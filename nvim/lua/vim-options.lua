@@ -1,4 +1,5 @@
 vim.g.mapleader = " "
+vim.keymap.set("n", ";", ":", { noremap = true })
 
 local keymap = vim.keymap
 

@@ -8,8 +8,8 @@ return {
 			sections = {
 				lualine_a = { "mode" },
 				lualine_b = { "filename" },
-				lualine_c = { "branch", "diff", "diagnostics" },
-				lualine_x = { "encoding", "fileformat", "filetype" },
+				lualine_c = { "encoding", "fileformat", "filetype" },
+				lualine_x = { "branch", "diff", "diagnostics" },
 				lualine_y = { "progress" },
 				lualine_z = { "location" },
 			},
