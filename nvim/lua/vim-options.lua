@@ -3,9 +3,6 @@ vim.keymap.set("n", ";", ":", { noremap = true })
 
 local keymap = vim.keymap
 
-keymap.set("n", "4", "$", {})
-keymap.set("n", "5", "%", {})
-
 keymap.set("n", "<M-h>", "b")
 keymap.set("n", "<M-l>", "w")
 keymap.set("i", "<M-h>", "<C-o>b")

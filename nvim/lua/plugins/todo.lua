@@ -5,6 +5,5 @@ return {
 	config = function()
 		require("todo-comments").setup({})
 		-- Keymaps should be set after setup
-		vim.keymap.set("n", "<leader>ft", ":TodoTelescope<CR>", { noremap = true, silent = true })
 	end,
 }
