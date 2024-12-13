@@ -13,95 +13,167 @@ return {
 		},
 		{ "nvim-telescope/telescope-ui-select.nvim" },
 		{ "nvim-tree/nvim-web-devicons", enabled = vim.g.have_nerd_font },
+		-- Add project management capability
+		{ "nvim-telescope/telescope-project.nvim" },
+		-- Add file browser
+		{ "nvim-telescope/telescope-file-browser.nvim" },
 	},
 	config = function()
-		require("telescope").setup({
+		local telescope = require("telescope")
+		local actions = require("telescope.actions")
+		local action_state = require("telescope.actions.state")
+		local fb_actions = require("telescope").extensions.file_browser.actions
+
+		telescope.setup({
+			defaults = {
+				file_ignore_patterns = {
+					-- Common web development patterns to ignore
+					"node_modules",
+					"build",
+					"dist",
+					".git",
+					".next",
+					"package-lock.json",
+					"yarn.lock",
+					"%.lock",
+					-- Python
+					"__pycache__",
+					".venv",
+					"venv",
+					-- Go
+					"go.sum",
+					-- Docker
+					"docker-compose.*.yml",
+					-- Coverage and test reports
+					"coverage",
+					".nyc_output",
+					-- ENV files
+					".env.*",
+					-- Mobile development
+					"ios/Pods",
+					"android/app/build",
+				},
+				mappings = {
+					i = {
+						["<C-j>"] = actions.move_selection_next,
+						["<C-k>"] = actions.move_selection_previous,
+						["<C-q>"] = actions.smart_send_to_qflist + actions.open_qflist,
+						["<C-s>"] = actions.select_horizontal,
+						["<C-v>"] = actions.select_vertical,
+						["<C-t>"] = actions.select_tab,
+						["<C-/>"] = actions.which_key, -- Show all mappings
+					},
+				},
+				preview = {
+					filesize_limit = 1, -- Don't preview files over 1MB
+					timeout = 150, -- Reduce preview timeout
+				},
+			},
+			pickers = {
+				find_files = {
+					hidden = true,
+					-- Add common web development file types
+					find_command = { "rg", "--files", "--hidden", "--glob", "!.git/*" },
+				},
+				live_grep = {
+					-- Add file type specific searches
+					additional_args = function(opts)
+						return { "--type-add", "web:*.{js,ts,jsx,tsx,html,css,scss,vue,svelte}" }
+					end,
+				},
+				buffers = {
+					show_all_buffers = true,
+					sort_mru = true,
+					mappings = {
+						i = {
+							["<C-d>"] = actions.delete_buffer,
+						},
+					},
+				},
+			},
 			extensions = {
 				["ui-select"] = {
 					require("telescope.themes").get_dropdown(),
 				},
+				file_browser = {
+					-- File browser configuration
+					hidden = true,
+					respect_gitignore = true,
+					mappings = {
+						i = {
+							["<C-c>"] = fb_actions.create,
+							["<C-r>"] = fb_actions.rename,
+							["<C-h>"] = fb_actions.toggle_hidden,
+							["<C-x>"] = fb_actions.remove,
+						},
+					},
+				},
+				project = {
+					base_dirs = {
+						"~/Projects",
+						"~/Work",
+					},
+					hidden_files = false,
+				},
 			},
 		})
 
-		-- Enable Telescope extensions if they are installed
-		pcall(require("telescope").load_extension, "fzf")
-		pcall(require("telescope").load_extension, "ui-select")
+		-- Load extensions
+		pcall(telescope.load_extension, "fzf")
+		pcall(telescope.load_extension, "ui-select")
+		pcall(telescope.load_extension, "file_browser")
+		pcall(telescope.load_extension, "project")
 
-		-- See `:help telescope.builtin`
+		-- Enhanced keymaps for web development workflow
 		local builtin = require("telescope.builtin")
-		vim.keymap.set("n", "<leader>sh", builtin.help_tags, { desc = "[S]earch [H]elp" })
-		vim.keymap.set("n", "<leader>sk", builtin.keymaps, { desc = "[S]earch [K]eymaps" })
-		vim.keymap.set("n", "<leader>sf", builtin.find_files, { desc = "[S]earch [F]iles" })
-		vim.keymap.set("n", "<leader>ss", builtin.builtin, { desc = "[S]earch [S]elect Telescope" })
-		vim.keymap.set("n", "<leader>sw", builtin.grep_string, { desc = "[S]earch current [W]ord" })
-		vim.keymap.set("n", "<leader>sg", builtin.live_grep, { desc = "[S]earch by [G]rep" })
-		vim.keymap.set("n", "<leader>sd", builtin.diagnostics, { desc = "[S]earch [D]iagnostics" })
-		vim.keymap.set("n", "<leader>sr", builtin.resume, { desc = "[S]earch [R]esume" })
-		vim.keymap.set("n", "<leader>s.", builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
-		-- vim.keymap.set("n", "<leader><leader>", builtin.buffers, { desc = "[ ] Find existing buffers" })
 
-		-- Slightly advanced example of overriding default behavior and theme
-		vim.keymap.set("n", "<leader>.", function()
-			-- You can pass additional configuration to Telescope to change the theme, layout, etc.
-			builtin.current_buffer_fuzzy_find(require("telescope.themes").get_dropdown({
-				winblend = 10,
-				previewer = false,
-			}))
-		end, { desc = "[/] Fuzzily search in current buffer" })
+		-- File navigation
+		vim.keymap.set("n", "<leader>ff", builtin.find_files, { desc = "[F]ind [F]iles" })
+		vim.keymap.set("n", "<leader>fg", builtin.live_grep, { desc = "[F]ind by [G]rep" })
+		vim.keymap.set("n", "<leader>fb", "<cmd>Telescope file_browser<cr>", { desc = "[F]ile [B]rowser" })
+		vim.keymap.set("n", "<leader>fr", builtin.oldfiles, { desc = "[F]ind [R]ecent files" })
 
-		-- It's also possible to pass additional configuration options.
-		--  See `:help telescope.builtin.live_grep()` for information about particular keys
-		vim.keymap.set("n", "<leader>s/", function()
-			builtin.live_grep({
-				grep_open_files = true,
-				prompt_title = "Live Grep in Open Files",
+		-- Project management
+		vim.keymap.set("n", "<leader>fp", "<cmd>Telescope project<cr>", { desc = "[F]ind [P]roject" })
+
+		-- Code navigation
+		vim.keymap.set("n", "<leader>fs", builtin.treesitter, { desc = "[F]ind [S]ymbols" })
+		vim.keymap.set("n", "<leader>fd", builtin.diagnostics, { desc = "[F]ind [D]iagnostics" })
+		vim.keymap.set("n", "<leader>fr", builtin.lsp_references, { desc = "[F]ind [R]eferences" })
+		vim.keymap.set("n", "<leader>fi", builtin.lsp_implementations, { desc = "[F]ind [I]mplementations" })
+
+		-- Web development specific
+		vim.keymap.set("n", "<leader>fc", function()
+			builtin.find_files({
+				prompt_title = "Find Components",
+				search_dirs = { "components", "src/components" },
 			})
-		end, { desc = "[S]earch [/] in Open Files" })
+		end, { desc = "[F]ind [C]omponents" })
 
-		-- Shortcut for searching your Neovim configuration files
-		vim.keymap.set("n", "<leader>sn", function()
-			builtin.find_files({ cwd = vim.fn.stdpath("config") })
-		end, { desc = "[S]earch [N]eovim files" })
+		vim.keymap.set("n", "<leader>fp", function()
+			builtin.find_files({
+				prompt_title = "Find Pages",
+				search_dirs = { "pages", "src/pages" },
+			})
+		end, { desc = "[F]ind [P]ages" })
 
-		local builtin = require("telescope.builtin")
-		local action_state = require("telescope.actions.state")
-		local actions = require("telescope.actions")
+		-- Docker/CI files search
+		vim.keymap.set("n", "<leader>fk", function()
+			builtin.find_files({
+				prompt_title = "Find Infrastructure Files",
+				search_dirs = { "kubernetes", "k8s", ".github", "docker" },
+			})
+		end, { desc = "[F]ind [K]ubernetes/Docker files" })
 
-		buffer_searcher = function()
+		-- Enhanced buffer management
+		local buffer_searcher = function()
 			builtin.buffers({
 				sort_mru = true,
 				ignore_current_buffer = true,
-				show_all_buffers = false,
-				attach_mappings = function(prompt_bufnr, map)
-					local refresh_buffer_searcher = function()
-						actions.close(prompt_bufnr)
-						vim.schedule(buffer_searcher)
-					end
-
-					local delete_buf = function()
-						local selection = action_state.get_selected_entry()
-						vim.api.nvim_buf_delete(selection.bufnr, { force = true })
-						refresh_buffer_searcher()
-					end
-
-					local delete_multiple_buf = function()
-						local picker = action_state.get_current_picker(prompt_bufnr)
-						local selection = picker:get_multi_selection()
-						for _, entry in ipairs(selection) do
-							vim.api.nvim_buf_delete(entry.bufnr, { force = true })
-						end
-						refresh_buffer_searcher()
-					end
-
-					map("n", "dd", delete_buf)
-					map("n", "<C-d>", delete_multiple_buf)
-					map("i", "<C-d>", delete_buf)
-
-					return true
-				end,
+				previewer = false,
 			})
 		end
 
-		vim.keymap.set("n", "<leader><leader>", buffer_searcher, {})
+		vim.keymap.set("n", "<leader><leader>", buffer_searcher, { desc = "Find buffers" })
 	end,
 }
