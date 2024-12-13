@@ -1,72 +1,68 @@
-local keymap = vim.keymap
+-- Use ; for command mode (keep existing)
+vim.keymap.set("n", ";", ":", { noremap = true, desc = "Use ; to enter command mode" })
 
-keymap.set("n", ";", ":", { noremap = true, desc = "Use ; to enter command mode" })
+-- Window Management (keep existing but organized)
+vim.keymap.set("n", "<leader>sv", "<C-w>v", { desc = "Split window vertically" })
+vim.keymap.set("n", "<leader>sh", "<C-w>s", { desc = "Split window horizontally" })
+vim.keymap.set("n", "<leader>se", "<C-w>=", { desc = "Make splits equal size" })
+vim.keymap.set("n", "<leader>sx", "<cmd>close<CR>", { desc = "Close current split" })
 
--- Commenting
-keymap.set("n", "<leader>/", "<Plug>(comment_toggle_linewise_current)", { desc = "Comment Line" })
-keymap.set("x", "/", "<Plug>(comment_toggle_linewise_visual)", { desc = "Comment Visual Mode" })
+-- Window Resizing
+vim.keymap.set("n", "<C-Up>", ":resize -2<CR>", { desc = "Decrease window height" })
+vim.keymap.set("n", "<C-Down>", ":resize +2<CR>", { desc = "Increase window height" })
+vim.keymap.set("n", "<C-Left>", ":vertical resize -2<CR>", { desc = "Decrease window width" })
+vim.keymap.set("n", "<C-Right>", ":vertical resize +2<CR>", { desc = "Increase window width" })
 
--- nvim tree
-keymap.set("n", "\\", "<cmd>NvimTreeToggle<CR>", { desc = "Toggle file explorer" })
-keymap.set("n", "<leader>ec", "<cmd>NvimTreeCollapse<CR>", { desc = "Collapse file explorer" })
-keymap.set("n", "<leader>er", "<cmd>NvimTreeRefresh<CR>", { desc = "Refresh file explorer" })
+-- Smart Center Screen (keep existing)
+vim.keymap.set("n", "<C-d>", "<C-d>zz", { desc = "Scroll down and center" })
+vim.keymap.set("n", "<C-u>", "<C-u>zz", { desc = "Scroll up and center" })
+vim.keymap.set("n", "n", "nzzzv", { desc = "Next search result and center" })
+vim.keymap.set("n", "N", "Nzzzv", { desc = "Previous search result and center" })
 
--- Telescope
-keymap.set("n", "<leader>sh", "Telescope help_tags", { desc = "[S]earch [H]elp" })
-keymap.set("n", "<leader>sk", "Telescope keymaps", { desc = "[S]earch [K]eymaps" })
-keymap.set("n", "<leader>sf", "Telescope find_files", { desc = "[S]earch [F]iles" })
-keymap.set("n", "<leader>ss", "Telescope builtin", { desc = "[S]earch [S]elect Telescope" })
-keymap.set("n", "<leader>sw", "Telescope grep_string", { desc = "[S]earch current [W]ord" })
-keymap.set("n", "<leader>sg", "Telescope live_grep", { desc = "[S]earch by [G]rep" })
-keymap.set("n", "<leader>sd", "Telescope diagnostics", { desc = "[S]earch [D]iagnostics" })
-keymap.set("n", "<leader><leader>", "Telescope buffers", { desc = "[ ] Find existing buffers" })
-keymap.set(
+-- Buffer Management
+vim.keymap.set("n", "<leader>bn", ":bnext<CR>", { desc = "Next buffer" })
+vim.keymap.set("n", "<leader>bp", ":bprevious<CR>", { desc = "Previous buffer" })
+vim.keymap.set("n", "<leader>bd", ":bdelete<CR>", { desc = "Delete buffer" })
+
+-- Code Navigation and Editing
+vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv", { desc = "Move line down" })
+vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv", { desc = "Move line up" })
+vim.keymap.set("n", "J", "mzJ`z", { desc = "Join lines and keep cursor position" })
+
+-- Indent/Outdent
+vim.keymap.set("v", "<", "<gv", { desc = "Outdent line" })
+vim.keymap.set("v", ">", ">gv", { desc = "Indent line" })
+
+-- Quick Fix Navigation
+vim.keymap.set("n", "<C-j>", "<cmd>cnext<CR>zz", { desc = "Next quickfix item" })
+vim.keymap.set("n", "<C-k>", "<cmd>cprev<CR>zz", { desc = "Previous quickfix item" })
+
+-- Search and Replace
+vim.keymap.set(
 	"n",
-	"<leader>st",
-	":TodoTelescope<CR>",
-	{ noremap = true, silent = true, desc = "Todo Comments Telescope Mode" }
+	"<leader>r",
+	":%s/\\<<C-r><C-w>\\>/<C-r><C-w>/gI<Left><Left><Left>",
+	{ desc = "Replace word under cursor" }
 )
-keymap.set(
-	"n",
-	"<leader>t1",
-	":TodoTelescope keywords=ISSUE,FIX,FIXME,BUG<CR>",
-	{ noremap = true, silent = true, desc = "Todo Comments Telescope Mode" }
-)
-keymap.set(
-	"n",
-	"<leader>t2",
-	":TodoTelescope keywords=WARN,WARNING<CR>",
-	{ noremap = true, silent = true, desc = "Todo Comments Telescope Mode" }
-)
+vim.keymap.set("n", "<leader>h", ":nohlsearch<CR>", { desc = "Clear search highlighting" })
 
--- Movement or window movement
-keymap.set("n", "<C-h>", "<C-w><C-h>", { desc = "Move focus to the left window" })
-keymap.set("n", "<C-l>", "<C-w><C-l>", { desc = "Move focus to the right window" })
-keymap.set("n", "<C-j>", "<C-w><C-j>", { desc = "Move focus to the lower window" })
-keymap.set("n", "<C-k>", "<C-w><C-k>", { desc = "Move focus to the upper window" })
+vim.keymap.set("x", "<leader>p", [["_dP]], { desc = "Paste without yanking" })
+vim.keymap.set({ "n", "v" }, "<leader>y", [["+y]], { desc = "Yank to system clipboard" })
+vim.keymap.set("n", "<leader>Y", [["+Y]], { desc = "Yank line to system clipboard" })
+vim.keymap.set({ "n", "v" }, "<leader>d", [["_d]], { desc = "Delete without yanking" })
 
--- Movement by words
-keymap.set("n", "<M-h>", "b")
-keymap.set("n", "<M-l>", "w")
-keymap.set("i", "<M-h>", "<C-o>b")
-keymap.set("i", "<M-l>", "<C-o>w")
+-- Mode Switching (keep existing but enhanced)
+vim.keymap.set("i", "jk", "<ESC>", { desc = "Exit insert mode with jk" })
+vim.keymap.set("i", "kj", "<ESC>", { desc = "Exit insert mode with kj" })
 
--- Save File
-keymap.set("n", "<C-s>", ":w<CR>")
-keymap.set("i", "<C-s>", "<ESC>:w<CR>")
+-- Code Folding
+vim.keymap.set("n", "<leader>z", "za", { desc = "Toggle fold" })
+vim.keymap.set("n", "<leader>Z", "zA", { desc = "Toggle fold recursively" })
 
--- Split windows in nvim
-keymap.set("n", "<leader>sv", "<C-w>v", { desc = "Split window vertically" })
-keymap.set("n", "<leader>sh", "<C-w>s", { desc = "Split window horizontally" })
-keymap.set("n", "<leader>se", "<C-w>=", {})
-keymap.set("n", "<leader>sx", "<cmd>close<CR>", {})
+-- Project Navigation
+vim.keymap.set("n", "<leader>pp", ":cd %:p:h<CR>:pwd<CR>", { desc = "Change to current file's directory" })
 
--- Movement to middle of the screen
-keymap.set("n", "<C-d>", "<C-d>zz")
-keymap.set("n", "<C-u>", "<C-u>zz")
-keymap.set("n", "n", "nzzzv")
-keymap.set("n", "N", "Nzzzv")
-
--- additional preferences
-keymap.set("i", "jk", "<ESC>", { desc = "Exit insert mode with jk" })
-keymap.set("n", "<leader>h", ":nohlsearch<CR>")
+-- Quick Settings Toggle
+vim.keymap.set("n", "<leader>tw", ":set wrap!<CR>", { desc = "Toggle word wrap" })
+vim.keymap.set("n", "<leader>tn", ":set number!<CR>", { desc = "Toggle line numbers" })
+vim.keymap.set("n", "<leader>tr", ":set relativenumber!<CR>", { desc = "Toggle relative numbers" })
