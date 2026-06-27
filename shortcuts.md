@@ -35,8 +35,9 @@ the next key.
 | Shortcut | Action |
 | --- | --- |
 | `prefix` then `c` | Create a new tmux window, like a terminal tab, in the current directory |
-| `prefix` then `r` | Rename the current tmux window/tab |
+| `prefix` then `r` or `,` | Rename the current tmux window/tab from an empty prompt |
 | `prefix` then `x` | Close the current pane after confirmation |
+| `prefix` then `m` | Maximize or restore the current pane |
 | `prefix` then `h` | Move to the pane on the left |
 | `prefix` then `j` | Move to the pane below |
 | `prefix` then `k` | Move to the pane above |
@@ -49,7 +50,7 @@ the next key.
 | `prefix` then `J` | Resize pane down by 5 cells |
 | `prefix` then `K` | Resize pane up by 5 cells |
 | `prefix` then `L` | Resize pane right by 5 cells |
-| `prefix` then `|` | Split pane horizontally in the current directory |
+| `prefix` then `\` | Split pane horizontally in the current directory |
 | `prefix` then `-` | Split pane vertically in the current directory |
 
 ### Copy Mode And Clipboard
@@ -65,6 +66,12 @@ the next key.
 | `prefix` then `]` | Paste the latest tmux buffer |
 
 ### Notes
+
+After changing the tmux config from this repo, reload it with:
+
+```sh
+tmux source-file tmux/tmux.conf
+```
 
 If `Ctrl-s` freezes the terminal instead of opening the tmux prefix prompt,
 software flow control is enabled in the shell. Add this to the shell startup
