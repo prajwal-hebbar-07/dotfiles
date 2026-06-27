@@ -84,6 +84,36 @@ The standard config path is expected to point to this repo:
 ~/.config/starship.toml -> ~/chaotic-thoughts/dotfiles/starship/starship.toml
 ```
 
+## Neovim
+
+The Neovim configuration lives in `nvim`.
+
+It configures Neovim as a small code-reading and coding setup:
+
+- Uses `lazy.nvim` for plugin management.
+- Uses Catppuccin Mocha for the editor theme.
+- Adds `nvim-tree` for a file explorer.
+- Adds `fzf-lua` for file, buffer, help, and text search.
+- Adds Treesitter for syntax highlighting and indentation.
+- Adds `nvim-cmp` for autocomplete with LSP, path, buffer, and snippet sources.
+- Adds automatic bracket pairs.
+- Adds Mason-managed LSP servers for Lua, JavaScript/TypeScript, Python, Bash,
+  JSON, YAML, and Markdown.
+- Adds formatters through `conform.nvim`.
+- Adds linters through `nvim-lint`.
+
+Install the editor and search helpers with:
+
+```sh
+brew install neovim ripgrep fd
+```
+
+The system config path is expected to point to this repo:
+
+```sh
+~/.config/nvim -> ~/chaotic-thoughts/dotfiles/nvim
+```
+
 ## Git
 
 The Git configuration lives in `git/gitconfig`.

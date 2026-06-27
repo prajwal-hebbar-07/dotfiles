@@ -12,6 +12,38 @@ These shortcuts come from WezTerm's defaults plus the current local setup.
 WezTerm's tab bar is disabled in this config. Use tmux windows and panes for
 terminal organization instead.
 
+## Neovim
+
+The Neovim leader key is:
+
+```text
+Space
+```
+
+| Shortcut | Action |
+| --- | --- |
+| `Space` then `e` | Toggle the file explorer |
+| `Space` then `E` | Reveal the current file in the explorer |
+| `Space` then `ff` | Find files |
+| `Space` then `fg` | Search text in the project |
+| `Space` then `/` | Search text in the current buffer |
+| `Space` then `fb` | Find open buffers |
+| `Space` then `fr` | Find recent files |
+| `Space` then `fh` | Search help tags |
+| `gd` | Go to definition |
+| `gD` | Go to declaration |
+| `gi` | Go to implementation |
+| `gr` | Go to references |
+| `K` | Show hover documentation |
+| `Space` then `rn` | Rename symbol |
+| `Space` then `ca` | Show code actions |
+| `Space` then `f` | Format the current file |
+| `[d` / `]d` | Move to previous or next diagnostic |
+| `Space` then `d` | Show diagnostic details |
+| `Ctrl-Space` | Open autocomplete menu |
+| `Tab` / `Shift-Tab` | Move through autocomplete items or snippets |
+| `Enter` | Confirm autocomplete item |
+
 ## zsh
 
 | Shortcut | Action |
