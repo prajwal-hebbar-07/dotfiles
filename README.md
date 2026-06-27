@@ -58,3 +58,30 @@ The system config path is expected to point to this repo:
 ```
 
 See `shortcuts.md` for the keyboard shortcuts.
+
+## zsh
+
+The zsh configuration lives in `zsh/.zshrc`.
+
+It configures the interactive shell for command discovery and nicer typing:
+
+- Enables larger shared command history with duplicate cleanup.
+- Adds case-insensitive tab completion and selectable completion menus.
+- Adds history-prefix search with the up/down arrow keys and `Ctrl-p`/`Ctrl-n`.
+- Loads `zsh-autosuggestions` from Homebrew for inline command suggestions.
+- Loads `zsh-syntax-highlighting` from Homebrew so commands are colored as you
+  type.
+- Loads `fzf` from Homebrew for visual command history, file, and folder search.
+- Keeps the local aliases and Node/pnpm path setup.
+
+Install the shell plugins with:
+
+```sh
+brew install zsh-autosuggestions zsh-syntax-highlighting fzf
+```
+
+The home config path is expected to point to this repo:
+
+```sh
+~/.zshrc -> ~/chaotic-thoughts/dotfiles/zsh/.zshrc
+```

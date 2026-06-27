@@ -12,6 +12,20 @@ These shortcuts come from WezTerm's defaults plus the current local setup.
 WezTerm's tab bar is disabled in this config. Use tmux windows and panes for
 terminal organization instead.
 
+## zsh
+
+| Shortcut | Action |
+| --- | --- |
+| `Tab` | Complete commands, files, folders, options, and git branches |
+| `Tab` then arrow keys | Move through the completion menu |
+| `Up` / `Down` | Search history using the command prefix already typed |
+| `Ctrl-p` / `Ctrl-n` | Search history using the command prefix already typed |
+| `Right` | Accept the current inline autosuggestion |
+| `Ctrl-r` | Open visual fuzzy search over command history |
+| `Ctrl-y` | Copy the selected command from the `Ctrl-r` history picker |
+| `Ctrl-t` | Open visual fuzzy search over files and insert the selected path |
+| `Option` + `c` | Open visual fuzzy search over folders and jump to the selected folder |
+
 ## tmux
 
 The tmux prefix is:
