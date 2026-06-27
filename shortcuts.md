@@ -42,10 +42,10 @@ the next key.
 | `prefix` then `j` | Move to the pane below |
 | `prefix` then `k` | Move to the pane above |
 | `prefix` then `l` | Move to the pane on the right |
-| `Option` + `h` | Move to the pane on the left without pressing prefix |
-| `Option` + `j` | Move to the pane below without pressing prefix |
-| `Option` + `k` | Move to the pane above without pressing prefix |
-| `Option` + `l` | Move to the pane on the right without pressing prefix |
+| `Ctrl` + `h` | Move to the pane on the left without pressing prefix |
+| `Ctrl` + `j` | Move to the pane below without pressing prefix |
+| `Ctrl` + `k` | Move to the pane above without pressing prefix |
+| `Ctrl` + `l` | Move to the pane on the right without pressing prefix |
 | `prefix` then `H` | Resize pane left by 5 cells |
 | `prefix` then `J` | Resize pane down by 5 cells |
 | `prefix` then `K` | Resize pane up by 5 cells |
