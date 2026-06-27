@@ -34,6 +34,9 @@ the next key.
 
 | Shortcut | Action |
 | --- | --- |
+| `prefix` then `c` | Create a new tmux window, like a terminal tab, in the current directory |
+| `prefix` then `r` | Rename the current tmux window/tab |
+| `prefix` then `x` | Close the current pane after confirmation |
 | `prefix` then `h` | Move to the pane on the left |
 | `prefix` then `j` | Move to the pane below |
 | `prefix` then `k` | Move to the pane above |
