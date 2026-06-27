@@ -44,7 +44,8 @@ It configures tmux as the main place for tabs, panes, movement, and copy mode:
 - Uses `tmux-256color` and enables RGB color support, including WezTerm-specific
   RGB support.
 - Adds vim-style pane movement with `h`, `j`, `k`, and `l`.
-- Adds prefix-free pane movement with `Alt-h`, `Alt-j`, `Alt-k`, and `Alt-l`.
+- Adds prefix-free pane movement with `Ctrl-h`, `Ctrl-j`, `Ctrl-k`, and
+  `Ctrl-l`.
 - Adds vim-style pane resizing with uppercase `H`, `J`, `K`, and `L`.
 - Opens new split panes in the current pane's working directory.
 - Uses vi-style copy mode.
@@ -59,6 +60,30 @@ The system config path is expected to point to this repo:
 
 See `shortcuts.md` for the keyboard shortcuts.
 
+## Starship
+
+The Starship prompt configuration lives in `starship/starship.toml`.
+
+It configures a Catppuccin Mocha prompt with useful context at the command line:
+
+- Current directory with smart truncation.
+- Git branch and compact repository status.
+- Node.js, Python, and package versions when relevant.
+- Command duration for slower commands.
+- Background jobs and failed command exit status.
+
+Install Starship with:
+
+```sh
+brew install starship
+```
+
+The standard config path is expected to point to this repo:
+
+```sh
+~/.config/starship.toml -> ~/chaotic-thoughts/dotfiles/starship/starship.toml
+```
+
 ## zsh
 
 The zsh configuration lives in `zsh/.zshrc`.
@@ -72,12 +97,13 @@ It configures the interactive shell for command discovery and nicer typing:
 - Loads `zsh-syntax-highlighting` from Homebrew so commands are colored as you
   type.
 - Loads `fzf` from Homebrew for visual command history, file, and folder search.
+- Initializes Starship for a richer prompt.
 - Keeps the local aliases and Node/pnpm path setup.
 
 Install the shell plugins with:
 
 ```sh
-brew install zsh-autosuggestions zsh-syntax-highlighting fzf
+brew install zsh-autosuggestions zsh-syntax-highlighting fzf starship
 ```
 
 The home config path is expected to point to this repo:

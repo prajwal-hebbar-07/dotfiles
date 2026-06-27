@@ -126,6 +126,12 @@ esac
 
 export PATH="$HOME/.local/bin:$PATH"
 
+# Prompt
+export STARSHIP_CONFIG="$HOME/chaotic-thoughts/dotfiles/starship/starship.toml"
+if command -v starship >/dev/null 2>&1; then
+  eval "$(starship init zsh)"
+fi
+
 # Syntax highlighting should be loaded last.
 if [ -n "$HOMEBREW_PREFIX" ]; then
   if [ -r "$HOMEBREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]; then
