@@ -84,6 +84,29 @@ The standard config path is expected to point to this repo:
 ~/.config/starship.toml -> ~/chaotic-thoughts/dotfiles/starship/starship.toml
 ```
 
+## Git
+
+The Git configuration lives in `git/gitconfig`.
+
+It configures `git-delta` as the pager for readable side-by-side diffs:
+
+- Shows changed files with decorated headers.
+- Shows old and new code side by side.
+- Shows line numbers on both sides.
+- Keeps moved-line coloring and better merge conflict markers enabled.
+
+Install the diff viewer with:
+
+```sh
+brew install git-delta
+```
+
+The home config is expected to include this repo config:
+
+```sh
+~/.gitconfig includes ~/chaotic-thoughts/dotfiles/git/gitconfig
+```
+
 ## zsh
 
 The zsh configuration lives in `zsh/.zshrc`.
