@@ -97,6 +97,7 @@ It configures Neovim as a small code-reading and coding setup:
 - Adds Treesitter for syntax highlighting and indentation.
 - Adds `nvim-cmp` for autocomplete with LSP, path, buffer, and snippet sources.
 - Adds automatic bracket pairs.
+- Adds one-shot browser-based Markdown preview.
 - Adds Mason-managed LSP servers for Lua, JavaScript/TypeScript, Python, Bash,
   JSON, YAML, and Markdown.
 - Adds formatters through `conform.nvim`.
@@ -105,8 +106,10 @@ It configures Neovim as a small code-reading and coding setup:
 Install the editor and search helpers with:
 
 ```sh
-brew install neovim ripgrep fd
+brew install neovim ripgrep fd tree-sitter-cli
 ```
+
+Markdown preview also needs Node/npm available so the preview app can be built.
 
 The system config path is expected to point to this repo:
 

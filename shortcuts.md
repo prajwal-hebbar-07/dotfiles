@@ -30,6 +30,8 @@ Space
 | `Space` then `fb` | Find open buffers |
 | `Space` then `fr` | Find recent files |
 | `Space` then `fh` | Search help tags |
+| `Space` then `mp` | Open or refresh Markdown preview in the browser once |
+| `Space` then `ms` | Stop Markdown preview |
 | `gd` | Go to definition |
 | `gD` | Go to declaration |
 | `gi` | Go to implementation |
@@ -80,7 +82,7 @@ the next key.
 
 | Shortcut | Action |
 | --- | --- |
-| `prefix` then `c` | Create a new tmux window, like a terminal tab, in the current directory |
+| `prefix` then `c` | Create a new tmux window, like a terminal tab, in the session start directory |
 | `prefix` then `r` or `,` | Rename the current tmux window/tab from an empty prompt |
 | `prefix` then `x` | Close the current pane after confirmation |
 | `prefix` then `m` | Maximize or restore the current pane |
@@ -103,8 +105,10 @@ the next key.
 
 | Shortcut | Action |
 | --- | --- |
-| `prefix` then `[` | Enter copy mode |
-| `v` | Begin selection in copy mode |
+| `prefix` then `v` or `[` | Enter copy mode, similar to Vim normal mode |
+| `h` / `j` / `k` / `l` | Move around in copy mode |
+| `v` | Begin character-wise selection in copy mode |
+| `V` | Begin line-wise selection in copy mode |
 | `Ctrl-v` | Toggle rectangle selection in copy mode |
 | `y` | Copy selection to the macOS clipboard and leave copy mode |
 | `Enter` | Copy selection to the macOS clipboard and leave copy mode |

@@ -138,3 +138,10 @@ if [ -n "$HOMEBREW_PREFIX" ]; then
     source "$HOMEBREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
   fi
 fi
+export PYENV_ROOT="$HOME/.pyenv"
+[[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
+eval "$(pyenv init -)"
+
+
+# Added by Antigravity CLI installer
+export PATH="/Users/hebbar/.local/bin:$PATH"
