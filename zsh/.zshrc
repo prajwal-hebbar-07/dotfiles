@@ -109,6 +109,7 @@ fi
 alias gn='codex --dangerously-bypass-approvals-and-sandbox'
 alias gc='codex resume --last --dangerously-bypass-approvals-and-sandbox'
 alias g='lazygit'
+alias hd='hunk diff'
 alias cn='claude --dangerously-skip-permissions'
 alias cc='claude --continue --dangerously-skip-permissions'
 
