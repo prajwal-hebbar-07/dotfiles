@@ -22,29 +22,31 @@ Space
 
 | Shortcut | Action |
 | --- | --- |
-| `Space` then `e` | Toggle the file explorer |
-| `Space` then `E` | Reveal the current file in the explorer |
-| `Space` then `ff` | Find files |
-| `Space` then `fg` | Search text in the project |
-| `Space` then `/` | Search text in the current buffer |
-| `Space` then `fb` | Find open buffers |
-| `Space` then `fr` | Find recent files |
-| `Space` then `fh` | Search help tags |
-| `Space` then `mp` | Open or refresh Markdown preview in the browser once |
-| `Space` then `ms` | Stop Markdown preview |
+| `-` | Open parent directory with Oil |
+| `Space` then `-` | Open Oil in a floating window |
+| `Space` then `pf` | Find files |
+| `Space` then `pg` | Find Git files |
+| `Space` then `ps` | Search text in the project |
+| `Space` then `pr` | Find recent files |
+| `Space` then `pb` | Find open buffers |
+| `Space` then `pk` | Search keymaps |
+| `Space` then `vh` | Search help tags |
 | `gd` | Go to definition |
 | `gD` | Go to declaration |
 | `gi` | Go to implementation |
-| `gr` | Go to references |
+| `gR` | Go to references |
 | `K` | Show hover documentation |
 | `Space` then `rn` | Rename symbol |
-| `Space` then `ca` | Show code actions |
-| `Space` then `f` | Format the current file |
-| `[d` / `]d` | Move to previous or next diagnostic |
-| `Space` then `d` | Show diagnostic details |
-| `Ctrl-Space` | Open autocomplete menu |
-| `Tab` / `Shift-Tab` | Move through autocomplete items or snippets |
-| `Enter` | Confirm autocomplete item |
+| `Space` then `vca` | Show code actions |
+| `Space` then `D` | Show buffer diagnostics |
+| `df` | Show diagnostic details for the current line |
+| `Space` then `mp` | Format the current file or visual selection |
+| `Space` then `l` | Run linting |
+| `Space` then `gg` | Open Fugitive Git status |
+| `]h` / `[h` | Move to next or previous Git hunk |
+| `Space` then `gs` | Stage Git hunk |
+| `Space` then `gr` | Reset Git hunk |
+| `Space` then `u` | Toggle undo tree |
 
 ## zsh
 
@@ -129,7 +131,7 @@ the next key.
 After changing the tmux config from this repo, reload it with:
 
 ```sh
-tmux source-file tmux/tmux.conf
+tmux source-file ~/.config/tmux/tmux.conf
 ```
 
 If `Ctrl-s` freezes the terminal instead of opening the tmux prefix prompt,

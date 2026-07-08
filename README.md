@@ -3,9 +3,31 @@
 This repository contains terminal-focused configuration files that can be linked
 into the system configuration directory.
 
+## Install
+
+Install the required linker:
+
+```sh
+brew install stow
+```
+
+Clone the repo, then link the config files into `$HOME`:
+
+```sh
+git clone <repo-url> ~/dotfiles
+cd ~/dotfiles
+./install.sh
+```
+
+The install script runs GNU Stow for these packages:
+
+```sh
+stow --target="$HOME" --restow zsh tmux wezterm starship git
+```
+
 ## WezTerm
 
-The WezTerm configuration lives in `wezterm/wezterm.lua`.
+The WezTerm configuration lives in `wezterm/.config/wezterm/wezterm.lua`.
 
 It configures WezTerm as a clean terminal window that is ready to be used with a
 terminal multiplexer such as tmux:
@@ -25,12 +47,12 @@ terminal multiplexer such as tmux:
 The system config path is expected to point to this repo:
 
 ```sh
-~/.config/wezterm -> ~/chaotic-thoughts/dotfiles/wezterm
+~/.config/wezterm -> <repo>/wezterm/.config/wezterm
 ```
 
 ## tmux
 
-The tmux configuration lives in `tmux/tmux.conf`.
+The tmux configuration lives in `tmux/.config/tmux/tmux.conf`.
 
 It configures tmux as the main place for tabs, panes, movement, and copy mode:
 
@@ -56,14 +78,15 @@ It configures tmux as the main place for tabs, panes, movement, and copy mode:
 The system config path is expected to point to this repo:
 
 ```sh
-~/.config/tmux -> ~/chaotic-thoughts/dotfiles/tmux
+~/.config/tmux -> <repo>/tmux/.config/tmux
 ```
 
 See `shortcuts.md` for the keyboard shortcuts.
 
 ## Starship
 
-The Starship prompt configuration lives in `starship/starship.toml`.
+The Starship prompt configuration lives in
+`starship/.config/starship/starship.toml`.
 
 It configures a Catppuccin Mocha prompt with useful context at the command line:
 
@@ -82,23 +105,26 @@ brew install starship
 The standard config path is expected to point to this repo:
 
 ```sh
-~/.config/starship.toml -> ~/chaotic-thoughts/dotfiles/starship/starship.toml
+~/.config/starship -> <repo>/starship/.config/starship
 ```
 
 ## Neovim
 
-The Neovim configuration lives in `nvim`.
+The Neovim configuration lives in `nvim/.config/nvim`.
 
 It configures Neovim as a small code-reading and coding setup:
 
 - Uses `lazy.nvim` for plugin management.
 - Uses Catppuccin Mocha for the editor theme.
-- Adds `nvim-tree` for a file explorer.
-- Adds `fzf-lua` for file, buffer, help, and text search.
+- Adds `oil.nvim` for directory and file operations.
+- Adds Telescope for file, buffer, help, Git file, and text search.
 - Adds Treesitter for syntax highlighting and indentation.
-- Adds `nvim-cmp` for autocomplete with LSP, path, buffer, and snippet sources.
+- Adds `blink.cmp` for autocomplete with LSP, path, buffer, and snippet sources.
 - Adds automatic bracket pairs.
-- Adds one-shot browser-based Markdown preview.
+- Adds markdown rendering inside Neovim.
+- Adds `gitsigns.nvim` and `vim-fugitive` for Git workflows.
+- Adds small editing helpers from `mini.nvim`.
+- Adds tmux-aware split navigation with `vim-tmux-navigator`.
 - Adds Mason-managed LSP servers for Lua, JavaScript/TypeScript, Python, Bash,
   JSON, YAML, and Markdown.
 - Adds formatters through `conform.nvim`.
@@ -110,17 +136,17 @@ Install the editor and search helpers with:
 brew install neovim ripgrep fd tree-sitter-cli
 ```
 
-Markdown preview also needs Node/npm available so the preview app can be built.
+Mason installs language servers and formatter/linter binaries on first startup.
 
 The system config path is expected to point to this repo:
 
 ```sh
-~/.config/nvim -> ~/chaotic-thoughts/dotfiles/nvim
+~/.config/nvim -> <repo>/nvim/.config/nvim
 ```
 
 ## Git
 
-The Git configuration lives in `git/gitconfig`.
+The Git configuration lives in `git/.config/git/config`.
 
 It configures `git-delta` as the pager for readable side-by-side diffs:
 
@@ -135,10 +161,10 @@ Install the diff viewer with:
 brew install git-delta
 ```
 
-The home config is expected to include this repo config:
+The system config path is expected to point to this repo:
 
 ```sh
-~/.gitconfig includes ~/chaotic-thoughts/dotfiles/git/gitconfig
+~/.config/git -> <repo>/git/.config/git
 ```
 
 ## zsh
@@ -171,5 +197,5 @@ brew install joshmedeski/sesh/sesh
 The home config path is expected to point to this repo:
 
 ```sh
-~/.zshrc -> ~/chaotic-thoughts/dotfiles/zsh/.zshrc
+~/.zshrc -> <repo>/zsh/.zshrc
 ```
