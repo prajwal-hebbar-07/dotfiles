@@ -14,6 +14,27 @@ setopt hist_verify
 setopt inc_append_history
 setopt share_history
 
+# Homebrew and GNU tools
+typeset -U path PATH
+
+if command -v brew >/dev/null 2>&1; then
+  HOMEBREW_PREFIX="${HOMEBREW_PREFIX:-$(brew --prefix)}"
+fi
+
+if [ -n "$HOMEBREW_PREFIX" ]; then
+  path=("$HOMEBREW_PREFIX/bin" $path)
+
+  if [ -d "$HOMEBREW_PREFIX/opt/coreutils/libexec/gnubin" ]; then
+    path=("$HOMEBREW_PREFIX/opt/coreutils/libexec/gnubin" $path)
+  fi
+fi
+
+if command -v dircolors >/dev/null 2>&1; then
+  eval "$(dircolors -b)"
+elif command -v gdircolors >/dev/null 2>&1; then
+  eval "$(gdircolors -b)"
+fi
+
 # Completion
 autoload -Uz compinit
 zmodload zsh/complist
@@ -47,12 +68,13 @@ colors
 export CLICOLOR=1
 export LSCOLORS=Gxfxcxdxbxegedabagacad
 
-# Plugins
-if command -v brew >/dev/null 2>&1; then
-  HOMEBREW_PREFIX="${HOMEBREW_PREFIX:-$(brew --prefix)}"
-fi
-
 if [[ -o interactive && -t 0 ]] && command -v fzf >/dev/null 2>&1; then
+  if command -v fd >/dev/null 2>&1; then
+    export FZF_DEFAULT_COMMAND='fd --hidden --strip-cwd-prefix --exclude .git'
+    export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+    export FZF_ALT_C_COMMAND='fd --type=d --hidden --strip-cwd-prefix --exclude .git'
+  fi
+
   export FZF_DEFAULT_OPTS="
     --height=45%
     --layout=reverse
@@ -75,19 +97,15 @@ if [[ -o interactive && -t 0 ]] && command -v fzf >/dev/null 2>&1; then
     --header='Enter: use command | Ctrl-y: copy command'
   "
 
-  if [ -n "$HOMEBREW_PREFIX" ] && [ -x "$HOMEBREW_PREFIX/opt/fzf/bin/fzf-preview.sh" ]; then
-    export FZF_CTRL_T_OPTS="
-      --prompt='files > '
-      --preview='$HOMEBREW_PREFIX/opt/fzf/bin/fzf-preview.sh {}'
-      --preview-window=right:60%:wrap
-    "
-  else
-    export FZF_CTRL_T_OPTS="--prompt='files > '"
-  fi
+  export FZF_CTRL_T_OPTS="
+    --prompt='files > '
+    --preview='bat --style=numbers --color=always --line-range=:300 {} 2>/dev/null || eza --tree --level=2 --icons=always --color=always {} 2>/dev/null'
+    --preview-window=right:60%:wrap
+  "
 
   export FZF_ALT_C_OPTS="
     --prompt='folders > '
-    --preview='ls -la {} 2>/dev/null | sed -n \"1,80p\"'
+    --preview='eza --tree --level=2 --icons=always --color=always --group-directories-first {} 2>/dev/null'
     --preview-window=right:60%:wrap
   "
 
@@ -110,6 +128,32 @@ alias c='code'
 alias ca='cursor-app'
 alias g='lazygit'
 alias hd='hunk diff'
+alias ls='eza --long --icons=always --git --no-user --group-directories-first'
+alias ll='eza --long --icons=always --git --no-user --group-directories-first'
+alias la='eza --long --all --icons=always --git --no-user --group-directories-first'
+alias lt='eza --tree --level=3 --icons=always --git --group-directories-first'
+alias tree='tree -L 3 -a -I ".git|node_modules|.venv|__pycache__" --charset X'
+alias rgi='rg --hidden --glob "!.git"'
+alias rgf='rg --files --hidden --glob "!.git"'
+alias yy='yazi'
+
+sesh-pick() {
+  if ! command -v sesh >/dev/null 2>&1; then
+    echo "sesh is not installed" >&2
+    return 1
+  fi
+
+  local session
+  if command -v gum >/dev/null 2>&1; then
+    session="$(sesh list -t -c | gum filter --height 20 --placeholder 'Pick session')"
+  else
+    session="$(sesh list -t -c | fzf --height 45% --border --prompt='session > ')"
+  fi
+
+  [ -n "$session" ] && sesh connect "$session"
+}
+
+alias ss='sesh-pick'
 
 cursor-app() {
   local claude_config_dir="$HOME/.claude-cursor"

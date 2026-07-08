@@ -59,6 +59,11 @@ Space
 | `Ctrl-y` | Copy the selected command from the `Ctrl-r` history picker |
 | `Ctrl-t` | Open visual fuzzy search over files and insert the selected path |
 | `Option` + `c` | Open visual fuzzy search over folders and jump to the selected folder |
+| `ss` | Pick or create a tmux session with `sesh` and `gum` |
+| `yy` | Open `yazi` in the current directory |
+| `lt` | Show a three-level `eza` tree |
+| `rgi` | Search text with `ripgrep`, including hidden files except `.git` |
+| `rgf` | List files with `ripgrep`, including hidden files except `.git` |
 
 ## tmux
 
@@ -86,6 +91,10 @@ the next key.
 | `prefix` then `r` or `,` | Rename the current tmux window/tab from an empty prompt |
 | `prefix` then `x` | Close the current pane after confirmation |
 | `prefix` then `m` | Maximize or restore the current pane |
+| `prefix` then `g` | Open `lazygit` in a tmux popup |
+| `prefix` then `y` | Open `yazi` in a tmux popup |
+| `prefix` then `t` | Show a three-level `tree` view in a tmux popup |
+| `prefix` then `s` | Pick or create a session with `sesh` and `gum` |
 | `prefix` then `h` | Move to the pane on the left |
 | `prefix` then `j` | Move to the pane below |
 | `prefix` then `k` | Move to the pane above |

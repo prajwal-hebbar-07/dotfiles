@@ -50,6 +50,7 @@ It configures tmux as the main place for tabs, panes, movement, and copy mode:
 - Opens new split panes in the current pane's working directory.
 - Uses vi-style copy mode.
 - Copies selected text into the macOS clipboard with `pbcopy`.
+- Opens focused popups for `lazygit`, `yazi`, `tree`, and `sesh`.
 - Uses a Catppuccin Mocha-inspired status bar and pane border theme.
 
 The system config path is expected to point to this repo:
@@ -153,13 +154,18 @@ It configures the interactive shell for command discovery and nicer typing:
 - Loads `zsh-syntax-highlighting` from Homebrew so commands are colored as you
   type.
 - Loads `fzf` from Homebrew for visual command history, file, and folder search.
+- Uses `eza` for richer directory listings and `tree` for quick directory maps.
+- Uses `ripgrep` aliases for hidden-file-aware text and file search.
+- Uses `sesh` with `gum` for tmux session picking.
+- Adds GNU coreutils to the front of `PATH` when available.
 - Initializes Starship for a richer prompt.
 - Keeps the local aliases and Node/pnpm path setup.
 
-Install the shell plugins with:
+Install the shell tools with:
 
 ```sh
-brew install zsh-autosuggestions zsh-syntax-highlighting fzf starship
+brew install zsh-autosuggestions zsh-syntax-highlighting fzf starship eza ripgrep gum yazi tree coreutils
+brew install joshmedeski/sesh/sesh
 ```
 
 The home config path is expected to point to this repo:
