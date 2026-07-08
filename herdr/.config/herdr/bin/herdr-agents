@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+rows="$(herdr agent list | jq -r '
+  .result.agents[]
+  | [.terminal_id, (.agent // "agent"), .agent_status, .cwd]
+  | @tsv
+')"
+
+if [ -z "$rows" ]; then
+  echo "No running agents."
+  read -r -p "Press enter to close..." _
+  exit 0
+fi
+
+if ! command -v fzf >/dev/null 2>&1; then
+  echo "fzf is required to pick an agent (not found on PATH)."
+  read -r -p "Press enter to close..." _
+  exit 1
+fi
+
+numbered="$(printf '%s\n' "$rows" | nl -w1 -s $'\t' -ba)"
+count="$(printf '%s\n' "$rows" | wc -l | tr -d ' ')"
+[ "$count" -gt 9 ] && count=9
+
+# Bind 1-9 to jump straight to that row, in addition to normal fzf browsing/search.
+binds="1:pos(1)+accept"
+for ((i = 2; i <= count; i++)); do
+  binds="${binds},${i}:pos(${i})+accept"
+done
+
+selected="$(printf '%s\n' "$numbered" |
+  fzf \
+    --height=100% \
+    --border \
+    --prompt="agents > " \
+    --header="Jump to a running agent (1-9 jumps directly, or type to search)" \
+    --delimiter=$'\t' \
+    --with-nth=1,3,4,5 \
+    --bind="$binds")"
+
+[ -z "$selected" ] && exit 0
+
+target="$(printf '%s' "$selected" | cut -f2)"
+herdr agent focus "$target"

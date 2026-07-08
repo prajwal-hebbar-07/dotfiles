@@ -98,6 +98,9 @@ work:
 - Keeps pane movement on `prefix` plus `h`, `j`, `k`, and `l`.
 - Adds direct pane movement on `Ctrl-h`, `Ctrl-j`, `Ctrl-k`, and `Ctrl-l`.
 - Uses `j` and `k` inside the workspace picker for workspace movement.
+- Adds `prefix+a` for an fzf picker over running agents (`herdr agent list` /
+  `herdr agent focus`); pressing `1`-`9` jumps straight to that row, or type
+  to fuzzy-search.
 - Uses `prefix+c` for new tabs and `prefix+,` for renaming tabs.
 - Uses `prefix+Shift-p` for renaming panes.
 - Uses `prefix+\` and `prefix+-` for right and down splits, matching the tmux

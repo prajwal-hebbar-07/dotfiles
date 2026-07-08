@@ -12,6 +12,7 @@ prefix ;	settings	open Herdr settings
 prefix Shift-r	reload	reload Herdr config
 prefix s	goto	go to workspace, tab, or pane
 prefix w	workspace picker	open workspace picker; use j/k to move
+prefix a	agent	jump to a running agent; 1-9 jumps directly, or type to search
 prefix Shift-w	workspace	create new workspace
 prefix Shift-,	workspace	rename current workspace
 prefix Shift-d	workspace	close/delete current workspace

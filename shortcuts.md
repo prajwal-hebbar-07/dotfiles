@@ -160,6 +160,7 @@ Ctrl-s
 | `prefix` then `Q` | Stop Herdr completely after typing `RESET` |
 | `prefix` then `s` | Go to a workspace/tab/pane |
 | `prefix` then `w` | Open the workspace picker; use `j` and `k` to move |
+| `prefix` then `a` | Jump to a running agent; `1`-`9` jumps directly, or type to search |
 | `prefix` then `W` | Create a new workspace |
 | `prefix` then `Shift-,` | Rename the current workspace |
 | `prefix` then `Shift-d` | Close the current workspace |

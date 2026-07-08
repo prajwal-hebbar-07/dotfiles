@@ -65,6 +65,12 @@ command = "~/.config/herdr/bin/herdr-keymaps"
 description = "Search Herdr keymaps"
 
 [[keys.command]]
+key = "prefix+a"
+type = "pane"
+command = "~/.config/herdr/bin/herdr-agents"
+description = "Jump to a running agent"
+
+[[keys.command]]
 key = "prefix+q"
 type = "shell"
 command = "herdr server stop"
