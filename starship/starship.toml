@@ -45,7 +45,7 @@ error_symbol = "[❯](bold red)"
 vimcmd_symbol = "[❮](bold mauve)"
 
 [directory]
-format = "[ $path ]($style)"
+format = "[ $path ]($style) "
 style = "teal"
 truncation_length = 4
 truncation_symbol = "…/"
@@ -60,88 +60,86 @@ read_only_style = "red"
 "Developer" = "󰲋 "
 
 [git_branch]
-format = "  [$symbol$branch]($style)[](base)"
+format = "[$symbol$branch ]($style)[](base) "
 style = "fg:lavender bg:base"
 symbol = "[](base) "
 
 [git_status]
-format = "[$untracked$staged$modified$renamed$deleted$conflicted$ahead_behind ]($style)"
+format = "[$untracked$staged$modified$renamed$deleted$conflicted$ahead_behind]($style) "
 style = "bold peach"
-conflicted = "[✖](red bold)"
-ahead = "[⇡${count}](teal)"
-behind = "[⇣${count}](peach)"
-diverged = "[⇕⇡${ahead_count}⇣${behind_count}](mauve)"
+conflicted = "[✖${count} ](red bold)"
+ahead = "[⇡${count} ](teal)"
+behind = "[⇣${count} ](peach)"
+diverged = "[⇕⇡${ahead_count}⇣${behind_count} ](mauve)"
 up_to_date = ""
-untracked = "[?${count}](red)"
-stashed = "[≡${count}](lavender)"
-modified = "[!${count}](yellow)"
-staged = "[+${count}](green)"
-renamed = "[»${count}](blue)"
-deleted = "[-${count}](red)"
+untracked = "[?${count} ](red)"
+stashed = "[≡${count} ](lavender)"
+modified = "[!${count} ](yellow)"
+staged = "[+${count} ](green)"
+renamed = "[»${count} ](blue)"
+deleted = "[-${count} ](red)"
 
 [custom.giturl]
 description = "Display symbol for remote Git server"
 command = """
 GIT_REMOTE=$(command git ls-remote --get-url 2> /dev/null)
 case "$GIT_REMOTE" in
-    *github*) GIT_REMOTE_SYMBOL=" " ;;
-    *gitlab*) GIT_REMOTE_SYMBOL=" " ;;
-    *bitbucket*) GIT_REMOTE_SYMBOL=" " ;;
-    *git*) GIT_REMOTE_SYMBOL=" " ;;
-    *) GIT_REMOTE_SYMBOL=" " ;;
+    *github*) GIT_REMOTE_SYMBOL="" ;;
+    *gitlab*) GIT_REMOTE_SYMBOL="" ;;
+    *bitbucket*) GIT_REMOTE_SYMBOL="" ;;
+    *git*) GIT_REMOTE_SYMBOL="" ;;
+    *) GIT_REMOTE_SYMBOL="" ;;
 esac
-echo "$GIT_REMOTE_SYMBOL "
+echo "$GIT_REMOTE_SYMBOL"
 """
 when = "git rev-parse --is-inside-work-tree 2> /dev/null"
-format = "$output"
+format = "[$output]($style) "
+style = "bold lavender"
 require_repo = true
 ignore_timeout = true
 
 [custom.git_worktree]
 description = "Show indicator when inside a git worktree"
 command = """
-if git rev-parse --git-dir >/dev/null 2>&1; then
-      common_dir=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null)
-      git_dir=$(git rev-parse --path-format=absolute --git-dir 2>/dev/null)
-      if [ "$common_dir" != "$git_dir" ]; then
-            echo "⛓ "
-      fi
-fi
+echo "⛓"
 """
-when = "git rev-parse --is-inside-work-tree >/dev/null 2>&1"
-format = "([$output]($style))"
+when = """
+git rev-parse --git-dir >/dev/null 2>&1 &&
+[ "$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null)" != "$(git rev-parse --path-format=absolute --git-dir 2>/dev/null)" ]
+"""
+format = "[$output]($style) "
 style = "bold green"
 require_repo = true
 ignore_timeout = true
 
 [nodejs]
-format = "[ $symbol($version) ]($style)"
+format = "[ $symbol$version ]($style) "
 style = "bold green"
 symbol = " "
 
 [python]
-format = "[ ${symbol}${pyenv_prefix}(${version})( \\($virtualenv\\)) ]($style)"
+format = "[ $symbol${pyenv_prefix}$version( \\($virtualenv\\)) ]($style) "
 style = "bold yellow"
 symbol = " "
 
 [package]
-format = "[ $symbol$version ]($style)"
+format = "[ $symbol$version ]($style) "
 style = "bold pink"
 symbol = "󰏗 "
 
 [cmd_duration]
-format = "[ took $duration ]($style)"
+format = "[ took $duration ]($style) "
 style = "yellow"
 min_time = 1000
 
 [jobs]
-format = "[ $symbol$number ]($style)"
+format = "[ $symbol$number ]($style) "
 style = "teal"
 symbol = "✦"
 
 [status]
 disabled = false
-format = "[ exit $status ]($style)"
+format = "[ exit $status ]($style) "
 style = "bold red"
 
 [line_break]
