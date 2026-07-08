@@ -60,7 +60,7 @@ read_only_style = "red"
 "Developer" = "󰲋 "
 
 [git_branch]
-format = "[$symbol$branch ]($style)[](base) "
+format = "[$symbol$branch]($style)[](base) "
 style = "fg:lavender bg:base"
 symbol = "[](base) "
 
