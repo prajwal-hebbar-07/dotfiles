@@ -106,12 +106,16 @@ if [ -n "$HOMEBREW_PREFIX" ]; then
 fi
 
 # Aliases
-alias gn='codex --dangerously-bypass-approvals-and-sandbox'
-alias gc='codex resume --last --dangerously-bypass-approvals-and-sandbox'
+alias c='code'
+alias ca='cursor-app'
 alias g='lazygit'
 alias hd='hunk diff'
-alias cn='claude --dangerously-skip-permissions'
-alias cc='claude --continue --dangerously-skip-permissions'
+
+cursor-app() {
+  local claude_config_dir="$HOME/.claude-cursor"
+  mkdir -p "$claude_config_dir"
+  open --env "CLAUDE_CONFIG_DIR=$claude_config_dir" -a "Cursor" "$@"
+}
 
 # Node
 export NVM_DIR="$HOME/.nvm"
@@ -146,3 +150,9 @@ eval "$(pyenv init -)"
 
 # Added by Antigravity CLI installer
 export PATH="/Users/hebbar/.local/bin:$PATH"
+
+# Added by Devin
+export PATH="/Users/hebbar/.codeium/windsurf/bin:$PATH"
+
+# Added by Antigravity IDE
+export PATH="/Users/hebbar/.antigravity-ide/antigravity-ide/bin:$PATH"
