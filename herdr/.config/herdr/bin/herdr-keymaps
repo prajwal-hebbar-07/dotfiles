@@ -10,7 +10,7 @@ prefix Q	exit	stop Herdr server and close all workspaces/panes
 prefix ;	settings	open Herdr settings
 prefix Shift-r	reload	reload Herdr config
 prefix s	goto	go to workspace, tab, or pane
-prefix w	workspace picker	open workspace picker
+prefix w	workspace picker	open workspace picker; use j/k to move
 prefix Shift-w	workspace	create new workspace
 prefix Shift-,	workspace	rename current workspace
 prefix Shift-d	workspace	close/delete current workspace

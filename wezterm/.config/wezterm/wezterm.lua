@@ -13,7 +13,7 @@ config.font = wezterm.font_with_fallback({
 config.font_size = 13.0
 
 config.line_height = 1.12
-config.window_background_opacity = 0.58
+config.window_background_opacity = 0.78
 config.macos_window_background_blur = 20
 config.window_padding = {
   left = 10,

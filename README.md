@@ -96,6 +96,7 @@ work:
   all workspaces, tabs, panes, and pane processes.
 - Keeps pane movement on `prefix` plus `h`, `j`, `k`, and `l`.
 - Adds direct pane movement on `Ctrl-h`, `Ctrl-j`, `Ctrl-k`, and `Ctrl-l`.
+- Uses `j` and `k` inside the workspace picker for workspace movement.
 - Uses `prefix+c` for new tabs and `prefix+,` for renaming tabs.
 - Uses `prefix+Shift-p` for renaming panes.
 - Uses `prefix+\` and `prefix+-` for right and down splits, matching the tmux
