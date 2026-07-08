@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+entries="$(cat <<'EOF'
+Ctrl-s	prefix	enter Herdr prefix mode
+prefix ?	help	show Herdr help
+prefix /	keymaps	search this keymap cheat sheet
+prefix q	detach	detach client, keep session running
+prefix Q	exit	stop Herdr server and close all workspaces/panes
+prefix ;	settings	open Herdr settings
+prefix Shift-r	reload	reload Herdr config
+prefix s	goto	go to workspace, tab, or pane
+prefix w	workspace picker	open workspace picker
+prefix Shift-w	workspace	create new workspace
+prefix Shift-,	workspace	rename current workspace
+prefix Shift-d	workspace	close/delete current workspace
+prefix c	tab	create new tab
+prefix ,	tab	rename current tab
+prefix p	tab	previous tab
+prefix n	tab	next tab
+prefix 1..9	tab	switch tab by number
+prefix Shift-x	tab	close/delete current tab
+prefix Shift-p	pane	rename current pane
+prefix x	pane	close/delete current pane
+prefix m	pane	zoom or restore current pane
+prefix \\	pane	split pane to the right
+prefix -	pane	split pane downward
+prefix h	pane	focus pane left
+prefix j	pane	focus pane down
+prefix k	pane	focus pane up
+prefix l	pane	focus pane right
+Ctrl-h	pane	focus pane left without prefix
+Ctrl-j	pane	focus pane down without prefix
+Ctrl-k	pane	focus pane up without prefix
+Ctrl-l	pane	focus pane right without prefix
+prefix H	pane	resize pane left
+prefix J	pane	resize pane down
+prefix K	pane	resize pane up
+prefix L	pane	resize pane right
+prefix Tab	pane	cycle to next pane
+prefix Shift-Tab	pane	cycle to previous pane
+prefix e	scrollback	edit scrollback
+prefix [	copy	enter keyboard copy mode
+prefix g	tool	open lazygit
+prefix y	tool	open yazi
+prefix t	tool	show project tree
+EOF
+)"
+
+if command -v fzf >/dev/null 2>&1; then
+  printf "%s\n" "$entries" |
+    fzf \
+      --height=100% \
+      --border \
+      --prompt="herdr keys > " \
+      --header="Type what you want: workspace, delete, rename, pane, split, exit, git..." \
+      --delimiter=$'\t' \
+      --with-nth=1,2,3
+else
+  printf "%s\n" "$entries" | column -t -s $'\t' | less -R
+fi

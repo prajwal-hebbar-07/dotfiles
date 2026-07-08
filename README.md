@@ -22,7 +22,7 @@ cd ~/dotfiles
 The install script runs GNU Stow for these packages:
 
 ```sh
-stow --target="$HOME" --restow zsh tmux wezterm starship git
+stow --target="$HOME" --restow zsh tmux wezterm starship git nvim herdr
 ```
 
 ## WezTerm
@@ -82,6 +82,48 @@ The system config path is expected to point to this repo:
 ```
 
 See `shortcuts.md` for the keyboard shortcuts.
+
+## Herdr
+
+The Herdr configuration lives in `herdr/.config/herdr/config.toml`.
+
+It configures Herdr as a tmux-like terminal workspace manager for agent-heavy
+work:
+
+- Uses the same `Ctrl-s` prefix as tmux.
+- Adds `prefix+/` for searching Herdr keymaps by intent.
+- Adds a guarded `prefix+Q` exit flow that stops the Herdr server and closes
+  all workspaces, tabs, panes, and pane processes.
+- Keeps pane movement on `prefix` plus `h`, `j`, `k`, and `l`.
+- Adds direct pane movement on `Ctrl-h`, `Ctrl-j`, `Ctrl-k`, and `Ctrl-l`.
+- Uses `prefix+c` for new tabs and `prefix+,` for renaming tabs.
+- Uses `prefix+Shift-p` for renaming panes.
+- Uses `prefix+\` and `prefix+-` for right and down splits, matching the tmux
+  split habit in this repo.
+- Uses uppercase `H`, `J`, `K`, and `L` after the prefix for pane resizing.
+- Uses `prefix+m` for pane zoom.
+- Uses `prefix+g`, `prefix+y`, and `prefix+t` for `lazygit`, `yazi`, and a
+  project tree pane.
+- Uses the Catppuccin theme with the same accent color as the tmux status bar.
+
+Install Herdr with:
+
+```sh
+brew install herdr
+```
+
+To keep the Herdr server running in the background:
+
+```sh
+brew services start herdr
+```
+
+The config file is expected to point to this repo. The parent directory stays
+real because Herdr writes logs and sockets next to the config file:
+
+```sh
+~/.config/herdr/config.toml -> <repo>/herdr/.config/herdr/config.toml
+```
 
 ## Starship
 

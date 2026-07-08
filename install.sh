@@ -9,6 +9,7 @@ PACKAGES=(
   starship
   git
   nvim
+  herdr
 )
 
 if ! command -v stow >/dev/null 2>&1; then
@@ -21,6 +22,8 @@ mkdir -p "$HOME/.config"
 remove_repo_symlink() {
   local target="$1"
   local link_target
+  local resolved_target
+  local resolved_dir
 
   if [ ! -L "$target" ]; then
     return
@@ -28,6 +31,29 @@ remove_repo_symlink() {
 
   link_target="$(readlink "$target")"
   case "$link_target" in
+    /*)
+      resolved_target="$link_target"
+      ;;
+    *)
+      resolved_target=""
+      if resolved_dir="$(
+        cd "$(dirname "$target")"
+        cd "$(dirname "$link_target")" 2>/dev/null
+        pwd -P
+      )"; then
+        resolved_target="$resolved_dir/$(basename "$link_target")"
+      fi
+      ;;
+  esac
+
+  case "$link_target" in
+    "$DOTFILES_DIR"/*)
+      rm "$target"
+      return
+      ;;
+  esac
+
+  case "$resolved_target" in
     "$DOTFILES_DIR"/*)
       rm "$target"
       ;;
@@ -40,6 +66,11 @@ remove_repo_symlink "$HOME/.config/wezterm"
 remove_repo_symlink "$HOME/.config/starship"
 remove_repo_symlink "$HOME/.config/starship.toml"
 remove_repo_symlink "$HOME/.config/nvim"
+remove_repo_symlink "$HOME/.config/herdr"
+
+# Herdr writes logs and sockets next to config.toml, so keep this as a real
+# directory and symlink only the config file into it.
+mkdir -p "$HOME/.config/herdr"
 
 cd "$DOTFILES_DIR"
 stow --target="$HOME" --restow "${PACKAGES[@]}"
