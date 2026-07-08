@@ -1,0 +1,9 @@
+{
+  "statusLine": {
+    "type": "command",
+    "command": "bash \"$HOME/.claude-two/statusline.sh\""
+  },
+  "tui": "fullscreen",
+  "theme": "dark",
+  "skipDangerousModePermissionPrompt": true
+}

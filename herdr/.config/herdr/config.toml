@@ -20,7 +20,7 @@ prefix = "ctrl+s"
 
 help = "prefix+?"
 settings = "prefix+;"
-detach = "prefix+q"
+detach = "prefix+d"
 reload_config = "prefix+shift+r"
 
 workspace_picker = "prefix+w"
@@ -63,6 +63,12 @@ key = "prefix+slash"
 type = "pane"
 command = "~/.config/herdr/bin/herdr-keymaps"
 description = "Search Herdr keymaps"
+
+[[keys.command]]
+key = "prefix+q"
+type = "shell"
+command = "herdr server stop"
+description = "Stop Herdr server"
 
 [[keys.command]]
 key = "prefix+shift+q"

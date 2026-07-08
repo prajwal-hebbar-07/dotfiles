@@ -10,6 +10,8 @@ PACKAGES=(
   git
   nvim
   herdr
+  claude-one
+  claude-two
 )
 
 if ! command -v stow >/dev/null 2>&1; then
@@ -67,10 +69,17 @@ remove_repo_symlink "$HOME/.config/starship"
 remove_repo_symlink "$HOME/.config/starship.toml"
 remove_repo_symlink "$HOME/.config/nvim"
 remove_repo_symlink "$HOME/.config/herdr"
+remove_repo_symlink "$HOME/.claude-one"
+remove_repo_symlink "$HOME/.claude-two"
 
 # Herdr writes logs and sockets next to config.toml, so keep this as a real
 # directory and symlink only the config file into it.
 mkdir -p "$HOME/.config/herdr"
+
+# claude-one/claude-two write sessions, caches, and credentials alongside their
+# statusline.sh and settings.json, so keep them as real directories and
+# symlink only the tracked config files into them.
+mkdir -p "$HOME/.claude-one" "$HOME/.claude-two"
 
 cd "$DOTFILES_DIR"
 stow --target="$HOME" --restow "${PACKAGES[@]}"

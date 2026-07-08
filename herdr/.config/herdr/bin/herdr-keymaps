@@ -5,7 +5,8 @@ entries="$(cat <<'EOF'
 Ctrl-s	prefix	enter Herdr prefix mode
 prefix ?	help	show Herdr help
 prefix /	keymaps	search this keymap cheat sheet
-prefix q	detach	detach client, keep session running
+prefix q	exit	stop Herdr server
+prefix d	detach	detach client, keep session running
 prefix Q	exit	stop Herdr server and close all workspaces/panes
 prefix ;	settings	open Herdr settings
 prefix Shift-r	reload	reload Herdr config

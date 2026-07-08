@@ -126,6 +126,8 @@ fi
 # Aliases
 alias c='code'
 alias ca='cursor-app'
+alias cc1='CLAUDE_CONFIG_DIR="$HOME/.claude-one" claude --dangerously-skip-permissions'
+alias cc2='CLAUDE_CONFIG_DIR="$HOME/.claude-two" claude --dangerously-skip-permissions'
 alias g='lazygit'
 alias hd='hunk diff'
 alias ls='eza --long --icons=always --git --no-user --group-directories-first'
@@ -136,6 +138,7 @@ alias tree='tree -L 3 -a -I ".git|node_modules|.venv|__pycache__" --charset X'
 alias rgi='rg --hidden --glob "!.git"'
 alias rgf='rg --files --hidden --glob "!.git"'
 alias yy='yazi'
+alias herdr-stop-all='herdr session list --json | jq -r ".[].name" | while read -r s; do herdr session stop "$s"; done'
 
 sesh-pick() {
   if ! command -v sesh >/dev/null 2>&1; then
@@ -176,6 +179,11 @@ esac
 export PATH="$HOME/.local/bin:$PATH"
 
 # Prompt
+if [[ -o interactive && -t 1 && "${HERDR_ENV:-}" = "1" && -z "${HERDR_PROMPT_TOP_PADDED:-}" ]]; then
+  printf '\n'
+  export HERDR_PROMPT_TOP_PADDED=1
+fi
+
 export STARSHIP_CONFIG="$HOME/.config/starship/starship.toml"
 if command -v starship >/dev/null 2>&1; then
   eval "$(starship init zsh)"

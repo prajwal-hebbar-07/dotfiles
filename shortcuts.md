@@ -155,7 +155,8 @@ Ctrl-s
 | `Ctrl-s` | Herdr prefix |
 | `prefix` then `?` | Show Herdr help |
 | `prefix` then `/` | Search Herdr keymaps by intent |
-| `prefix` then `q` | Detach from Herdr |
+| `prefix` then `q` | Stop the Herdr server |
+| `prefix` then `d` | Detach from Herdr |
 | `prefix` then `Q` | Stop Herdr completely after typing `RESET` |
 | `prefix` then `s` | Go to a workspace/tab/pane |
 | `prefix` then `w` | Open the workspace picker; use `j` and `k` to move |
