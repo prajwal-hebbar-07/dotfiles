@@ -2,6 +2,7 @@
 set -euo pipefail
 
 DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+LEGACY_DOTFILES_DIR="$HOME/chaotic-thoughts/dotfiles"
 PACKAGES=(
   zsh
   tmux
@@ -53,10 +54,14 @@ remove_repo_symlink() {
       rm "$target"
       return
       ;;
+    "$LEGACY_DOTFILES_DIR"/* | *"chaotic-thoughts/dotfiles"/*)
+      rm "$target"
+      return
+      ;;
   esac
 
   case "$resolved_target" in
-    "$DOTFILES_DIR"/*)
+    "$DOTFILES_DIR"/* | "$LEGACY_DOTFILES_DIR"/*)
       rm "$target"
       ;;
   esac
@@ -68,9 +73,18 @@ remove_repo_symlink "$HOME/.config/wezterm"
 remove_repo_symlink "$HOME/.config/starship"
 remove_repo_symlink "$HOME/.config/starship.toml"
 remove_repo_symlink "$HOME/.config/nvim"
+remove_repo_symlink "$HOME/.config/git/config"
 remove_repo_symlink "$HOME/.config/herdr"
+remove_repo_symlink "$HOME/.config/herdr/bin"
+remove_repo_symlink "$HOME/.config/herdr/config.toml"
 remove_repo_symlink "$HOME/.claude-one"
+remove_repo_symlink "$HOME/.claude-one/settings.json"
+remove_repo_symlink "$HOME/.claude-one/skills"
+remove_repo_symlink "$HOME/.claude-one/statusline.sh"
 remove_repo_symlink "$HOME/.claude-two"
+remove_repo_symlink "$HOME/.claude-two/settings.json"
+remove_repo_symlink "$HOME/.claude-two/skills"
+remove_repo_symlink "$HOME/.claude-two/statusline.sh"
 
 # Herdr writes logs and sockets next to config.toml, so keep this as a real
 # directory and symlink only the config file into it.

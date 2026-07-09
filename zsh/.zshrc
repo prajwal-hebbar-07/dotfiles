@@ -126,8 +126,8 @@ fi
 # Aliases
 alias c='code'
 alias ca='cursor-app'
-alias cc1='CLAUDE_CONFIG_DIR="$HOME/.claude-one" claude --dangerously-skip-permissions'
-alias cc2='CLAUDE_CONFIG_DIR="$HOME/.claude-two" claude --dangerously-skip-permissions'
+alias cc1='CLAUDE_CONFIG_DIR="$HOME/.claude-two" claude --dangerously-skip-permissions'
+alias cc2='CLAUDE_CONFIG_DIR="$HOME/.claude-one" claude --dangerously-skip-permissions'
 alias g='lazygit'
 alias hd='hunk diff'
 alias ls='eza --long --icons=always --git --no-user --group-directories-first'

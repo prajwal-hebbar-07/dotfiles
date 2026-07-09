@@ -230,8 +230,8 @@ It configures the interactive shell for command discovery and nicer typing:
 - Uses `eza` for richer directory listings and `tree` for quick directory maps.
 - Uses `ripgrep` aliases for hidden-file-aware text and file search.
 - Uses `sesh` with `gum` for tmux session picking.
-- Adds `cc1` and `cc2` Claude aliases for `~/.claude-one` and
-  `~/.claude-two` with dangerous permission prompts skipped.
+- Adds `cc1` and `cc2` Claude aliases for `~/.claude-two` and
+  `~/.claude-one` with dangerous permission prompts skipped.
 - Adds `herdr-stop-all` for stopping every named Herdr session.
 - Adds GNU coreutils to the front of `PATH` when available.
 - Initializes Starship for a richer prompt.
