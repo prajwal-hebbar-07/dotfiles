@@ -1,0 +1,4 @@
+interface:
+  display_name: "Ship"
+  short_description: "Stage, commit, merge-update, and push safely"
+  default_prompt: "Use $ship to stage all changes, commit them, pull with merge, and push the current branch."

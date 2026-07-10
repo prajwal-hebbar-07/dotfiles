@@ -22,7 +22,25 @@ cd ~/dotfiles
 The install script runs GNU Stow for these packages:
 
 ```sh
-stow --target="$HOME" --restow zsh tmux wezterm starship git nvim herdr
+stow --target="$HOME" --restow zsh tmux wezterm starship git nvim herdr claude-one claude-two codex
+```
+
+## Codex
+
+The Codex skills live in `codex/.codex/skills`.
+
+The `ship` skill handles `/ship` and related requests as one guarded Git flow:
+
+- Stages all changes once.
+- Creates one Conventional Commits commit without AI attribution.
+- Pulls with a merge, never a rebase.
+- Stops for guidance on conflicts and never force-pushes automatically.
+
+The skill is expected to point to this repo while the rest of `~/.codex`
+remains a real directory for Codex runtime state:
+
+```sh
+~/.codex/skills/ship -> <repo>/codex/.codex/skills/ship
 ```
 
 ## WezTerm
