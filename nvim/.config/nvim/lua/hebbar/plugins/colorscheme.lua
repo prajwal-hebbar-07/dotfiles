@@ -6,20 +6,25 @@ return {
     config = function()
       require("catppuccin").setup({
         flavour = "mocha",
-        transparent_background = false,
-        integrations = {
-          gitsigns = true,
-          native_lsp = {
-            enabled = true,
-            virtual_text = {
-              errors = { "italic" },
-              hints = { "italic" },
-            },
+        transparent_background = true,
+        float = {
+          transparent = true,
+        },
+        lsp_styles = {
+          virtual_text = {
+            errors = { "italic" },
+            hints = { "italic" },
           },
+        },
+        integrations = {
+          blink_cmp = true,
+          gitsigns = true,
+          lsp_trouble = true,
+          mason = true,
+          render_markdown = true,
           telescope = true,
           treesitter = true,
           mini = true,
-          markdown = true,
         },
       })
 

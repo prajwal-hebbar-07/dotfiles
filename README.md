@@ -162,7 +162,8 @@ The Neovim configuration lives in `nvim/.config/nvim`.
 It configures Neovim as a small code-reading and coding setup:
 
 - Uses `lazy.nvim` for plugin management.
-- Uses Catppuccin Mocha for the editor theme.
+- Uses Catppuccin Mocha with a transparent, minimal editor interface.
+- Uses Space as the global and local leader key.
 - Adds `oil.nvim` for directory and file operations.
 - Adds Telescope for file, buffer, help, Git file, and text search.
 - Adds Treesitter for syntax highlighting and indentation.

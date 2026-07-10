@@ -1,5 +1,3 @@
-vim.g.mapleader = " "
-vim.g.maplocalleader = " "
 vim.g.netrw_banner = 0
 
 local opt = vim.opt
@@ -7,7 +5,9 @@ local opt = vim.opt
 opt.termguicolors = true
 opt.number = true
 opt.relativenumber = true
+opt.numberwidth = 4
 opt.signcolumn = "yes"
+opt.cursorline = true
 opt.scrolloff = 8
 opt.mouse = "a"
 opt.clipboard:append("unnamedplus")
@@ -31,11 +31,25 @@ opt.inccommand = "split"
 
 opt.splitright = true
 opt.splitbelow = true
+opt.splitkeep = "screen"
 opt.updatetime = 100
 opt.timeoutlen = 400
+opt.pumheight = 10
 opt.colorcolumn = "0"
 opt.guicursor = ""
 opt.isfname:append("@-@")
+
+opt.showmode = false
+opt.laststatus = 3
+opt.showtabline = 1
+opt.winborder = "rounded"
+opt.fillchars = {
+  eob = " ",
+  fold = " ",
+  foldclose = "",
+  foldopen = "",
+  foldsep = " ",
+}
 
 opt.foldenable = true
 opt.foldmethod = "manual"
