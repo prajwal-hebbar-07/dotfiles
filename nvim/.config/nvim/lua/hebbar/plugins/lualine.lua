@@ -22,6 +22,7 @@ return {
             color = { fg = "#f9e2af" },
           },
           "diagnostics",
+          "lsp_status",
           "filetype",
         },
         lualine_y = { "progress" },

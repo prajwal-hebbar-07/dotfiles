@@ -9,8 +9,11 @@ opt.numberwidth = 4
 opt.signcolumn = "yes"
 opt.cursorline = true
 opt.scrolloff = 8
+opt.sidescrolloff = 8
 opt.mouse = "a"
 opt.clipboard:append("unnamedplus")
+opt.confirm = true
+opt.autoread = true
 
 opt.tabstop = 4
 opt.softtabstop = 4
@@ -23,6 +26,7 @@ opt.swapfile = false
 opt.backup = false
 opt.undofile = true
 opt.undodir = vim.fn.stdpath("data") .. "/undodir"
+vim.fn.mkdir(opt.undodir:get()[1], "p")
 
 opt.ignorecase = true
 opt.smartcase = true
@@ -38,6 +42,15 @@ opt.pumheight = 10
 opt.colorcolumn = "0"
 opt.guicursor = ""
 opt.isfname:append("@-@")
+opt.virtualedit = "block"
+opt.breakindent = true
+opt.smoothscroll = true
+opt.list = true
+opt.listchars = {
+  tab = "» ",
+  trail = "·",
+  nbsp = "␣",
+}
 
 opt.showmode = false
 opt.laststatus = 3
@@ -55,3 +68,7 @@ opt.foldenable = true
 opt.foldmethod = "manual"
 opt.foldlevel = 99
 opt.foldcolumn = "0"
+
+opt.sessionoptions = { "buffers", "curdir", "folds", "help", "tabpages", "winsize", "winpos", "terminal", "localoptions" }
+opt.diffopt:append({ "algorithm:histogram", "linematch:60" })
+opt.shortmess:append("I")

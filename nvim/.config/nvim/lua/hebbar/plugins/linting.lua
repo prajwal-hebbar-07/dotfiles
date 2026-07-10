@@ -13,14 +13,14 @@ return {
     }
 
     local group = vim.api.nvim_create_augroup("hebbar_lint", { clear = true })
-    vim.api.nvim_create_autocmd({ "BufEnter", "BufWritePost", "InsertLeave" }, {
+    vim.api.nvim_create_autocmd({ "BufEnter", "BufWritePost" }, {
       group = group,
       callback = function()
         lint.try_lint()
       end,
     })
 
-    vim.keymap.set("n", "<leader>l", function()
+    vim.keymap.set("n", "<leader>ll", function()
       lint.try_lint()
     end, { desc = "Run linting" })
   end,

@@ -22,31 +22,61 @@ Space
 
 | Shortcut | Action |
 | --- | --- |
+| `Space` then `?` | Show buffer-local keymaps |
 | `-` | Open parent directory with Oil |
 | `Space` then `-` | Open Oil in a floating window |
-| `Space` then `pf` | Find files |
-| `Space` then `pg` | Find Git files |
-| `Space` then `ps` | Search text in the project |
-| `Space` then `pr` | Find recent files |
-| `Space` then `pb` | Find open buffers |
-| `Space` then `pk` | Search keymaps |
+| `Space` then `e` | Toggle the Neo-tree project sidebar |
+| `Space` then `f` | Find files |
+| `Space` then `fg` | Find Git files |
+| `Space` then `fs` | Search text in the project |
+| `Space` then `fr` | Find recent files |
+| `Space` then `fb` | Find open buffers |
+| `Space` then `fk` | Search keymaps |
+| `Space` then `fw` | Search for the word under the cursor |
+| `Space` then `ft` | Find todo comments |
 | `Space` then `vh` | Search help tags |
+| `Space` then `sr` | Search and replace across the project or visual range |
+| `Space` then `sw` | Replace the word under the cursor in the current file |
+| `Space` then `o` | Toggle the code outline |
+| `]s` / `[s` | Move to next or previous code symbol |
+| `]b` / `[b` | Move to next or previous buffer |
+| `Space` then `bd` | Delete the current buffer |
 | `gd` | Go to definition |
 | `gD` | Go to declaration |
 | `gi` | Go to implementation |
 | `gR` | Go to references |
 | `K` | Show hover documentation |
 | `Space` then `rn` | Rename symbol |
-| `Space` then `vca` | Show code actions |
+| `Space` then `ca` | Show code actions |
 | `Space` then `D` | Show buffer diagnostics |
-| `df` | Show diagnostic details for the current line |
+| `Space` then `ld` | Show diagnostic details for the current line |
+| `Space` then `ls` | Search document symbols |
+| `Space` then `lS` | Search workspace symbols |
+| `Space` then `lh` | Toggle LSP inlay hints when supported |
 | `Space` then `mp` | Format the current file or visual selection |
-| `Space` then `l` | Run linting |
+| `Space` then `mt` | Toggle format-on-save for the current buffer |
+| `Space` then `ll` | Run linting |
+| `Space` then `rr` | Select and run a project task or test |
+| `Space` then `rt` | Toggle the background task list |
+| `Space` then `ra` | Select an action for a running or completed task |
+| `Space` then `qs` | Restore the session for the current project |
+| `Space` then `qS` | Select a saved session |
+| `Space` then `ql` | Restore the most recent session |
 | `Space` then `gg` | Open Fugitive Git status |
 | `]h` / `[h` | Move to next or previous Git hunk |
 | `Space` then `gs` | Stage Git hunk |
 | `Space` then `gr` | Reset Git hunk |
 | `Space` then `u` | Toggle undo tree |
+| `F5` | Start or continue debugging |
+| `F9` | Toggle a breakpoint |
+| `F10` / `F11` / `F12` | Step over, into, or out while debugging |
+| `Space` then `bu` | Toggle the debugger inspector UI |
+| `Space` then `be` | Evaluate the expression under the cursor or selection |
+| `Space` then `bt` | Debug the Python test under the cursor |
+| `Space` then `bT` | Debug the current Python test class |
+| `Space` then `br` | Toggle the debugger REPL |
+| `Space` then `bx` | Stop debugging |
+| `Esc` twice | Leave terminal input mode |
 
 ## zsh
 

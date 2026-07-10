@@ -46,6 +46,9 @@ return {
       snippets = {
         preset = "luasnip",
       },
+      signature = {
+        enabled = true,
+      },
     })
 
     require("luasnip.loaders.from_vscode").lazy_load()

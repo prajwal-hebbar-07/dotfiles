@@ -6,22 +6,47 @@ return {
     { "antosha417/nvim-lsp-file-operations", config = true },
   },
   config = function()
+    local highlight_group = vim.api.nvim_create_augroup("hebbar_lsp_highlight", { clear = true })
+
     vim.api.nvim_create_autocmd("LspAttach", {
       group = vim.api.nvim_create_augroup("hebbar_lsp", { clear = true }),
       callback = function(event)
         local opts = { buffer = event.buf, silent = true }
+        local client = vim.lsp.get_client_by_id(event.data.client_id)
 
         vim.keymap.set("n", "gR", "<cmd>Telescope lsp_references<CR>", vim.tbl_extend("force", opts, { desc = "References" }))
         vim.keymap.set("n", "gD", vim.lsp.buf.declaration, vim.tbl_extend("force", opts, { desc = "Declaration" }))
         vim.keymap.set("n", "gd", "<cmd>Telescope lsp_definitions<CR>", vim.tbl_extend("force", opts, { desc = "Definitions" }))
         vim.keymap.set("n", "gi", "<cmd>Telescope lsp_implementations<CR>", vim.tbl_extend("force", opts, { desc = "Implementations" }))
         vim.keymap.set("n", "gt", "<cmd>Telescope lsp_type_definitions<CR>", vim.tbl_extend("force", opts, { desc = "Type definitions" }))
-        vim.keymap.set({ "n", "v" }, "<leader>vca", vim.lsp.buf.code_action, vim.tbl_extend("force", opts, { desc = "Code action" }))
+        vim.keymap.set({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, vim.tbl_extend("force", opts, { desc = "Code action" }))
         vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, vim.tbl_extend("force", opts, { desc = "Rename symbol" }))
         vim.keymap.set("n", "<leader>D", "<cmd>Telescope diagnostics bufnr=0<CR>", vim.tbl_extend("force", opts, { desc = "Buffer diagnostics" }))
-        vim.keymap.set("n", "df", vim.diagnostic.open_float, vim.tbl_extend("force", opts, { desc = "Line diagnostics" }))
+        vim.keymap.set("n", "<leader>ld", vim.diagnostic.open_float, vim.tbl_extend("force", opts, { desc = "Line diagnostics" }))
+        vim.keymap.set("n", "<leader>ls", "<cmd>Telescope lsp_document_symbols<CR>", vim.tbl_extend("force", opts, { desc = "Document symbols" }))
+        vim.keymap.set("n", "<leader>lS", "<cmd>Telescope lsp_dynamic_workspace_symbols<CR>", vim.tbl_extend("force", opts, { desc = "Workspace symbols" }))
         vim.keymap.set("n", "K", vim.lsp.buf.hover, vim.tbl_extend("force", opts, { desc = "Hover docs" }))
-        vim.keymap.set("i", "<C-h>", vim.lsp.buf.signature_help, vim.tbl_extend("force", opts, { desc = "Signature help" }))
+
+        if client and client:supports_method("textDocument/inlayHint", event.buf) then
+          vim.keymap.set("n", "<leader>lh", function()
+            local enabled = vim.lsp.inlay_hint.is_enabled({ bufnr = event.buf })
+            vim.lsp.inlay_hint.enable(not enabled, { bufnr = event.buf })
+          end, vim.tbl_extend("force", opts, { desc = "Toggle inlay hints" }))
+        end
+
+        if client and client:supports_method("textDocument/documentHighlight", event.buf) then
+          vim.api.nvim_clear_autocmds({ group = highlight_group, buffer = event.buf })
+          vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
+            group = highlight_group,
+            buffer = event.buf,
+            callback = vim.lsp.buf.document_highlight,
+          })
+          vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
+            group = highlight_group,
+            buffer = event.buf,
+            callback = vim.lsp.buf.clear_references,
+          })
+        end
       end,
     })
 
@@ -37,6 +62,7 @@ return {
       virtual_text = true,
       underline = true,
       update_in_insert = false,
+      severity_sort = true,
       float = {
         focusable = false,
         style = "minimal",
@@ -87,7 +113,17 @@ return {
     })
 
     vim.lsp.config("tailwindcss", {
-      filetypes = { "html", "css", "javascript", "typescript", "javascriptreact", "typescriptreact", "svelte", "vue", "astro" },
+      filetypes = {
+        "html",
+        "css",
+        "javascript",
+        "typescript",
+        "javascriptreact",
+        "typescriptreact",
+        "svelte",
+        "vue",
+        "astro",
+      },
       init_options = {
         userLanguages = {
           astro = "html",
