@@ -32,7 +32,7 @@ semantic commit, bring the branch up to date with a merge pull, push.
    )"
    ```
 
-   Message rules (same as the commit skill):
+   Message rules:
    - Conventional Commits subject: imperative mood, lowercase, no trailing
      period, ≤ 72 chars; types like feat/fix/refactor/docs/chore/etc.
    - Body (unless trivial): what and why, `-` bullets for distinct changes,

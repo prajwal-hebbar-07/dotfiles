@@ -124,7 +124,7 @@ if [ -n "$HOMEBREW_PREFIX" ]; then
 fi
 
 # Aliases
-alias c='code'
+alias c='CLAUDE_CONFIG_DIR="$HOME/.claude-two" code'
 alias ca='cursor-app'
 alias cc1='CLAUDE_CONFIG_DIR="$HOME/.claude-two" claude --dangerously-skip-permissions'
 alias cc2='CLAUDE_CONFIG_DIR="$HOME/.claude-one" claude --dangerously-skip-permissions'
@@ -159,7 +159,7 @@ sesh-pick() {
 alias ss='sesh-pick'
 
 cursor-app() {
-  local claude_config_dir="$HOME/.claude-cursor"
+  local claude_config_dir="$HOME/.claude-one"
   mkdir -p "$claude_config_dir"
   open --env "CLAUDE_CONFIG_DIR=$claude_config_dir" -a "Cursor" "$@"
 }
