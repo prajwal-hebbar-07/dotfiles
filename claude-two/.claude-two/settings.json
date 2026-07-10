@@ -1,9 +1,11 @@
 {
+  "model": "claude-fable-5[1m]",
   "statusLine": {
     "type": "command",
     "command": "bash \"$HOME/.claude-two/statusline.sh\""
   },
   "tui": "fullscreen",
+  "skipDangerousModePermissionPrompt": true,
   "theme": "dark",
-  "skipDangerousModePermissionPrompt": true
+  "effortLevel": "high"
 }

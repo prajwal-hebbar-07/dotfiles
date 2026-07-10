@@ -109,12 +109,13 @@ week_reset_epoch=$(echo "$input" | jq -r '.rate_limits.seven_day.resets_at // em
 limit_seg() {
   local label=$1 pct=$2 reset_epoch=$3
   [ -z "$pct" ] && return
-  local dots pct_int reset_str content seg_bg
+  local dots pct_int reset_str content seg_bg pct_fg
   dots=$(make_dots "$pct" 9)
   pct_int=${pct%.*}
   reset_str=$(fmt_reset "$reset_epoch")
   seg_bg=$(bg $(bg_pct_color "$pct"))
-  content=$(printf '%s%s%s%s:%s %s %s%3s%%%s' "$BOLD" "$WHITE" "$label" "$FRESET" "$FRESET" "$dots" "$BOLD$WHITE" "$pct_int" "$FRESET")
+  pct_fg=$(fg $(pct_color "$pct"))
+  content=$(printf '%s%s%s%s:%s %s %s%3s%%%s' "$BOLD" "$WHITE" "$label" "$FRESET" "$FRESET" "$dots" "$BOLD$pct_fg" "$pct_int" "$FRESET")
   [ -n "$reset_str" ] && content="${content}$(printf ' %s·%s %s' "$DIM" "$FRESET" "$reset_str")"
   printf '%s %s %s%s' "$seg_bg" "$content" "$FRESET" "$BGEND"
 }
