@@ -36,11 +36,23 @@ The `ship` skill handles `/ship` and related requests as one guarded Git flow:
 - Pulls with a merge, never a rebase.
 - Stops for guidance on conflicts and never force-pushes automatically.
 
-The skill is expected to point to this repo while the rest of `~/.codex`
+The `plan` family mirrors the Claude planning loop so Codex works the same
+way:
+
+- `plan` researches the task and writes a crisp, diagram-first
+  `plans/plan-<slug>.md`, opened in an nvim tmux split for inline `@me`
+  comments.
+- `plan-review` resolves those comments one round at a time and logs them in
+  the plan's Review changelog.
+- `plan-detail` expands on any step of a plan in conversation, keeping the
+  file lean.
+- `plan-done` verifies a plan actually landed, then deletes its file.
+
+The skills are expected to point to this repo while the rest of `~/.codex`
 remains a real directory for Codex runtime state:
 
 ```sh
-~/.codex/skills/ship -> <repo>/codex/.codex/skills/ship
+~/.codex/skills/<skill> -> <repo>/codex/.codex/skills/<skill>
 ```
 
 ## WezTerm

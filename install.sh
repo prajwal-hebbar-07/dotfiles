@@ -84,6 +84,10 @@ remove_repo_symlink "$HOME/.claude-two/skills"
 remove_repo_symlink "$HOME/.claude-two/statusline.sh"
 remove_repo_symlink "$HOME/.codex/skills"
 remove_repo_symlink "$HOME/.codex/skills/ship"
+remove_repo_symlink "$HOME/.codex/skills/plan"
+remove_repo_symlink "$HOME/.codex/skills/plan-review"
+remove_repo_symlink "$HOME/.codex/skills/plan-detail"
+remove_repo_symlink "$HOME/.codex/skills/plan-done"
 
 # claude-one/claude-two write sessions, caches, and credentials alongside their
 # statusline.sh and settings.json, so keep them as real directories and
@@ -91,7 +95,7 @@ remove_repo_symlink "$HOME/.codex/skills/ship"
 mkdir -p "$HOME/.claude-one" "$HOME/.claude-two"
 
 # Codex keeps runtime state alongside its skills, so preserve its real config
-# directories and symlink only the tracked skill into them.
+# directories and symlink only the tracked skills into them.
 mkdir -p "$HOME/.codex/skills"
 
 cd "$DOTFILES_DIR"

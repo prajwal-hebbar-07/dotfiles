@@ -1,0 +1,4 @@
+interface:
+  display_name: "Plan"
+  short_description: "Research a task and write a crisp reviewable plan file"
+  default_prompt: "Use $plan to research the task and write plans/plan-<slug>.md, opened in an nvim tmux split for @me-comment review."
