@@ -45,7 +45,10 @@ output is an updated plan file plus a short report.
    suggestion to weigh. If a comment is genuinely ambiguous, make the smallest
    reasonable interpretation and note the assumption in the changelog rather
    than stalling the loop. If a comment requires looking at code you have not
-   read, read it before answering.
+   read, read it before answering. Keep resolutions in the plan's crisp,
+   diagram-first style (see `/plan`) — one-liners and ASCII diagrams, not
+   prose; if a comment asks for background rather than a change, answer it
+   tersely in place and mention `/plan-detail` for real depth.
 
 4. **Remove the `@me` markers** you resolved — the rewritten plan must be
    clean, with no leftover comment markers.
