@@ -67,6 +67,8 @@ Space
 | `Space` then `gs` | Stage Git hunk |
 | `Space` then `gr` | Reset Git hunk |
 | `Space` then `u` | Toggle undo tree |
+| `Space` then `pc` | In a plan markdown file, insert an `@me` comment for Claude below the cursor |
+| `Space` then `pr` | In a plan-review split, send the plan and its `@me` comments back to Claude |
 | `F5` | Start or continue debugging |
 | `F9` | Toggle a breakpoint |
 | `F10` / `F11` / `F12` | Step over, into, or out while debugging |
@@ -77,6 +79,20 @@ Space
 | `Space` then `br` | Toggle the debugger REPL |
 | `Space` then `bx` | Stop debugging |
 | `Esc` twice | Leave terminal input mode |
+
+### Plan review loop
+
+Instead of plan mode, ask Claude Code to `/plan <task>` (any permission mode).
+It researches the codebase, writes the plan to `plans/plan-<slug>.md`, and
+opens it in a right-hand tmux split running Neovim. Annotate inline with `@me`
+HTML comments (`Space` then `pc` inserts one), save, then press `Space` then
+`pr` to send your notes back — this runs `/plan-review <file>` in the Claude
+pane. Claude resolves each comment, strips the markers, logs the round in the
+plan's Review changelog, and rewrites the file in place; the split reloads
+automatically. When a round comes back with no comments, Claude marks the plan
+`ready to implement`. Close the split with `:q` and tell Claude to implement
+it. Outside tmux the same loop works manually: edit the file in any editor and
+run `/plan-review plans/plan-<slug>.md` yourself.
 
 ## zsh
 

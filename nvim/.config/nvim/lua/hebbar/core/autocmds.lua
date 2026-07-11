@@ -33,9 +33,9 @@ vim.api.nvim_create_autocmd("BufReadPost", {
   end,
 })
 
-vim.api.nvim_create_autocmd({ "FocusGained", "TermClose", "TermLeave" }, {
+vim.api.nvim_create_autocmd({ "FocusGained", "TermClose", "TermLeave", "CursorHold", "CursorHoldI" }, {
   group = group,
-  desc = "Reload files changed outside Neovim",
+  desc = "Reload files changed outside Neovim (CursorHold covers the plan-review loop, where focus never leaves nvim)",
   callback = function()
     if vim.fn.getcmdwintype() == "" then
       vim.cmd("checktime")
