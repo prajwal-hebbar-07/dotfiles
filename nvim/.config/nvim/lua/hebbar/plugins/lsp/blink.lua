@@ -12,10 +12,22 @@ return {
       },
       keymap = {
         preset = "default",
+        ["<Tab>"] = { "select_next", "snippet_forward", "fallback" },
+        ["<S-Tab>"] = { "select_prev", "snippet_backward", "fallback" },
+        ["<CR>"] = { "accept", "fallback" },
       },
       completion = {
         menu = {
           auto_show = true,
+        },
+        list = {
+          selection = {
+            -- No item preselected: the first <Tab> lands on the first
+            -- option, and <CR> is a plain newline until something is
+            -- selected.
+            preselect = false,
+            auto_insert = false,
+          },
         },
         documentation = {
           auto_show = true,
