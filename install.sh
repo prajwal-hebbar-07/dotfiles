@@ -10,7 +10,6 @@ PACKAGES=(
   starship
   git
   nvim
-  herdr
   claude-one
   claude-two
   codex
@@ -75,9 +74,6 @@ remove_repo_symlink "$HOME/.config/starship"
 remove_repo_symlink "$HOME/.config/starship.toml"
 remove_repo_symlink "$HOME/.config/nvim"
 remove_repo_symlink "$HOME/.config/git/config"
-remove_repo_symlink "$HOME/.config/herdr"
-remove_repo_symlink "$HOME/.config/herdr/bin"
-remove_repo_symlink "$HOME/.config/herdr/config.toml"
 remove_repo_symlink "$HOME/.claude-one"
 remove_repo_symlink "$HOME/.claude-one/settings.json"
 remove_repo_symlink "$HOME/.claude-one/skills"
@@ -88,10 +84,6 @@ remove_repo_symlink "$HOME/.claude-two/skills"
 remove_repo_symlink "$HOME/.claude-two/statusline.sh"
 remove_repo_symlink "$HOME/.codex/skills"
 remove_repo_symlink "$HOME/.codex/skills/ship"
-
-# Herdr writes logs and sockets next to config.toml, so keep this as a real
-# directory and symlink only the config file into it.
-mkdir -p "$HOME/.config/herdr"
 
 # claude-one/claude-two write sessions, caches, and credentials alongside their
 # statusline.sh and settings.json, so keep them as real directories and

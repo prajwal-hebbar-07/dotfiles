@@ -1,5 +1,5 @@
 {
-  "model": "haiku",
+  "model": "claude-fable-5[1m]",
   "statusLine": {
     "type": "command",
     "command": "bash \"$HOME/.claude-one/statusline.sh\""

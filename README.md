@@ -22,7 +22,7 @@ cd ~/dotfiles
 The install script runs GNU Stow for these packages:
 
 ```sh
-stow --target="$HOME" --restow zsh tmux wezterm starship git nvim herdr claude-one claude-two codex
+stow --target="$HOME" --restow zsh tmux wezterm starship git nvim claude-one claude-two codex
 ```
 
 ## Codex
@@ -100,53 +100,6 @@ The system config path is expected to point to this repo:
 ```
 
 See `shortcuts.md` for the keyboard shortcuts.
-
-## Herdr
-
-The Herdr configuration lives in `herdr/.config/herdr/config.toml`.
-
-It configures Herdr as a tmux-like terminal workspace manager for agent-heavy
-work:
-
-- Uses the same `Ctrl-s` prefix as tmux.
-- Adds `prefix+/` for searching Herdr keymaps by intent.
-- Adds `prefix+q` for stopping the Herdr server.
-- Adds a guarded `prefix+Q` exit flow that stops the Herdr server and closes
-  all workspaces, tabs, panes, and pane processes.
-- Keeps pane movement on `prefix` plus `h`, `j`, `k`, and `l`.
-- Adds direct pane movement on `Ctrl-h`, `Ctrl-j`, `Ctrl-k`, and `Ctrl-l`.
-- Uses `j` and `k` inside the workspace picker for workspace movement.
-- Adds `prefix+a` for an fzf picker over running agents (`herdr agent list` /
-  `herdr agent focus`); pressing `1`-`9` jumps straight to that row, or type
-  to fuzzy-search.
-- Uses `prefix+c` for new tabs and `prefix+,` for renaming tabs.
-- Uses `prefix+Shift-p` for renaming panes.
-- Uses `prefix+\` and `prefix+-` for right and down splits, matching the tmux
-  split habit in this repo.
-- Uses uppercase `H`, `J`, `K`, and `L` after the prefix for pane resizing.
-- Uses `prefix+m` for pane zoom.
-- Uses `prefix+g`, `prefix+y`, and `prefix+t` for `lazygit`, `yazi`, and a
-  project tree pane.
-- Uses the Catppuccin theme with the same accent color as the tmux status bar.
-
-Install Herdr with:
-
-```sh
-brew install herdr
-```
-
-To keep the Herdr server running in the background:
-
-```sh
-brew services start herdr
-```
-
-The config file is expected to point to this repo. The parent directory stays
-real because Herdr writes logs and sockets next to the config file:
-
-```sh
-~/.config/herdr/config.toml -> <repo>/herdr/.config/herdr/config.toml
-```
 
 ## Starship
 
@@ -263,7 +216,6 @@ It configures the interactive shell for command discovery and nicer typing:
 - Uses `sesh` with `gum` for tmux session picking.
 - Adds `cc1` and `cc2` Claude aliases for `~/.claude-two` and
   `~/.claude-one` with dangerous permission prompts skipped.
-- Adds `herdr-stop-all` for stopping every named Herdr session.
 - Adds GNU coreutils to the front of `PATH` when available.
 - Initializes Starship for a richer prompt.
 - Keeps the local aliases and Node/pnpm path setup.
