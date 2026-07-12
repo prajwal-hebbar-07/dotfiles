@@ -67,6 +67,7 @@ Space
 | `Space` then `gs` | Stage Git hunk |
 | `Space` then `gr` | Reset Git hunk |
 | `Space` then `u` | Toggle undo tree |
+| `Space` then `pv` | In a markdown file, toggle a live browser preview that re-renders as you edit |
 | `Space` then `pc` | In a plan markdown file, insert an `@me` comment for Claude below the cursor |
 | `Space` then `pr` | In a plan-review split, send the plan and its `@me` comments back to Claude |
 | `F5` | Start or continue debugging |
@@ -84,8 +85,10 @@ Space
 
 Instead of plan mode, ask Claude Code to `/plan <task>` (any permission mode).
 It researches the codebase, writes the plan to `plans/plan-<slug>.md`, and
-opens it in a right-hand tmux split running Neovim. Annotate inline with `@me`
-HTML comments (`Space` then `pc` inserts one), save, then press `Space` then
+opens it in a right-hand tmux split running Neovim. Press `Space` then `pv` to
+open the plan in a browser tab that re-renders as you edit — flip to it to read
+the rendered plan, then back to Neovim to keep editing. Annotate inline with
+`@me` HTML comments (`Space` then `pc` inserts one), save, then press `Space` then
 `pr` to send your notes back — this runs `/plan-review <file>` in the Claude
 pane. Claude resolves each comment, strips the markers, logs the round in the
 plan's Review changelog, and rewrites the file in place; the split reloads

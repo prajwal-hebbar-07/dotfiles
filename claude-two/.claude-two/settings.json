@@ -1,10 +1,10 @@
 {
-  "model": "opus",
+  "model": "haiku",
   "statusLine": {
     "type": "command",
     "command": "bash \"$HOME/.claude-two/statusline.sh\""
   },
-  "effortLevel": "high",
+  "effortLevel": "medium",
   "tui": "fullscreen",
   "skipDangerousModePermissionPrompt": true,
   "theme": "dark"

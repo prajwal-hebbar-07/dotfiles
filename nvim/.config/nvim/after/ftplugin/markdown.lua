@@ -51,6 +51,11 @@ for level = 1, 6 do
   end, { buffer = true, desc = "Toggle H" .. level })
 end
 
+-- Plan preview: open (or toggle off) a live browser preview of this file. The
+-- browser tab re-renders as you edit, so open it to read the rendered plan,
+-- then flip back to nvim to keep updating.
+vim.keymap.set("n", "<leader>pv", "<cmd>MarkdownPreviewToggle<CR>", { buffer = true, desc = "Toggle markdown browser preview" })
+
 -- Plan review: insert an `@me` note for Claude below the cursor and start typing.
 vim.keymap.set("n", "<leader>pc", function()
   local row = vim.api.nvim_win_get_cursor(0)[1]
