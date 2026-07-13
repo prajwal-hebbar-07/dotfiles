@@ -139,6 +139,21 @@ alias rgi='rg --hidden --glob "!.git"'
 alias rgf='rg --files --hidden --glob "!.git"'
 alias yy='yazi'
 
+clear-history() {
+  local history_file="${HISTFILE:-$HOME/.zsh_history}"
+
+  : >| "$history_file" || {
+    echo "Could not clear $history_file" >&2
+    return 1
+  }
+
+  # Start a fresh in-memory history list so this shell cannot restore old entries.
+  fc -p "$history_file"
+  echo "Terminal history cleared."
+}
+
+alias ch='clear-history'
+
 sesh-pick() {
   if ! command -v sesh >/dev/null 2>&1; then
     echo "sesh is not installed" >&2
