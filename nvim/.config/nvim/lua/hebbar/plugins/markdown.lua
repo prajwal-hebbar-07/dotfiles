@@ -35,12 +35,9 @@ return {
     "iamcco/markdown-preview.nvim",
     cmd = { "MarkdownPreview", "MarkdownPreviewStop", "MarkdownPreviewToggle" },
     ft = { "markdown" },
-    build = function()
-      -- Load the plugin first so its autoload/ is on the runtimepath, then
-      -- pull down the prebuilt preview binary (no yarn/npm install needed).
-      vim.cmd("Lazy load markdown-preview.nvim")
-      vim.fn["mkdp#util#install"]()
-    end,
+    -- Run synchronously so lazy.nvim does not finish the build before the
+    -- plugin's asynchronous Vimscript installer downloads the server binary.
+    build = "cd app && ./install.sh",
     init = function()
       -- Keep the preview tab open when switching buffers so it survives a
       -- trip back to nvim; don't steal focus from the editor on open.

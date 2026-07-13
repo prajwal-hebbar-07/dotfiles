@@ -1,73 +1,108 @@
 ---
 name: plan
-description: Terminal-native planning that replaces plan mode entirely. Researches the task in the real codebase, writes a crisp, diagram-first plan to plans/plan-<slug>.md, and opens it for review in a right-hand tmux split running nvim so the user can annotate it with inline "@me" HTML comments (resolved later by /plan-review). Runs in whatever permission mode is active — never enters plan mode. Use when the user says "/plan <task>", "plan this", "make/write a plan for X", "create a plan doc", or asks for a plan they can review in the editor.
+description: Terminal-native planning that replaces plan mode entirely. Researches the real repository, writes a terse diagram-first execution map to plans/plan-<slug>.md, and opens it for review in a right-hand tmux split running nvim so the user can annotate it with inline "@me" HTML comments (resolved later by /plan-review). Runs in whatever permission mode is active — never enters plan mode. Use when the user says "/plan <task>", "plan this", "make/write a plan for X", "create a plan doc", or asks for a plan they can review in the editor.
 ---
 
 # Plan (terminal-native, no plan mode)
 
-Produce a reviewable plan **as a markdown file**, not as a plan-mode session.
-The plan is researched against the real codebase, written to
-`plans/plan-<slug>.md`, and opened in a right-hand tmux split running nvim
-where the user annotates it inline. `/plan-review` (its own skill, wired to
-the `<leader>pr` keybind in nvim) resolves those annotations in later rounds.
+Research the real repository. Write `plans/plan-<slug>.md`. Open it in a
+right-hand tmux split running nvim for inline review. `/plan-review` resolves
+the user's `@me` annotations in later rounds.
 
-The output of this skill is always **the plan file only** — never the
-implementation, and never a plan-mode session.
+The only artifact is the plan file — never implementation or a plan-mode
+session.
 
-## Writing style: crisp and visual
+## Output contract
 
-The reader is an experienced software developer. Optimize the plan for
-scanning, not for completeness of prose:
+Write a technical execution map for a senior software engineer.
 
-- **Diagrams over paragraphs.** Whenever the plan involves structure, flow,
-  ordering, or a before/after state, draw it as an ASCII diagram in a fenced
-  code block (box-drawing characters render perfectly in the nvim split —
-  never use mermaid or anything that needs a renderer). Good candidates:
-  current vs. target architecture, data/control flow, dependency order of
-  steps, a file-tree of what gets touched.
-- **One line per step.** `path/to/file.ext:line — what changes`. No
-  explanation of *how* to do standard things; the reader knows.
-- **No concept explanations.** Never explain what a tool, pattern, or
-  technique is. State decisions, not tutorials.
-- **Terse everywhere.** Goal in 2-3 lines. Risks as one-liners. If a section
-  has nothing non-obvious to say, keep it empty rather than padding it.
-- Depth on demand is `/plan-detail`'s job — the plan itself stays lean and
-  the user asks when they want the reasoning behind a step.
+- Aggressively minimize prose and sentence count. Prefer fragments, labels,
+  arrows, and one-line decisions.
+- Goal: normally 1-2 short lines.
+- No tutorials, concept explanations, walkthroughs, framework/library
+  explanations, standard engineering detail, or obvious implementation steps.
+- `/plan-detail` owns reasoning and deeper explanation. `/plan` owns
+  architecture, structure, flow, state, boundaries, decisions, dependency
+  order, and touched code.
+- **If removing a sentence does not reduce the developer's ability to
+  implement the change correctly, remove it.**
+- Keep empty sections empty; never pad with generic content.
+
+Target density:
+
+```text
+Goal            1-2 lines
+Shape           1-3 small diagrams
+Plan            one line per touched file/symbol
+Risks           non-obvious one-liners
+Open questions  unresolved decisions only
+```
+
+## Diagram-first shape
+
+Make `## Shape` the primary technical explanation. Research first; select the
+diagram type that exposes the actual change:
+
+- architecture, ownership, boundaries → boxes + labeled arrows
+- current → target architecture → before/after
+- request, data, control, async/event flow → directional flow + branches
+- state or lifecycle → state machine
+- dependency order → vertical/horizontal chain
+- touched files/components → tree or boundary view
+
+Use ASCII fenced blocks only. Never Mermaid or Graphviz. Prefer several small,
+focused diagrams over one large diagram. Do not force architecture diagrams.
+Do not invent architecture.
+
+## Repository grounding
+
+Before writing:
+
+1. Read relevant existing documents in `plans/`.
+2. Inspect affected implementation paths, symbols, patterns, flows, and tests.
+3. Verify every referenced existing file, directory, function, type, class,
+   module, component, state, and command in the repository.
+
+Planned artifacts are allowed; mark them `[new]` when referenced. Use
+`[existing]` when a diagram or list would otherwise be ambiguous. Never invent
+repository structure.
+
+## Plan entries
+
+Normally one implementation change per line:
+
+```text
+path/to/file.ts:symbol — change
+```
+
+Prefer stable symbols over line numbers. Group only for a real phase or
+subsystem boundary; never add headings for decoration.
 
 ## Flow
 
-1. **Never enter plan mode.** Do not call EnterPlanMode, and do not present
-   the plan via ExitPlanMode. This skill exists specifically because the
-   review loop lives in the plan file, not in plan mode. Work in whatever
-   permission mode is active.
+1. **Never enter plan mode.** Do not call EnterPlanMode. Do not use
+   ExitPlanMode to present the result. Work in the active permission mode.
 
-2. **Understand the task.** Take it from the invocation args
-   (`/plan add oauth refresh`) or from the conversation. Ask only if the task
-   is genuinely ambiguous — otherwise state your interpretation in the plan's
-   Goal section and let the user correct it with a comment.
+2. **Understand the task.** Take it from invocation args
+   (`/plan add oauth refresh`) or conversation. Ask only when genuinely
+   ambiguous; otherwise record the terse interpretation in `## Goal` for
+   inline correction.
 
-3. **Research before writing.** A plan not grounded in the actual codebase is
-   worthless. Explore the files, functions, existing patterns, and tests the
-   task touches. Every file or symbol the plan references must actually exist
-   (e.g. `src/auth/session.ts:42`) — never hypothetical paths. Also check
-   `plans/` for related plan files (`overview.md`, `step-*.md`,
-   other `plan-*.md`) whose decisions constrain this one.
+3. **Research before writing.** Follow "Repository grounding" completely.
+   Do not create the plan until relevant code, patterns, and tests are read.
 
 4. **Choose the file path.** Repo root is
-   `git rev-parse --show-toplevel 2>/dev/null || pwd`. The file is
-   `<root>/plans/plan-<slug>.md`, where `<slug>` is a short kebab-case slug of
-   the task (e.g. `plan-oauth-refresh.md`). Create `plans/` if it does not
-   exist. If the file already exists, do **not** silently overwrite it — pick
-   a new slug or ask whether to replace it (existing comments would be lost).
+   `git rev-parse --show-toplevel 2>/dev/null || pwd`. Write
+   `<root>/plans/plan-<slug>.md`, using a short kebab-case task slug, e.g.
+   `plan-oauth-refresh.md`. Create `plans/` if absent. Never silently
+   overwrite an existing plan; choose another slug or ask before replacing it.
 
-5. **Write the file** with the Write tool, using the template in
-   "Plan file format" below and the writing style above. Anything you could
-   not settle from research goes in `## Open questions` — the user answers
-   them inline with `@me` comments.
+5. **Write the file** with the Write tool using "Plan file format". Put only
+   decisions research could not settle in `## Open questions`; the user
+   answers them with inline `@me` comments.
 
-6. **Open the review split** (only if `$TMUX` is set), passing Claude's own
-   pane id into nvim's environment so the `<leader>pr` keybind can send
-   comments straight back:
+6. **Open the review split** only when `$TMUX` is set. Pass Claude's pane id
+   into nvim so `<leader>pr` sends comments back:
 
    ```bash
    plan="$(git rev-parse --show-toplevel 2>/dev/null || pwd)/plans/plan-<slug>.md"
@@ -77,17 +112,14 @@ scanning, not for completeness of prose:
      nvim "$plan"
    ```
 
-   Substitute the real slug. If **not** inside tmux, skip the split: report
-   the file path and tell the user to open it in their editor and run
-   `/plan-review <path>` after commenting.
+   Substitute the real slug. Outside tmux, skip the split; report the path and
+   tell the user to open it and run `/plan-review <path>` after commenting.
 
-7. **Tell the user, concisely**, how the loop works: annotate inline with
-   `@me` HTML comments (`<leader>pc` inserts one), save, press `<leader>pr`
-   (leader = Space) to send them back, and close the pane (`:q`) once the
-   Status line says ready. Mention that `/plan-detail <question>` expands on
-   any part of the plan and `/plan-done` deletes it once implemented. Then
-   STOP the turn — the next round arrives as a `/plan-review <path>`
-   invocation.
+7. **Explain the loop concisely.** Annotate with `@me` HTML comments
+   (`<leader>pc` inserts one), save, press `<leader>pr` (leader = Space), and
+   close with `:q` when Status says ready. Mention `/plan-detail <question>`
+   for depth and `/plan-done` after implementation. Stop; the next round
+   arrives as `/plan-review <path>`.
 
 ## Plan file format
 
@@ -110,21 +142,21 @@ scanning, not for completeness of prose:
 Status: draft — <YYYY-MM-DD>
 
 ## Goal
-<2-3 lines: what this delivers, plus your reading of anything ambiguous>
+<1-2 short lines: outcome + necessary scope interpretation>
 
 ## Shape
-<the picture: ASCII diagram(s) of the flow / architecture / before-after /
-touched-files tree — whatever view makes the change obvious at a glance>
+<1-3 task-specific ASCII diagrams; verified [existing] artifacts and clearly
+marked [new] artifacts only>
 
 ## Plan
-<ordered one-liners: `file:line — change`; group under short ### headings
-when phases matter; a small diagram beats a paragraph for step ordering>
+<ordered one-liners: `path/to/file.ts:symbol — change`; prefer symbols over
+line numbers; one change per line; headings only for phases/subsystems>
 
 ## Edge cases & risks
-<one-liners only>
+<non-obvious implementation risks, one line each>
 
 ## Open questions
-<anything research could not settle — the user answers these with @me comments>
+<unresolved decisions repository research could not settle, one line each>
 
 ## Review changelog
 <!-- /plan-review appends a dated round entry here each pass -->
@@ -132,12 +164,14 @@ when phases matter; a small diagram beats a paragraph for step ordering>
 
 ## Hard rules
 
-- **No plan mode, ever.** Not on entry, not for presenting the result.
-- **Never implement in this skill.** Output is the plan file only; the user
-  triggers implementation explicitly after review.
-- **Never skip research.** No plan file before the relevant code has been read.
+- **No plan mode, ever.** Never call EnterPlanMode or use ExitPlanMode.
+- **Never implement.** The user triggers implementation after review.
+- **Never skip research.** Read related plans, relevant code, patterns, and
+  tests before writing.
+- **Never invent repository artifacts.** Verify existing references; mark new
+  artifacts `[new]`.
 - **Never clobber an existing plan file** without the user's say-so.
-- **ASCII diagrams only** — the plan is read in a terminal nvim split;
-  mermaid/graphviz blocks are unreadable there.
+- **ASCII diagrams only.** Never Mermaid, Graphviz, or renderer-dependent
+  formats.
 - Requires tmux for the split; without tmux, write the file and report the
-  path — never fall back to some other editor or an in-conversation review.
+  path — never use another editor or an in-conversation review.
