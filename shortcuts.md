@@ -143,6 +143,7 @@ the next key.
 | `prefix` then `x` | Close the current pane after confirmation |
 | `prefix` then `m` | Maximize or restore the current pane |
 | `prefix` then `g` | Open `lazygit` in a tmux popup |
+| `prefix` then `G` | Open `hunk diff` in a tmux popup |
 | `prefix` then `y` | Open `yazi` in a tmux popup |
 | `prefix` then `t` | Show a three-level `tree` view in a tmux popup |
 | `prefix` then `s` | Pick or create a session with `sesh` and `gum` |
