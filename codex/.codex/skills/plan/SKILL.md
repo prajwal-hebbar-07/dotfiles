@@ -53,6 +53,34 @@ Never invent architecture. Every path, function, type, module, state, and
 component shown must be verified in the repository or marked as an explicitly
 planned new artifact, e.g. `[new] RefreshTokenStore`.
 
+## AI-renderable layer
+
+Plan files double as input to an AI visual renderer that turns them into
+diagrams and dashboards without reading the repository. This grammar is a
+parse contract, not decoration — keep it exact:
+
+- **Frontmatter first.** The file opens with YAML frontmatter (see "Plan file
+  format"): `plan`, `slug`, `kind`, `created`, `horizon`. One value each, no
+  prose.
+- **Caption every diagram.** Immediately after each ASCII diagram's closing
+  fence, add one line:
+
+  ```text
+  [DIAGRAM PROMPT: <diagram type; named elements + labeled relationships;
+  what to emphasize>]
+  ```
+
+  Self-contained: a renderer with zero codebase context must be able to draw
+  the visual from this line alone. Name every node, state, and edge direction
+  explicitly; never write "the components above".
+- **Statused plan entries.** Every `## Plan` line is a numbered checkbox:
+  `- [ ] 3. path/to/file.ts:symbol — change (effort: M) needs: 1,2`.
+  Statuses: `[ ]` todo, `[~]` in progress, `[x]` done, `[!]` blocked.
+  Add `(effort: S|M|L|XL)` when it informs ordering; `needs: <step numbers>`
+  only for real dependencies.
+- **Tokened callouts.** Each risk line starts `⚠️ RISK:`. Optional
+  phase-boundary checkpoints are `🎉 MILESTONE:` lines.
+
 ## Flow
 
 1. **The file is the medium.** Do not deliver the plan as a chat message or
@@ -106,6 +134,14 @@ planned new artifact, e.g. `[new] RefreshTokenStore`.
 `plans/plan-<slug>.md`:
 
 ```markdown
+---
+plan: <Plan title>
+slug: <slug>
+kind: <feature|bugfix|refactor|migration|infra|tooling>
+created: <YYYY-MM-DD>
+horizon: <rough effort span, e.g. 2 days>
+---
+
 <!-- plan-review guide (delete when done):
   - Leave notes for the agent as HTML comments beginning with @me, e.g. a line:
         @me: use Postgres, not Redis
@@ -127,15 +163,17 @@ Status: draft — <YYYY-MM-DD>
 ## Shape
 <task-specific ASCII diagram(s): architecture, flow, state, lifecycle,
 dependencies, before/after, ownership, or touched components; verified
-existing artifacts plus clearly marked [new] artifacts only>
+existing artifacts plus clearly marked [new] artifacts only; each fence
+immediately followed by its [DIAGRAM PROMPT: …] caption line>
 
 ## Plan
-<ordered one-liners: `path/to/file.ts:line-or-symbol — change`>
-<mark new files/symbols `[new]`; add `###` groups only for meaningful phases
+<numbered checkbox one-liners: `- [ ] 1. path/to/file.ts:line-or-symbol — change`>
+<mark new files/symbols `[new]`; optional `(effort: S|M|L|XL)` and
+`needs: <nums>` tags; add `###` groups only for meaningful phases
 or subsystem boundaries>
 
 ## Edge cases & risks
-<decision-relevant one-liners only>
+<decision-relevant one-liners only, each starting `⚠️ RISK:`>
 
 ## Open questions
 <unsettled implementation decisions, one line each; answer via @me comments>
@@ -152,5 +190,8 @@ or subsystem boundaries>
 - **Never clobber an existing plan file** without the user's say-so.
 - **ASCII diagrams only.** The plan is read in terminal nvim; never use
   mermaid, graphviz, or renderer-dependent formats.
+- **Keep the renderer grammar exact.** Frontmatter keys, `[DIAGRAM PROMPT: …]`
+  captions, numbered checkbox entries, and `⚠️ RISK:` prefixes are parsed
+  verbatim by a downstream AI — never paraphrase or restyle the tokens.
 - Requires tmux for the split; without tmux, write the file and report the
   path — never use another editor or an in-conversation review.

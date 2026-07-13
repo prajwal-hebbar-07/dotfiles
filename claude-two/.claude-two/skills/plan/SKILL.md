@@ -52,7 +52,7 @@ diagram type that exposes the actual change:
 
 Use ASCII fenced blocks only. Never Mermaid or Graphviz. Prefer several small,
 focused diagrams over one large diagram. Do not force architecture diagrams.
-Do not invent architecture.
+Do not invent architecture. Caption every diagram per "AI-renderable layer".
 
 ## Repository grounding
 
@@ -77,6 +77,34 @@ path/to/file.ts:symbol — change
 
 Prefer stable symbols over line numbers. Group only for a real phase or
 subsystem boundary; never add headings for decoration.
+
+## AI-renderable layer
+
+Plan files double as input to an AI visual renderer that turns them into
+diagrams and dashboards without reading the repository. This grammar is a
+parse contract, not decoration — keep it exact:
+
+- **Frontmatter first.** The file opens with YAML frontmatter (see "Plan file
+  format"): `plan`, `slug`, `kind`, `created`, `horizon`. One value each, no
+  prose.
+- **Caption every diagram.** Immediately after each ASCII diagram's closing
+  fence, add one line:
+
+  ```text
+  [DIAGRAM PROMPT: <diagram type; named elements + labeled relationships;
+  what to emphasize>]
+  ```
+
+  Self-contained: a renderer with zero codebase context must be able to draw
+  the visual from this line alone. Name every node, state, and edge direction
+  explicitly; never write "the components above".
+- **Statused plan entries.** Every `## Plan` line is a numbered checkbox:
+  `- [ ] 3. path/to/file.ts:symbol — change (effort: M) needs: 1,2`.
+  Statuses: `[ ]` todo, `[~]` in progress, `[x]` done, `[!]` blocked.
+  Add `(effort: S|M|L|XL)` when it informs ordering; `needs: <step numbers>`
+  only for real dependencies.
+- **Tokened callouts.** Each risk line starts `⚠️ RISK:`. Optional
+  phase-boundary checkpoints are `🎉 MILESTONE:` lines.
 
 ## Flow
 
@@ -126,6 +154,14 @@ subsystem boundary; never add headings for decoration.
 `plans/plan-<slug>.md`:
 
 ```markdown
+---
+plan: <Plan title>
+slug: <slug>
+kind: <feature|bugfix|refactor|migration|infra|tooling>
+created: <YYYY-MM-DD>
+horizon: <rough effort span, e.g. 2 days>
+---
+
 <!-- plan-review guide (delete when done):
   - Leave notes for Claude as HTML comments beginning with @me, e.g. a line:
         @me: use Postgres, not Redis
@@ -146,14 +182,17 @@ Status: draft — <YYYY-MM-DD>
 
 ## Shape
 <1-3 task-specific ASCII diagrams; verified [existing] artifacts and clearly
-marked [new] artifacts only>
+marked [new] artifacts only; each fence immediately followed by its
+[DIAGRAM PROMPT: …] caption line>
 
 ## Plan
-<ordered one-liners: `path/to/file.ts:symbol — change`; prefer symbols over
-line numbers; one change per line; headings only for phases/subsystems>
+<numbered checkbox one-liners: `- [ ] 1. path/to/file.ts:symbol — change`;
+prefer symbols over line numbers; one change per line; optional
+`(effort: S|M|L|XL)` and `needs: <nums>` tags; headings only for
+phases/subsystems>
 
 ## Edge cases & risks
-<non-obvious implementation risks, one line each>
+<non-obvious implementation risks, one `⚠️ RISK:` line each>
 
 ## Open questions
 <unresolved decisions repository research could not settle, one line each>
@@ -173,5 +212,8 @@ line numbers; one change per line; headings only for phases/subsystems>
 - **Never clobber an existing plan file** without the user's say-so.
 - **ASCII diagrams only.** Never Mermaid, Graphviz, or renderer-dependent
   formats.
+- **Keep the renderer grammar exact.** Frontmatter keys, `[DIAGRAM PROMPT: …]`
+  captions, numbered checkbox entries, and `⚠️ RISK:` prefixes are parsed
+  verbatim by a downstream AI — never paraphrase or restyle the tokens.
 - Requires tmux for the split; without tmux, write the file and report the
   path — never use another editor or an in-conversation review.

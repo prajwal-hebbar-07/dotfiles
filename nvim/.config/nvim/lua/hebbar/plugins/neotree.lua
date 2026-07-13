@@ -23,6 +23,22 @@ return {
     window = {
       position = "left",
       width = 36,
+      mappings = {
+        ["Y"] = "copy_relative_path",
+        ["gY"] = "copy_absolute_path",
+      },
+    },
+    commands = {
+      copy_relative_path = function(state)
+        local path = vim.fn.fnamemodify(state.tree:get_node():get_id(), ":.")
+        vim.fn.setreg("+", path)
+        vim.notify("Copied: " .. path)
+      end,
+      copy_absolute_path = function(state)
+        local path = state.tree:get_node():get_id()
+        vim.fn.setreg("+", path)
+        vim.notify("Copied: " .. path)
+      end,
     },
     filesystem = {
       hijack_netrw_behavior = "disabled",

@@ -82,3 +82,7 @@ file plus a short report.
   changelog.
 - **Always re-read the file from disk** before resolving — the user edited it
   after you last wrote it.
+- **Preserve the AI-renderer grammar** (see the plan skill's "AI-renderable
+  layer"): YAML frontmatter, `[DIAGRAM PROMPT: …]` captions after every
+  diagram fence, numbered checkbox plan entries, `⚠️ RISK:` prefixes. Edits
+  update their content, never remove or restyle the tokens.
