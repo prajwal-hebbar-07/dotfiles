@@ -1,6 +1,6 @@
 ---
 name: plan-review
-description: Resolve the user's inline "@me" HTML comments in a plans/plan-<slug>.md file created by the plan skill — edit the plan to satisfy each comment, strip the markers, record a dated round in the Review changelog, and rewrite the file in place (the nvim split autoreloads it). Never implements. Use when invoked with a plan file path (the nvim <leader>pr keybind types "/plan-review /abs/path" into this pane), or when the user says "/plan-review", "$plan-review", "check my comments on the plan", or "I left notes in the plan".
+description: Resolve the user's inline "@me" HTML comments in a plans/plan-SLUG.md file created by the plan skill. Edit the plan to satisfy each comment, strip the markers, record a dated round in the Review changelog, and rewrite the file in place so the nvim split autoreloads it. Never implements. Use when invoked with a plan file path or when the user asks to review comments or notes left in a plan.
 ---
 
 # Plan Review (resolve @me comments)
@@ -45,11 +45,12 @@ file plus a short report.
    suggestion to weigh. If a comment is genuinely ambiguous, make the smallest
    reasonable interpretation and note the assumption in the changelog rather
    than stalling the loop. If a comment requires looking at code you have not
-   read, read it before answering. Keep resolutions in the plan's crisp,
-   diagram-first style (see the `plan` skill) — one-liners and ASCII
-   diagrams, not prose; if a comment asks for background rather than a
-   change, answer it tersely in place and mention the `plan-detail` skill
-   for real depth.
+   read, read it before answering. Preserve the plan as a self-contained
+   engineering document: update the context, design, change inventory,
+   implementation sequence, verification, rollout, risks, and open questions
+   wherever the resolution has consequences. If a comment asks for analysis
+   beyond the plan's implementation scope, answer briefly in place and mention
+   the `plan-detail` skill for deeper follow-up.
 
 4. **Remove the `@me` markers** you resolved — the rewritten plan must be
    clean, with no leftover comment markers.
@@ -82,7 +83,7 @@ file plus a short report.
   changelog.
 - **Always re-read the file from disk** before resolving — the user edited it
   after you last wrote it.
-- **Preserve the AI-renderer grammar** (see the plan skill's "AI-renderable
-  layer"): YAML frontmatter, `[DIAGRAM PROMPT: …]` captions after every
-  diagram fence, numbered checkbox plan entries, `⚠️ RISK:` prefixes. Edits
-  update their content, never remove or restyle the tokens.
+- **Preserve independent readability.** A reviewer should understand the
+  revised plan without access to the conversation or review comments.
+- **Preserve ordinary engineering Markdown.** Do not introduce visualization
+  prompts, renderer metadata, or machine-specific formatting contracts.

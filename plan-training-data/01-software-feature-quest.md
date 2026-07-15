@@ -8,20 +8,9 @@ mood: heroic-quest
 structure: phased
 ---
 
-<!-- plan-review guide (delete when done):
-  - Leave notes for Claude as HTML comments beginning with @me, e.g. a line:
-        @me: use Postgres, not Redis
-    written inside an HTML comment, anywhere in the plan. In nvim, Space+pc
-    inserts one under the cursor.
-  - Save, then press Space+pr to send your notes to Claude.
-  - Claude edits this file in place; the split reloads automatically.
-  - Close this pane (:q) when the Status line says ready to implement.
-  - /plan-detail <question> for depth; /plan-done to delete when implemented.
--->
-
 # The Quest for Dark Mode ⚔️🌙
 
-Status: draft — 2026-07-13
+Status: reviewed (round 1) — 2026-07-15
 
 ## Goal
 Ship user-togglable dark mode across settings-app: semantic tokens first, then
@@ -81,8 +70,27 @@ wax seals; emphasize that "auto" follows the OS preference.]
 ⚠️ RISK: third-party embeds (map widget, payment iframe) can't be themed — themed wrapper frame is the ceiling.
 
 ## Open questions
+These are the only decisions that gate implementation; everything else in the
+plan is specified enough to start. Phase 1 (steps 1–3) can begin immediately.
 - Follow system preference changes mid-session, or only re-read on load?
+  *Gates step 3 (ThemeProvider): decides whether `auto` attaches a
+  `matchMedia('(prefers-color-scheme: dark)')` change listener or resolves once
+  at boot. Defaulting to a live listener is the low-risk call — flag if you want
+  boot-only.*
 - Empty-state illustrations: commission dark variants or programmatic tint?
+  *Gates the effort/scope of Phase 2 component work (steps 4–5), not the
+  approach. Not needed to start Phase 1.*
 
 ## Review changelog
 <!-- /plan-review appends a dated round entry here each pass -->
+
+### Round 1 — 2026-07-15
+- Readiness check: the plan is implementation-ready for Phase 1 (steps 1–3) as
+  written — semantic tokens, codemod, and ThemeProvider all have concrete file
+  paths, effort, and dependencies. Phases 2–3 are specified enough to execute;
+  the two open questions gate details, not the overall approach.
+- Open questions: annotated both with the exact step they gate (Q1 → step 3
+  ThemeProvider; Q2 → Phase 2 scope) and noted the low-risk default for Q1, so
+  a reader knows what's blocked versus ready. Left them open as PM decisions
+  rather than deciding unilaterally — use `/plan-detail` for a deeper look at
+  either.

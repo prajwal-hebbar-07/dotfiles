@@ -1,112 +1,79 @@
 ---
 name: plan
-description: Terminal-native planning. Researches the task in the real codebase, writes a terse diagram-first execution map to plans/plan-<slug>.md, and opens it for review in a right-hand tmux split running nvim so the user can annotate it with inline "@me" HTML comments (resolved later by the plan-review skill). Never implements and never presents the plan only in conversation — the file is the medium. Use when the user says "/plan <task>", "$plan <task>", "plan this", "make/write a plan for X", "create a plan doc", or asks for a plan they can review in the editor.
+description: Research a task in the real codebase, write a self-contained senior-engineering implementation plan to plans/plan-SLUG.md, and open it for review in a right-hand tmux split running nvim so the user can annotate it with inline "@me" HTML comments resolved by the plan-review skill. Never implements and never presents the plan only in conversation. Use when the user asks to plan a task, make or write a plan, create a plan document, or prepare a plan for editor review.
 ---
 
 # Plan (terminal-native)
 
-Produce a reviewable technical execution map as a markdown file, not a
-conversational proposal. Research the real codebase, write
-`plans/plan-<slug>.md`, and open it in a right-hand tmux split running nvim.
-The `plan-review` skill resolves inline `@me` annotations in later rounds.
+Research the real codebase and write a reviewable technical implementation
+plan to `plans/plan-<slug>.md`. Open it in a right-hand tmux split running
+nvim. The `plan-review` skill resolves inline `@me` annotations in later
+rounds.
 
-The output is always the plan file only — never the implementation.
+The output is the plan file only, never the implementation.
 
-## Writing contract
+## Document standard
 
-Write for a senior software engineer scanning at speed.
+Write a self-contained engineering document that a senior engineer could use
+to review the design, understand the trade-offs, and implement the change
+without reconstructing missing context from the conversation.
 
-- **Aggressively concise.** Prefer fragments and one-line decisions. Goal:
-  normally 1-2 short lines. Risks and open questions: one line each.
-- **Execution map, not documentation.** No tutorials, concept explanations,
-  implementation walkthroughs, obvious engineering details, or standard
-  framework/library behavior.
-- **Decision-bearing content only.** Remove prose that does not change scope,
-  structure, ordering, ownership, behavior, or verification.
-- **Information-density rule.** If removing a sentence does not reduce the
-  developer's ability to implement the change correctly, remove it.
-- **Separation of concerns.** `plan-detail` owns reasoning and explanation.
-  `plan` owns structure, decisions, ordering, and touched code.
-- **Smallest executable plan.** No completeness padding; leave a section empty
-  when research yields nothing decision-relevant.
+- State the problem, intended outcome, and scope boundary.
+- Describe the verified current behavior before proposing changes.
+- Record material design decisions and explain why they fit the repository.
+- Identify affected interfaces, data, state, failure behavior, compatibility,
+  security, performance, and operations when relevant.
+- Name concrete files and stable symbols. Mark planned artifacts `[new]`.
+- Sequence implementation work by dependency and make each step verifiable.
+- Separate facts, decisions, assumptions, risks, and unresolved questions.
+- Include only sections relevant to the task, but never omit information an
+  implementer or reviewer needs.
+- Prefer clear prose, lists, and tables. Do not include visualization prompts,
+  renderer metadata, or machine-specific formatting contracts.
 
-## Diagram-first shape
+Avoid tutorials, generic framework explanations, speculative architecture,
+and filler. Concision is useful only when the document remains independently
+understandable.
 
-Make `## Shape` the primary technical explanation. A developer should
-understand the intended change from the diagrams, then confirm it from the
-one-line `## Plan` entries.
+## Repository grounding
 
-Research first; choose only diagrams that clarify the real task:
+Before writing:
 
-- architecture or ownership/boundaries → boxes and labeled arrows
-- request, data, control, async, or event flow → directional flow with branches
-- state transitions or lifecycle → state machine
-- dependency or implementation ordering → vertical/horizontal chain
-- current vs target structure → before/after view
-- components or files touched → boundary or tree view
+1. Read relevant existing documents in `plans/`.
+2. Inspect affected entry points, implementation paths, symbols, data and
+   control flow, configuration, tests, and operational hooks.
+3. Verify every referenced existing file, directory, command, function, type,
+   class, module, component, state, and interface in the repository.
+4. Check history only when it materially explains a constraint or prior
+   decision.
 
-Use ASCII in fenced code blocks. Prefer multiple focused diagrams of roughly
-five lines over one noisy diagram. Do not force every concern into a generic
-architecture diagram.
-
-Never invent architecture. Every path, function, type, module, state, and
-component shown must be verified in the repository or marked as an explicitly
-planned new artifact, e.g. `[new] RefreshTokenStore`.
-
-## AI-renderable layer
-
-Plan files double as input to an AI visual renderer that turns them into
-diagrams and dashboards without reading the repository. This grammar is a
-parse contract, not decoration — keep it exact:
-
-- **Frontmatter first.** The file opens with YAML frontmatter (see "Plan file
-  format"): `plan`, `slug`, `kind`, `created`, `horizon`. One value each, no
-  prose.
-- **Caption every diagram.** Immediately after each ASCII diagram's closing
-  fence, add one line:
-
-  ```text
-  [DIAGRAM PROMPT: <diagram type; named elements + labeled relationships;
-  what to emphasize>]
-  ```
-
-  Self-contained: a renderer with zero codebase context must be able to draw
-  the visual from this line alone. Name every node, state, and edge direction
-  explicitly; never write "the components above".
-- **Statused plan entries.** Every `## Plan` line is a numbered checkbox:
-  `- [ ] 3. path/to/file.ts:symbol — change (effort: M) needs: 1,2`.
-  Statuses: `[ ]` todo, `[~]` in progress, `[x]` done, `[!]` blocked.
-  Add `(effort: S|M|L|XL)` when it informs ordering; `needs: <step numbers>`
-  only for real dependencies.
-- **Tokened callouts.** Each risk line starts `⚠️ RISK:`. Optional
-  phase-boundary checkpoints are `🎉 MILESTONE:` lines.
+Never invent repository structure. Distinguish verified current behavior from
+the proposed design.
 
 ## Flow
 
-1. **The file is the medium.** Do not deliver the plan as a chat message or
-   through any built-in planning/approval feature; the review loop lives in
-   the plan file.
+1. **Use the file as the medium.** Do not deliver the plan as a chat message
+   or through a built-in planning feature; the review loop lives in the plan
+   file.
 
-2. **Understand the task.** Take it from invocation args
-   (`/plan add oauth refresh`) or conversation. Ask only when genuinely
-   ambiguous; otherwise put the terse interpretation in `## Goal` for inline
-   correction.
+2. **Understand the task.** Take it from invocation arguments or conversation.
+   Ask only when an ambiguity would materially change scope or design.
+   Otherwise document the interpretation and any assumption for inline review.
 
-3. **Research before writing.** Read related files in `plans/` first
-   (`overview.md`, `step-*.md`, other `plan-*.md`), then inspect the actual
-   files, symbols, patterns, flows, states, and tests involved. Base diagram
-   selection and plan decisions on this research. Every referenced artifact
-   must exist or be explicitly marked `[new]`.
+3. **Research before writing.** Follow "Repository grounding" completely.
+   Do not create the plan until the relevant implementation and tests have
+   been read.
 
-4. **Choose the file path.** Repo root is
+4. **Choose the file path.** Resolve the repository root with
    `git rev-parse --show-toplevel 2>/dev/null || pwd`. Write
-   `<root>/plans/plan-<slug>.md`, using a short kebab-case task slug, e.g.
+   `<root>/plans/plan-<slug>.md` using a short kebab-case task slug, such as
    `plan-oauth-refresh.md`. Create `plans/` if absent. Never silently
    overwrite an existing plan; choose another slug or ask before replacing it.
 
-5. **Write the file** using "Plan file format" and the contracts above. Put
-   only research gaps that affect implementation in `## Open questions`; the
-   user answers them with inline `@me` comments.
+5. **Write the file** using "Plan file format". Adapt the document to the
+   task: omit irrelevant subsections, add a focused subsection when the
+   template does not capture an important concern, and keep all claims tied to
+   repository evidence.
 
 6. **Open the review split** only when `$TMUX` is set. Pass this pane's id as
    `CLAUDE_PANE` so `<leader>pr` can send comments back regardless of which
@@ -126,57 +93,73 @@ parse contract, not decoration — keep it exact:
 7. **Explain the loop concisely.** Annotate with `@me` HTML comments
    (`<leader>pc` inserts one), save, press `<leader>pr` (leader = Space) to
    type `/plan-review <path>` into this pane, then close with `:q` when Status
-   says ready. Mention `plan-detail` for depth and `plan-done` after
-   implementation. Stop; the next round arrives as `/plan-review <path>`.
+   says ready. Mention `plan-detail` for follow-up analysis and `plan-done`
+   after implementation. Stop; the next round arrives as
+   `/plan-review <path>`.
 
 ## Plan file format
 
 `plans/plan-<slug>.md`:
 
 ```markdown
----
-plan: <Plan title>
-slug: <slug>
-kind: <feature|bugfix|refactor|migration|infra|tooling>
-created: <YYYY-MM-DD>
-horizon: <rough effort span, e.g. 2 days>
----
-
 <!-- plan-review guide (delete when done):
-  - Leave notes for the agent as HTML comments beginning with @me, e.g. a line:
+  - Leave notes for the agent as HTML comments beginning with @me, e.g.:
         @me: use Postgres, not Redis
-    written inside an HTML comment, anywhere in the plan. In nvim, Space+pc
-    inserts one under the cursor.
+    In nvim, Space+pc inserts one under the cursor.
   - Save, then press Space+pr to send your notes back for review.
   - The agent edits this file in place; the split reloads automatically.
   - Close this pane (:q) when the Status line says ready to implement.
-  - plan-detail <question> for depth; plan-done to delete when implemented.
+  - plan-detail <question> for follow-up analysis; plan-done after implementation.
 -->
 
 # <Plan title>
 
 Status: draft — <YYYY-MM-DD>
 
-## Goal
-<1-2 short lines: outcome and any necessary scope interpretation>
+## Summary
+<Problem, intended outcome, proposed direction, and scope in a short overview.>
 
-## Shape
-<task-specific ASCII diagram(s): architecture, flow, state, lifecycle,
-dependencies, before/after, ownership, or touched components; verified
-existing artifacts plus clearly marked [new] artifacts only; each fence
-immediately followed by its [DIAGRAM PROMPT: …] caption line>
+## Context and current state
+<Verified current behavior, relevant architecture, entry points, constraints,
+and repository evidence. Reference concrete paths and symbols.>
 
-## Plan
-<numbered checkbox one-liners: `- [ ] 1. path/to/file.ts:line-or-symbol — change`>
-<mark new files/symbols `[new]`; optional `(effort: S|M|L|XL)` and
-`needs: <nums>` tags; add `###` groups only for meaningful phases
-or subsystem boundaries>
+## Goals
+- <Observable outcome>
 
-## Edge cases & risks
-<decision-relevant one-liners only, each starting `⚠️ RISK:`>
+## Non-goals
+- <Explicit boundary that prevents scope drift>
+
+## Proposed design
+<Target behavior and material design decisions. Cover interfaces, data/state,
+error handling, compatibility, security, performance, and operations only when
+relevant. Explain non-obvious choices and rejected alternatives briefly.>
+
+## Change inventory
+| Area | Current artifact | Planned change |
+| --- | --- | --- |
+| <subsystem> | `path/to/file.ts:symbol` | <specific responsibility change> |
+
+## Implementation plan
+- [ ] 1. `path/to/file.ts:symbol` — <change, dependencies, and completion condition>
+- [ ] 2. `[new] path/to/file.test.ts` — <coverage or behavior established>
+
+## Verification
+- <Automated tests and exact commands when known>
+- <Integration, manual, migration, or operational checks when relevant>
+
+## Rollout and rollback
+<Deployment order, compatibility window, observability, rollback trigger, and
+recovery path. State "Not required" with a reason when the change is local and
+atomic.>
+
+## Risks and mitigations
+| Risk | Impact | Mitigation |
+| --- | --- | --- |
+| <credible failure mode> | <consequence> | <prevention, detection, or recovery> |
 
 ## Open questions
-<unsettled implementation decisions, one line each; answer via @me comments>
+- <Only decisions that repository research could not settle; include owner or
+  decision point when known.>
 
 ## Review changelog
 <!-- plan-review appends a dated round entry here each pass -->
@@ -184,14 +167,14 @@ or subsystem boundaries>
 
 ## Hard rules
 
-- **Never implement in this skill.** Output is the plan file only; the user
-  triggers implementation explicitly after review.
-- **Never skip research.** Read related plans and relevant code before writing.
-- **Never clobber an existing plan file** without the user's say-so.
-- **ASCII diagrams only.** The plan is read in terminal nvim; never use
-  mermaid, graphviz, or renderer-dependent formats.
-- **Keep the renderer grammar exact.** Frontmatter keys, `[DIAGRAM PROMPT: …]`
-  captions, numbered checkbox entries, and `⚠️ RISK:` prefixes are parsed
-  verbatim by a downstream AI — never paraphrase or restyle the tokens.
+- **Never implement in this skill.** The user triggers implementation after
+  review.
+- **Never skip research.** Read related plans, relevant code, configuration,
+  and tests before writing.
+- **Never clobber an existing plan file** without the user's approval.
+- **Do not optimize the document for a visualization tool.** Write ordinary,
+  durable Markdown for engineering review; the user owns any later visual.
+- **Do not hide uncertainty.** Record assumptions, unresolved decisions, and
+  material evidence gaps explicitly.
 - Requires tmux for the split; without tmux, write the file and report the
-  path — never use another editor or an in-conversation review.
+  path. Never substitute another editor or an in-conversation review.

@@ -1,13 +1,13 @@
 ---
 name: plan-detail
-description: Expand on any part of a plans/plan-<slug>.md file created by the plan skill — the plans are deliberately crisp, so this is how the user pulls the reasoning, alternatives, or code-level specifics behind a step when they want them. Answers in the conversation by default, grounded in fresh research; only writes into the plan file if the user asks to persist it. Never implements. Use when the user says "/plan-detail <question>", "$plan-detail <question>", "more detail on step N", "why does the plan do X", "explain that part of the plan", or asks a question about something in a plan file.
+description: Investigate or expand any decision, step, risk, or open question in a plans/plan-SLUG.md file created by the plan skill. Answers in the conversation by default using fresh repository research, and updates the plan only when the user asks or the investigation finds a factual error. Never implements. Use when the user requests more detail, reasoning, alternatives, or code-level specifics for something in a plan.
 ---
 
 # Plan Detail (depth on demand)
 
-Plans written by the `plan` skill are deliberately crisp — one-liners and
-diagrams, no explanations. This skill is the pressure valve: the user points
-at a part of the plan and gets the depth that was intentionally left out.
+Plans written by the `plan` skill are self-contained implementation documents.
+Use this skill when the user wants a deeper investigation of one decision,
+step, risk, alternative, or unresolved question without starting implementation.
 
 ## Locating the plan file
 
@@ -20,8 +20,8 @@ at a part of the plan and gets the depth that was intentionally left out.
 
 1. **Read the plan file fresh** — it may have changed since you last saw it.
 
-2. **Identify what the user is pointing at**: a step number, a section, a
-   diagram, a risk line, or a free-form question about the plan's approach.
+2. **Identify what the user is pointing at**: a step number, section, design
+   decision, risk, open question, or free-form question about the approach.
    If the reference is ambiguous, pick the most likely target and say which
    one you answered.
 
@@ -35,16 +35,15 @@ at a part of the plan and gets the depth that was intentionally left out.
    depth, but still written for an experienced developer: no tutorials, no
    padding. Reference real paths and symbols (`src/auth/session.ts:42`).
 
-5. **Only touch the plan file if asked.** If the user says to persist the
-   detail (or the answer reveals the plan itself needs correcting), edit the
-   plan minimally: fix the affected line(s), or add a short `### <topic>`
-   under a `## Details` section at the end — never bloat the main sections.
-   Note the edit in `## Review changelog`.
+5. **Only touch the plan file if asked or if it is factually wrong.** Put
+   persisted information in the section it clarifies rather than creating a
+   detached appendix. Keep the document coherent and note the edit in
+   `## Review changelog`.
 
 ## Hard rules
 
 - **Never implement.** Explaining a step is not license to execute it.
-- **Default output is conversation, not file edits** — the plan stays crisp
-  unless the user explicitly wants the detail persisted.
+- **Default output is conversation, not file edits** unless the user requests
+  persistence or fresh research proves the plan factually wrong.
 - **Answers must come from fresh research**, not from what the plan already
   says restated in more words.
