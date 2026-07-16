@@ -1,86 +1,158 @@
----
-plan: Learning Rust, A Trail Guide
-slug: learn-rust
-kind: learning
-created: 2026-07-13
-horizon: 6 months
-mood: trail-guide
-structure: territory-map-with-basecamps
----
+<!-- plan-review guide (delete when done):
+  - Leave notes for Claude as HTML comments beginning with @me, e.g.:
+        @me: use Postgres, not Redis
+    In nvim, Space+pc inserts one under the cursor.
+  - Save, then press Space+pr to send your notes to Claude.
+  - Claude edits this file in place; the split reloads automatically.
+  - Close this pane (:q) when the Status line says ready to implement.
+  - /plan-detail <question> for follow-up analysis; /plan-done after implementation.
+-->
 
-# Learning Rust: A Trail Guide 🦀🥾
+# Learning Rust — 26-week roadmap
 
-Status: draft — 2026-07-13
+Status: reviewed (round 1) — 2026-07-15
 
-## Goal
-From comfortable-in-Python to shipping Rust in production in 26 weeks at 5
-hrs/week, with a build project at every basecamp. The borrow checker is a
-strict but fair park ranger, not a wall.
+## Summary
+Go from early-stage programmer (some Python, not yet fluent) to shipping Rust in
+production in 26 weeks at ~5 hours/week. Because Rust is effectively the first
+language the learner will get truly comfortable in, the roadmap builds general
+programming fundamentals alongside Rust rather than assuming they transfer in
+from Python — expect the early checkpoints to carry more weight and possibly run
+long. It is organized around four checkpoints, each gated by a build project
+rather than reading, so progress is verified by working code. It plans
+explicitly for the weeks 5–7 ownership/borrow-checker slump, which is the usual
+quit point, and defers optional side topics (async, unsafe, WASM) so scope stays
+contained.
 
-## Shape
+## Context and current state
+- Starting point: some Python exposure but not yet fluent in any language; new
+  to Rust and to systems-level ownership/borrowing concepts. Rust is effectively
+  the first language the learner will get comfortable in, so general programming
+  fundamentals (control flow, functions, collections, testing, reading
+  compiler/runtime errors) are being learned alongside Rust-specific material
+  rather than transferring in.
+- Budget: ~5 hours/week for 26 weeks.
+- Known difficulty: the ownership and borrow-checker material (around weeks
+  5–7) is where most learners stall; the value only appears "an app or two
+  later," not immediately.
+- Optional detours (async/tokio, unsafe, WASM) each add time; async alone adds
+  ~3 weeks.
 
-```text
-Pythonista Village ──▶ 🏕️1 Foothills ──▶ ⛰️ Borrow Checker Pass
-      ──▶ 🏕️2 Structures Ridge ──▶ 🏕️3 Concurrency Col ──▶ 🏔️ SUMMIT
-side trails: Async Ridge (tokio, +3wk) · Unsafe Caverns (permit) · WASM Lookout
-```
-[DIAGRAM PROMPT: national-park trail map — trailhead "Pythonista Village" at
-bottom, main trail winding up through Basecamp 1 "Foothills" (green circle),
-"Borrow Checker Pass" (blue square, friendly ranger station icon — NOT a
-danger icon), Basecamp 2 "Structures Ridge" (blue square), Basecamp 3
-"Concurrency Col" (black diamond), summit flag "Shipping Rust in Production".
-Dotted side trails: "Async Ridge (tokio)", "Unsafe Caverns (permit required)",
-"WASM Lookout". Difficulty legend with green circle / blue square / black
-diamond. Emphasize the pass is guarded, not blocked.]
+## Goals
+- Ship one real Rust artifact by week 26 (deployed service, published crate, or
+  merged OSS contributions).
+- A working build project completed at each of the four checkpoints.
+- Genuine comfort with ownership, borrowing, traits, error handling, and basic
+  concurrency.
+- General programming fluency — Rust as the first language the learner is
+  comfortable in, not just the Rust-specific concepts layered on top.
 
-```text
-morale
-high ┤ ▔▔▔╲                        ╱▔▔▔▔ "I have become the checker"
-     │     ╲    the trough      ╱
-low  ┤       ╲▁▁▁▁w6▁▁▁▁▁▁▁▁▁╱
-     └──w1──────w6────w12────w20────w26
-```
-[DIAGRAM PROMPT: elevation cross-section of learner morale weeks 1–26 — high
-at the trailhead, deep valley labeled "The Borrow Checker Trough" around week
-6, rising ridge with small dips, cresting at "it compiles first try and I felt
-nothing (I have become the checker)". Emphasize the trough is expected
-terrain, marked on the map in advance.]
+## Non-goals
+- Depth in async, unsafe, or WASM this cycle — they are optional side trails.
+- Mastering macros or advanced type-level programming.
 
-## Plan
+## Proposed design
+The roadmap has four checkpoints, each ending in a build project that gates
+advancement.
 
-### 🏕️ Basecamp 1 — the foothills (weeks 1–4)
-- [x] 1. Rust Book ch. 1–9 — skip nothing, ESPECIALLY ch. 4 (effort: M)
-- [~] 2. Rustlings through move_semantics (effort: M)
-- [ ] 3. build: CLI todo app with file persistence (effort: M) needs: 1
-- 🎉 MILESTONE: cargo build runs clean and you knew WHY each error happened
+Checkpoint 1 (weeks 1–4): the Rust Book chapters 1–9 and Rustlings, capped by a
+CLI todo app with file persistence. The borrow-checker pass (weeks 5–7)
+re-reads ownership more slowly and builds a borrow-heavy in-memory key-value
+store. Checkpoint 2 (weeks 8–12): traits, generics, idiomatic error handling
+(`Result`, `thiserror`, `anyhow`), and iterators, capped by a streaming JSON
+log parser that stays flat in memory on a 2GB file. Checkpoint 3 (weeks 13–18):
+threads, channels, `Arc<Mutex<T>>`, capped by a parallel website checker with a
+worker pool and graceful Ctrl-C. The summit (weeks 19–26): commit to one route
+— a deployed axum API, a published crate with users, or three merged OSS PRs —
+and write a retrospective.
 
-### ⛰️ Borrow Checker Pass (weeks 5–7)
-- [ ] 4. ownership chapter again, slower; errors read like ranger signs — they literally tell you the way around (effort: M) needs: 3
-- [ ] 5. build: in-memory key-value store with a borrow-heavy API (effort: L) needs: 4
+## Change inventory
+| Checkpoint | Focus | Build project (gate) |
+| --- | --- | --- |
+| 1 (w1–4) | Book ch. 1–9, Rustlings | CLI todo with file persistence |
+| Pass (w5–7) | Ownership & borrowing | Borrow-heavy KV store |
+| 2 (w8–12) | Traits, errors, iterators | Streaming JSON log parser (2GB, flat mem) |
+| 3 (w13–18) | Concurrency | Parallel website checker |
+| Summit (w19–26) | One real deliverable | axum API / published crate / 3 OSS PRs |
 
-### 🏕️ Basecamp 2 — structures ridge (weeks 8–12)
-- [ ] 6. traits, generics, error handling done right: Result, thiserror, anyhow (effort: L) needs: 5
-- [ ] 7. iterators & closures until for-loops look quaint (effort: M) needs: 6
-- [ ] 8. build: streaming JSON log parser, 2GB file, flat memory — measure it, frame the number (effort: L) needs: 7
+## Implementation plan
 
-### 🏕️ Basecamp 3 — concurrency col (weeks 13–18)
-- [ ] 9. threads, channels, Arc<Mutex<T>> and when NOT to reach for it (effort: L) needs: 8
-- [ ] 10. optional side trail: Async Ridge (tokio) — only if goals include network services; +3 weeks (effort: L)
-- [ ] 11. build: parallel website checker — 500 URLs, worker pool, graceful Ctrl-C (effort: L) needs: 9
+### Checkpoint 1 — foundations (weeks 1–4)
+This checkpoint doubles as the general-programming on-ramp, so it may run past
+week 4 — that is expected, not a failure. Do not rush ch. 1–9 or skip Rustlings
+to "catch up."
+- [x] 1. Rust Book ch. 1–9, skipping nothing (especially ch. 4).
+- [~] 2. Rustlings through `move_semantics`.
+- [ ] 3. Build: CLI todo app with file persistence. Depends on 1.
 
-### 🏔️ Summit push (weeks 19–26)
-- [ ] 12. pick ONE route and commit: (A) axum HTTP API deployed somewhere real, (B) CLI tool on crates.io with actual users, or (C) 3 merged PRs to a Rust OSS project (effort: XL) needs: 11
-- [ ] 13. trip report blog post: "Six months of Rust: what the brochure didn't say" (effort: M) needs: 12
-- 🎉 MILESTONE: summit — you now say "the borrow checker is your friend" at parties; there is no cure
+### Borrow-checker pass (weeks 5–7)
+- [ ] 4. Re-read the ownership chapter slowly; read compiler errors as
+  guidance. Depends on 3.
+- [ ] 5. Build: in-memory key-value store with a borrow-heavy API. Depends on 4.
 
-## Edge cases & risks
-⚠️ RISK: weeks 5–7 are the quit point — symptom: "I could've built this in Python in an hour." True, and the wrong trail metric; you're here for the app after next.
-⚠️ RISK: tutorial loops (reading about hiking instead of hiking) — every basecamp gates on its build project, no exceptions.
-⚠️ RISK: taking every side trail — Async Ridge alone adds 3 weeks; unsampled trails remain legal to visit later.
+### Checkpoint 2 — structures (weeks 8–12)
+- [ ] 6. Traits, generics, error handling (`Result`, `thiserror`, `anyhow`).
+  Depends on 5.
+- [ ] 7. Iterators and closures until they feel natural. Depends on 6.
+- [ ] 8. Build: streaming JSON log parser, 2GB file, flat memory — measure it.
+  Depends on 7.
+
+### Checkpoint 3 — concurrency (weeks 13–18)
+- [ ] 9. Threads, channels, `Arc<Mutex<T>>`, and when not to use them.
+  Depends on 8.
+- [ ] 10. Optional side trail: async/tokio — only if goals include network
+  services; adds ~3 weeks.
+- [ ] 11. Build: parallel website checker — 500 URLs, worker pool, graceful
+  Ctrl-C. Depends on 9.
+
+### Summit (weeks 19–26)
+- [ ] 12. Pick one route and commit: (A) deployed axum HTTP API, (B) CLI tool
+  on crates.io with users, or (C) three merged PRs to a Rust OSS project.
+  Depends on 11.
+- [ ] 13. Write a retrospective on the six months. Depends on 12.
+
+## Verification
+- Each checkpoint gates on its build project compiling and running, not on
+  chapters read.
+- The week-8 log parser is verified by measuring memory stays flat on a 2GB
+  input.
+- The summit deliverable is verified by it being real: deployed, published, or
+  merged.
+
+## Rollout and rollback
+Because Checkpoint 1 now carries the general-programming fundamentals too, it is
+acceptable for it to overrun weeks 1–4; the 26-week timeline is a target, not a
+gate. Better to extend the on-ramp than to reach the ownership pass without solid
+programming basics. If the weeks 5–7 slump stalls progress, the fallback is to
+repeat the pass with
+a smaller borrow-heavy project rather than skipping ahead — later checkpoints
+depend on ownership fluency. Optional side trails can be dropped entirely
+without affecting the summit; they are additive, not prerequisites.
+
+## Risks and mitigations
+| Risk | Impact | Mitigation |
+| --- | --- | --- |
+| Learning general programming and Rust's ownership model at the same time | Slower early progress, compounding confusion | Treat Checkpoint 1 as an on-ramp: don't rush ch. 1–9, do every Rustling, let it run past week 4 if needed before the ownership pass |
+| Weeks 5–7 slump ("I could've done this some other way") | Quitting | Reframe: the payoff is the app after next; gate on the build project |
+| Tutorial loops (reading instead of building) | No real progress | Every checkpoint gates on a build project |
+| Taking every side trail | Timeline blowout | Defer async/unsafe/WASM; they remain available later |
 
 ## Open questions
-- Summit route A/B/C — decide at basecamp 3 based on what week 11's project felt like?
-- Pair with a Rust study buddy or solo hike with community check-ins?
+- Summit route A/B/C — decide at checkpoint 3 based on how week-11's project
+  felt?
+- Pair with a study buddy or go solo with community check-ins?
 
 ## Review changelog
 <!-- /plan-review appends a dated round entry here each pass -->
+
+### Round 1 — 2026-07-15
+- Summary / Context / Goals: corrected the premise — you're not fluent in Python
+  either, so the roadmap now builds general programming fundamentals alongside
+  Rust instead of assuming they transfer in. Assumed "some Python exposure, not
+  yet fluent" rather than never-written-code; flag if you're a total beginner and
+  we'll add a pre-week-1 programming primer.
+- Checkpoint 1 / Rollout / Risks: reframed Checkpoint 1 as a general-programming
+  on-ramp that may run past week 4 (timeline is a target, not a gate), and added
+  a risk for learning fundamentals and ownership at the same time.
+- Weeks 5–7 slump risk: dropped the "could've done this in Python" framing since
+  Python isn't a fallback you're fluent in.

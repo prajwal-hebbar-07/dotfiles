@@ -1,14 +1,14 @@
 ---
 name: plan-review
-description: Resolve the user's inline "@me" HTML comments in a plans/plan-SLUG.md file created by /plan. Edit the plan to satisfy each comment, strip the markers, record a dated round in the Review changelog, and rewrite the file in place so the nvim split autoreloads it. Never enters plan mode or implements. Use when invoked with a plan file path or when the user asks to review comments or notes left in a plan.
+description: Resolve the user's inline "@me" HTML comments in a plans/plan-SLUG.md file created by /plan. Edit the plan to satisfy each comment, strip the markers, record a dated round in the Review changelog, and rewrite the file in place for the nvim or Plan Visualizer review workflow. Never enters plan mode or implements. Use when invoked with a plan file path or when the user asks to review comments or notes left in a plan.
 ---
 
 # Plan Review (resolve @me comments)
 
 One review round on a plan file written by `/plan`: read the user's inline
-`@me` comments, apply them, and rewrite the file cleanly. The nvim split the
-user is commenting in autoreloads the rewrite, so the loop never leaves the
-terminal.
+`@me` comments, apply them, and rewrite the file cleanly. The caller may be an
+interactive Claude pane, nvim, or Plan Visualizer's headless Claude runner;
+the file is the shared review medium in every case.
 
 Never implement anything in this skill, and never enter plan mode. Its only
 output is an updated plan file plus a short report.
@@ -66,13 +66,15 @@ output is an updated plan file plus a short report.
    - Open question 2: assumed staging only, as your note implied — flag if wrong.
    ```
 
-7. **Write the file back** (Edit/Write). nvim has `autoread` on and runs
-   `checktime` on CursorHold, so the split reloads on its own — the user does
-   not need to do anything.
+7. **Write the file back** (Edit/Write). nvim autoreloads on CursorHold. Plan
+   Visualizer reloads after its Claude process exits; when review was invoked
+   elsewhere, its Reload control reads the latest file.
 
-8. **Report briefly** in the Claude pane: how many comments were resolved,
-   one line each (same content as the changelog round). Then STOP and wait
-   for the next round, or for the user to explicitly ask to implement.
+8. **Return a brief report:** how many comments were resolved, one line each
+   (same content as the changelog round). Do not rely on the report being
+   visible: a headless caller may surface only completion or failure. Then
+   STOP and wait for the next round, or for the user to explicitly ask to
+   implement.
 
 ## Hard rules
 

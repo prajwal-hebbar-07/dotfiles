@@ -1,14 +1,14 @@
 ---
 name: plan
-description: Research a task in the real codebase, write a self-contained senior-engineering implementation plan to plans/plan-SLUG.md, and open it for review in a right-hand tmux split running nvim so the user can annotate it with inline "@me" HTML comments resolved by the plan-review skill. Never implements and never presents the plan only in conversation. Use when the user asks to plan a task, make or write a plan, create a plan document, or prepare a plan for editor review.
+description: Research a task in the real codebase, write a self-contained senior-engineering implementation plan to plans/plan-SLUG.md, and open it for review in Plan Visualizer when available plus a right-hand tmux split running nvim. The user annotates it with inline "@me" HTML comments resolved by the plan-review skill. Never implements and never presents the plan only in conversation. Use when the user asks to plan a task, make or write a plan, create a plan document, or prepare a plan for editor review.
 ---
 
-# Plan (terminal-native)
+# Plan (file-native)
 
 Research the real codebase and write a reviewable technical implementation
-plan to `plans/plan-<slug>.md`. Open it in a right-hand tmux split running
-nvim. The `plan-review` skill resolves inline `@me` annotations in later
-rounds.
+plan to `plans/plan-<slug>.md`. Open it in Plan Visualizer when that local app
+is available and in a right-hand tmux split running nvim when inside tmux. The
+`plan-review` skill resolves inline `@me` annotations in later rounds.
 
 The output is the plan file only, never the implementation.
 
@@ -75,27 +75,36 @@ the proposed design.
    template does not capture an important concern, and keep all claims tied to
    repository evidence.
 
-6. **Open the review split** only when `$TMUX` is set. Pass this pane's id as
-   `CLAUDE_PANE` so `<leader>pr` can send comments back regardless of which
-   agent runs in the pane:
+6. **Open the review surfaces.** They share the same Markdown file; neither is
+   a separate source of truth.
 
-   ```bash
-   plan="$(git rev-parse --show-toplevel 2>/dev/null || pwd)/plans/plan-<slug>.md"
-   : "${TMUX_PANE:?not in tmux}"
-   tmux split-window -h -t "$TMUX_PANE" \
-     -e "CLAUDE_PANE=$TMUX_PANE" -e "PLAN_FILE=$plan" \
-     nvim "$plan"
-   ```
+   - When `$TMUX` is set, open the nvim split. Pass this pane's id as
+     `CLAUDE_PANE` so `<leader>pr` can send comments back regardless of which
+     agent runs in the pane:
 
-   Substitute the real slug. Outside tmux, skip the split; report the path and
-   tell the user to open it and send `/plan-review <path>` after commenting.
+     ```bash
+     plan="$(git rev-parse --show-toplevel 2>/dev/null || pwd)/plans/plan-<slug>.md"
+     : "${TMUX_PANE:?not in tmux}"
+     tmux split-window -h -t "$TMUX_PANE" \
+       -e "CLAUDE_PANE=$TMUX_PANE" -e "PLAN_FILE=$plan" \
+       nvim "$plan"
+     ```
 
-7. **Explain the loop concisely.** Annotate with `@me` HTML comments
-   (`<leader>pc` inserts one), save, press `<leader>pr` (leader = Space) to
-   type `/plan-review <path>` into this pane, then close with `:q` when Status
-   says ready. Mention `plan-detail` for follow-up analysis and `plan-done`
-   after implementation. Stop; the next round arrives as
-   `/plan-review <path>`.
+   - Probe `${PLAN_VISUALIZER_URL:-http://127.0.0.1:4823}`. If reachable,
+     URL-encode the absolute plan path and open
+     `<visualizer>/?path=<encoded-plan-path>` in the browser. Do not start,
+     install, or search for the app when it is unavailable; report the plan
+     path and keep the nvim/manual workflow usable.
+
+   Substitute the real slug. Outside tmux, skip only the split.
+
+7. **Explain the loop concisely.** In Plan Visualizer, add margin or selection
+   comments and click **Run plan review**; that button runs Claude's
+   `/plan-review` and reloads the file on completion. In nvim, use
+   `<leader>pc`, save, and press `<leader>pr` (leader = Space) to send
+   `/plan-review <path>` into this pane. Close nvim with `:q` when Status says
+   ready. Mention `plan-detail` for follow-up analysis and `plan-done` after
+   implementation. Stop and wait for the next review round.
 
 ## Plan file format
 
@@ -105,10 +114,11 @@ the proposed design.
 <!-- plan-review guide (delete when done):
   - Leave notes for the agent as HTML comments beginning with @me, e.g.:
         @me: use Postgres, not Redis
+    In Plan Visualizer, use a block's margin control or select text.
     In nvim, Space+pc inserts one under the cursor.
-  - Save, then press Space+pr to send your notes back for review.
-  - The agent edits this file in place; the split reloads automatically.
-  - Close this pane (:q) when the Status line says ready to implement.
+  - In Plan Visualizer, click Run plan review. In nvim, save and press Space+pr.
+  - The agent edits this file in place; the review surface reloads it.
+  - Close nvim (:q) when the Status line says ready to implement.
   - plan-detail <question> for follow-up analysis; plan-done after implementation.
 -->
 
@@ -176,5 +186,6 @@ atomic.>
   durable Markdown for engineering review; the user owns any later visual.
 - **Do not hide uncertainty.** Record assumptions, unresolved decisions, and
   material evidence gaps explicitly.
-- Requires tmux for the split; without tmux, write the file and report the
-  path. Never substitute another editor or an in-conversation review.
+- Requires tmux only for the nvim split. Without tmux or Plan Visualizer,
+  write the file and report the path for manual review. Never substitute an
+  in-conversation review.
