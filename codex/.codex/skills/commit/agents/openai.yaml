@@ -1,0 +1,4 @@
+interface:
+  display_name: "Commit"
+  short_description: "Commit staged changes, then pull --no-rebase and push"
+  default_prompt: "Use $commit to commit only the staged changes with a semantic message, then pull with a merge and push."

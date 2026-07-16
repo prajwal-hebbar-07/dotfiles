@@ -10,6 +10,7 @@ PACKAGES=(
   starship
   git
   nvim
+  codex
 )
 
 if ! command -v stow >/dev/null 2>&1; then
@@ -71,6 +72,7 @@ remove_repo_symlink "$HOME/.config/starship"
 remove_repo_symlink "$HOME/.config/starship.toml"
 remove_repo_symlink "$HOME/.config/nvim"
 remove_repo_symlink "$HOME/.config/git/config"
+remove_repo_symlink "$HOME/.claude/skills"
 remove_repo_symlink "$HOME/.claude-one"
 remove_repo_symlink "$HOME/.claude-one/settings.json"
 remove_repo_symlink "$HOME/.claude-one/skills"
@@ -79,15 +81,33 @@ remove_repo_symlink "$HOME/.claude-two"
 remove_repo_symlink "$HOME/.claude-two/settings.json"
 remove_repo_symlink "$HOME/.claude-two/skills"
 remove_repo_symlink "$HOME/.claude-two/statusline.sh"
+# Clean up per-skill symlinks, including retired ones, so re-running install on
+# a machine that had the old skills replaces them with the current set.
+for _skill in commit ship plan plan-review plan-detail plan-done \
+  project-steps step-plan; do
+  remove_repo_symlink "$HOME/.codex/skills/$_skill"
+done
+
+# Codex keeps runtime state alongside its skills, so preserve its real config
+# directory and let stow symlink only the tracked skills into it.
+mkdir -p "$HOME/.codex/skills"
 
 cd "$DOTFILES_DIR"
 stow --target="$HOME" --restow "${PACKAGES[@]}"
 
-# claude-one/claude-two are separate logins (different CLAUDE_CONFIG_DIR) that
-# share one settings file. They write sessions, caches, and credentials into
-# these real directories, so keep them real and symlink only the shared,
-# login-agnostic settings.json into each.
-mkdir -p "$HOME/.claude-one" "$HOME/.claude-two"
+# The default Claude config and the claude-one/claude-two logins (each a
+# separate CLAUDE_CONFIG_DIR) all share one repo-tracked skills folder. Each
+# config dir keeps its own sessions, caches, and credentials as a real
+# directory, so symlink only the shared skills/ folder into it.
+for _claude_dir in "$HOME/.claude" "$HOME/.claude-one" "$HOME/.claude-two"; do
+  mkdir -p "$_claude_dir"
+  # ln -sfn would nest inside a pre-existing real skills dir; drop it first.
+  [ -d "$_claude_dir/skills" ] && [ ! -L "$_claude_dir/skills" ] \
+    && rmdir "$_claude_dir/skills" 2>/dev/null
+  ln -sfn "$DOTFILES_DIR/claude/skills" "$_claude_dir/skills"
+done
+
+# claude-one/claude-two additionally share one login-agnostic settings.json.
 ln -sfn "$DOTFILES_DIR/claude/settings.json" "$HOME/.claude-one/settings.json"
 ln -sfn "$DOTFILES_DIR/claude/settings.json" "$HOME/.claude-two/settings.json"
 

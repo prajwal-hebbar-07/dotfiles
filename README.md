@@ -22,21 +22,48 @@ cd ~/dotfiles
 The install script runs GNU Stow for these packages:
 
 ```sh
-stow --target="$HOME" --restow zsh tmux wezterm starship git nvim
+stow --target="$HOME" --restow zsh tmux wezterm starship git nvim codex
 ```
 
 ## Claude
 
-Two Claude logins share one config file. `install.sh` symlinks the single
-`claude/settings.json` into both real config directories, which keep their own
-sessions, caches, and credentials:
+The default config plus two extra logins (`claude-one` and `claude-two`, each a
+separate `CLAUDE_CONFIG_DIR`) share one repo-tracked config. Each keeps its own
+sessions, caches, and credentials as a real directory, and `install.sh`
+symlinks the shared pieces into it.
+
+All three share one skills folder (`claude/skills`); `claude-one`/`claude-two`
+additionally share one login-agnostic `claude/settings.json`:
 
 ```sh
+~/.claude/skills           -> <repo>/claude/skills
+~/.claude-one/skills        -> <repo>/claude/skills
+~/.claude-two/skills        -> <repo>/claude/skills
 ~/.claude-one/settings.json -> <repo>/claude/settings.json
 ~/.claude-two/settings.json -> <repo>/claude/settings.json
 ```
 
 Pick a login with `CLAUDE_CONFIG_DIR`; the `cc1`/`cc2` zsh aliases wrap this.
+The shared skills include `commit`, which commits only the already-staged
+changes with a semantic message, then pulls with a merge and pushes.
+
+## Codex
+
+The Codex skills live in `codex/.codex/skills`. `install.sh` symlinks each one
+into `~/.codex/skills` while the rest of `~/.codex` stays a real directory for
+Codex runtime state:
+
+```sh
+~/.codex/skills/<skill> -> <repo>/codex/.codex/skills/<skill>
+```
+
+The `commit` skill handles `$commit` as one guarded Git flow:
+
+- Commits only the already-staged changes; never stages anything itself.
+- Writes one Conventional Commits message with a few explanatory bullets and no
+  AI attribution.
+- Pulls with a merge (`--no-rebase`), never a rebase, then pushes.
+- Stops for guidance on merge conflicts and never force-pushes.
 
 ## WezTerm
 
