@@ -47,9 +47,10 @@ Pick a login with `CLAUDE_CONFIG_DIR`; the `cc1`/`cc2` zsh aliases wrap this.
 The shared skills include `commit` (commits only the already-staged changes
 with a semantic message, then pulls with a merge and pushes), `plan`
 (researches the repo and writes a senior-engineer-ready implementation plan,
-with diagrams where useful, into the project's `plans/` directory), and
+with diagrams where useful, into the project's `plans/` directory),
 `plan-review` (resolves the inline `@me` comments left in a plan and logs each
-review round inside it).
+review round inside it), and `plan-ask` (read-only back-and-forth Q&A about a
+plan — explains the reasoning, tradeoffs, and risks without editing it).
 
 ## Codex
 

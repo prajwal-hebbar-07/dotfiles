@@ -1,0 +1,4 @@
+interface:
+  display_name: "Plan Ask"
+  short_description: "Discuss a plan and answer questions about it, read-only"
+  default_prompt: "Use $plan-ask to ask questions about a plan and talk through its reasoning, alternatives, and risks without editing it."

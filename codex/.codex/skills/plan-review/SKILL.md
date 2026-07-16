@@ -48,8 +48,10 @@ hands it over as context, so you know exactly where the change lands:
 
 ## Steps
 
-1. **Locate the plan.** Use the path the user gave; otherwise the plan they
-   name, or the most recently modified `plans/plan-*.md`. Read the whole file.
+1. **Work from the referenced plan.** The user hands over the plan document as
+   context (usually with a selection), so use it directly — no need to hunt for
+   it. Read the whole document. Only if no plan was referenced, fall back to the
+   most recently modified `plans/plan-*.md`.
 2. **Collect the comments in scope** (see Context and scope). With a selection,
    that's the `@me` comment(s) in the selected block; otherwise every `@me`
    comment in the plan. For each, note its location and what it asks. If there

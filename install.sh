@@ -83,7 +83,7 @@ remove_repo_symlink "$HOME/.claude-two/skills"
 remove_repo_symlink "$HOME/.claude-two/statusline.sh"
 # Clean up per-skill symlinks, including retired ones, so re-running install on
 # a machine that had the old skills replaces them with the current set.
-for _skill in commit ship plan plan-review plan-detail plan-done \
+for _skill in commit ship plan plan-review plan-ask plan-detail plan-done \
   project-steps step-plan; do
   remove_repo_symlink "$HOME/.codex/skills/$_skill"
 done
