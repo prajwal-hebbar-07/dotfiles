@@ -44,8 +44,10 @@ additionally share one login-agnostic `claude/settings.json`:
 ```
 
 Pick a login with `CLAUDE_CONFIG_DIR`; the `cc1`/`cc2` zsh aliases wrap this.
-The shared skills include `commit`, which commits only the already-staged
-changes with a semantic message, then pulls with a merge and pushes.
+The shared skills include `commit` (commits only the already-staged changes
+with a semantic message, then pulls with a merge and pushes) and `plan`
+(researches the repo and writes a senior-engineer-ready implementation plan,
+with diagrams where useful, into the project's `plans/` directory).
 
 ## Codex
 

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Plan"
+  short_description: "Research the repo and write an implementation plan to plans/"
+  default_prompt: "Use $plan to research the codebase and write a concise, senior-engineer-ready implementation plan to the project's plans/ directory."
