@@ -16,8 +16,48 @@ return {
           vim.keymap.set(mode, lhs, rhs, { buffer = bufnr, desc = desc })
         end
 
-        map("n", "]h", gs.next_hunk, "Next hunk")
-        map("n", "[h", gs.prev_hunk, "Previous hunk")
+        local function nav_hunk(direction)
+          gs.nav_hunk(direction, { target = "all" })
+        end
+
+        local function close_file_diff()
+          local revision_windows = {}
+
+          for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+            local diff_buf = vim.api.nvim_win_get_buf(win)
+            local diff_name = vim.api.nvim_buf_get_name(diff_buf)
+
+            if vim.startswith(diff_name, "gitsigns://") then
+              table.insert(revision_windows, win)
+            end
+          end
+
+          if #revision_windows == 0 then
+            return false
+          end
+
+          for _, win in ipairs(revision_windows) do
+            if vim.api.nvim_win_is_valid(win) then
+              vim.api.nvim_win_close(win, false)
+            end
+          end
+
+          vim.cmd("diffoff!")
+          return true
+        end
+
+        local function toggle_file_diff()
+          if not close_file_diff() then
+            gs.diffthis("HEAD", { vertical = true })
+          end
+        end
+
+        map("n", "]h", function()
+          nav_hunk("next")
+        end, "Next Git hunk")
+        map("n", "[h", function()
+          nav_hunk("prev")
+        end, "Previous Git hunk")
         map("n", "<leader>gs", gs.stage_hunk, "Stage hunk")
         map("n", "<leader>gr", gs.reset_hunk, "Reset hunk")
         map("v", "<leader>gs", function()
@@ -33,7 +73,7 @@ return {
         map("n", "<leader>gb", function()
           gs.blame_line({ full = true })
         end, "Blame line")
-        map("n", "<leader>gd", gs.diffthis, "Diff this")
+        map("n", "<leader>gd", toggle_file_diff, "Toggle file diff")
         map({ "o", "x" }, "ih", ":<C-U>Gitsigns select_hunk<CR>", "Select hunk")
       end,
     },

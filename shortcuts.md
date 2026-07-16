@@ -26,7 +26,7 @@ Space
 | `-` | Open parent directory with Oil |
 | `Space` then `-` | Open Oil in a floating window |
 | `Space` then `e` | Toggle the Neo-tree project sidebar |
-| `Space` then `f` | Find files |
+| `Space` then `ff` | Find files |
 | `Space` then `fg` | Find Git files |
 | `Space` then `fs` | Search text in the project |
 | `Space` then `fr` | Find recent files |
@@ -63,7 +63,8 @@ Space
 | `Space` then `qS` | Select a saved session |
 | `Space` then `ql` | Restore the most recent session |
 | `Space` then `gg` | Open Fugitive Git status |
-| `]h` / `[h` | Move to next or previous Git hunk |
+| `Space` then `gd` | Toggle the current file's uncommitted diff against `HEAD` |
+| `]h` / `[h` | Move to next or previous uncommitted Git hunk, including staged changes |
 | `Space` then `gs` | Stage Git hunk |
 | `Space` then `gr` | Reset Git hunk |
 | `Space` then `u` | Toggle undo tree |
