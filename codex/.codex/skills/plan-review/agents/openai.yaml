@@ -1,0 +1,4 @@
+interface:
+  display_name: "Plan Review"
+  short_description: "Resolve @me comments in a plan and log the review round"
+  default_prompt: "Use $plan-review to resolve the @me comments in a plan document and record what changed in its review log."
