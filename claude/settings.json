@@ -1,9 +1,5 @@
 {
   "model": "opus",
-  "statusLine": {
-    "type": "command",
-    "command": "bash \"$HOME/.claude-two/statusline.sh\""
-  },
   "effortLevel": "high",
   "tui": "fullscreen",
   "skipDangerousModePermissionPrompt": true,

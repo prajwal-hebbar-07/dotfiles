@@ -1,4 +1,0 @@
-interface:
-  display_name: "Step Plan"
-  short_description: "Deep-plan one project step with a dev roundtable"
-  default_prompt: "Use $step-plan to research and deep-plan the next step in plans/overview.md."

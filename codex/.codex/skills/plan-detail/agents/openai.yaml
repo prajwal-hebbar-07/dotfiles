@@ -1,4 +1,0 @@
-interface:
-  display_name: "Plan Detail"
-  short_description: "Explain any part of a plan file in depth"
-  default_prompt: "Use $plan-detail to research and explain the referenced part of the current plans/plan-<slug>.md."

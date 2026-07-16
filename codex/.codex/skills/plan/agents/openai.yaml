@@ -1,4 +1,0 @@
-interface:
-  display_name: "Plan"
-  short_description: "Write a senior-engineering implementation plan"
-  default_prompt: "Use $plan to research the task, write plans/plan-<slug>.md, and open it for review in Plan Visualizer and nvim when available."

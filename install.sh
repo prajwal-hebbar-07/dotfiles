@@ -10,9 +10,6 @@ PACKAGES=(
   starship
   git
   nvim
-  claude-one
-  claude-two
-  codex
 )
 
 if ! command -v stow >/dev/null 2>&1; then
@@ -82,23 +79,16 @@ remove_repo_symlink "$HOME/.claude-two"
 remove_repo_symlink "$HOME/.claude-two/settings.json"
 remove_repo_symlink "$HOME/.claude-two/skills"
 remove_repo_symlink "$HOME/.claude-two/statusline.sh"
-remove_repo_symlink "$HOME/.codex/skills"
-remove_repo_symlink "$HOME/.codex/skills/ship"
-remove_repo_symlink "$HOME/.codex/skills/plan"
-remove_repo_symlink "$HOME/.codex/skills/plan-review"
-remove_repo_symlink "$HOME/.codex/skills/plan-detail"
-remove_repo_symlink "$HOME/.codex/skills/plan-done"
-
-# claude-one/claude-two write sessions, caches, and credentials alongside their
-# statusline.sh and settings.json, so keep them as real directories and
-# symlink only the tracked config files into them.
-mkdir -p "$HOME/.claude-one" "$HOME/.claude-two"
-
-# Codex keeps runtime state alongside its skills, so preserve its real config
-# directories and symlink only the tracked skills into them.
-mkdir -p "$HOME/.codex/skills"
 
 cd "$DOTFILES_DIR"
 stow --target="$HOME" --restow "${PACKAGES[@]}"
+
+# claude-one/claude-two are separate logins (different CLAUDE_CONFIG_DIR) that
+# share one settings file. They write sessions, caches, and credentials into
+# these real directories, so keep them real and symlink only the shared,
+# login-agnostic settings.json into each.
+mkdir -p "$HOME/.claude-one" "$HOME/.claude-two"
+ln -sfn "$DOTFILES_DIR/claude/settings.json" "$HOME/.claude-one/settings.json"
+ln -sfn "$DOTFILES_DIR/claude/settings.json" "$HOME/.claude-two/settings.json"
 
 echo "Linked dotfiles with stow."

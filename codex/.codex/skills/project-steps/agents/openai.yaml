@@ -1,4 +1,0 @@
-interface:
-  display_name: "Project Steps"
-  short_description: "Create or sync a multi-step project overview"
-  default_prompt: "Use $project-steps to break this project into ordered, independently verifiable steps."

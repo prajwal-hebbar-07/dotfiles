@@ -22,38 +22,21 @@ cd ~/dotfiles
 The install script runs GNU Stow for these packages:
 
 ```sh
-stow --target="$HOME" --restow zsh tmux wezterm starship git nvim claude-one claude-two codex
+stow --target="$HOME" --restow zsh tmux wezterm starship git nvim
 ```
 
-## Codex
+## Claude
 
-The Codex skills live in `codex/.codex/skills`.
-
-The `ship` skill handles `/ship` and related requests as one guarded Git flow:
-
-- Stages all changes once.
-- Creates one Conventional Commits commit without AI attribution.
-- Pulls with a merge, never a rebase.
-- Stops for guidance on conflicts and never force-pushes automatically.
-
-The `plan` family mirrors the Claude planning loop so Codex works the same
-way:
-
-- `plan` researches the task and writes a self-contained senior-engineering
-  implementation document to `plans/plan-<slug>.md`, opened in an nvim tmux
-  split for inline `@me` comments.
-- `plan-review` resolves those comments one round at a time and logs them in
-  the plan's Review changelog.
-- `plan-detail` investigates any decision or step using fresh repository
-  evidence and persists corrections when needed.
-- `plan-done` verifies a plan actually landed, then deletes its file.
-
-The skills are expected to point to this repo while the rest of `~/.codex`
-remains a real directory for Codex runtime state:
+Two Claude logins share one config file. `install.sh` symlinks the single
+`claude/settings.json` into both real config directories, which keep their own
+sessions, caches, and credentials:
 
 ```sh
-~/.codex/skills/<skill> -> <repo>/codex/.codex/skills/<skill>
+~/.claude-one/settings.json -> <repo>/claude/settings.json
+~/.claude-two/settings.json -> <repo>/claude/settings.json
 ```
+
+Pick a login with `CLAUDE_CONFIG_DIR`; the `cc1`/`cc2` zsh aliases wrap this.
 
 ## WezTerm
 

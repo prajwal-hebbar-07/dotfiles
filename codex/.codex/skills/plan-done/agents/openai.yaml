@@ -1,4 +1,0 @@
-interface:
-  display_name: "Plan Done"
-  short_description: "Verify a plan landed, then delete its file"
-  default_prompt: "Use $plan-done to verify the current plans/plan-<slug>.md is implemented and delete it."
