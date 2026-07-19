@@ -9,7 +9,6 @@ PACKAGES=(
   wezterm
   starship
   git
-  nvim
   helix
   codex
 )
@@ -96,6 +95,10 @@ mkdir -p "$HOME/.codex/skills"
 
 cd "$DOTFILES_DIR"
 stow --target="$HOME" --restow "${PACKAGES[@]}"
+
+# nvim lives flat in the repo (nvim/ is the config root, not a stow package), so
+# link the whole folder in directly instead of letting stow mirror a subtree.
+ln -sfn "$DOTFILES_DIR/nvim" "$HOME/.config/nvim"
 
 # The default Claude config and the claude-one/claude-two logins (each a
 # separate CLAUDE_CONFIG_DIR) all share one repo-tracked skills folder. Each
