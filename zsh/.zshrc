@@ -130,7 +130,7 @@ alias cc1='CLAUDE_CONFIG_DIR="$HOME/.claude-two" claude --dangerously-skip-permi
 alias cc2='CLAUDE_CONFIG_DIR="$HOME/.claude-one" claude --dangerously-skip-permissions'
 alias g='lazygit'
 alias hd='hunk diff'
-alias ls='eza --long --icons=always --git --no-user --group-directories-first'
+alias ls='eza --grid --icons=always --group-directories-first'
 alias ll='eza --long --icons=always --git --no-user --group-directories-first'
 alias la='eza --long --all --icons=always --git --no-user --group-directories-first'
 alias lt='eza --tree --level=3 --icons=always --git --group-directories-first'

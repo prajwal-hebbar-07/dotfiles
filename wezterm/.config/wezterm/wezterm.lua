@@ -4,7 +4,7 @@ local config = wezterm.config_builder()
 
 config.color_scheme = "Tokyo Night"
 config.colors = {
-  background = "#1a1b26",
+  background = "#0d0e14",
 }
 config.font = wezterm.font_with_fallback({
   "JetBrains Mono",
@@ -13,7 +13,7 @@ config.font = wezterm.font_with_fallback({
 config.font_size = 13.0
 
 config.line_height = 1.12
-config.window_background_opacity = 0.78
+config.window_background_opacity = 0.86
 config.macos_window_background_blur = 20
 config.window_padding = {
   left = 10,

@@ -70,7 +70,6 @@ remove_repo_symlink "$HOME/.config/tmux"
 remove_repo_symlink "$HOME/.config/wezterm"
 remove_repo_symlink "$HOME/.config/starship"
 remove_repo_symlink "$HOME/.config/starship.toml"
-remove_repo_symlink "$HOME/.config/nvim"
 remove_repo_symlink "$HOME/.config/helix"
 remove_repo_symlink "$HOME/.config/git/config"
 remove_repo_symlink "$HOME/.claude/skills"
@@ -95,10 +94,6 @@ mkdir -p "$HOME/.codex/skills"
 
 cd "$DOTFILES_DIR"
 stow --target="$HOME" --restow "${PACKAGES[@]}"
-
-# nvim lives flat in the repo (nvim/ is the config root, not a stow package), so
-# link the whole folder in directly instead of letting stow mirror a subtree.
-ln -sfn "$DOTFILES_DIR/nvim" "$HOME/.config/nvim"
 
 # The default Claude config and the claude-one/claude-two logins (each a
 # separate CLAUDE_CONFIG_DIR) all share one repo-tracked skills folder. Each

@@ -22,7 +22,7 @@ cd ~/dotfiles
 The install script runs GNU Stow for these packages:
 
 ```sh
-stow --target="$HOME" --restow zsh tmux wezterm starship git nvim codex
+stow --target="$HOME" --restow zsh tmux wezterm starship git helix codex
 ```
 
 ## Claude
@@ -111,8 +111,6 @@ It configures tmux as the main place for tabs, panes, movement, and copy mode:
 - Uses `tmux-256color` and enables RGB color support, including WezTerm-specific
   RGB support.
 - Adds vim-style pane movement with `h`, `j`, `k`, and `l`.
-- Adds prefix-free pane movement with `Ctrl-h`, `Ctrl-j`, `Ctrl-k`, and
-  `Ctrl-l`.
 - Adds vim-style pane resizing with uppercase `H`, `J`, `K`, and `L`.
 - Opens new split panes in the current pane's working directory.
 - Uses vi-style copy mode.
@@ -151,55 +149,6 @@ The standard config path is expected to point to this repo:
 
 ```sh
 ~/.config/starship -> <repo>/starship/.config/starship
-```
-
-## Neovim
-
-The Neovim configuration lives in `nvim/.config/nvim`.
-
-It configures Neovim as a complete, keyboard-driven coding workspace:
-
-- Uses `lazy.nvim` for plugin management.
-- Uses Catppuccin Mocha with a transparent, minimal editor interface.
-- Uses Space as the global and local leader key.
-- Adds `oil.nvim` for directory and file operations.
-- Adds Neo-tree for a persistent, Git-aware project sidebar.
-- Adds Telescope for file, buffer, help, Git file, and text search.
-- Adds `grug-far.nvim` for previewable project-wide search and replace.
-- Adds `aerial.nvim` for a navigable code outline.
-- Adds Treesitter for syntax highlighting and indentation.
-- Adds `blink.cmp` for autocomplete with LSP, path, buffer, and snippet sources.
-- Adds `which-key.nvim` to make the keymap hierarchy discoverable.
-- Adds automatic bracket pairs.
-- Adds markdown rendering inside Neovim.
-- Adds `gitsigns.nvim` and `vim-fugitive` for Git workflows.
-- Adds small editing helpers from `mini.nvim`.
-- Adds tmux-aware split navigation with `vim-tmux-navigator`.
-- Adds automatic project sessions through `persistence.nvim`.
-- Adds background build, run, and test tasks through `overseer.nvim`, including
-  npm, Make, Cargo, Pytest, current-file execution, and `.vscode/tasks.json`
-  discovery.
-- Adds DAP debugging for Python and JavaScript/TypeScript with breakpoints,
-  stepping, expression evaluation, a REPL, and an inspector UI.
-- Adds Mason-managed LSP servers for Lua, JavaScript/TypeScript, Python, Bash,
-  JSON, YAML, and Markdown.
-- Adds format-on-save and manual formatting through `conform.nvim`.
-- Adds linters through `nvim-lint`.
-
-Install the editor and search helpers with:
-
-```sh
-brew install neovim ripgrep fd tree-sitter-cli
-```
-
-Mason installs language servers, formatter/linter binaries, and the Python and
-JavaScript debug adapters on first startup. Node.js is required for the
-JavaScript/TypeScript tooling.
-
-The system config path is expected to point to this repo:
-
-```sh
-~/.config/nvim -> <repo>/nvim/.config/nvim
 ```
 
 ## Helix

@@ -12,92 +12,6 @@ These shortcuts come from WezTerm's defaults plus the current local setup.
 WezTerm's tab bar is disabled in this config. Use tmux windows and panes for
 terminal organization instead.
 
-## Neovim
-
-The Neovim leader key is:
-
-```text
-Space
-```
-
-| Shortcut | Action |
-| --- | --- |
-| `Space` then `?` | Show buffer-local keymaps |
-| `-` | Open parent directory with Oil |
-| `Space` then `-` | Open Oil in a floating window |
-| `Space` then `e` | Toggle the Neo-tree project sidebar |
-| `Space` then `ff` | Find files |
-| `Space` then `fg` | Find Git files |
-| `Space` then `fs` | Search text in the project |
-| `Space` then `fr` | Find recent files |
-| `Space` then `fb` | Find open buffers |
-| `Space` then `fk` | Search keymaps |
-| `Space` then `fw` | Search for the word under the cursor |
-| `Space` then `ft` | Find todo comments |
-| `Space` then `vh` | Search help tags |
-| `Space` then `sr` | Search and replace across the project or visual range |
-| `Space` then `sw` | Replace the word under the cursor in the current file |
-| `Space` then `o` | Toggle the code outline |
-| `]s` / `[s` | Move to next or previous code symbol |
-| `]b` / `[b` | Move to next or previous buffer |
-| `Space` then `bd` | Delete the current buffer |
-| `gd` | Go to definition |
-| `gD` | Go to declaration |
-| `gi` | Go to implementation |
-| `gR` | Go to references |
-| `K` | Show hover documentation |
-| `Space` then `rn` | Rename symbol |
-| `Space` then `ca` | Show code actions |
-| `Space` then `D` | Show buffer diagnostics |
-| `Space` then `ld` | Show diagnostic details for the current line |
-| `Space` then `ls` | Search document symbols |
-| `Space` then `lS` | Search workspace symbols |
-| `Space` then `lh` | Toggle LSP inlay hints when supported |
-| `Space` then `mp` | Format the current file or visual selection |
-| `Space` then `mt` | Toggle format-on-save for the current buffer |
-| `Space` then `ll` | Run linting |
-| `Space` then `rr` | Select and run a project task or test |
-| `Space` then `rt` | Toggle the background task list |
-| `Space` then `ra` | Select an action for a running or completed task |
-| `Space` then `qs` | Restore the session for the current project |
-| `Space` then `qS` | Select a saved session |
-| `Space` then `ql` | Restore the most recent session |
-| `Space` then `gg` | Open Fugitive Git status |
-| `Space` then `gd` | Toggle the current file's uncommitted diff against `HEAD` |
-| `]h` / `[h` | Move to next or previous uncommitted Git hunk, including staged changes |
-| `Space` then `gs` | Stage Git hunk |
-| `Space` then `gr` | Reset Git hunk |
-| `Space` then `u` | Toggle undo tree |
-| `Space` then `pv` | In a markdown file, toggle a live browser preview that re-renders as you edit |
-| `Space` then `pc` | In a plan markdown file, insert an `@me` comment for Claude below the cursor |
-| `Space` then `pr` | In a plan-review split, send the plan and its `@me` comments back to Claude |
-| `F5` | Start or continue debugging |
-| `F9` | Toggle a breakpoint |
-| `F10` / `F11` / `F12` | Step over, into, or out while debugging |
-| `Space` then `bu` | Toggle the debugger inspector UI |
-| `Space` then `be` | Evaluate the expression under the cursor or selection |
-| `Space` then `bt` | Debug the Python test under the cursor |
-| `Space` then `bT` | Debug the current Python test class |
-| `Space` then `br` | Toggle the debugger REPL |
-| `Space` then `bx` | Stop debugging |
-| `Esc` twice | Leave terminal input mode |
-
-### Plan review loop
-
-Instead of plan mode, ask Claude Code to `/plan <task>` (any permission mode).
-It researches the codebase, writes the plan to `plans/plan-<slug>.md`, and
-opens it in a right-hand tmux split running Neovim. Press `Space` then `pv` to
-open the plan in a browser tab that re-renders as you edit — flip to it to read
-the rendered plan, then back to Neovim to keep editing. Annotate inline with
-`@me` HTML comments (`Space` then `pc` inserts one), save, then press `Space` then
-`pr` to send your notes back — this runs `/plan-review <file>` in the Claude
-pane. Claude resolves each comment, strips the markers, logs the round in the
-plan's Review changelog, and rewrites the file in place; the split reloads
-automatically. When a round comes back with no comments, Claude marks the plan
-`ready to implement`. Close the split with `:q` and tell Claude to implement
-it. Outside tmux the same loop works manually: edit the file in any editor and
-run `/plan-review plans/plan-<slug>.md` yourself.
-
 ## zsh
 
 | Shortcut | Action |
@@ -152,10 +66,6 @@ the next key.
 | `prefix` then `j` | Move to the pane below |
 | `prefix` then `k` | Move to the pane above |
 | `prefix` then `l` | Move to the pane on the right |
-| `Ctrl` + `h` | Move to the pane on the left without pressing prefix |
-| `Ctrl` + `j` | Move to the pane below without pressing prefix |
-| `Ctrl` + `k` | Move to the pane above without pressing prefix |
-| `Ctrl` + `l` | Move to the pane on the right without pressing prefix |
 | `prefix` then `H` | Resize pane left by 5 cells |
 | `prefix` then `J` | Resize pane down by 5 cells |
 | `prefix` then `K` | Resize pane up by 5 cells |
