@@ -39,7 +39,7 @@ opt.listchars = {
   nbsp = "␣",
 }
 
-opt.showtabline = 1
+opt.showtabline = 0
 opt.winborder = "rounded"
 
 opt.foldmethod = "manual"
