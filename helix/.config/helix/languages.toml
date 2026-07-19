@@ -1,0 +1,98 @@
+# Per-language tooling for Helix.
+#
+# Covers the stack in use: JS/TS/JSX/TSX (React, Next.js, Node, Express, Nest),
+# Go, Python, Dockerfile, YAML (incl. docker-compose), Nginx, and Tailwind CSS.
+#
+# Helix does NOT install language servers or formatters — it only wires up ones
+# already on $PATH. Install what you use (see the README for the full list);
+# `hx --health <language>` shows what is found vs. missing.
+#
+# Defaults already provide: typescript-language-server + prettier for the web
+# languages, gopls for Go, ruff/pylsp for Python, and the css/yaml/dockerfile
+# servers. This file adds format-on-save, external formatters where Helix has
+# none by default, and the Tailwind CSS language server for class completion.
+
+# --- Tailwind CSS language server ---------------------------------------------
+# Activates only in projects that contain a Tailwind config file.
+[language-server.tailwindcss-ls]
+command = "tailwindcss-language-server"
+args = ["--stdio"]
+
+# --- JavaScript / TypeScript / React ------------------------------------------
+# prettier formats on save; the Tailwind server rides alongside the TypeScript
+# server for class-name completion. prettier resolves the project's .prettierrc
+# from the working directory, so plugins like prettier-plugin-tailwindcss apply.
+[[language]]
+name = "javascript"
+auto-format = true
+formatter = { command = "prettier", args = ["--parser", "babel"] }
+language-servers = ["typescript-language-server", "tailwindcss-ls"]
+
+[[language]]
+name = "jsx"
+auto-format = true
+formatter = { command = "prettier", args = ["--parser", "babel"] }
+language-servers = ["typescript-language-server", "tailwindcss-ls"]
+
+[[language]]
+name = "typescript"
+auto-format = true
+formatter = { command = "prettier", args = ["--parser", "typescript"] }
+language-servers = ["typescript-language-server", "tailwindcss-ls"]
+
+[[language]]
+name = "tsx"
+auto-format = true
+formatter = { command = "prettier", args = ["--parser", "typescript"] }
+language-servers = ["typescript-language-server", "tailwindcss-ls"]
+
+# --- Web assets ---------------------------------------------------------------
+[[language]]
+name = "html"
+auto-format = true
+formatter = { command = "prettier", args = ["--parser", "html"] }
+language-servers = ["vscode-html-language-server", "tailwindcss-ls"]
+
+[[language]]
+name = "css"
+auto-format = true
+formatter = { command = "prettier", args = ["--parser", "css"] }
+language-servers = ["vscode-css-language-server", "tailwindcss-ls"]
+
+[[language]]
+name = "json"
+auto-format = true
+formatter = { command = "prettier", args = ["--parser", "json"] }
+
+# --- Go -----------------------------------------------------------------------
+# goimports formats and organizes imports on save; gopls provides the LSP.
+[[language]]
+name = "go"
+auto-format = true
+formatter = { command = "goimports" }
+
+# --- Python -------------------------------------------------------------------
+# ruff handles both formatting and linting; keep the default LSPs (ruff/pylsp).
+[[language]]
+name = "python"
+auto-format = true
+formatter = { command = "ruff", args = ["format", "-"] }
+
+# --- YAML (includes docker-compose) -------------------------------------------
+[[language]]
+name = "yaml"
+auto-format = true
+formatter = { command = "prettier", args = ["--parser", "yaml"] }
+
+# --- Dockerfile ---------------------------------------------------------------
+# docker-langserver is the default LSP; no external formatter.
+[[language]]
+name = "dockerfile"
+auto-format = false
+
+# --- Markdown -----------------------------------------------------------------
+[[language]]
+name = "markdown"
+auto-format = false
+
+# Nginx config is highlighted via its bundled grammar and needs no extra tooling.

@@ -1,0 +1,46 @@
+# Helix editor configuration.
+#
+# Canonical copy lives in the dotfiles repo and is stowed to
+# ~/.config/helix/config.toml. See languages.toml for per-language tooling.
+
+theme = "rose_pine_transparent"
+
+[editor]
+line-number = "relative"
+mouse = true
+cursorline = true
+color-modes = true
+bufferline = "multiple"
+true-color = true
+
+[editor.cursor-shape]
+insert = "bar"
+normal = "block"
+select = "underline"
+
+[editor.file-picker]
+hidden = false
+
+[editor.statusline]
+left = ["mode", "spinner", "file-name", "read-only-indicator", "file-modification-indicator"]
+center = []
+right = ["diagnostics", "selections", "register", "position", "file-encoding", "file-line-ending", "file-type"]
+
+[editor.lsp]
+display-messages = true
+display-inlay-hints = true
+
+[editor.indent-guides]
+render = true
+character = "┊"
+
+[editor.soft-wrap]
+enable = true
+
+[keys.normal]
+# Center the view when jumping around, matching common Vim muscle memory.
+"C-d" = ["half_page_down", "align_view_center"]
+"C-u" = ["half_page_up", "align_view_center"]
+# Quick save / quit on the space leader.
+"space"."w" = ":write"
+"space"."q" = ":quit"

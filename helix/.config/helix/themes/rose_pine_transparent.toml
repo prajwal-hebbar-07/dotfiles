@@ -1,0 +1,88 @@
+# Rosé Pine, transparent + enriched syntax highlighting.
+#
+# Inherits the upstream `rose_pine` theme (so its palette and UI colors carry
+# over), then:
+#   1. Clears the editor background so a transparent terminal shows through.
+#   2. Fills in many syntax scopes upstream leaves at defaults, giving richer,
+#      more differentiated highlighting for the JS/TS/React, Go, and Python
+#      stacks used here.
+inherits = "rose_pine"
+
+# --- Transparency -------------------------------------------------------------
+# Empty tables clear the inherited backgrounds so the terminal shows through.
+"ui.background" = {}
+"ui.background.separator" = {}
+"ui.statusline" = { fg = "subtle" }
+"ui.statusline.inactive" = { fg = "muted" }
+"ui.bufferline" = { fg = "muted" }
+"ui.bufferline.active" = { fg = "text", modifiers = ["bold"] }
+"ui.virtual.whitespace" = { fg = "highlight_med" }
+
+# --- Types & namespaces -------------------------------------------------------
+"type" = "foam"
+"type.builtin" = { fg = "foam", modifiers = ["italic"] }
+"type.parameter" = "iris"                       # generics <T>
+"type.enum.variant" = "rose"
+"constructor" = "foam"
+"namespace" = "iris"                            # Go packages, TS namespaces
+
+# --- Keywords -----------------------------------------------------------------
+"keyword" = "pine"
+"keyword.control" = "pine"
+"keyword.control.conditional" = "pine"
+"keyword.control.repeat" = "pine"
+"keyword.control.import" = "iris"               # import / from / require
+"keyword.control.return" = { fg = "pine", modifiers = ["italic"] }
+"keyword.control.exception" = "love"            # try / catch / throw / panic
+"keyword.directive" = "iris"                    # pragmas, "use client"
+"keyword.function" = "pine"                     # func / function / def
+"keyword.storage.type" = "foam"                 # class / struct / interface / type
+"keyword.storage.modifier" = { fg = "pine", modifiers = ["italic"] }  # async / static / public / const
+"keyword.operator" = "subtle"
+"operator" = "subtle"
+
+# --- Functions ----------------------------------------------------------------
+"function" = "rose"
+"function.builtin" = "love"
+"function.method" = "rose"
+"function.macro" = "iris"
+"function.special" = "love"
+
+# --- Variables & members ------------------------------------------------------
+"variable" = "text"
+"variable.builtin" = "love"                     # this / self
+"variable.parameter" = "iris"
+"variable.other.member" = "foam"                # obj.field
+"label" = "foam"
+"attribute" = "iris"                            # JSX/HTML attrs, Nest decorators
+
+# --- Tags (JSX / HTML) --------------------------------------------------------
+"tag" = "foam"
+"tag.builtin" = { fg = "foam", modifiers = ["bold"] }
+
+# --- Constants, numbers, strings ----------------------------------------------
+"constant" = "foam"
+"constant.builtin" = "love"
+"constant.builtin.boolean" = "rose"
+"constant.character" = "gold"
+"constant.character.escape" = "pine"
+"constant.numeric" = "gold"
+"constant.numeric.integer" = "gold"
+"constant.numeric.float" = "gold"
+"string" = "gold"
+"string.regexp" = "foam"
+"string.special.path" = "gold"
+"string.special.url" = { fg = "iris", underline = { color = "iris", style = "line" } }
+
+# --- Punctuation --------------------------------------------------------------
+"punctuation" = "subtle"
+"punctuation.delimiter" = "subtle"
+"punctuation.bracket" = "subtle"
+"punctuation.special" = "rose"                  # template ${}, JSX braces
+
+# --- Comments -----------------------------------------------------------------
+"comment" = { fg = "muted", modifiers = ["italic"] }
+"comment.line.documentation" = { fg = "subtle", modifiers = ["italic"] }
+"comment.block.documentation" = { fg = "subtle", modifiers = ["italic"] }
+
+"special" = "rose"

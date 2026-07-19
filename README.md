@@ -202,6 +202,58 @@ The system config path is expected to point to this repo:
 ~/.config/nvim -> <repo>/nvim/.config/nvim
 ```
 
+## Helix
+
+The Helix configuration lives in `helix/.config/helix`:
+
+- `config.toml` — editor behaviour and keymaps.
+- `languages.toml` — per-language servers and formatters.
+- `themes/rose_pine_transparent.toml` — the custom theme.
+
+It configures Helix as a lightweight, keyboard-driven editor:
+
+- Uses a custom `rose_pine_transparent` theme: upstream Rosé Pine with a
+  cleared editor background (so a transparent terminal shows through) and
+  enriched syntax highlighting for the JS/TS/React, Go, and Python stacks.
+- Uses relative line numbers, a highlighted cursor line, and no rulers.
+- Shows a bufferline when more than one file is open and enables soft wrap.
+- Renders indent guides and mode-aware cursor shapes.
+- Enables LSP diagnostics messages and inlay hints.
+- Adds centered half-page scrolling with `Ctrl-d`/`Ctrl-u` and `space w`/
+  `space q` for write/quit.
+
+`languages.toml` wires up tooling for JS/TS/JSX/TSX (React, Next.js, Node,
+Express, Nest), Go, Python, Dockerfile, YAML (incl. docker-compose), Nginx, and
+Tailwind CSS — format-on-save with `prettier`/`goimports`/`ruff` and the
+matching language servers, including `tailwindcss-language-server` for class
+completion.
+
+Install the editor with:
+
+```sh
+brew install helix
+```
+
+Helix does not bundle language servers or formatters; install the ones you use
+so `languages.toml` can find them on `$PATH`:
+
+```sh
+brew install gopls ruff
+go install golang.org/x/tools/cmd/goimports@latest
+npm install -g typescript typescript-language-server prettier \
+  @tailwindcss/language-server vscode-langservers-extracted \
+  dockerfile-language-server-nodejs yaml-language-server
+```
+
+Run `hx --health <language>` to see what Helix finds versus what is missing.
+Nginx and docker-compose need no extra tooling (grammar / YAML defaults).
+
+The system config path is expected to point to this repo:
+
+```sh
+~/.config/helix -> <repo>/helix/.config/helix
+```
+
 ## Git
 
 The Git configuration lives in `git/.config/git/config`.
