@@ -3,7 +3,14 @@
 return {
   "folke/snacks.nvim",
   opts = {
-    picker = { enabled = true },
+    picker = {
+      enabled = true,
+      -- files + buffers: narrow centered popover, no preview split
+      sources = {
+        files = { layout = { preset = "select", preview = false } },
+        buffers = { layout = { preset = "select", preview = false } },
+      },
+    },
 
     -- rest off until you ask for them
     dashboard = { enabled = false },

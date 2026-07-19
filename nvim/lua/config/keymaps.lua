@@ -7,6 +7,9 @@ local keymap = vim.keymap.set
 local opts = { noremap = true, silent = true }
 
 keymap("n", "<leader><leader>", "<cmd>source %<CR>", { desc = "Source current file" })
+keymap("n", "<leader><space>", function()
+  Snacks.picker.buffers()
+end, { desc = "Buffers" })
 keymap("n", "<C-c>", "<cmd>nohlsearch<CR>", { desc = "Clear search highlight" })
 keymap("n", "Q", "<nop>", opts)
 
