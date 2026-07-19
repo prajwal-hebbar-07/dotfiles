@@ -18,6 +18,30 @@ inherits = "rose_pine"
 "ui.bufferline.active" = { fg = "text", modifiers = ["bold"] }
 "ui.virtual.whitespace" = { fg = "highlight_med" }
 
+# --- Popups, menus & pickers --------------------------------------------------
+# The editor itself stays transparent, but floating UI (which-key, pickers,
+# completion, hover docs) gets a solid, elevated "card" look: a surface
+# background, an iris accent border, and bright text — so nothing reads washed
+# out against the see-through editor.
+"ui.popup" = { fg = "text", bg = "surface" }
+"ui.popup.info" = { fg = "text", bg = "surface" }
+"ui.window" = { fg = "iris", bg = "surface" }        # popup + split borders
+"ui.help" = { fg = "text", bg = "surface" }
+"ui.text.info" = { fg = "foam" }                     # which-key / info text
+"ui.text.inactive" = { fg = "muted" }
+
+# Completion menu + which-key list
+"ui.menu" = { fg = "subtle", bg = "surface" }
+"ui.menu.selected" = { fg = "base", bg = "iris", modifiers = ["bold"] }
+"ui.menu.scroll" = { fg = "iris", bg = "overlay" }
+
+# Pickers (space f, space /, buffers): current row + column headers pop
+"ui.text.focus" = { fg = "gold", bg = "highlight_med", modifiers = ["bold"] }
+"ui.highlight" = { bg = "highlight_med" }
+"ui.picker.header" = { fg = "muted", bg = "surface" }
+"ui.picker.header.column" = { fg = "subtle" }
+"ui.picker.header.column.active" = { fg = "foam", modifiers = ["bold"], underline = { style = "line" } }
+
 # --- Types & namespaces -------------------------------------------------------
 "type" = "foam"
 "type.builtin" = { fg = "foam", modifiers = ["italic"] }
