@@ -3,7 +3,7 @@
 # Canonical copy lives in the dotfiles repo and is stowed to
 # ~/.config/helix/config.toml. See languages.toml for per-language tooling.
 
-theme = "rose_pine_transparent"
+theme = "tokyonight_transparent"
 
 [editor]
 line-number = "relative"

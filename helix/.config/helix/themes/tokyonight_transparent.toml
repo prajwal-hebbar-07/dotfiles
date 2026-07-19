@@ -1,0 +1,42 @@
+# Tokyo Night, fully transparent + enriched syntax highlighting.
+#
+# Inherits the upstream `tokyonight` theme (palette + rich syntax carry over),
+# then clears every background — editor, statusline, popups, menus, pickers,
+# completion — so a transparent terminal shows through everywhere. Borders,
+# selections, and the current picker/menu row stay colored so nothing that
+# needs to stand out gets lost against the see-through editor.
+inherits = "tokyonight"
+
+# --- Transparency (clear all backgrounds) -------------------------------------
+"ui.background" = { fg = "fg" }
+"ui.background.separator" = {}
+"ui.statusline" = { fg = "fg-dark" }
+"ui.statusline.inactive" = { fg = "fg-gutter" }
+"ui.statusline.normal" = { fg = "blue", modifiers = ["bold"] }
+"ui.statusline.insert" = { fg = "light-green", modifiers = ["bold"] }
+"ui.statusline.select" = { fg = "magenta", modifiers = ["bold"] }
+"ui.bufferline" = { fg = "comment" }
+"ui.bufferline.active" = { fg = "fg", modifiers = ["bold"] }
+
+# Floating UI: transparent bodies, colored borders + selected row for legibility.
+"ui.popup" = { fg = "fg" }
+"ui.popup.info" = { fg = "fg" }
+"ui.help" = { fg = "fg" }
+"ui.menu" = { fg = "fg" }
+"ui.menu.selected" = { fg = "bg", bg = "blue", modifiers = ["bold"] }
+"ui.menu.scroll" = { fg = "blue" }
+"ui.text.info" = { fg = "fg" }
+"ui.window" = { fg = "border-highlight", modifiers = ["bold"] }
+
+# Pickers (space f, space /, buffers): current row + column headers pop.
+"ui.text.focus" = { fg = "orange", bg = "bg-focus", modifiers = ["bold"] }
+"ui.picker.header.column.active" = { fg = "cyan", modifiers = ["bold"], underline = { style = "line" } }
+
+# --- A few syntax enrichments over the base tokyonight ------------------------
+"variable.builtin" = { fg = "red" }                       # this / self
+"punctuation.special" = { fg = "magenta" }                # template ${}, JSX braces
+"keyword.control.exception" = { fg = "red" }              # try / catch / throw / panic
+"keyword.storage.modifier" = { fg = "magenta", modifiers = ["italic"] }  # async / static / const
+"constant.builtin.boolean" = { fg = "orange" }
+"type.enum.variant" = { fg = "orange" }
+"string.special.url" = { fg = "cyan", underline = { color = "cyan", style = "line" } }

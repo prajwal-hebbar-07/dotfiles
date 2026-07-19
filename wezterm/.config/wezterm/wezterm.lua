@@ -2,9 +2,9 @@ local wezterm = require("wezterm")
 
 local config = wezterm.config_builder()
 
-config.color_scheme = "rose-pine"
+config.color_scheme = "Tokyo Night"
 config.colors = {
-  background = "#000000",
+  background = "#1a1b26",
 }
 config.font = wezterm.font_with_fallback({
   "JetBrains Mono",

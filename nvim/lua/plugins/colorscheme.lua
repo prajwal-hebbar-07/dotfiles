@@ -1,103 +1,70 @@
--- Rosé Pine, transparent + enriched syntax highlighting.
+-- Tokyo Night (night), fully transparent + enriched syntax highlighting.
 --
--- Mirrors the Helix `rose_pine_transparent` theme: the same scope→palette
--- mapping (types=foam, keywords=pine, functions=rose, ...) ported onto Neovim's
--- Treesitter capture groups, a transparent editor so wezterm's blur shows
--- through, and solid "card" popups so floating UI doesn't wash out.
+-- transparent = true clears the editor AND every float, so wezterm's blur shows
+-- through everywhere — no per-plugin surface patching. styles.floats/sidebars
+-- pin the picker, which-key, explorer, notifier, etc. to transparent too.
+-- on_highlights adds extra treesitter colors on top of tokyonight's defaults and
+-- force-clears the snacks/which-key backgrounds as belt-and-suspenders.
 return {
   {
-    "rose-pine/neovim",
-    name = "rose-pine",
+    "folke/tokyonight.nvim",
     opts = {
-      variant = "main", -- matches Helix's `rose_pine` (dark)
-      dark_variant = "main",
+      style = "night",
+      transparent = true,
       styles = {
-        italic = true,
-        bold = true,
-        transparency = true,
+        sidebars = "transparent",
+        floats = "transparent",
+        comments = { italic = true },
+        keywords = { italic = true },
       },
-      highlight_groups = {
-        -- Solid, elevated popup cards over the transparent editor
-        NormalFloat = { bg = "surface" },
-        FloatBorder = { fg = "iris", bg = "surface" },
-        Pmenu = { fg = "subtle", bg = "surface" },
-        PmenuSel = { fg = "base", bg = "iris", bold = true },
-        PmenuSbar = { bg = "overlay" },
-        PmenuThumb = { bg = "iris" },
+      on_highlights = function(hl, c)
+        -- Belt-and-suspenders: keep all floating UI see-through even if a
+        -- plugin integration sets its own background.
+        hl.NormalFloat = { bg = "none" }
+        hl.FloatBorder = { fg = c.blue, bg = "none" }
+        for _, g in ipairs({
+          "SnacksPickerBox",
+          "SnacksPickerList",
+          "SnacksPickerInput",
+          "SnacksPickerPreview",
+          "SnacksNormal",
+          "WhichKeyNormal",
+          "TelescopeNormal",
+          "BlinkCmpMenu",
+          "NoiceCmdlinePopup",
+        }) do
+          hl[g] = { bg = "none" }
+        end
+        hl.SnacksPickerBorder = { fg = c.blue, bg = "none" }
+        hl.WhichKeyBorder = { fg = c.blue, bg = "none" }
 
-        -- Types & namespaces
-        ["@type"] = { fg = "foam" },
-        ["@type.builtin"] = { fg = "foam", italic = true },
-        ["@type.definition"] = { fg = "foam" },
-        ["@type.parameter"] = { fg = "iris" }, -- generics <T>
-        ["@constructor"] = { fg = "foam" },
-        ["@module"] = { fg = "iris" }, -- Go packages, TS namespaces
-        ["@lsp.type.enumMember"] = { fg = "rose" }, -- enum variants
-
-        -- Keywords
-        ["@keyword"] = { fg = "pine" },
-        ["@keyword.function"] = { fg = "pine" }, -- func / function / def
-        ["@keyword.conditional"] = { fg = "pine" },
-        ["@keyword.repeat"] = { fg = "pine" },
-        ["@keyword.import"] = { fg = "iris" }, -- import / from / require
-        ["@keyword.return"] = { fg = "pine", italic = true },
-        ["@keyword.exception"] = { fg = "love" }, -- try / catch / throw / panic
-        ["@keyword.directive"] = { fg = "iris" }, -- pragmas, "use client"
-        ["@keyword.modifier"] = { fg = "pine", italic = true }, -- async / static / const
-        ["@keyword.type"] = { fg = "foam" }, -- class / struct / interface
-        ["@keyword.operator"] = { fg = "subtle" },
-        ["@operator"] = { fg = "subtle" },
-
-        -- Functions
-        ["@function"] = { fg = "rose" },
-        ["@function.call"] = { fg = "rose" },
-        ["@function.method"] = { fg = "rose" },
-        ["@function.method.call"] = { fg = "rose" },
-        ["@function.builtin"] = { fg = "love" },
-        ["@function.macro"] = { fg = "iris" },
-
-        -- Variables & members
-        ["@variable"] = { fg = "text" },
-        ["@variable.builtin"] = { fg = "love" }, -- this / self
-        ["@variable.parameter"] = { fg = "iris" },
-        ["@variable.member"] = { fg = "foam" }, -- obj.field
-        ["@property"] = { fg = "foam" },
-        ["@label"] = { fg = "foam" },
-        ["@attribute"] = { fg = "iris" }, -- JSX/HTML attrs, decorators
-
-        -- Tags (JSX / HTML)
-        ["@tag"] = { fg = "foam" },
-        ["@tag.builtin"] = { fg = "foam", bold = true },
-        ["@tag.attribute"] = { fg = "iris" },
-        ["@tag.delimiter"] = { fg = "subtle" },
-
-        -- Constants, numbers, strings
-        ["@constant"] = { fg = "foam" },
-        ["@constant.builtin"] = { fg = "love" },
-        ["@boolean"] = { fg = "rose" },
-        ["@character"] = { fg = "gold" },
-        ["@character.special"] = { fg = "pine" }, -- escapes
-        ["@string"] = { fg = "gold" },
-        ["@string.escape"] = { fg = "pine" },
-        ["@string.regexp"] = { fg = "foam" },
-        ["@string.special.url"] = { fg = "iris", underline = true },
-        ["@string.special.path"] = { fg = "gold" },
-        ["@number"] = { fg = "gold" },
-        ["@number.float"] = { fg = "gold" },
-
-        -- Punctuation
-        ["@punctuation.delimiter"] = { fg = "subtle" },
-        ["@punctuation.bracket"] = { fg = "subtle" },
-        ["@punctuation.special"] = { fg = "rose" }, -- template ${}, JSX braces
-
-        -- Comments
-        ["@comment"] = { fg = "muted", italic = true },
-        ["@comment.documentation"] = { fg = "subtle", italic = true },
-      },
+        -- Extra syntax richness on top of tokyonight's palette.
+        hl["@type.builtin"] = { fg = c.cyan, italic = true }
+        hl["@type.parameter"] = { fg = c.magenta } -- generics <T>
+        hl["@constructor"] = { fg = c.cyan }
+        hl["@module"] = { fg = c.cyan } -- Go packages, TS namespaces
+        hl["@lsp.type.enumMember"] = { fg = c.orange }
+        hl["@keyword.import"] = { fg = c.cyan }
+        hl["@keyword.exception"] = { fg = c.red }
+        hl["@keyword.return"] = { fg = c.magenta, italic = true }
+        hl["@keyword.coroutine"] = { fg = c.magenta, italic = true } -- async/await
+        hl["@variable.member"] = { fg = c.green1 } -- obj.field
+        hl["@variable.builtin"] = { fg = c.red } -- this / self
+        hl["@property"] = { fg = c.green1 }
+        hl["@attribute"] = { fg = c.orange } -- decorators, JSX/HTML attrs
+        hl["@tag.attribute"] = { fg = c.orange }
+        hl["@tag.builtin"] = { fg = c.blue, bold = true }
+        hl["@string.escape"] = { fg = c.magenta }
+        hl["@string.special.url"] = { fg = c.cyan, underline = true }
+        hl["@punctuation.special"] = { fg = c.magenta } -- template ${}, JSX braces
+        hl["@boolean"] = { fg = c.orange }
+        hl["@number.float"] = { fg = c.orange }
+        hl["@comment.documentation"] = { fg = c.yellow, italic = true }
+      end,
     },
   },
   {
     "LazyVim/LazyVim",
-    opts = { colorscheme = "rose-pine" },
+    opts = { colorscheme = "tokyonight" },
   },
 }
