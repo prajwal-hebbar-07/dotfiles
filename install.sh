@@ -10,6 +10,7 @@ PACKAGES=(
   starship
   git
   helix
+  nvim
   codex
 )
 
@@ -71,6 +72,7 @@ remove_repo_symlink "$HOME/.config/wezterm"
 remove_repo_symlink "$HOME/.config/starship"
 remove_repo_symlink "$HOME/.config/starship.toml"
 remove_repo_symlink "$HOME/.config/helix"
+remove_repo_symlink "$HOME/.config/nvim"
 remove_repo_symlink "$HOME/.config/git/config"
 remove_repo_symlink "$HOME/.claude/skills"
 remove_repo_symlink "$HOME/.claude-one"

@@ -22,7 +22,7 @@ cd ~/dotfiles
 The install script runs GNU Stow for these packages:
 
 ```sh
-stow --target="$HOME" --restow zsh tmux wezterm starship git helix codex
+stow --target="$HOME" --restow zsh tmux wezterm starship git helix nvim codex
 ```
 
 ## Claude
@@ -201,6 +201,25 @@ The system config path is expected to point to this repo:
 
 ```sh
 ~/.config/helix -> <repo>/helix/.config/helix
+```
+
+## Neovim
+
+The Neovim configuration lives in `nvim/.config/nvim`. `init.lua` bootstraps
+`lazy.nvim` with an empty plugin spec, while `lua/config/options.lua` and
+`lua/config/keymaps.lua` contain the built-in editor settings. No other plugins
+are included.
+
+Install Neovim with:
+
+```sh
+brew install neovim
+```
+
+The system config path is expected to point to this repo:
+
+```sh
+~/.config/nvim -> <repo>/nvim/.config/nvim
 ```
 
 ## Git
