@@ -32,16 +32,24 @@ separate `CLAUDE_CONFIG_DIR`) share one repo-tracked config. Each keeps its own
 sessions, caches, and credentials as a real directory, and `install.sh`
 symlinks the shared pieces into it.
 
-All three share one skills folder (`claude/skills`); `claude-one`/`claude-two`
-additionally share one login-agnostic `claude/settings.json`:
+All three share one skills folder (`claude/skills`) and session-title hook;
+`claude-one`/`claude-two` additionally share one login-agnostic
+`claude/settings.json`:
 
 ```sh
 ~/.claude/skills           -> <repo>/claude/skills
 ~/.claude-one/skills        -> <repo>/claude/skills
 ~/.claude-two/skills        -> <repo>/claude/skills
+~/.claude/session-title.sh  -> <repo>/claude/session-title.sh
+~/.claude-one/session-title.sh -> <repo>/claude/session-title.sh
+~/.claude-two/session-title.sh -> <repo>/claude/session-title.sh
 ~/.claude-one/settings.json -> <repo>/claude/settings.json
 ~/.claude-two/settings.json -> <repo>/claude/settings.json
 ```
+
+The shared settings name a new chat from its first prompt using four searchable
+words; the fourth includes a short session ID so names remain unique. An
+explicit `--name` or `/rename` always wins and is never overwritten.
 
 Pick a login with `CLAUDE_CONFIG_DIR`; the `cc1`/`cc2` zsh aliases wrap this.
 The shared skills include `commit` (commits only the already-staged changes

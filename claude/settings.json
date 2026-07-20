@@ -11,6 +11,18 @@
       }
     }
   },
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_CONFIG_DIR/session-title.sh\""
+          }
+        ]
+      }
+    ]
+  },
   "effortLevel": "high",
   "tui": "fullscreen",
   "skipDangerousModePermissionPrompt": true,

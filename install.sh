@@ -83,6 +83,9 @@ remove_repo_symlink "$HOME/.claude-two"
 remove_repo_symlink "$HOME/.claude-two/settings.json"
 remove_repo_symlink "$HOME/.claude-two/skills"
 remove_repo_symlink "$HOME/.claude-two/statusline.sh"
+remove_repo_symlink "$HOME/.claude/session-title.sh"
+remove_repo_symlink "$HOME/.claude-one/session-title.sh"
+remove_repo_symlink "$HOME/.claude-two/session-title.sh"
 # Clean up per-skill symlinks, including retired ones, so re-running install on
 # a machine that had the old skills replaces them with the current set.
 for _skill in commit ship plan plan-review plan-ask plan-detail plan-done \
@@ -107,6 +110,7 @@ for _claude_dir in "$HOME/.claude" "$HOME/.claude-one" "$HOME/.claude-two"; do
   [ -d "$_claude_dir/skills" ] && [ ! -L "$_claude_dir/skills" ] \
     && rmdir "$_claude_dir/skills" 2>/dev/null
   ln -sfn "$DOTFILES_DIR/claude/skills" "$_claude_dir/skills"
+  ln -s "$DOTFILES_DIR/claude/session-title.sh" "$_claude_dir/session-title.sh"
 done
 
 # claude-one/claude-two additionally share one login-agnostic settings.json.
