@@ -239,7 +239,7 @@ It configures the interactive shell for command discovery and nicer typing:
 - Loads `zsh-syntax-highlighting` from Homebrew so commands are colored as you
   type.
 - Loads `fzf` from Homebrew for visual command history, file, and folder search.
-- Uses `eza` for richer directory listings and `tree` for quick directory maps.
+- Uses GNU `ls` for fast colored directory listings and `tree` for directory maps.
 - Uses `ripgrep` aliases for hidden-file-aware text and file search.
 - Uses `sesh` with `gum` for tmux session picking.
 - Adds `cc1` and `cc2` Claude aliases for `~/.claude-two` and
@@ -251,7 +251,7 @@ It configures the interactive shell for command discovery and nicer typing:
 Install the shell tools with:
 
 ```sh
-brew install zsh-autosuggestions zsh-syntax-highlighting fzf starship eza ripgrep gum yazi tree coreutils
+brew install zsh-autosuggestions zsh-syntax-highlighting fzf starship ripgrep gum yazi tree coreutils
 brew install joshmedeski/sesh/sesh
 ```
 

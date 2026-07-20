@@ -27,7 +27,7 @@ terminal organization instead.
 | `Option` + `c` | Open visual fuzzy search over folders and jump to the selected folder |
 | `ss` | Pick or create a tmux session with `sesh` and `gum` |
 | `yy` | Open `yazi` in the current directory |
-| `lt` | Show a three-level `eza` tree |
+| `lt` | Show a three-level directory tree |
 | `rgi` | Search text with `ripgrep`, including hidden files except `.git` |
 | `rgf` | List files with `ripgrep`, including hidden files except `.git` |
 

@@ -99,13 +99,13 @@ if [[ -o interactive && -t 0 ]] && command -v fzf >/dev/null 2>&1; then
 
   export FZF_CTRL_T_OPTS="
     --prompt='files > '
-    --preview='bat --style=numbers --color=always --line-range=:300 {} 2>/dev/null || eza --tree --level=2 --icons=always --color=always {} 2>/dev/null'
+    --preview='bat --style=numbers --color=always --line-range=:300 {} 2>/dev/null || tree -C -L 2 -a -I \".git|node_modules|.venv|__pycache__\" --charset X {} 2>/dev/null'
     --preview-window=right:60%:wrap
   "
 
   export FZF_ALT_C_OPTS="
     --prompt='folders > '
-    --preview='eza --tree --level=2 --icons=always --color=always --group-directories-first {} 2>/dev/null'
+    --preview='tree -C --dirsfirst -L 2 -a -I \".git|node_modules|.venv|__pycache__\" --charset X {} 2>/dev/null'
     --preview-window=right:60%:wrap
   "
 
@@ -130,10 +130,10 @@ alias cc1='CLAUDE_CONFIG_DIR="$HOME/.claude-two" claude --dangerously-skip-permi
 alias cc2='CLAUDE_CONFIG_DIR="$HOME/.claude-one" claude --dangerously-skip-permissions'
 alias g='lazygit'
 alias hd='hunk diff'
-alias ls='eza --grid --icons=always --group-directories-first'
-alias ll='eza --long --icons=always --git --no-user --group-directories-first'
-alias la='eza --long --all --icons=always --git --no-user --group-directories-first'
-alias lt='eza --tree --level=3 --icons=always --git --group-directories-first'
+alias ls='ls --color=auto --group-directories-first'
+alias ll='ls -lh --color=auto --group-directories-first'
+alias la='ls -lah --color=auto --group-directories-first'
+alias lt='tree'
 alias tree='tree -L 3 -a -I ".git|node_modules|.venv|__pycache__" --charset X'
 alias rgi='rg --hidden --glob "!.git"'
 alias rgf='rg --files --hidden --glob "!.git"'
