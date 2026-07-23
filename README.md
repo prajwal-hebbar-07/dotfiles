@@ -124,7 +124,7 @@ It configures tmux as the main place for tabs, panes, movement, and copy mode:
 - Uses vi-style copy mode.
 - Copies selected text into the macOS clipboard with `pbcopy`.
 - Opens focused popups for `lazygit`, `yazi`, `tree`, and `sesh`.
-- Uses a Catppuccin Mocha-inspired status bar and pane border theme.
+- Uses a Tokyo Night status bar and pane border theme.
 
 The system config path is expected to point to this repo:
 
@@ -214,9 +214,9 @@ The system config path is expected to point to this repo:
 ## Neovim
 
 The Neovim configuration lives in `nvim/.config/nvim`. `init.lua` bootstraps
-`lazy.nvim` with an empty plugin spec, while `lua/config/options.lua` and
-`lua/config/keymaps.lua` contain the built-in editor settings. No other plugins
-are included.
+`lazy.nvim`, while `lua/config/options.lua` and `lua/config/keymaps.lua` contain
+the built-in editor settings. The only plugin is `folke/tokyonight.nvim`, set to
+the `night` style so Neovim matches the Tokyo Night palette used elsewhere.
 
 Install Neovim with:
 

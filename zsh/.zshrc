@@ -217,3 +217,8 @@ export PATH="/Users/hebbar/.codeium/windsurf/bin:$PATH"
 
 # Added by Antigravity IDE
 export PATH="/Users/hebbar/.antigravity-ide/antigravity-ide/bin:$PATH"
+
+# Added by LM Studio CLI (lms)
+export PATH="$PATH:/Users/hebbar/.lmstudio/bin"
+# End of LM Studio CLI section
+
