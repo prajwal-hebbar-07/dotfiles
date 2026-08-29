@@ -125,6 +125,11 @@ Page ids are the awkward part: the MCP cannot enumerate pages, so when only a
 page name is known the skill records `pageId: UNKNOWN` and leaves the consuming
 skill to confirm the page by name — it never pins a page it did not see.
 
+Nothing in it is omp-specific — it is a plain Agent Skills package that reads the
+Paper MCP and writes Markdown — so the one directory is linked into both hosts:
+`~/.omp/agent/skills/paper-target` and `~/.cursor/skills/paper-target`. One file
+to edit, no copy to drift, and both hosts resolve the same target block.
+
 **`paper` MCP server** (`ohmypi/mcp.json`) — stdio server for Paper Desktop,
 `~/.paper/bin/paper mcp`, and the only definition of that server on this
 machine. The `paper-desktop@paper` marketplace plugin (v0.2.1) declared the
@@ -162,6 +167,19 @@ nothing.
 
 Editor for hands-on code work: an AI-native fork of VS Code, so VS Code
 keybindings, settings, and extensions carry over.
+
+**Skills** — Cursor discovers user-level skills from `~/.cursor/skills/` (and
+`~/.agents/skills/`, plus the Claude and Codex directories for compatibility),
+so `paper-target` is linked there from `ohmypi/skills/`. `~/.cursor/skills-cursor/`
+is Cursor's own directory for its built-in skills, kept in sync from a
+`.sync-manifest.json`; nothing of mine goes in it. `commit` is not linked in —
+it dispatches an omp task agent, which Cursor has no equivalent of, and Cursor's
+own commit flow covers that ground.
+
+**Paper MCP** — comes from the `paper-desktop` plugin here rather than a hand
+written server: Cursor expands `${userHome}` in plugin manifests, so the same
+manifest that fails under omp spawns correctly, and its tool schemas are cached
+per project under `~/.cursor/projects/<slug>/mcps/`.
 
 ### zsh
 
@@ -331,7 +349,7 @@ Already linked:
 
 ```sh
 ln -sfn "$PWD/zsh/zshrc"       ~/.zshrc
-mkdir -p ~/.local/bin ~/.config/tmux ~/.config/ghostty ~/.omp/agent/skills ~/.omp/agent/agents
+mkdir -p ~/.local/bin ~/.config/tmux ~/.config/ghostty ~/.omp/agent/skills ~/.omp/agent/agents ~/.cursor/skills
 ln -sfn "$PWD/zsh/bin/pk-preview" ~/.local/bin/pk-preview
 ln -sfn "$PWD/tmux/tmux.conf"  ~/.config/tmux/tmux.conf
 ln -sfn "$PWD/ghostty/config" ~/.config/ghostty/config
@@ -341,6 +359,8 @@ ln -sfn "$PWD/ohmypi/skills/paper-target" ~/.omp/agent/skills/paper-target
 ln -sfn "$PWD/ohmypi/agents/committer.md" ~/.omp/agent/agents/committer.md
 ln -sfn "$PWD/ohmypi/mcp.json"            ~/.omp/agent/mcp.json
 ln -sfn "$PWD/ohmypi/RULES.md"            ~/.omp/agent/RULES.md
+
+ln -sfn "$PWD/ohmypi/skills/paper-target" ~/.cursor/skills/paper-target
 ```
 
 Marketplace plugins live outside this repo, in `~/.omp/plugins`; ponytail is
@@ -359,3 +379,6 @@ current window. A running tmux server picks up edits to `tmux/tmux.conf` with
 Task agents are rediscovered on every dispatch, but skills and rules are read at
 startup — a new or renamed skill needs an omp restart before `/skill:<name>` sees
 it, and edits to `RULES.md` take hold in the next session, not the running one.
+Cursor also reads its skill directories at startup: **Developer: Reload Window**
+is enough, and the skill then appears under Customize → Skills and as
+`/paper-target` in Agent chat.
