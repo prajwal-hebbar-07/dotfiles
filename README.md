@@ -2,9 +2,10 @@
 
 Personal configuration for my daily development setup.
 
-> Status: the shell (`zsh/`) and terminal multiplexer (`tmux/`) configurations
-> are committed and live on this machine. The remaining tools listed below are
-> still to land; this README records them so the layout is known in advance.
+> Status: the shell (`zsh/`), terminal multiplexer (`tmux/`), and harness
+> (`ohmypi/`) configurations are committed and live on this machine. The
+> remaining tools listed below are still to land; this README records them so
+> the layout is known in advance.
 
 ## What I use
 
@@ -34,8 +35,20 @@ straightforward to version here.
 ### Oh My Pi
 
 The coding harness I work through — agent-driven editing, search, and
-verification against this machine rather than a hosted sandbox. Its settings and
-rules belong in this repo so behavior is reproducible across machines.
+verification against this machine rather than a hosted sandbox. `ohmypi/` holds
+its skills and task agents, symlinked into `~/.omp/agent/`.
+
+**`commit` skill** (`/skill:commit`) — turns staged changes into one semantic
+commit. It checks that `user.name` and `user.email` are set, refuses to run with
+an empty index, writes a `type(scope): summary` subject followed by pointer
+bullets, and adds no `Co-Authored-By:` or "Generated with" trailer, so git
+history carries no harness attribution. It never runs `git add` — staging stays
+my decision.
+
+**`committer` agent** — the skill's whole job is delegation. It dispatches this
+agent, which runs `anthropic/claude-haiku-4-5` at `thinking-level: minimal` with
+`bash` as its only tool, so the diff is read by the cheap model and never enters
+the main session's context.
 
 ### Cursor
 
@@ -89,7 +102,9 @@ As configuration is added, it should land under one directory per tool:
 dotfiles/
 ├── brave/      # browser preferences, extension notes
 ├── ghostty/    # terminal config, theme, font
-├── ohmypi/     # harness settings and rules
+├── ohmypi/     # harness skills and task agents
+│   ├── skills/commit/SKILL.md
+│   └── agents/committer.md
 ├── cursor/     # editor settings, keybindings, extension list
 ├── zsh/        # zshrc, shell exports and aliases
 └── tmux/       # tmux.conf, Pale Knight theme and keys
@@ -104,10 +119,14 @@ Already linked:
 
 ```sh
 ln -sfn "$PWD/zsh/zshrc"       ~/.zshrc
-mkdir -p ~/.config/tmux
+mkdir -p ~/.config/tmux ~/.omp/agent/skills ~/.omp/agent/agents
 ln -sfn "$PWD/tmux/tmux.conf"  ~/.config/tmux/tmux.conf
+ln -sfn "$PWD/ohmypi/skills/commit"     ~/.omp/agent/skills/commit
+ln -sfn "$PWD/ohmypi/agents/committer.md" ~/.omp/agent/agents/committer.md
 ```
 
 Any pre-existing real `~/.zshrc` was copied to `~/.zshrc.backup.<timestamp>`
 before the link was created. A running tmux server picks up edits to
-`tmux/tmux.conf` with `prefix C-r`; new servers read it on start.
+`tmux/tmux.conf` with `prefix C-r`; new servers read it on start. Task agents are
+rediscovered on every dispatch, but skills are read at startup — a new or renamed
+skill needs an omp restart before `/skill:<name>` sees it.
