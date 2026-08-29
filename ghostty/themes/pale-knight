@@ -1,63 +1,74 @@
 # Pale Knight — Ghostty theme
 #
-# Same palette as tmux/tmux.conf and zsh/zshrc: dusk-blue ground, bone text,
-# soul-cyan for what is alive and focused, infection for what wants attention.
+# Material Palenight, held down in chroma. Indigo-violet ground, Palenight's own
+# foreground, soul-cyan for what is alive and focused, infection for what wants
+# attention. Same palette as tmux/tmux.conf and zsh/zshrc.
 #
 # Selected from ghostty/config with `theme = pale-knight`. Ghostty reads custom
 # themes from the `themes` subdirectory of its config directory.
 #
-# ── Design rule ──────────────────────────────────────────────────────────────
-# Every accent is generated in OKLCH at one fixed lightness, so hue is the only
-# thing that changes between them. Equal lightness means equal attention: six
-# colours you can tell apart, none of which grabs the eye before the others.
+# ── Surfaces are Palenight ───────────────────────────────────────────────────
+# The ground is violet, not blue-grey: every surface sits on hue 278-286 in
+# OKLCH, the hue band Palenight itself occupies, at Palenight's chroma rather
+# than half of it. Three of the seven steps are Palenight's own colours.
 #
-#   ANSI 1-6    L = 0.72    contrast vs background 6.4-6.7:1
-#   ANSI 9-14   L = 0.80    contrast vs background 8.5-8.9:1
-#   chroma      0.055-0.070 (roughly half of Tokyo Night, a third of the old
-#               palette) — enough to name the colour, not enough to shout
+#   background  #26283b   L 0.285  C 0.034  H 278   (Palenight bg    #292d3e)
+#   crypt       #32334a   L 0.330  C 0.040  H 281
+#   shade       #444364   L 0.398  C 0.055  H 286   (Palenight sel   #444267)
+#   stone       #696e93   L 0.548  C 0.058  H 278   (Palenight comm. #676e95)
+#   ash         #9297ba   L 0.685  C 0.052  H 278
+#   foreground  #a6accd   L 0.751  C 0.048  H 277   (Palenight fg    #a6accd)
+#   pale        #d4d7f1   L 0.885  C 0.035  H 280
 #
-# Compared against Tokyo Night and Material Palenight: Palenight's lifted
-# background and soft foreground, Tokyo Night Storm's even accent weighting,
-# then both pushed further down in chroma. The background sits at L = 0.244
-# rather than near-black so bright glyphs stop haloing.
+# ── Accents keep the equal-weight rule ───────────────────────────────────────
+# Palenight's hues, generated in OKLCH at one fixed lightness, so hue is the
+# only thing that changes between them. Equal lightness means equal attention:
+# six colours you can tell apart, none of which grabs the eye before the others.
+#
+#   ANSI 1-6    L = 0.72    contrast vs background 5.6-6.0:1
+#   ANSI 9-14   L = 0.80    contrast vs background 7.5-8.0:1
+#   chroma      0.095       (violet 0.105) — about 70% of Palenight's 0.13-0.16,
+#               so the hue is unmistakable without the neon
+#   hues        red 19  green 130  yellow 81  blue 264  violet 311  cyan 226
+#               — Palenight's own, within a degree or two
 
 # ── Surface ──────────────────────────────────────────────────────────────────
-# void, and bone at 7.6:1 instead of the old 12.7:1 — comfortable for long
-# sessions rather than maximally legible for one glance.
-background = #1d2029
-foreground = #aab2be
+# Foreground on background is 6.5:1, a shade above Palenight's own 6.1:1 —
+# comfortable for long sessions rather than maximally legible for one glance.
+background = #26283b
+foreground = #a6accd
 
 # Block cursor is the largest solid colour on screen, so it gets a normal-weight
 # accent, not a bright one.
-cursor-color = #7bb0b0
-cursor-text  = #1d2029
+cursor-color = #5cb1d2
+cursor-text  = #26283b
 
-selection-background = #393d4a
-selection-foreground = #d2d8e1
+selection-background = #444364
+selection-foreground = #d4d7f1
 
 # Find-in-terminal highlight: muted infection on void, matching the tmux message
 # bar. Findable at a glance, no longer a flare.
-search-background = #bba077
-search-foreground = #1d2029
+search-background = #c39e5c
+search-foreground = #26283b
 
-split-divider-color = #393d4a
+split-divider-color = #444364
 
 # ── ANSI 0-7 ─────────────────────────────────────────────────────────────────
-palette = 0=#292c37
-palette = 1=#cd9491
-palette = 2=#92ae8e
-palette = 3=#bba077
-palette = 4=#8ea6c9
-palette = 5=#b19ac0
-palette = 6=#7bb0b0
-palette = 7=#aab2be
+palette = 0=#32334a
+palette = 1=#da8c8d
+palette = 2=#91b171
+palette = 3=#c39e5c
+palette = 4=#86a4e1
+palette = 5=#ba92d5
+palette = 6=#5cb1d2
+palette = 7=#a6accd
 
 # ── ANSI 8-15 (bright) ───────────────────────────────────────────────────────
-palette = 8=#656c7d
-palette = 9=#ebaba8
-palette = 10=#a8c8a4
-palette = 11=#d7b98b
-palette = 12=#a5c0e7
-palette = 13=#ccb2dd
-palette = 14=#8fcaca
-palette = 15=#d2d8e1
+palette = 8=#696e93
+palette = 9=#f5a5a6
+palette = 10=#aaca89
+palette = 11=#ddb875
+palette = 12=#9fbdfc
+palette = 13=#d3abf0
+palette = 14=#76cbed
+palette = 15=#d4d7f1

@@ -18,35 +18,37 @@
 
 
 # ── Palette ──────────────────────────────────────────────────────────────────
-# Shared with ghostty/themes/pale-knight and tmux/tmux.conf. The five accents
-# are generated in OKLCH at one fixed lightness (L = 0.72), so hue is the only
-# difference between them: all five land at 6.4-6.7:1 against void, so syntax
-# highlighting reads as distinct roles without any one colour grabbing the eye.
+# Shared with ghostty/themes/pale-knight and tmux/tmux.conf. Surfaces sit in
+# Material Palenight's own OKLCH hue band (278-286) at its chroma, so the ground
+# reads violet, not blue-grey. The four accents are generated at one fixed
+# lightness (L = 0.72) on Palenight's hues, so hue is the only difference
+# between them: all four land at 5.6-6.0:1 against void, so syntax highlighting
+# reads as distinct roles without any one colour grabbing the eye.
 #
-# void      #1d2029   the abyss, deepest background
-# crypt     #292c37   status bar ground
-# shade     #393d4a   raised cell
-# stone     #656c7d   dim text, separators
-# ash       #858c9b   muted labels
-# bone      #aab2be   body text
-# pale      #d2d8e1   pale king white, active text
-# soul      #7bb0b0   cyan, focus and life
-# lifeblood #8ea6c9   blue, secondary accent
-# infection #bba077   amber, warnings and prompts
-# essence   #b19ac0   violet, quiet metadata
+# void      #26283b   the abyss, deepest background
+# crypt     #32334a   status bar ground
+# shade     #444364   raised cell
+# stone     #696e93   dim text, separators
+# ash       #9297ba   muted labels
+# bone      #a6accd   body text
+# pale      #d4d7f1   pale king white, active text
+# soul      #5cb1d2   cyan, focus and life
+# lifeblood #86a4e1   blue, secondary accent
+# infection #c39e5c   amber, warnings and prompts
+# essence   #ba92d5   violet, quiet metadata
 
 typeset -gA PK=(
-  void      '#1d2029'
-  crypt     '#292c37'
-  shade     '#393d4a'
-  stone     '#656c7d'
-  ash       '#858c9b'
-  bone      '#aab2be'
-  pale      '#d2d8e1'
-  soul      '#7bb0b0'
-  lifeblood '#8ea6c9'
-  infection '#bba077'
-  essence   '#b19ac0'
+  void      '#26283b'
+  crypt     '#32334a'
+  shade     '#444364'
+  stone     '#696e93'
+  ash       '#9297ba'
+  bone      '#a6accd'
+  pale      '#d4d7f1'
+  soul      '#5cb1d2'
+  lifeblood '#86a4e1'
+  infection '#c39e5c'
+  essence   '#ba92d5'
 )
 
 
@@ -141,10 +143,10 @@ zstyle ':completion:*' group-name ''          # one labelled group per match typ
 
 # Raw SGR, not %F{…}: fzf-tab renders these group headers itself and never runs
 # them through prompt expansion, so a %F would show up as literal text.
-zstyle ':completion:*:*:*:*:descriptions' format $'\e[1;38;2;123;176;176m◈ %d\e[0m'
-zstyle ':completion:*:*:*:*:corrections'  format $'\e[38;2;187;160;119m× %d (errors: %e)\e[0m'
-zstyle ':completion:*:*:*:*:messages'     format $'\e[38;2;177;154;192m%d\e[0m'
-zstyle ':completion:*:*:*:*:warnings'     format $'\e[38;2;101;108;125mno matches for %d\e[0m'
+zstyle ':completion:*:*:*:*:descriptions' format $'\e[1;38;2;92;177;210m◈ %d\e[0m'
+zstyle ':completion:*:*:*:*:corrections'  format $'\e[38;2;195;158;92m× %d (errors: %e)\e[0m'
+zstyle ':completion:*:*:*:*:messages'     format $'\e[38;2;186;146;213m%d\e[0m'
+zstyle ':completion:*:*:*:*:warnings'     format $'\e[38;2;105;110;147mno matches for %d\e[0m'
 
 zstyle ':completion:*:*:cd:*' tag-order local-directories directory-stack path-directories
 zstyle ':completion:*:*:kill:*:processes' command 'ps -u $USER -o pid,%cpu,tty,cputime,cmd'
@@ -156,50 +158,50 @@ zstyle ':completion:*:git-checkout:*' sort false
 # ── File colours ─────────────────────────────────────────────────────────────
 # One palette drives eza, the completion menu, and every fzf preview.
 _pk_lscolors=(
-  "di=1;38;2;123;176;176"    # directories        soul, bold
-  "ln=38;2;177;154;192"      # symlinks           essence
-  "or=1;38;2;187;160;119"    # broken symlinks    infection, bold
-  "ex=1;38;2;142;166;201"    # executables        lifeblood, bold
-  "fi=38;2;170;178;190"      # regular files      bone
-  "pi=38;2;101;108;125"      # fifos              stone
-  "so=38;2;177;154;192"      # sockets
-  "bd=38;2;101;108;125"
-  "cd=38;2;101;108;125"
+  "di=1;38;2;92;177;210"    # directories        soul, bold
+  "ln=38;2;186;146;213"      # symlinks           essence
+  "or=1;38;2;195;158;92"    # broken symlinks    infection, bold
+  "ex=1;38;2;134;164;225"    # executables        lifeblood, bold
+  "fi=38;2;166;172;205"      # regular files      bone
+  "pi=38;2;105;110;147"      # fifos              stone
+  "so=38;2;186;146;213"      # sockets
+  "bd=38;2;105;110;147"
+  "cd=38;2;105;110;147"
   # setuid/setgid — void on infection, the same warning badge used everywhere
   # else. Pale on infection would be 1.7:1.
-  "su=38;2;29;32;41;48;2;187;160;119"
-  "sg=38;2;29;32;41;48;2;187;160;119"
-  "tw=1;38;2;123;176;176"
-  "ow=1;38;2;123;176;176"
+  "su=38;2;38;40;59;48;2;195;158;92"
+  "sg=38;2;38;40;59;48;2;195;158;92"
+  "tw=1;38;2;92;177;210"
+  "ow=1;38;2;92;177;210"
   # archives and disk images — infection
-  "*.zip=38;2;187;160;119" "*.tar=38;2;187;160;119" "*.gz=38;2;187;160;119"
-  "*.tgz=38;2;187;160;119" "*.bz2=38;2;187;160;119" "*.xz=38;2;187;160;119"
-  "*.zst=38;2;187;160;119" "*.7z=38;2;187;160;119"  "*.rar=38;2;187;160;119"
-  "*.dmg=38;2;187;160;119" "*.pkg=38;2;187;160;119"
+  "*.zip=38;2;195;158;92" "*.tar=38;2;195;158;92" "*.gz=38;2;195;158;92"
+  "*.tgz=38;2;195;158;92" "*.bz2=38;2;195;158;92" "*.xz=38;2;195;158;92"
+  "*.zst=38;2;195;158;92" "*.7z=38;2;195;158;92"  "*.rar=38;2;195;158;92"
+  "*.dmg=38;2;195;158;92" "*.pkg=38;2;195;158;92"
   # media — essence
-  "*.png=38;2;177;154;192" "*.jpg=38;2;177;154;192" "*.jpeg=38;2;177;154;192"
-  "*.gif=38;2;177;154;192" "*.svg=38;2;177;154;192" "*.webp=38;2;177;154;192"
-  "*.mp4=38;2;177;154;192" "*.mov=38;2;177;154;192" "*.mp3=38;2;177;154;192"
-  "*.pdf=38;2;177;154;192"
+  "*.png=38;2;186;146;213" "*.jpg=38;2;186;146;213" "*.jpeg=38;2;186;146;213"
+  "*.gif=38;2;186;146;213" "*.svg=38;2;186;146;213" "*.webp=38;2;186;146;213"
+  "*.mp4=38;2;186;146;213" "*.mov=38;2;186;146;213" "*.mp3=38;2;186;146;213"
+  "*.pdf=38;2;186;146;213"
   # configuration and prose — lifeblood
-  "*.json=38;2;142;166;201" "*.toml=38;2;142;166;201" "*.yaml=38;2;142;166;201"
-  "*.yml=38;2;142;166;201"  "*.ini=38;2;142;166;201"  "*.conf=38;2;142;166;201"
-  "*.md=38;2;142;166;201"   "*.txt=38;2;142;166;201"
+  "*.json=38;2;134;164;225" "*.toml=38;2;134;164;225" "*.yaml=38;2;134;164;225"
+  "*.yml=38;2;134;164;225"  "*.ini=38;2;134;164;225"  "*.conf=38;2;134;164;225"
+  "*.md=38;2;134;164;225"   "*.txt=38;2;134;164;225"
   # noise — stone
-  "*.lock=38;2;101;108;125" "*.log=38;2;101;108;125" "*.bak=38;2;101;108;125"
-  "*.tmp=38;2;101;108;125"  "*.DS_Store=38;2;101;108;125"
+  "*.lock=38;2;105;110;147" "*.log=38;2;105;110;147" "*.bak=38;2;105;110;147"
+  "*.tmp=38;2;105;110;147"  "*.DS_Store=38;2;105;110;147"
 )
 export LS_COLORS="${(j.:.)_pk_lscolors}"
 unset _pk_lscolors
 
 # eza's extra columns, on top of LS_COLORS.
 export EZA_COLORS="\
-uu=38;2;101;108;125:gu=38;2;101;108;125:\
-da=38;2;101;108;125:sn=38;2;123;176;176:sb=38;2;101;108;125:\
-ur=38;2;170;178;190:uw=38;2;187;160;119:ux=38;2;142;166;201:ue=38;2;142;166;201:\
-gr=38;2;101;108;125:gw=38;2;101;108;125:gx=38;2;101;108;125:\
-tr=38;2;101;108;125:tw=38;2;101;108;125:tx=38;2;101;108;125:xx=38;2;57;61;74:\
-ga=38;2;123;176;176:gm=38;2;187;160;119:gd=38;2;187;160;119:gv=38;2;177;154;192"
+uu=38;2;105;110;147:gu=38;2;105;110;147:\
+da=38;2;105;110;147:sn=38;2;92;177;210:sb=38;2;105;110;147:\
+ur=38;2;166;172;205:uw=38;2;195;158;92:ux=38;2;134;164;225:ue=38;2;134;164;225:\
+gr=38;2;105;110;147:gw=38;2;105;110;147:gx=38;2;105;110;147:\
+tr=38;2;105;110;147:tw=38;2;105;110;147:tx=38;2;105;110;147:xx=38;2;68;67;100:\
+ga=38;2;92;177;210:gm=38;2;195;158;92:gd=38;2;195;158;92:gv=38;2;186;146;213"
 
 zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
 zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
