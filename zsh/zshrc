@@ -132,10 +132,12 @@ zstyle ':completion:*' squeeze-slashes true
 zstyle ':completion:*' verbose true
 zstyle ':completion:*' group-name ''          # one labelled group per match type
 
-zstyle ':completion:*:*:*:*:descriptions' format "%F{${PK[soul]}}%B❖ %d%b%f"
-zstyle ':completion:*:*:*:*:corrections'  format "%F{${PK[infection]}}✘ %d (errors: %e)%f"
-zstyle ':completion:*:*:*:*:messages'     format "%F{${PK[essence]}}%d%f"
-zstyle ':completion:*:*:*:*:warnings'     format "%F{${PK[stone]}}no matches for %d%f"
+# Raw SGR, not %F{…}: fzf-tab renders these group headers itself and never runs
+# them through prompt expansion, so a %F would show up as literal text.
+zstyle ':completion:*:*:*:*:descriptions' format $'\e[1;38;2;122;215;207m❖ %d\e[0m'
+zstyle ':completion:*:*:*:*:corrections'  format $'\e[38;2;217;144;63m✘ %d (errors: %e)\e[0m'
+zstyle ':completion:*:*:*:*:messages'     format $'\e[38;2;157;140;196m%d\e[0m'
+zstyle ':completion:*:*:*:*:warnings'     format $'\e[38;2;74;88;110mno matches for %d\e[0m'
 
 zstyle ':completion:*:*:cd:*' tag-order local-directories directory-stack path-directories
 zstyle ':completion:*:*:kill:*:processes' command 'ps -u $USER -o pid,%cpu,tty,cputime,cmd'
@@ -395,21 +397,35 @@ zmodload -i zsh/datetime
 autoload -Uz add-zsh-hook vcs_info
 
 zstyle ':vcs_info:*' enable git
-zstyle ':vcs_info:git:*' check-for-changes true
-zstyle ':vcs_info:git:*' stagedstr   " %F{${PK[soul]}}✚%f"
-zstyle ':vcs_info:git:*' unstagedstr " %F{${PK[infection]}}●%f"
+# check-for-changes is off on purpose: it costs two extra git invocations and
+# still cannot report counts. One `git status --porcelain` below does both.
+zstyle ':vcs_info:git:*' check-for-changes false
 zstyle ':vcs_info:git:*' formats \
-  " %F{${PK[stone]}}on%f %F{${PK[essence]}}%b%f%c%u%m"
+  " %F{${PK[stone]}}on%f %F{${PK[essence]}}%b%f%m"
 zstyle ':vcs_info:git:*' actionformats \
-  " %F{${PK[stone]}}on%f %F{${PK[essence]}}%b%f %F{${PK[infection]}}⟨%a⟩%f%c%u%m"
-zstyle ':vcs_info:git+set-message:*' hooks pk-untracked pk-divergence
+  " %F{${PK[stone]}}on%f %F{${PK[essence]}}%b%f %F{${PK[infection]}}⟨%a⟩%f%m"
+zstyle ':vcs_info:git+set-message:*' hooks pk-dirty pk-divergence
 
-# ? — there are files git has never been told about.
-+vi-pk-untracked() {
-  local first
-  first=$(command git ls-files --others --exclude-standard --directory \
-            --no-empty-directory 2>/dev/null | head -n1)
-  [[ -n $first ]] && hook_com[misc]+=" %F{${PK[lifeblood]}}?%f"
+# ✚ staged   ● unstaged   ? untracked   ✖ conflicted — one git call, with counts.
++vi-pk-dirty() {
+  local -i staged=0 unstaged=0 untracked=0 conflict=0
+  local line x y
+  while IFS= read -r line; do
+    x=${line[1]} y=${line[2]}
+    if [[ $x$y == '??' ]]; then
+      (( untracked++ ))
+    elif [[ $x == U || $y == U || $x$y == AA || $x$y == DD ]]; then
+      (( conflict++ ))
+    else
+      [[ $x != ' ' ]] && (( staged++ ))
+      [[ $y != ' ' ]] && (( unstaged++ ))
+    fi
+  done < <(command git status --porcelain=v1 2>/dev/null)
+
+  (( conflict  )) && hook_com[misc]+=" %F{${PK[infection]}}%B✖${conflict}%b%f"
+  (( staged    )) && hook_com[misc]+=" %F{${PK[soul]}}✚${staged}%f"
+  (( unstaged  )) && hook_com[misc]+=" %F{${PK[infection]}}●${unstaged}%f"
+  (( untracked )) && hook_com[misc]+=" %F{${PK[lifeblood]}}?${untracked}%f"
   return 0
 }
 
@@ -480,8 +496,8 @@ RPROMPT2=''
 # ── Tools ────────────────────────────────────────────────────────────────────
 # eza — the good-looking ls: icons, directories first, git state in long mode.
 if (( $+commands[eza] )); then
-  _pk_eza=(eza --icons=auto --group-directories-first --colour=auto
-           --colour-scale=size --hyperlink)
+  _pk_eza=(eza --icons=auto --group-directories-first --color=auto
+           --color-scale=size --hyperlink)
   alias ls="${_pk_eza[*]}"
   alias l="${_pk_eza[*]} --long --header --git --no-user --time-style=relative"
   alias ll="${_pk_eza[*]} --long --header --git --time-style=long-iso"
@@ -556,8 +572,9 @@ up() {
 # ff — fuzzy-find a file under here and open it.
 ff() {
   local file
-  file=$(fzf --preview 'pk-preview {}' --preview-window=right,60%) || return
+  file=$(fzf --preview 'pk-preview {}' --preview-window=right,60%) || return 0
   [[ -n $file ]] && ${=EDITOR} -- "$file"
+  return 0
 }
 
 
@@ -565,4 +582,8 @@ ff() {
 # Machine-specific and secret things belong in ~/.zshrc.local, which is not in
 # this repository. Anything an installer appends lands above this line — move
 # it into the right section here, or delete it.
-[[ -r "$HOME/.zshrc.local" ]] && source "$HOME/.zshrc.local"
+# The `if` matters: a bare `[[ ]] &&` would leave $? at 1 and paint a phantom
+# failure marker on the very first prompt.
+if [[ -r "$HOME/.zshrc.local" ]]; then
+  source "$HOME/.zshrc.local"
+fi
