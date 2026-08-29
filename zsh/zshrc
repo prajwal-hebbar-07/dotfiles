@@ -3,7 +3,7 @@
 #
 # Companion to tmux/tmux.conf: the same Hollow Knight palette, and the same
 # rule — what is alive and focused is soul-cyan, what demands attention is
-# infection-orange.
+# infection-amber.
 #
 # Source of truth: dotfiles/zsh/zshrc  (~/.zshrc -> here)
 # Reload in place: exec zsh   (aliased to `reload`)
@@ -18,28 +18,35 @@
 
 
 # ── Palette ──────────────────────────────────────────────────────────────────
-# void      #0b0e14   the abyss, deepest background
-# crypt     #151a24   status bar ground
-# shade     #232b3a   raised cell
-# stone     #4a586e   dim text, separators
-# bone      #c8d3de   body text
-# pale      #f2f6fa   pale king white, active text
-# soul      #7ad7cf   cyan, focus and life
-# lifeblood #4a9fd8   blue, secondary accent
-# infection #d9903f   orange, warnings and prompts
-# essence   #9d8cc4   violet, quiet metadata
+# Shared with ghostty/themes/pale-knight and tmux/tmux.conf. The five accents
+# are generated in OKLCH at one fixed lightness (L = 0.72), so hue is the only
+# difference between them: all five land at 6.4-6.7:1 against void, so syntax
+# highlighting reads as distinct roles without any one colour grabbing the eye.
+#
+# void      #1d2029   the abyss, deepest background
+# crypt     #292c37   status bar ground
+# shade     #393d4a   raised cell
+# stone     #656c7d   dim text, separators
+# ash       #858c9b   muted labels
+# bone      #aab2be   body text
+# pale      #d2d8e1   pale king white, active text
+# soul      #7bb0b0   cyan, focus and life
+# lifeblood #8ea6c9   blue, secondary accent
+# infection #bba077   amber, warnings and prompts
+# essence   #b19ac0   violet, quiet metadata
 
 typeset -gA PK=(
-  void      '#0b0e14'
-  crypt     '#151a24'
-  shade     '#232b3a'
-  stone     '#4a586e'
-  bone      '#c8d3de'
-  pale      '#f2f6fa'
-  soul      '#7ad7cf'
-  lifeblood '#4a9fd8'
-  infection '#d9903f'
-  essence   '#9d8cc4'
+  void      '#1d2029'
+  crypt     '#292c37'
+  shade     '#393d4a'
+  stone     '#656c7d'
+  ash       '#858c9b'
+  bone      '#aab2be'
+  pale      '#d2d8e1'
+  soul      '#7bb0b0'
+  lifeblood '#8ea6c9'
+  infection '#bba077'
+  essence   '#b19ac0'
 )
 
 
@@ -134,10 +141,10 @@ zstyle ':completion:*' group-name ''          # one labelled group per match typ
 
 # Raw SGR, not %F{…}: fzf-tab renders these group headers itself and never runs
 # them through prompt expansion, so a %F would show up as literal text.
-zstyle ':completion:*:*:*:*:descriptions' format $'\e[1;38;2;122;215;207m❖ %d\e[0m'
-zstyle ':completion:*:*:*:*:corrections'  format $'\e[38;2;217;144;63m✘ %d (errors: %e)\e[0m'
-zstyle ':completion:*:*:*:*:messages'     format $'\e[38;2;157;140;196m%d\e[0m'
-zstyle ':completion:*:*:*:*:warnings'     format $'\e[38;2;74;88;110mno matches for %d\e[0m'
+zstyle ':completion:*:*:*:*:descriptions' format $'\e[1;38;2;123;176;176m❖ %d\e[0m'
+zstyle ':completion:*:*:*:*:corrections'  format $'\e[38;2;187;160;119m✘ %d (errors: %e)\e[0m'
+zstyle ':completion:*:*:*:*:messages'     format $'\e[38;2;177;154;192m%d\e[0m'
+zstyle ':completion:*:*:*:*:warnings'     format $'\e[38;2;101;108;125mno matches for %d\e[0m'
 
 zstyle ':completion:*:*:cd:*' tag-order local-directories directory-stack path-directories
 zstyle ':completion:*:*:kill:*:processes' command 'ps -u $USER -o pid,%cpu,tty,cputime,cmd'
@@ -149,48 +156,50 @@ zstyle ':completion:*:git-checkout:*' sort false
 # ── File colours ─────────────────────────────────────────────────────────────
 # One palette drives eza, the completion menu, and every fzf preview.
 _pk_lscolors=(
-  "di=1;38;2;122;215;207"    # directories        soul, bold
-  "ln=38;2;157;140;196"      # symlinks           essence
-  "or=1;38;2;217;144;63"     # broken symlinks    infection, bold
-  "ex=1;38;2;74;159;216"     # executables        lifeblood, bold
-  "fi=38;2;200;211;222"      # regular files      bone
-  "pi=38;2;74;88;110"        # fifos              stone
-  "so=38;2;157;140;196"      # sockets
-  "bd=38;2;74;88;110"
-  "cd=38;2;74;88;110"
-  "su=38;2;242;246;250;48;2;217;144;63"
-  "sg=38;2;242;246;250;48;2;217;144;63"
-  "tw=1;38;2;122;215;207"
-  "ow=1;38;2;122;215;207"
+  "di=1;38;2;123;176;176"    # directories        soul, bold
+  "ln=38;2;177;154;192"      # symlinks           essence
+  "or=1;38;2;187;160;119"    # broken symlinks    infection, bold
+  "ex=1;38;2;142;166;201"    # executables        lifeblood, bold
+  "fi=38;2;170;178;190"      # regular files      bone
+  "pi=38;2;101;108;125"      # fifos              stone
+  "so=38;2;177;154;192"      # sockets
+  "bd=38;2;101;108;125"
+  "cd=38;2;101;108;125"
+  # setuid/setgid — void on infection, the same warning badge used everywhere
+  # else. Pale on infection would be 1.7:1.
+  "su=38;2;29;32;41;48;2;187;160;119"
+  "sg=38;2;29;32;41;48;2;187;160;119"
+  "tw=1;38;2;123;176;176"
+  "ow=1;38;2;123;176;176"
   # archives and disk images — infection
-  "*.zip=38;2;217;144;63" "*.tar=38;2;217;144;63" "*.gz=38;2;217;144;63"
-  "*.tgz=38;2;217;144;63" "*.bz2=38;2;217;144;63" "*.xz=38;2;217;144;63"
-  "*.zst=38;2;217;144;63" "*.7z=38;2;217;144;63"  "*.rar=38;2;217;144;63"
-  "*.dmg=38;2;217;144;63" "*.pkg=38;2;217;144;63"
+  "*.zip=38;2;187;160;119" "*.tar=38;2;187;160;119" "*.gz=38;2;187;160;119"
+  "*.tgz=38;2;187;160;119" "*.bz2=38;2;187;160;119" "*.xz=38;2;187;160;119"
+  "*.zst=38;2;187;160;119" "*.7z=38;2;187;160;119"  "*.rar=38;2;187;160;119"
+  "*.dmg=38;2;187;160;119" "*.pkg=38;2;187;160;119"
   # media — essence
-  "*.png=38;2;157;140;196" "*.jpg=38;2;157;140;196" "*.jpeg=38;2;157;140;196"
-  "*.gif=38;2;157;140;196" "*.svg=38;2;157;140;196" "*.webp=38;2;157;140;196"
-  "*.mp4=38;2;157;140;196" "*.mov=38;2;157;140;196" "*.mp3=38;2;157;140;196"
-  "*.pdf=38;2;157;140;196"
+  "*.png=38;2;177;154;192" "*.jpg=38;2;177;154;192" "*.jpeg=38;2;177;154;192"
+  "*.gif=38;2;177;154;192" "*.svg=38;2;177;154;192" "*.webp=38;2;177;154;192"
+  "*.mp4=38;2;177;154;192" "*.mov=38;2;177;154;192" "*.mp3=38;2;177;154;192"
+  "*.pdf=38;2;177;154;192"
   # configuration and prose — lifeblood
-  "*.json=38;2;74;159;216" "*.toml=38;2;74;159;216" "*.yaml=38;2;74;159;216"
-  "*.yml=38;2;74;159;216"  "*.ini=38;2;74;159;216"  "*.conf=38;2;74;159;216"
-  "*.md=38;2;74;159;216"   "*.txt=38;2;74;159;216"
+  "*.json=38;2;142;166;201" "*.toml=38;2;142;166;201" "*.yaml=38;2;142;166;201"
+  "*.yml=38;2;142;166;201"  "*.ini=38;2;142;166;201"  "*.conf=38;2;142;166;201"
+  "*.md=38;2;142;166;201"   "*.txt=38;2;142;166;201"
   # noise — stone
-  "*.lock=38;2;74;88;110" "*.log=38;2;74;88;110" "*.bak=38;2;74;88;110"
-  "*.tmp=38;2;74;88;110"  "*.DS_Store=38;2;74;88;110"
+  "*.lock=38;2;101;108;125" "*.log=38;2;101;108;125" "*.bak=38;2;101;108;125"
+  "*.tmp=38;2;101;108;125"  "*.DS_Store=38;2;101;108;125"
 )
 export LS_COLORS="${(j.:.)_pk_lscolors}"
 unset _pk_lscolors
 
 # eza's extra columns, on top of LS_COLORS.
 export EZA_COLORS="\
-uu=38;2;74;88;110:gu=38;2;74;88;110:\
-da=38;2;74;88;110:sn=38;2;122;215;207:sb=38;2;74;88;110:\
-ur=38;2;200;211;222:uw=38;2;217;144;63:ux=38;2;74;159;216:ue=38;2;74;159;216:\
-gr=38;2;74;88;110:gw=38;2;74;88;110:gx=38;2;74;88;110:\
-tr=38;2;74;88;110:tw=38;2;74;88;110:tx=38;2;74;88;110:xx=38;2;35;43;58:\
-ga=38;2;122;215;207:gm=38;2;217;144;63:gd=38;2;217;144;63:gv=38;2;157;140;196"
+uu=38;2;101;108;125:gu=38;2;101;108;125:\
+da=38;2;101;108;125:sn=38;2;123;176;176:sb=38;2;101;108;125:\
+ur=38;2;170;178;190:uw=38;2;187;160;119:ux=38;2;142;166;201:ue=38;2;142;166;201:\
+gr=38;2;101;108;125:gw=38;2;101;108;125:gx=38;2;101;108;125:\
+tr=38;2;101;108;125:tw=38;2;101;108;125:tx=38;2;101;108;125:xx=38;2;57;61;74:\
+ga=38;2;123;176;176:gm=38;2;187;160;119:gd=38;2;187;160;119:gv=38;2;177;154;192"
 
 zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
 zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
@@ -329,8 +338,9 @@ if [[ -r /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
   ZSH_HIGHLIGHT_STYLES[bracket-level-3]="fg=${PK[lifeblood]}"
   ZSH_HIGHLIGHT_STYLES[cursor-matchingbracket]='standout'
 
-  # A recursive force-remove is branded while it is still being typed.
-  ZSH_HIGHLIGHT_PATTERNS+=('rm -*[rf]*' "fg=${PK[pale]},bold,bg=${PK[infection]}")
+  # A recursive force-remove is branded while it is still being typed. Dark on
+  # amber, like every other warning badge — pale on amber would be 1.7:1.
+  ZSH_HIGHLIGHT_PATTERNS+=('rm -*[rf]*' "fg=${PK[void]},bold,bg=${PK[infection]}")
 fi
 
 
@@ -516,7 +526,10 @@ fi
 
 # bat — cat with syntax highlighting, and a readable man(1).
 if (( $+commands[bat] )); then
-  export BAT_THEME=TwoDark
+  # `ansi` renders through the terminal's own 16 colours instead of shipping a
+  # second palette, so bat inherits Pale Knight and can never drift from it.
+  # TwoDark was a foreign, far more saturated set.
+  export BAT_THEME=ansi
   export BAT_STYLE='numbers,changes,header'
   export MANPAGER="sh -c 'col -bx | bat --language=man --plain'"
   export MANROFFOPT='-c'

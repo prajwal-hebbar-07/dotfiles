@@ -1,45 +1,63 @@
 # Pale Knight — Ghostty theme
 #
-# Same palette as tmux/tmux.conf and zsh/zshrc: void-black ground, bone-white
-# text, soul-cyan for what is alive and focused, infection-orange for what wants
-# attention.
+# Same palette as tmux/tmux.conf and zsh/zshrc: dusk-blue ground, bone text,
+# soul-cyan for what is alive and focused, infection for what wants attention.
 #
 # Selected from ghostty/config with `theme = pale-knight`. Ghostty reads custom
 # themes from the `themes` subdirectory of its config directory.
+#
+# ── Design rule ──────────────────────────────────────────────────────────────
+# Every accent is generated in OKLCH at one fixed lightness, so hue is the only
+# thing that changes between them. Equal lightness means equal attention: six
+# colours you can tell apart, none of which grabs the eye before the others.
+#
+#   ANSI 1-6    L = 0.72    contrast vs background 6.4-6.7:1
+#   ANSI 9-14   L = 0.80    contrast vs background 8.5-8.9:1
+#   chroma      0.055-0.070 (roughly half of Tokyo Night, a third of the old
+#               palette) — enough to name the colour, not enough to shout
+#
+# Compared against Tokyo Night and Material Palenight: Palenight's lifted
+# background and soft foreground, Tokyo Night Storm's even accent weighting,
+# then both pushed further down in chroma. The background sits at L = 0.244
+# rather than near-black so bright glyphs stop haloing.
 
 # ── Surface ──────────────────────────────────────────────────────────────────
-background = #0b0e14
-foreground = #c8d3de
+# void, and bone at 7.6:1 instead of the old 12.7:1 — comfortable for long
+# sessions rather than maximally legible for one glance.
+background = #1d2029
+foreground = #aab2be
 
-cursor-color = #7ad7cf
-cursor-text  = #0b0e14
+# Block cursor is the largest solid colour on screen, so it gets a normal-weight
+# accent, not a bright one.
+cursor-color = #7bb0b0
+cursor-text  = #1d2029
 
-selection-background = #232b3a
-selection-foreground = #f2f6fa
+selection-background = #393d4a
+selection-foreground = #d2d8e1
 
-# Find-in-terminal highlight: infection-orange on void, matching the tmux
-# message bar.
-search-background = #d9903f
-search-foreground = #0b0e14
+# Find-in-terminal highlight: muted infection on void, matching the tmux message
+# bar. Findable at a glance, no longer a flare.
+search-background = #bba077
+search-foreground = #1d2029
 
-split-divider-color = #232b3a
+split-divider-color = #393d4a
 
 # ── ANSI 0-7 ─────────────────────────────────────────────────────────────────
-palette = 0=#151a24
-palette = 1=#d05f6a
-palette = 2=#7fb069
-palette = 3=#d9903f
-palette = 4=#4a9fd8
-palette = 5=#9d8cc4
-palette = 6=#7ad7cf
-palette = 7=#c8d3de
+palette = 0=#292c37
+palette = 1=#cd9491
+palette = 2=#92ae8e
+palette = 3=#bba077
+palette = 4=#8ea6c9
+palette = 5=#b19ac0
+palette = 6=#7bb0b0
+palette = 7=#aab2be
 
 # ── ANSI 8-15 (bright) ───────────────────────────────────────────────────────
-palette = 8=#4a586e
-palette = 9=#e4808a
-palette = 10=#9ad089
-palette = 11=#e8a95c
-palette = 12=#6fb8e6
-palette = 13=#b6a7d9
-palette = 14=#9ce5e0
-palette = 15=#f2f6fa
+palette = 8=#656c7d
+palette = 9=#ebaba8
+palette = 10=#a8c8a4
+palette = 11=#d7b98b
+palette = 12=#a5c0e7
+palette = 13=#ccb2dd
+palette = 14=#8fcaca
+palette = 15=#d2d8e1

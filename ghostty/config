@@ -24,7 +24,7 @@ macos-titlebar-style = tabs
 # Unfocused splits keep full strength instead of fading to 0.7, so an inactive
 # pane reads as solid rather than washed out.
 unfocused-split-opacity = 1
-unfocused-split-fill = #0b0e14
+unfocused-split-fill = #1d2029
 
 
 # ── Window ───────────────────────────────────────────────────────────────────

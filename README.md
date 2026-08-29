@@ -31,7 +31,18 @@ Chrome-compatible DevTools and extension support.
 GPU-accelerated terminal emulator, and the terminal every shell workflow in this
 repo assumes. `ghostty/config` carries the settings and `ghostty/themes/pale-knight`
 the colours — the same Pale Knight palette as tmux and zsh, so all three layers
-agree on what soul-cyan and infection-orange mean.
+agree on what soul-cyan and infection-amber mean.
+
+The palette is built to be **low-contrast on purpose**. Every accent is generated
+in OKLCH at one fixed lightness, so hue is the only thing that changes between
+them: ANSI 1-6 all land at 6.4-6.7:1 against the background and ANSI 9-14 at
+8.5-8.9:1. Equal lightness means equal attention — six colours you can tell
+apart, none of which grabs the eye first. Chroma sits at 0.055-0.070, roughly
+half of Tokyo Night. The background is lifted off near-black to L = 0.244 so
+bright glyphs stop haloing, and body text reads at 7.6:1 rather than 12.7:1:
+comfortable for a long session instead of maximally legible for one glance.
+Benchmarked against Tokyo Night and Material Palenight — Palenight's calm
+surface, Tokyo Night Storm's even accent weighting, both pushed further down.
 
 The window is deliberately **opaque**. `background-opacity = 1` and
 `background-blur = false` are already Ghostty's defaults; what actually leaked the
@@ -53,7 +64,7 @@ Two Ghostty parser details worth remembering when editing that file:
 
 The coding harness I work through — agent-driven editing, search, and
 verification against this machine rather than a hosted sandbox. `ohmypi/` holds
-its skills and task agents, symlinked into `~/.omp/agent/`.
+its skills, task agents, and MCP servers, symlinked into `~/.omp/agent/`.
 
 **`commit` skill** (`/skill:commit`) — turns staged changes into one semantic
 commit. It checks that `user.name` and `user.email` are set, refuses to run with
@@ -66,6 +77,25 @@ my decision.
 agent, which runs `anthropic/claude-haiku-4-5` at `thinking-level: minimal` with
 `bash` as its only tool, so the diff is read by the cheap model and never enters
 the main session's context.
+
+**`paper` MCP server** (`ohmypi/mcp.json`) — stdio server for Paper Desktop,
+`~/.paper/bin/paper mcp`, and the only definition of that server on this
+machine. The `paper-desktop@paper` marketplace plugin (v0.2.1) declared the
+same server, but its manifest hardcodes `${HOME}/.paper/bin/paper` and omp
+expands `${...}` only in native config, so the plugin's copy failed to spawn
+every startup with `ENOENT ... posix_spawn '${HOME}/.paper/bin/paper'`. The
+plugin carried nothing else — no skills, agents, or commands, just that
+manifest and logo assets — so it and the `paper` marketplace
+(`paper-design/agent-plugins`) were uninstalled rather than shadowed:
+
+```sh
+omp plugin uninstall paper-desktop@paper
+omp plugin marketplace remove paper
+```
+
+Reinstalling is worthwhile only once upstream ships an absolute path or omp
+expands variables in plugin manifests; until then this entry is what makes the
+`paper` tools work.
 
 ### Cursor
 
@@ -102,7 +132,7 @@ rather than the three times `vcs_info` would.
 | `3.0s` | How long the last command took, shown past two seconds |
 | `✘ 2` | Exit status of the last command, when it failed |
 
-The `❯` is soul-cyan after a success and infection-orange after a failure.
+The `❯` is soul-cyan after a success and infection-amber after a failure.
 `user@host` is prefixed only over SSH.
 
 **Typing.** Three plugins do the work, and load order in `zshrc` matters —
@@ -110,8 +140,8 @@ syntax highlighting must come after the widgets it wraps, and substring search
 after that:
 
 - **zsh-syntax-highlighting** colours the line as it is typed. A command that
-  resolves turns soul-cyan; one that does not turns infection-orange, so a typo
-  shows before Enter. A recursive `rm -rf` is branded on an orange background.
+  resolves turns soul-cyan; one that does not turns infection-amber, so a typo
+  shows before Enter. A recursive `rm -rf` is branded on an amber background.
 - **zsh-autosuggestions** greys in the rest of the line, guessed from history
   first and from completion second.
 - **zsh-history-substring-search** makes `↑` walk only the history entries
@@ -153,7 +183,9 @@ first, and file colours from the same palette:
 | `lS` / `lm` | Sorted by size / by modification time, largest and newest first |
 
 `cat` is [bat](https://github.com/sharkdp/bat), which also renders `man` pages;
-`catp` skips the line numbers and header. `z` is
+`catp` skips the line numbers and header. `BAT_THEME=ansi` makes it highlight
+through the terminal's own 16 colours rather than shipping a second, louder
+palette, so it can never drift from Pale Knight. `z` is
 [zoxide](https://github.com/ajeetdsouza/zoxide) — `z dotfiles` from anywhere
 reaches the directory that name has meant most often, and `zi` picks from the
 ranked list. `ff` fuzzy-finds a file and opens it. `mkcd` makes a directory and
@@ -161,9 +193,9 @@ steps into it; `up 3` climbs three levels.
 
 ### tmux
 
-Terminal multiplexer, themed **Pale Knight** — a Hollow Knight palette: void
-black chrome, bone-white text, soul-cyan for the focused window and pane, and
-infection-orange for prompts, bells, and the session badge while the prefix is
+Terminal multiplexer, themed **Pale Knight** — a Hollow Knight palette: dusk-blue
+chrome, bone text, soul-cyan for the focused window and pane, and
+infection-amber for prompts, bells, and the session badge while the prefix is
 held.
 
 The prefix is `C-s`. Windows and panes are numbered from 1 and renumbered on
@@ -200,9 +232,10 @@ dotfiles/
 ├── ghostty/    # terminal config
 │   ├── config
 │   └── themes/pale-knight
-├── ohmypi/     # harness skills and task agents
+├── ohmypi/     # harness skills, task agents, MCP servers
 │   ├── skills/commit/SKILL.md
-│   └── agents/committer.md
+│   ├── agents/committer.md
+│   └── mcp.json
 ├── cursor/     # editor settings, keybindings, extension list
 ├── zsh/        # zshrc, and bin/pk-preview for the fzf preview pane
 └── tmux/       # tmux.conf, Pale Knight theme and keys
@@ -242,6 +275,7 @@ ln -sfn "$PWD/ghostty/config" ~/.config/ghostty/config
 ln -sfn "$PWD/ghostty/themes" ~/.config/ghostty/themes
 ln -sfn "$PWD/ohmypi/skills/commit"     ~/.omp/agent/skills/commit
 ln -sfn "$PWD/ohmypi/agents/committer.md" ~/.omp/agent/agents/committer.md
+ln -sfn "$PWD/ohmypi/mcp.json"            ~/.omp/agent/mcp.json
 ```
 
 Any pre-existing real `~/.zshrc` was copied to `~/.zshrc.backup.<timestamp>`
