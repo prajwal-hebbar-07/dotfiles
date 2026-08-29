@@ -111,6 +111,20 @@ agent, which runs `anthropic/claude-haiku-4-5` at `thinking-level: minimal` with
 `bash` as its only tool, so the diff is read by the cheap model and never enters
 the main session's context.
 
+**`paper-target` skill** (`/skill:paper-target`) — pins which Paper file and
+page a repository's design work reads from. It resolves them through the Paper
+MCP (`list_files`, `open_file`, `get_basic_info` — never a guessed id) and writes
+the result into that repo's `AGENTS.md` / `CLAUDE.md` between
+`<!-- paper-target:start -->` markers, so the target is already in context at the
+start of every later session instead of depending on whatever file Paper has
+focused. `show` reports the block against a live `get_basic_info` and says
+whether they agree; `clear` removes the block and nothing else. The write is
+idempotent, touches only the marked region, and Paper stays read-only throughout.
+
+Page ids are the awkward part: the MCP cannot enumerate pages, so when only a
+page name is known the skill records `pageId: UNKNOWN` and leaves the consuming
+skill to confirm the page by name — it never pins a page it did not see.
+
 **`paper` MCP server** (`ohmypi/mcp.json`) — stdio server for Paper Desktop,
 `~/.paper/bin/paper mcp`, and the only definition of that server on this
 machine. The `paper-desktop@paper` marketplace plugin (v0.2.1) declared the
@@ -282,6 +296,7 @@ dotfiles/
 ├── ohmypi/     # harness sticky rules, skills, task agents, MCP servers
 │   ├── RULES.md
 │   ├── skills/commit/SKILL.md
+│   ├── skills/paper-target/SKILL.md
 │   ├── agents/committer.md
 │   └── mcp.json
 ├── cursor/     # editor settings, keybindings, extension list
@@ -322,6 +337,7 @@ ln -sfn "$PWD/tmux/tmux.conf"  ~/.config/tmux/tmux.conf
 ln -sfn "$PWD/ghostty/config" ~/.config/ghostty/config
 ln -sfn "$PWD/ghostty/themes" ~/.config/ghostty/themes
 ln -sfn "$PWD/ohmypi/skills/commit"     ~/.omp/agent/skills/commit
+ln -sfn "$PWD/ohmypi/skills/paper-target" ~/.omp/agent/skills/paper-target
 ln -sfn "$PWD/ohmypi/agents/committer.md" ~/.omp/agent/agents/committer.md
 ln -sfn "$PWD/ohmypi/mcp.json"            ~/.omp/agent/mcp.json
 ln -sfn "$PWD/ohmypi/RULES.md"            ~/.omp/agent/RULES.md
