@@ -1,0 +1,55 @@
+#!/bin/sh
+# ─────────────────────────────────────────────────────────────────────────────
+# pk-preview — the preview pane behind fzf and fzf-tab.
+#
+# Lives on PATH rather than inside zshrc because fzf runs previews through a
+# fresh `$SHELL -c`, which never sources ~/.zshrc: a shell function would not
+# exist there. One script, one behaviour, every picker.
+#
+# Source of truth: dotfiles/zsh/bin/pk-preview  (~/.local/bin/pk-preview -> here)
+# ─────────────────────────────────────────────────────────────────────────────
+
+target=$1
+lines=${FZF_PREVIEW_LINES:-200}
+
+[ -n "$target" ] || exit 0
+
+# ~/foo from a completion candidate is a literal tilde, not $HOME.
+case $target in
+  '~/'*) target="$HOME/${target#'~/'}" ;;
+esac
+
+if [ -d "$target" ]; then
+  if command -v eza >/dev/null 2>&1; then
+    eza --tree --level=2 --icons=always --colour=always \
+        --group-directories-first --git-ignore -- "$target" 2>/dev/null |
+      head -n "$lines"
+  else
+    ls -lA -- "$target" | head -n "$lines"
+  fi
+
+elif [ -f "$target" ]; then
+  # Binary files: describe them instead of spraying bytes at the terminal.
+  case "$(file --mime-encoding -b -- "$target" 2>/dev/null)" in
+    binary)
+      file -b -- "$target"
+      printf '\n'
+      command -v hexdump >/dev/null 2>&1 && hexdump -C -n 512 -- "$target"
+      ;;
+    *)
+      if command -v bat >/dev/null 2>&1; then
+        bat --style=numbers,changes --color=always \
+            --line-range=":$lines" -- "$target"
+      else
+        head -n "$lines" -- "$target"
+      fi
+      ;;
+  esac
+
+elif [ -L "$target" ]; then
+  printf 'symlink → %s\n' "$(readlink -- "$target")"
+
+else
+  # Not a path at all: a completion candidate, a variable, a command.
+  printf '%s\n' "$target"
+fi

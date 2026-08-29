@@ -1,1 +1,568 @@
-export PATH="$HOME/.local/bin:$PATH"
+# ─────────────────────────────────────────────────────────────────────────────
+# zsh — Pale Knight
+#
+# Companion to tmux/tmux.conf: the same Hollow Knight palette, and the same
+# rule — what is alive and focused is soul-cyan, what demands attention is
+# infection-orange.
+#
+# Source of truth: dotfiles/zsh/zshrc  (~/.zshrc -> here)
+# Reload in place: exec zsh   (aliased to `reload`)
+#
+# Load order is deliberate:
+#   env → options → history → completion → colours → fzf → fzf-tab
+#   → autosuggestions → syntax highlighting → history-substring-search
+#   → keys → prompt → tools → local
+# zsh-syntax-highlighting must be sourced after every widget it wraps, and
+# zsh-history-substring-search must come after it. Do not reshuffle casually.
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+# ── Palette ──────────────────────────────────────────────────────────────────
+# void      #0b0e14   the abyss, deepest background
+# crypt     #151a24   status bar ground
+# shade     #232b3a   raised cell
+# stone     #4a586e   dim text, separators
+# bone      #c8d3de   body text
+# pale      #f2f6fa   pale king white, active text
+# soul      #7ad7cf   cyan, focus and life
+# lifeblood #4a9fd8   blue, secondary accent
+# infection #d9903f   orange, warnings and prompts
+# essence   #9d8cc4   violet, quiet metadata
+
+typeset -gA PK=(
+  void      '#0b0e14'
+  crypt     '#151a24'
+  shade     '#232b3a'
+  stone     '#4a586e'
+  bone      '#c8d3de'
+  pale      '#f2f6fa'
+  soul      '#7ad7cf'
+  lifeblood '#4a9fd8'
+  infection '#d9903f'
+  essence   '#9d8cc4'
+)
+
+
+# ── Environment ──────────────────────────────────────────────────────────────
+# Homebrew first: it also puts its completion functions on fpath, which
+# everything below depends on.
+if [[ -x /opt/homebrew/bin/brew ]]; then
+  eval "$(/opt/homebrew/bin/brew shellenv)"
+fi
+export HOMEBREW_NO_ENV_HINTS=1
+
+typeset -U path fpath PATH FPATH          # no duplicate entries, ever
+path=("$HOME/.local/bin" $path)
+
+export EDITOR='cursor --wait'
+export VISUAL=$EDITOR
+export PAGER=less
+export LESS='-R -F -i -M --mouse'         # keep colour, quit if it all fits
+export LANG="${LANG:-en_US.UTF-8}"
+
+
+# ── Options ──────────────────────────────────────────────────────────────────
+setopt extended_glob            # #, ~ and ^ become glob operators
+setopt glob_dots                # globs see dotfiles without a leading .
+setopt numeric_glob_sort        # file10 sorts after file9
+setopt no_case_glob
+setopt auto_cd                  # a bare path is a cd
+setopt auto_pushd               # every cd pushes onto the directory stack
+setopt pushd_ignore_dups
+setopt pushd_silent
+setopt interactive_comments     # # comments are allowed at the prompt
+setopt multios
+setopt long_list_jobs
+setopt no_beep
+setopt no_flow_control          # reclaim C-s / C-q from terminal flow control
+setopt prompt_subst             # the prompt below re-expands on every draw
+unsetopt correct correct_all    # never second-guess a typed command
+
+
+# ── History ──────────────────────────────────────────────────────────────────
+HISTFILE="$HOME/.zsh_history"
+HISTSIZE=200000
+SAVEHIST=200000
+
+setopt extended_history         # record timestamp and duration
+setopt inc_append_history       # write as commands run, not at exit
+setopt share_history            # and read what other shells wrote
+setopt hist_ignore_all_dups     # a repeat drops the older copy
+setopt hist_ignore_space        # a leading space keeps it out of history
+setopt hist_reduce_blanks
+setopt hist_verify              # history expansion lands on the line first
+setopt hist_expire_dups_first
+
+
+# ── Completion ───────────────────────────────────────────────────────────────
+zmodload -i zsh/complist
+fpath=(/opt/homebrew/share/zsh-completions $fpath)
+
+autoload -Uz compinit
+# Rebuild the dump at most once a day; otherwise trust it and skip the scan.
+_pk_zcompdump="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/zcompdump-$ZSH_VERSION"
+command mkdir -p "${_pk_zcompdump:h}"
+if [[ -n ${_pk_zcompdump}(#qN.mh-24) ]]; then
+  compinit -C -d "$_pk_zcompdump"
+else
+  compinit -d "$_pk_zcompdump"
+fi
+unset _pk_zcompdump
+
+setopt always_to_end            # jump past the word once it is completed
+setopt complete_in_word         # complete from wherever the cursor sits
+setopt auto_param_slash         # directories complete with a trailing /
+setopt no_list_beep
+unsetopt menu_complete          # nothing is inserted until a choice is made
+
+# Case- and dash-insensitive first, then substring, then anywhere.
+# The cheapest match that works wins.
+zstyle ':completion:*' matcher-list \
+  'm:{a-zA-Z-_}={A-Za-z_-}' \
+  'r:|=*' \
+  'l:|=* r:|=*'
+zstyle ':completion:*' completer _complete _extensions _match _approximate
+zstyle -e ':completion:*:approximate:*' max-errors \
+  'reply=($(( ($#PREFIX + $#SUFFIX) / 3 )) numeric)'
+
+zstyle ':completion:*' use-cache on
+zstyle ':completion:*' cache-path "${XDG_CACHE_HOME:-$HOME/.cache}/zsh/compcache"
+zstyle ':completion:*' list-dirs-first true
+zstyle ':completion:*' squeeze-slashes true
+zstyle ':completion:*' verbose true
+zstyle ':completion:*' group-name ''          # one labelled group per match type
+
+zstyle ':completion:*:*:*:*:descriptions' format "%F{${PK[soul]}}%B❖ %d%b%f"
+zstyle ':completion:*:*:*:*:corrections'  format "%F{${PK[infection]}}✘ %d (errors: %e)%f"
+zstyle ':completion:*:*:*:*:messages'     format "%F{${PK[essence]}}%d%f"
+zstyle ':completion:*:*:*:*:warnings'     format "%F{${PK[stone]}}no matches for %d%f"
+
+zstyle ':completion:*:*:cd:*' tag-order local-directories directory-stack path-directories
+zstyle ':completion:*:*:kill:*:processes' command 'ps -u $USER -o pid,%cpu,tty,cputime,cmd'
+zstyle ':completion:*:(rm|kill|diff):*' ignore-line other
+zstyle ':completion:*:manuals' separate-sections true
+zstyle ':completion:*:git-checkout:*' sort false
+
+
+# ── File colours ─────────────────────────────────────────────────────────────
+# One palette drives eza, the completion menu, and every fzf preview.
+_pk_lscolors=(
+  "di=1;38;2;122;215;207"    # directories        soul, bold
+  "ln=38;2;157;140;196"      # symlinks           essence
+  "or=1;38;2;217;144;63"     # broken symlinks    infection, bold
+  "ex=1;38;2;74;159;216"     # executables        lifeblood, bold
+  "fi=38;2;200;211;222"      # regular files      bone
+  "pi=38;2;74;88;110"        # fifos              stone
+  "so=38;2;157;140;196"      # sockets
+  "bd=38;2;74;88;110"
+  "cd=38;2;74;88;110"
+  "su=38;2;242;246;250;48;2;217;144;63"
+  "sg=38;2;242;246;250;48;2;217;144;63"
+  "tw=1;38;2;122;215;207"
+  "ow=1;38;2;122;215;207"
+  # archives and disk images — infection
+  "*.zip=38;2;217;144;63" "*.tar=38;2;217;144;63" "*.gz=38;2;217;144;63"
+  "*.tgz=38;2;217;144;63" "*.bz2=38;2;217;144;63" "*.xz=38;2;217;144;63"
+  "*.zst=38;2;217;144;63" "*.7z=38;2;217;144;63"  "*.rar=38;2;217;144;63"
+  "*.dmg=38;2;217;144;63" "*.pkg=38;2;217;144;63"
+  # media — essence
+  "*.png=38;2;157;140;196" "*.jpg=38;2;157;140;196" "*.jpeg=38;2;157;140;196"
+  "*.gif=38;2;157;140;196" "*.svg=38;2;157;140;196" "*.webp=38;2;157;140;196"
+  "*.mp4=38;2;157;140;196" "*.mov=38;2;157;140;196" "*.mp3=38;2;157;140;196"
+  "*.pdf=38;2;157;140;196"
+  # configuration and prose — lifeblood
+  "*.json=38;2;74;159;216" "*.toml=38;2;74;159;216" "*.yaml=38;2;74;159;216"
+  "*.yml=38;2;74;159;216"  "*.ini=38;2;74;159;216"  "*.conf=38;2;74;159;216"
+  "*.md=38;2;74;159;216"   "*.txt=38;2;74;159;216"
+  # noise — stone
+  "*.lock=38;2;74;88;110" "*.log=38;2;74;88;110" "*.bak=38;2;74;88;110"
+  "*.tmp=38;2;74;88;110"  "*.DS_Store=38;2;74;88;110"
+)
+export LS_COLORS="${(j.:.)_pk_lscolors}"
+unset _pk_lscolors
+
+# eza's extra columns, on top of LS_COLORS.
+export EZA_COLORS="\
+uu=38;2;74;88;110:gu=38;2;74;88;110:\
+da=38;2;74;88;110:sn=38;2;122;215;207:sb=38;2;74;88;110:\
+ur=38;2;200;211;222:uw=38;2;217;144;63:ux=38;2;74;159;216:ue=38;2;74;159;216:\
+gr=38;2;74;88;110:gw=38;2;74;88;110:gx=38;2;74;88;110:\
+tr=38;2;74;88;110:tw=38;2;74;88;110:tx=38;2;74;88;110:xx=38;2;35;43;58:\
+ga=38;2;122;215;207:gm=38;2;217;144;63:gd=38;2;217;144;63:gv=38;2;157;140;196"
+
+zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
+zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
+
+
+# ── fzf ──────────────────────────────────────────────────────────────────────
+# C-r searches history, C-t inserts a file path, M-c jumps to a directory.
+# Previews come from zsh/bin/pk-preview, which is on PATH because fzf runs
+# previews in a fresh shell that never reads this file.
+if (( $+commands[fzf] )); then
+  export FZF_DEFAULT_OPTS="
+    --height=45% --layout=reverse --border=rounded --info=inline-right
+    --scrollbar=▌ --pointer=❯ --marker=◆ --prompt='❖ '
+    --color=fg:${PK[bone]},fg+:${PK[pale]},bg:-1,bg+:${PK[shade]}
+    --color=hl:${PK[infection]},hl+:${PK[infection]}
+    --color=info:${PK[essence]},prompt:${PK[soul]},pointer:${PK[soul]}
+    --color=marker:${PK[lifeblood]},spinner:${PK[essence]},header:${PK[stone]}
+    --color=border:${PK[shade]},separator:${PK[shade]},scrollbar:${PK[shade]}
+    --color=gutter:-1,query:${PK[pale]}
+    --bind=ctrl-/:toggle-preview
+  "
+
+  if (( $+commands[fd] )); then
+    export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
+    export FZF_CTRL_T_COMMAND=$FZF_DEFAULT_COMMAND
+    export FZF_ALT_C_COMMAND='fd --type d --hidden --follow --exclude .git'
+  fi
+
+  export FZF_CTRL_T_OPTS="--preview 'pk-preview {}' --preview-window=right,60%,border-left"
+  export FZF_ALT_C_OPTS="--preview 'pk-preview {}' --preview-window=right,60%,border-left"
+  export FZF_CTRL_R_OPTS="
+    --preview 'echo {2..}' --preview-window=down,3,wrap,border-top
+    --bind='ctrl-y:execute-silent(printf %s {2..} | pbcopy)+abort'
+    --header='C-y copies the command'
+  "
+
+  source <(fzf --zsh)
+fi
+
+
+# ── fzf-tab ──────────────────────────────────────────────────────────────────
+# Tab opens an fzf picker over the completion candidates, with a live preview
+# of whatever is highlighted. Loads after compinit and after fzf.
+if [[ -r /opt/homebrew/share/fzf-tab/fzf-tab.zsh ]]; then
+  zstyle ':completion:*' menu no        # fzf-tab draws the menu instead
+
+  source /opt/homebrew/share/fzf-tab/fzf-tab.zsh
+
+  zstyle ':fzf-tab:*' fzf-flags \
+    --height=45% --layout=reverse --border=rounded \
+    "--color=fg:${PK[bone]},fg+:${PK[pale]},bg:-1,bg+:${PK[shade]}" \
+    "--color=hl:${PK[infection]},hl+:${PK[infection]}" \
+    "--color=info:${PK[essence]},pointer:${PK[soul]},marker:${PK[lifeblood]}" \
+    "--color=border:${PK[shade]},header:${PK[stone]},gutter:-1"
+  zstyle ':fzf-tab:*' fzf-pad 4
+  zstyle ':fzf-tab:*' prefix ''
+  zstyle ':fzf-tab:*' single-group color header
+  zstyle ':fzf-tab:*' switch-group '<' '>'      # walk between match groups
+  zstyle ':fzf-tab:*' continuous-trigger '/'    # accept a directory, keep going
+  zstyle ':fzf-tab:*' fzf-bindings 'ctrl-/:toggle-preview'
+
+  # Default preview is the path under the cursor; a few contexts deserve better.
+  zstyle ':fzf-tab:complete:*:*' fzf-preview 'pk-preview "${realpath:-$word}"'
+  zstyle ':fzf-tab:complete:(-command-|which|type|whence):*' fzf-preview \
+    'whence -a -- $word 2>/dev/null || printf %s\\n $word'
+  zstyle ':fzf-tab:complete:(export|unset|printenv):*' fzf-preview \
+    'printf %s\\n ${(P)word}'
+  zstyle ':fzf-tab:complete:git-(add|diff|restore|checkout|switch):*' fzf-preview \
+    'git diff --color=always -- $word 2>/dev/null | head -200 || pk-preview "${realpath:-$word}"'
+  zstyle ':fzf-tab:complete:git-show:*' fzf-preview \
+    'git show --color=always $word 2>/dev/null | head -200'
+  zstyle ':fzf-tab:complete:kill:argument-rest' fzf-preview \
+    'ps -p $word -o pid,ppid,%cpu,%mem,command'
+  zstyle ':fzf-tab:complete:man:*' fzf-preview 'man $word 2>/dev/null | head -200'
+else
+  zstyle ':completion:*' menu select    # fall back to zsh's own arrow-key menu
+fi
+
+
+# ── Autosuggestions ──────────────────────────────────────────────────────────
+# The greyed-out rest of the line, guessed from history and then from what
+# completion would offer. → walks into it, C-e takes all of it, C-space accepts
+# it and submits in one keystroke.
+if [[ -r /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh ]]; then
+  ZSH_AUTOSUGGEST_STRATEGY=(history completion)
+  ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=${PK[stone]}"
+  ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE=80        # no guessing at pasted monsters
+  ZSH_AUTOSUGGEST_MANUAL_REBIND=1           # skip the per-prompt rebind cost
+  source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+fi
+
+
+# ── Syntax highlighting ──────────────────────────────────────────────────────
+# The line is coloured while it is typed: a command that resolves turns
+# soul-cyan, one that does not turns infection-orange — a typo is visible
+# before Enter, not after.
+if [[ -r /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]]; then
+  ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets pattern cursor)
+  source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+
+  typeset -gA ZSH_HIGHLIGHT_STYLES
+  ZSH_HIGHLIGHT_STYLES[unknown-token]="fg=${PK[infection]},bold"
+  ZSH_HIGHLIGHT_STYLES[reserved-word]="fg=${PK[essence]}"
+  ZSH_HIGHLIGHT_STYLES[alias]="fg=${PK[soul]},bold"
+  ZSH_HIGHLIGHT_STYLES[suffix-alias]="fg=${PK[soul]},bold"
+  ZSH_HIGHLIGHT_STYLES[global-alias]="fg=${PK[soul]},bold"
+  ZSH_HIGHLIGHT_STYLES[builtin]="fg=${PK[soul]},bold"
+  ZSH_HIGHLIGHT_STYLES[function]="fg=${PK[soul]},bold"
+  ZSH_HIGHLIGHT_STYLES[command]="fg=${PK[soul]},bold"
+  ZSH_HIGHLIGHT_STYLES[arg0]="fg=${PK[soul]},bold"
+  ZSH_HIGHLIGHT_STYLES[hashed-command]="fg=${PK[soul]}"
+  ZSH_HIGHLIGHT_STYLES[precommand]="fg=${PK[soul]},italic"
+  ZSH_HIGHLIGHT_STYLES[commandseparator]="fg=${PK[stone]}"
+  ZSH_HIGHLIGHT_STYLES[autodirectory]="fg=${PK[lifeblood]},underline"
+  ZSH_HIGHLIGHT_STYLES[path]="fg=${PK[bone]},underline"
+  ZSH_HIGHLIGHT_STYLES[path_prefix]="fg=${PK[bone]},underline"
+  ZSH_HIGHLIGHT_STYLES[path_pathseparator]="fg=${PK[stone]},underline"
+  ZSH_HIGHLIGHT_STYLES[globbing]="fg=${PK[lifeblood]}"
+  ZSH_HIGHLIGHT_STYLES[history-expansion]="fg=${PK[essence]}"
+  ZSH_HIGHLIGHT_STYLES[single-hyphen-option]="fg=${PK[essence]}"
+  ZSH_HIGHLIGHT_STYLES[double-hyphen-option]="fg=${PK[essence]}"
+  ZSH_HIGHLIGHT_STYLES[single-quoted-argument]="fg=${PK[infection]}"
+  ZSH_HIGHLIGHT_STYLES[double-quoted-argument]="fg=${PK[infection]}"
+  ZSH_HIGHLIGHT_STYLES[dollar-quoted-argument]="fg=${PK[infection]}"
+  ZSH_HIGHLIGHT_STYLES[dollar-double-quoted-argument]="fg=${PK[lifeblood]}"
+  ZSH_HIGHLIGHT_STYLES[back-double-quoted-argument]="fg=${PK[lifeblood]}"
+  ZSH_HIGHLIGHT_STYLES[back-quoted-argument]="fg=${PK[essence]}"
+  ZSH_HIGHLIGHT_STYLES[assign]="fg=${PK[bone]}"
+  ZSH_HIGHLIGHT_STYLES[redirection]="fg=${PK[essence]},bold"
+  ZSH_HIGHLIGHT_STYLES[comment]="fg=${PK[stone]},italic"
+  ZSH_HIGHLIGHT_STYLES[named-fd]="fg=${PK[bone]}"
+  ZSH_HIGHLIGHT_STYLES[numeric-fd]="fg=${PK[bone]}"
+  ZSH_HIGHLIGHT_STYLES[bracket-error]="fg=${PK[infection]},bold"
+  ZSH_HIGHLIGHT_STYLES[bracket-level-1]="fg=${PK[soul]}"
+  ZSH_HIGHLIGHT_STYLES[bracket-level-2]="fg=${PK[essence]}"
+  ZSH_HIGHLIGHT_STYLES[bracket-level-3]="fg=${PK[lifeblood]}"
+  ZSH_HIGHLIGHT_STYLES[cursor-matchingbracket]='standout'
+
+  # A recursive force-remove is branded while it is still being typed.
+  ZSH_HIGHLIGHT_PATTERNS+=('rm -*[rf]*' "fg=${PK[pale]},bold,bg=${PK[infection]}")
+fi
+
+
+# ── History substring search ─────────────────────────────────────────────────
+# Type a fragment, press ↑, and walk only the history entries containing it.
+# Sourced after syntax highlighting so its own highlight is not overwritten.
+if [[ -r /opt/homebrew/share/zsh-history-substring-search/zsh-history-substring-search.zsh ]]; then
+  source /opt/homebrew/share/zsh-history-substring-search/zsh-history-substring-search.zsh
+  HISTORY_SUBSTRING_SEARCH_HIGHLIGHT_FOUND="fg=${PK[void]},bg=${PK[soul]},bold"
+  HISTORY_SUBSTRING_SEARCH_HIGHLIGHT_NOT_FOUND="fg=${PK[void]},bg=${PK[infection]},bold"
+  HISTORY_SUBSTRING_SEARCH_FUZZY=1
+  HISTORY_SUBSTRING_SEARCH_ENSURE_UNIQUE=1
+fi
+
+
+# ── Keys ─────────────────────────────────────────────────────────────────────
+bindkey -e                                        # emacs keymap
+
+autoload -Uz edit-command-line && zle -N edit-command-line
+bindkey '^X^E' edit-command-line                  # open the line in $EDITOR
+
+# ↑ / ↓ search history by the fragment already typed; plain history if the
+# plugin is missing.
+if (( $+widgets[history-substring-search-up] )); then
+  bindkey '^[[A' history-substring-search-up
+  bindkey '^[OA' history-substring-search-up      # application cursor mode
+  bindkey '^[[B' history-substring-search-down
+  bindkey '^[OB' history-substring-search-down
+  bindkey '^P'   history-substring-search-up
+  bindkey '^N'   history-substring-search-down
+else
+  bindkey '^[[A' up-line-or-search
+  bindkey '^[[B' down-line-or-search
+fi
+
+# Accepting the grey suggestion.
+if (( $+widgets[autosuggest-accept] )); then
+  bindkey '^E'      autosuggest-accept            # C-e: take the whole thing
+  bindkey '^[[1;3C' autosuggest-accept            # M-→
+  bindkey '^ '      autosuggest-execute           # C-space: accept and run it
+  bindkey '^@'      autosuggest-execute           # same key, NUL-reporting terms
+  bindkey '^[^M'    autosuggest-execute           # M-Enter
+fi
+
+bindkey '^[[1;5C' forward-word                    # C-→
+bindkey '^[[1;5D' backward-word                   # C-←
+bindkey '^[[H'    beginning-of-line
+bindkey '^[[F'    end-of-line
+bindkey '^[[3~'   delete-char
+bindkey '^[[3;5~' kill-word                       # C-delete
+bindkey '^U'      backward-kill-line              # C-u kills left, not the lot
+bindkey '^[[Z'    reverse-menu-complete           # shift-tab walks backwards
+
+# Paste a URL and it is quoted for you.
+autoload -Uz bracketed-paste-magic url-quote-magic
+zle -N bracketed-paste bracketed-paste-magic
+zle -N self-insert url-quote-magic
+
+
+# ── Prompt ───────────────────────────────────────────────────────────────────
+# ❖ ~/personal/opensource/dotfiles on main ✚1 ●2 ?3 ⇡1          2.4s ✘ 130
+# ❯
+zmodload -i zsh/datetime
+autoload -Uz add-zsh-hook vcs_info
+
+zstyle ':vcs_info:*' enable git
+zstyle ':vcs_info:git:*' check-for-changes true
+zstyle ':vcs_info:git:*' stagedstr   " %F{${PK[soul]}}✚%f"
+zstyle ':vcs_info:git:*' unstagedstr " %F{${PK[infection]}}●%f"
+zstyle ':vcs_info:git:*' formats \
+  " %F{${PK[stone]}}on%f %F{${PK[essence]}}%b%f%c%u%m"
+zstyle ':vcs_info:git:*' actionformats \
+  " %F{${PK[stone]}}on%f %F{${PK[essence]}}%b%f %F{${PK[infection]}}⟨%a⟩%f%c%u%m"
+zstyle ':vcs_info:git+set-message:*' hooks pk-untracked pk-divergence
+
+# ? — there are files git has never been told about.
++vi-pk-untracked() {
+  local first
+  first=$(command git ls-files --others --exclude-standard --directory \
+            --no-empty-directory 2>/dev/null | head -n1)
+  [[ -n $first ]] && hook_com[misc]+=" %F{${PK[lifeblood]}}?%f"
+  return 0
+}
+
+# ⇡ / ⇣ — commits this branch has that its upstream does not, and vice versa.
++vi-pk-divergence() {
+  local ahead behind
+  ahead=$(command git rev-list --count '@{upstream}..HEAD' 2>/dev/null) || return 0
+  behind=$(command git rev-list --count 'HEAD..@{upstream}' 2>/dev/null)
+  (( ${ahead:-0}  > 0 )) && hook_com[misc]+=" %F{${PK[soul]}}⇡${ahead}%f"
+  (( ${behind:-0} > 0 )) && hook_com[misc]+=" %F{${PK[infection]}}⇣${behind}%f"
+  return 0
+}
+
+# How long the last command took, shown only once it is worth noticing.
+_pk_timer_start() { _pk_started=$EPOCHREALTIME }
+
+_pk_timer_read() {
+  local -F elapsed=0
+  local human
+  if [[ -n $_pk_started ]]; then
+    elapsed=$(( EPOCHREALTIME - _pk_started ))
+    unset _pk_started
+  fi
+  _pk_took=''
+  (( elapsed < 2 )) && return 0
+  if (( elapsed < 60 )); then
+    printf -v human '%.1fs' $elapsed
+  elif (( elapsed < 3600 )); then
+    printf -v human '%dm%02ds' $(( elapsed / 60 )) $(( elapsed % 60 ))
+  else
+    printf -v human '%dh%02dm' $(( elapsed / 3600 )) $(( elapsed % 3600 / 60 ))
+  fi
+  _pk_took="%F{${PK[stone]}}${human}%f "
+}
+
+_pk_precmd() {
+  local last=$?
+  _pk_timer_read
+  _pk_status=''
+  (( last )) && _pk_status="%F{${PK[infection]}}✘ ${last}%f"
+  vcs_info
+  # A blank line between the last output and the next prompt — but none wasted
+  # at the top of a fresh shell.
+  if (( ${_pk_drawn:-0} )); then print ""; else _pk_drawn=1; fi
+}
+
+add-zsh-hook preexec _pk_timer_start
+add-zsh-hook precmd  _pk_precmd
+
+# user@host, but only when this is not a local login shell.
+_pk_where=''
+if [[ -n $SSH_CONNECTION || -n $SSH_TTY ]]; then
+  _pk_where="%F{${PK[infection]}}%n%f%F{${PK[stone]}}@%f%F{${PK[essence]}}%m%f "
+fi
+
+PROMPT="${_pk_where}%F{${PK[soul]}}❖%f "
+PROMPT+="%B%F{${PK[lifeblood]}}%~%f%b"
+PROMPT+='${vcs_info_msg_0_}'
+PROMPT+="%(1j. %F{${PK[essence]}}⚙%j%f.)"
+PROMPT+=$'\n'
+PROMPT+="%(?.%F{${PK[soul]}}.%F{${PK[infection]}})❯%f "
+
+RPROMPT='${_pk_took}${_pk_status}'
+PROMPT2="%F{${PK[stone]}}◆%f %F{${PK[essence]}}%_%f %F{${PK[soul]}}❯%f "
+RPROMPT2=''
+
+
+# ── Tools ────────────────────────────────────────────────────────────────────
+# eza — the good-looking ls: icons, directories first, git state in long mode.
+if (( $+commands[eza] )); then
+  _pk_eza=(eza --icons=auto --group-directories-first --colour=auto
+           --colour-scale=size --hyperlink)
+  alias ls="${_pk_eza[*]}"
+  alias l="${_pk_eza[*]} --long --header --git --no-user --time-style=relative"
+  alias ll="${_pk_eza[*]} --long --header --git --time-style=long-iso"
+  alias la="${_pk_eza[*]} --long --header --git --all --time-style=long-iso"
+  alias lt="${_pk_eza[*]} --tree --level=2 --git-ignore"
+  alias lta="${_pk_eza[*]} --tree --level=3 --all"
+  alias lS="${_pk_eza[*]} --long --header --all --sort=size --reverse"
+  alias lm="${_pk_eza[*]} --long --header --all --sort=modified --reverse"
+  unset _pk_eza
+else
+  alias ls='ls -G'
+  alias l='ls -lh'
+  alias ll='ls -lh'
+  alias la='ls -lha'
+fi
+
+# bat — cat with syntax highlighting, and a readable man(1).
+if (( $+commands[bat] )); then
+  export BAT_THEME=TwoDark
+  export BAT_STYLE='numbers,changes,header'
+  export MANPAGER="sh -c 'col -bx | bat --language=man --plain'"
+  export MANROFFOPT='-c'
+  alias cat='bat --paging=never'
+  alias catp='bat --plain --paging=never'
+fi
+
+# zoxide — `z dotfiles` goes where you meant, `zi` picks from the ranked list.
+(( $+commands[zoxide] )) && eval "$(zoxide init zsh)"
+
+(( $+commands[rg] )) && alias rg='rg --smart-case --hidden --glob=!.git'
+(( $+commands[fd] )) && alias fd='fd --hidden --follow --exclude=.git'
+
+
+# ── Aliases and small functions ──────────────────────────────────────────────
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+alias -- -='cd -'
+alias d='dirs -v | head -10'
+
+alias mkdir='mkdir -p'
+alias df='df -h'
+alias du='du -h'
+alias ports='lsof -nP -iTCP -sTCP:LISTEN'
+alias path='print -l $path'
+alias reload='exec zsh'
+alias zshrc='${=EDITOR} ~/.zshrc'
+
+alias g=git
+alias gs='git status --short --branch'
+alias gd='git diff'
+alias gl='git log --oneline --graph --decorate -20'
+alias ga='git add'
+alias gc='git commit'
+alias gp='git push'
+alias lg=lazygit
+
+alias t=tmux
+alias ta='tmux attach -t'
+alias tl='tmux list-sessions'
+
+# mkcd — make it, then step into it.
+mkcd() { mkdir -p -- "$1" && cd -- "$1" }
+
+# up 3 — climb three directories.
+up() {
+  local n=${1:-1} p=''
+  repeat $n p+='../'
+  cd -- "${p:-.}"
+}
+
+# ff — fuzzy-find a file under here and open it.
+ff() {
+  local file
+  file=$(fzf --preview 'pk-preview {}' --preview-window=right,60%) || return
+  [[ -n $file ]] && ${=EDITOR} -- "$file"
+}
+
+
+# ── Local overrides ──────────────────────────────────────────────────────────
+# Machine-specific and secret things belong in ~/.zshrc.local, which is not in
+# this repository. Anything an installer appends lands above this line — move
+# it into the right section here, or delete it.
+[[ -r "$HOME/.zshrc.local" ]] && source "$HOME/.zshrc.local"
