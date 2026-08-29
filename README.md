@@ -2,13 +2,13 @@
 
 Personal configuration for my daily development setup.
 
-> Status: this repository is currently empty — no configuration files have been
-> committed yet. This README records the tools the dotfiles are intended to
-> cover, so the layout is known before configs land.
+> Status: the shell configuration (`zsh/`) is committed and live on this
+> machine. The remaining tools listed below are still to land; this README
+> records them so the layout is known in advance.
 
 ## What I use
 
-Four tools make up my environment:
+Five tools make up my environment:
 
 | Tool | Role |
 | --- | --- |
@@ -16,6 +16,7 @@ Four tools make up my environment:
 | [Ghostty](https://ghostty.org) | Terminal emulator |
 | Oh My Pi | Coding harness / agent environment |
 | [Cursor](https://cursor.com) | Code editor |
+| [zsh](https://www.zsh.org) | Shell (macOS default) |
 
 ### Brave
 
@@ -40,6 +41,14 @@ rules belong in this repo so behavior is reproducible across machines.
 Editor for hands-on code work: an AI-native fork of VS Code, so VS Code
 keybindings, settings, and extensions carry over.
 
+### zsh
+
+Default macOS login shell. `zsh/zshrc` is the single source of truth for it —
+`~/.zshrc` is a symlink to that file, so edits made in this repository take
+effect in every new shell with no copy step. Anything an installer appends to
+`~/.zshrc` lands in the repo file instead, where it can be reviewed and
+committed.
+
 ## Intended layout
 
 As configuration is added, it should land under one directory per tool:
@@ -49,11 +58,20 @@ dotfiles/
 ├── brave/      # browser preferences, extension notes
 ├── ghostty/    # terminal config, theme, font
 ├── ohmypi/     # harness settings and rules
-└── cursor/     # editor settings, keybindings, extension list
+├── cursor/     # editor settings, keybindings, extension list
+└── zsh/        # zshrc, shell exports and aliases
 ```
 
 ## Setup
 
-No install script exists yet. Once configs are committed, each tool's files are
-symlinked into the location that tool expects on this machine (macOS, Apple
-silicon).
+No install script exists yet. Each tool's files are symlinked into the location
+that tool expects on this machine (macOS, Apple silicon).
+
+zsh, already linked:
+
+```sh
+ln -sfn "$PWD/zsh/zshrc" ~/.zshrc
+```
+
+Any pre-existing real `~/.zshrc` was copied to `~/.zshrc.backup.<timestamp>`
+before the link was created.
