@@ -2,10 +2,10 @@
 
 Personal configuration for my daily development setup.
 
-> Status: the shell (`zsh/`), terminal multiplexer (`tmux/`), and harness
-> (`ohmypi/`) configurations are committed and live on this machine. The
-> remaining tools listed below are still to land; this README records them so
-> the layout is known in advance.
+> Status: the shell (`zsh/`), terminal multiplexer (`tmux/`), terminal
+> (`ghostty/`), and harness (`ohmypi/`) configurations are committed and live on
+> this machine. The remaining tools listed below are still to land; this README
+> records them so the layout is known in advance.
 
 ## What I use
 
@@ -64,7 +64,40 @@ Two Ghostty parser details worth remembering when editing that file:
 
 The coding harness I work through — agent-driven editing, search, and
 verification against this machine rather than a hosted sandbox. `ohmypi/` holds
-its skills, task agents, and MCP servers, symlinked into `~/.omp/agent/`.
+its rules, skills, task agents, and MCP servers, symlinked into `~/.omp/agent/`.
+
+**Hard rules** (`ohmypi/RULES.md` → `~/.omp/agent/RULES.md`) — omp loads a
+top-level `RULES.md` as an always-apply *sticky* rule: unlike `AGENTS.md`, it is
+re-attached near the current turn, so it keeps its hold after a long conversation
+has pushed the opening context out of view. Five prohibitions live there, and
+they outrank the harness's own instruction to verify by running things:
+
+1. **No starting, stopping, or restarting applications** — no `open -a`,
+   `osascript -e 'quit app …'`, `kill`/`pkill`/`killall`, no window reloads to
+   pick up config. The agent names what needs a restart; I do it.
+2. **No starting the server, the app, or a dev command** — not to check whether
+   it works, and not to see what is happening before deciding what to do next. I
+   start it, test it by hand, and report what I saw; the agent waits for that.
+3. **No opening or driving the browser tool** — including as "verification".
+   Much of my work is desktop apps, where a browser proves nothing.
+4. **No unrequested investigation** — no going through the list, reading around
+   the codebase, or working out what is going on until I ask, and I say when I am
+   done. Until then: implement what I asked for and nothing else.
+5. **No reaching for the `planner` or `hand` subagents** — that two-model
+   workflow runs only on `/delegate` or an explicit request; otherwise the agent
+   reads, decides, and edits with its own tools.
+
+Permission lifts a rule only for the action I name in that request; "go ahead" or
+"make it work" is not permission. When a rule blocks verification the agent must
+state plainly that verification needs me to check it — what is unverified, the
+command I would run, what result means success — rather than presenting
+unverified work as done. Reading the files it is about to edit, search, LSP,
+read-only git, and syntax checks on changed files stay allowed.
+
+Rule 5 is preventive: neither `planner`/`hand` nor `/delegate` exists in this
+install today — bundled agents are `scout`, `designer`, `reviewer`,
+`security-reviewer`, `librarian`, `task`, `sonic`, plus the local `committer` —
+so it takes hold the moment that workflow lands.
 
 **`commit` skill** (`/skill:commit`) — turns staged changes into one semantic
 commit. It checks that `user.name` and `user.email` are set, refuses to run with
@@ -246,7 +279,8 @@ dotfiles/
 ├── ghostty/    # terminal config
 │   ├── config
 │   └── themes/pale-knight
-├── ohmypi/     # harness skills, task agents, MCP servers
+├── ohmypi/     # harness sticky rules, skills, task agents, MCP servers
+│   ├── RULES.md
 │   ├── skills/commit/SKILL.md
 │   ├── agents/committer.md
 │   └── mcp.json
@@ -290,6 +324,7 @@ ln -sfn "$PWD/ghostty/themes" ~/.config/ghostty/themes
 ln -sfn "$PWD/ohmypi/skills/commit"     ~/.omp/agent/skills/commit
 ln -sfn "$PWD/ohmypi/agents/committer.md" ~/.omp/agent/agents/committer.md
 ln -sfn "$PWD/ohmypi/mcp.json"            ~/.omp/agent/mcp.json
+ln -sfn "$PWD/ohmypi/RULES.md"            ~/.omp/agent/RULES.md
 ```
 
 Marketplace plugins live outside this repo, in `~/.omp/plugins`; ponytail is
@@ -305,5 +340,6 @@ before the link was created. `reload` (`exec zsh`) picks up shell edits in the
 current window. A running tmux server picks up edits to `tmux/tmux.conf` with
 `prefix C-r`; new servers read it on start. Ghostty reloads with
 `Cmd+Shift+,` — a config change does not reach already-open windows until then.
-Task agents are rediscovered on every dispatch, but skills are read at startup —
-a new or renamed skill needs an omp restart before `/skill:<name>` sees it.
+Task agents are rediscovered on every dispatch, but skills and rules are read at
+startup — a new or renamed skill needs an omp restart before `/skill:<name>` sees
+it, and edits to `RULES.md` take hold in the next session, not the running one.
