@@ -47,8 +47,13 @@ type(scope): imperative summary
 
 Rules for the subject:
 
-- `type` is one of `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`,
-  `ci`, `chore`, `revert`.
+- `type` is chosen by what the change *does*, judged on the whole diff:
+  - `feat` — adds a file, capability, binding, or option. A mixed diff that adds
+    something plus its documentation is still `feat`.
+  - `fix` — corrects broken behavior.
+  - `docs` — only when **every** changed file is prose. README-plus-code is never `docs`.
+  - `refactor` — same behavior, different structure. `perf`, `test`, `style`, `build`,
+    `ci`, `chore`, `revert` for their obvious cases.
 - `scope` is optional; use the top-level directory that changed (`tmux`, `zsh`, `ohmypi`)
   and drop it when the change is repo-wide.
 - imperative mood ("add", not "added"/"adds"), no trailing period, 72 chars or fewer.
@@ -56,7 +61,8 @@ Rules for the subject:
 Rules for the bullets:
 
 - Explain what the change does and why it was made, not a restatement of the diff.
-- One line each, starting with `- `, wrapped at 80 characters.
+- One line each, starting with `- `. Hard limit 80 characters per line, including the
+  `- ` — count it and split or shorten anything longer.
 - 1–6 bullets. A one-line change needs no bullets; omit the body entirely.
 
 Commit it:
