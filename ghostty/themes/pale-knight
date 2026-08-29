@@ -1,0 +1,45 @@
+# Pale Knight — Ghostty theme
+#
+# Same palette as tmux/tmux.conf and zsh/zshrc: void-black ground, bone-white
+# text, soul-cyan for what is alive and focused, infection-orange for what wants
+# attention.
+#
+# Selected from ghostty/config with `theme = pale-knight`. Ghostty reads custom
+# themes from the `themes` subdirectory of its config directory.
+
+# ── Surface ──────────────────────────────────────────────────────────────────
+background = #0b0e14
+foreground = #c8d3de
+
+cursor-color = #7ad7cf
+cursor-text  = #0b0e14
+
+selection-background = #232b3a
+selection-foreground = #f2f6fa
+
+# Find-in-terminal highlight: infection-orange on void, matching the tmux
+# message bar.
+search-background = #d9903f
+search-foreground = #0b0e14
+
+split-divider-color = #232b3a
+
+# ── ANSI 0-7 ─────────────────────────────────────────────────────────────────
+palette = 0=#151a24
+palette = 1=#d05f6a
+palette = 2=#7fb069
+palette = 3=#d9903f
+palette = 4=#4a9fd8
+palette = 5=#9d8cc4
+palette = 6=#7ad7cf
+palette = 7=#c8d3de
+
+# ── ANSI 8-15 (bright) ───────────────────────────────────────────────────────
+palette = 8=#4a586e
+palette = 9=#e4808a
+palette = 10=#9ad089
+palette = 11=#e8a95c
+palette = 12=#6fb8e6
+palette = 13=#b6a7d9
+palette = 14=#9ce5e0
+palette = 15=#f2f6fa

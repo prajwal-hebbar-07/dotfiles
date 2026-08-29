@@ -1,0 +1,51 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Ghostty — Pale Knight
+#
+# Source of truth: dotfiles/ghostty/config  (~/.config/ghostty/config -> here)
+# Reload in place: Cmd+Shift+, (reload_config)
+#
+# Note: Ghostty has no trailing comments. A `#` after a value is part of the
+# value, so every comment here sits on its own line.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Colours live in themes/pale-knight, next to this file.
+theme = pale-knight
+
+
+# ── Fully opaque ─────────────────────────────────────────────────────────────
+# Nothing behind the window may show through. Ghostty already defaults to an
+# opaque background, so the desktop bleeding through came from the transparent
+# macOS titlebar; `tabs` draws it in the theme background instead.
+background-opacity = 1
+background-blur = false
+background-image =
+macos-titlebar-style = tabs
+
+# Unfocused splits keep full strength instead of fading to 0.7, so an inactive
+# pane reads as solid rather than washed out.
+unfocused-split-opacity = 1
+unfocused-split-fill = #0b0e14
+
+
+# ── Window ───────────────────────────────────────────────────────────────────
+# Titlebar and chrome follow the theme instead of the macOS appearance.
+window-theme = ghostty
+window-padding-x = 8
+window-padding-y = 6
+window-padding-balance = true
+# The palette is written in sRGB hex; render it unconverted.
+window-colorspace = srgb
+
+
+# ── Cursor ───────────────────────────────────────────────────────────────────
+cursor-style = block
+cursor-style-blink = false
+mouse-hide-while-typing = true
+
+
+# ── Terminal ─────────────────────────────────────────────────────────────────
+# tmux keeps its own 50k history; this is for bare shells outside tmux.
+scrollback-limit = 100000000
+copy-on-select = clipboard
+# tmux owns the session, so a closed window loses nothing.
+confirm-close-surface = false
