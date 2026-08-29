@@ -97,6 +97,20 @@ Reinstalling is worthwhile only once upstream ships an absolute path or omp
 expands variables in plugin manifests; until then this entry is what makes the
 `paper` tools work.
 
+**`ponytail` plugin** (`ponytail@ponytail`, v4.9.0, user scope) — installed from
+the `DietrichGebert/ponytail` marketplace, which omp reads through its
+Claude-Code-compatible `.claude-plugin/marketplace.json` fallback. It prepends a
+"lazy senior dev" ruleset (YAGNI, reuse, stdlib, native platform feature, one
+line) to the system prompt on every turn and ships six skills — `ponytail`,
+`ponytail-review`, `ponytail-audit`, `ponytail-debt`, `ponytail-gain`,
+`ponytail-help`. Its `pi-extension/index.js` loads through the legacy
+`package.json` `pi.extensions` key that omp still honours, and registers
+`/ponytail lite|full|ultra|off` plus one command per skill. Default level is
+`full`; override with `PONYTAIL_DEFAULT_MODE` or `/ponytail default <mode>`. The
+repo's Node lifecycle hooks (`hooks/claude-codex-hooks.json`) are Claude/Codex
+event names and are unused here, so the missing `node` on this machine costs
+nothing.
+
 ### Cursor
 
 Editor for hands-on code work: an AI-native fork of VS Code, so VS Code
@@ -276,6 +290,14 @@ ln -sfn "$PWD/ghostty/themes" ~/.config/ghostty/themes
 ln -sfn "$PWD/ohmypi/skills/commit"     ~/.omp/agent/skills/commit
 ln -sfn "$PWD/ohmypi/agents/committer.md" ~/.omp/agent/agents/committer.md
 ln -sfn "$PWD/ohmypi/mcp.json"            ~/.omp/agent/mcp.json
+```
+
+Marketplace plugins live outside this repo, in `~/.omp/plugins`; ponytail is
+reinstalled on a new machine with:
+
+```sh
+omp plugin marketplace add DietrichGebert/ponytail
+omp plugin install ponytail@ponytail
 ```
 
 Any pre-existing real `~/.zshrc` was copied to `~/.zshrc.backup.<timestamp>`

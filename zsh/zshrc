@@ -141,8 +141,8 @@ zstyle ':completion:*' group-name ''          # one labelled group per match typ
 
 # Raw SGR, not %F{…}: fzf-tab renders these group headers itself and never runs
 # them through prompt expansion, so a %F would show up as literal text.
-zstyle ':completion:*:*:*:*:descriptions' format $'\e[1;38;2;123;176;176m❖ %d\e[0m'
-zstyle ':completion:*:*:*:*:corrections'  format $'\e[38;2;187;160;119m✘ %d (errors: %e)\e[0m'
+zstyle ':completion:*:*:*:*:descriptions' format $'\e[1;38;2;123;176;176m◈ %d\e[0m'
+zstyle ':completion:*:*:*:*:corrections'  format $'\e[38;2;187;160;119m× %d (errors: %e)\e[0m'
 zstyle ':completion:*:*:*:*:messages'     format $'\e[38;2;177;154;192m%d\e[0m'
 zstyle ':completion:*:*:*:*:warnings'     format $'\e[38;2;101;108;125mno matches for %d\e[0m'
 
@@ -212,7 +212,7 @@ zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
 if (( $+commands[fzf] )); then
   export FZF_DEFAULT_OPTS="
     --height=45% --layout=reverse --border=rounded --info=inline-right
-    --scrollbar=▌ --pointer=❯ --marker=◆ --prompt='❖ '
+    --scrollbar=▌ --pointer=❯ --marker=◆ --prompt='◈ '
     --color=fg:${PK[bone]},fg+:${PK[pale]},bg:-1,bg+:${PK[shade]}
     --color=hl:${PK[infection]},hl+:${PK[infection]}
     --color=info:${PK[essence]},prompt:${PK[soul]},pointer:${PK[soul]}
@@ -401,7 +401,7 @@ zle -N self-insert url-quote-magic
 
 
 # ── Prompt ───────────────────────────────────────────────────────────────────
-# ❖ ~/personal/opensource/dotfiles on main ✚1 ●2 ?3 ⇡1          2.4s ✘ 130
+# ◈ ~/personal/opensource/dotfiles on main +1 ●2 ?3 ↑1          2.4s × 130
 # ❯
 zmodload -i zsh/datetime
 autoload -Uz add-zsh-hook vcs_info
@@ -416,7 +416,7 @@ zstyle ':vcs_info:git:*' actionformats \
   " %F{${PK[stone]}}on%f %F{${PK[essence]}}%b%f %F{${PK[infection]}}⟨%a⟩%f%m"
 zstyle ':vcs_info:git+set-message:*' hooks pk-dirty pk-divergence
 
-# ✚ staged   ● unstaged   ? untracked   ✖ conflicted — one git call, with counts.
+# + staged   ● unstaged   ? untracked   × conflicted — one git call, with counts.
 +vi-pk-dirty() {
   local -i staged=0 unstaged=0 untracked=0 conflict=0
   local line x y
@@ -432,20 +432,20 @@ zstyle ':vcs_info:git+set-message:*' hooks pk-dirty pk-divergence
     fi
   done < <(command git status --porcelain=v1 2>/dev/null)
 
-  (( conflict  )) && hook_com[misc]+=" %F{${PK[infection]}}%B✖${conflict}%b%f"
-  (( staged    )) && hook_com[misc]+=" %F{${PK[soul]}}✚${staged}%f"
+  (( conflict  )) && hook_com[misc]+=" %F{${PK[infection]}}%B×${conflict}%b%f"
+  (( staged    )) && hook_com[misc]+=" %F{${PK[soul]}}+${staged}%f"
   (( unstaged  )) && hook_com[misc]+=" %F{${PK[infection]}}●${unstaged}%f"
   (( untracked )) && hook_com[misc]+=" %F{${PK[lifeblood]}}?${untracked}%f"
   return 0
 }
 
-# ⇡ / ⇣ — commits this branch has that its upstream does not, and vice versa.
+# ↑ / ↓ — commits this branch has that its upstream does not, and vice versa.
 +vi-pk-divergence() {
   local ahead behind
   ahead=$(command git rev-list --count '@{upstream}..HEAD' 2>/dev/null) || return 0
   behind=$(command git rev-list --count 'HEAD..@{upstream}' 2>/dev/null)
-  (( ${ahead:-0}  > 0 )) && hook_com[misc]+=" %F{${PK[soul]}}⇡${ahead}%f"
-  (( ${behind:-0} > 0 )) && hook_com[misc]+=" %F{${PK[infection]}}⇣${behind}%f"
+  (( ${ahead:-0}  > 0 )) && hook_com[misc]+=" %F{${PK[soul]}}↑${ahead}%f"
+  (( ${behind:-0} > 0 )) && hook_com[misc]+=" %F{${PK[infection]}}↓${behind}%f"
   return 0
 }
 
@@ -475,7 +475,7 @@ _pk_precmd() {
   local last=$?
   _pk_timer_read
   _pk_status=''
-  (( last )) && _pk_status="%F{${PK[infection]}}✘ ${last}%f"
+  (( last )) && _pk_status="%F{${PK[infection]}}× ${last}%f"
   vcs_info
   # A blank line between the last output and the next prompt — but none wasted
   # at the top of a fresh shell.
@@ -491,10 +491,10 @@ if [[ -n $SSH_CONNECTION || -n $SSH_TTY ]]; then
   _pk_where="%F{${PK[infection]}}%n%f%F{${PK[stone]}}@%f%F{${PK[essence]}}%m%f "
 fi
 
-PROMPT="${_pk_where}%F{${PK[soul]}}❖%f "
+PROMPT="${_pk_where}%F{${PK[soul]}}◈%f "
 PROMPT+="%B%F{${PK[lifeblood]}}%~%f%b"
 PROMPT+='${vcs_info_msg_0_}'
-PROMPT+="%(1j. %F{${PK[essence]}}⚙%j%f.)"
+PROMPT+="%(1j. %F{${PK[essence]}}•%j%f.)"
 PROMPT+=$'\n'
 PROMPT+="%(?.%F{${PK[soul]}}.%F{${PK[infection]}})❯%f "
 

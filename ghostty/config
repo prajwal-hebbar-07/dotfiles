@@ -27,11 +27,28 @@ unfocused-split-opacity = 1
 unfocused-split-fill = #1d2029
 
 
+# ── Type ─────────────────────────────────────────────────────────────────────
+# JetBrains Mono, with Symbols Nerd Font Mono behind it for the glyphs the
+# prompt and status bars use. Carried over from dotfiles-old; this config had
+# no font settings at all, so Ghostty was falling back to the macOS default.
+font-family = JetBrains Mono
+font-family = Symbols Nerd Font Mono
+font-size = 13
+# Ligatures off: `->`, `!=` and `=>` stay as the characters they are.
+font-feature = -calt
+# Loosen the line box; box-drawing and separators still join because Ghostty
+# stretches them to the cell.
+adjust-cell-height = 12%
+font-thicken = false
+
+
 # ── Window ───────────────────────────────────────────────────────────────────
 # Titlebar and chrome follow the theme instead of the macOS appearance.
 window-theme = ghostty
-window-padding-x = 8
-window-padding-y = 6
+window-padding-x = 10
+# Roomier above, tighter below — the tmux status bar already occupies the last
+# row, so it does not need padding under it.
+window-padding-y = 10,5
 window-padding-balance = true
 # The palette is written in sRGB hex; render it unconverted.
 window-colorspace = srgb
