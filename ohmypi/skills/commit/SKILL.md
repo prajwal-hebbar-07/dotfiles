@@ -6,7 +6,8 @@ description: Commit already-staged changes with a semantic message and pointer b
 # commit
 
 Turn staged changes into one semantic commit **without spending main-session tokens on
-the diff**. The diff is read by `committer`, which runs on Haiku at minimal thinking.
+the diff**. The diff is read by `committer`, which runs on `ollama-cloud/glm-5.3-flash`,
+so it spends no Claude credits at all.
 
 ## Do this
 

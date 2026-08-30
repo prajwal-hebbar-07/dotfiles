@@ -1,8 +1,7 @@
 ---
 name: committer
-description: Creates one semantic git commit from already-staged changes. Runs on a cheap model; never stages files, never writes co-author trailers.
-model: anthropic/claude-haiku-4-5
-thinking-level: minimal
+description: Creates one semantic git commit from already-staged changes. Runs off-Claude on glm-5.3-flash; never stages files, never writes co-author trailers.
+model: ollama-cloud/glm-5.3-flash
 tools: bash
 ---
 
