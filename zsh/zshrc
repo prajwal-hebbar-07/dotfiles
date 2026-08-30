@@ -545,6 +545,25 @@ fi
 (( $+commands[rg] )) && alias rg='rg --smart-case --hidden --glob=!.git'
 (( $+commands[fd] )) && alias fd='fd --hidden --follow --exclude=.git'
 
+# nvm — node is on PATH, nvm itself is not loaded until it is called.
+# `. nvm.sh` costs ~0.85s, which no prompt should pay, and its own startup
+# `nvm use default` currently resolves to nothing anyway (the default alias
+# chains default → node → stable, and stable has no local match). So the
+# newest installed version goes straight on PATH, and the shim below sources
+# nvm.sh on the first `nvm` call and hands the arguments over.
+export NVM_DIR="$HOME/.nvm"
+if [[ -s "$NVM_DIR/nvm.sh" ]]; then
+  _pk_node=("$NVM_DIR"/versions/node/*/bin(Nn[-1]))
+  (( $#_pk_node )) && path=("$_pk_node[1]" $path)
+  unset _pk_node
+
+  nvm() {
+    unfunction nvm
+    source "$NVM_DIR/nvm.sh"
+    nvm "$@"
+  }
+fi
+
 
 # ── Aliases and small functions ──────────────────────────────────────────────
 alias ..='cd ..'

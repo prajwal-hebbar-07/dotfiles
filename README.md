@@ -160,8 +160,7 @@ line) to the system prompt on every turn and ships six skills — `ponytail`,
 `/ponytail lite|full|ultra|off` plus one command per skill. Default level is
 `full`; override with `PONYTAIL_DEFAULT_MODE` or `/ponytail default <mode>`. The
 repo's Node lifecycle hooks (`hooks/claude-codex-hooks.json`) are Claude/Codex
-event names and are unused here, so the missing `node` on this machine costs
-nothing.
+event names and are unused here, so they never run.
 
 ### Cursor
 
@@ -270,6 +269,14 @@ reaches the directory that name has meant most often, and `zi` picks from the
 ranked list. `ff` fuzzy-finds a file and opens it. `mkcd` makes a directory and
 steps into it; `up 3` climbs three levels.
 
+**Node** comes from [nvm](https://github.com/nvm-sh/nvm), installed under
+`~/.nvm` (not in this repository). Sourcing `nvm.sh` costs ~0.85s per shell, so
+`zshrc` does not: it puts the newest installed version's `bin` directly on
+PATH — `node`, `npm`, and `npx` are there in every shell — and defines an `nvm`
+function that sources `nvm.sh` on first call, replaces itself, and forwards the
+arguments. Startup stays at ~0.09s; `nvm install`, `nvm use`, and `nvm ls` all
+work, and a `nvm use X` inside a shell overrides the PATH entry for that shell.
+
 ### tmux
 
 Terminal multiplexer, themed **Pale Knight** — a Hollow Knight palette: dusk-blue
@@ -344,6 +351,17 @@ is how Homebrew leaves `share`. Once, after installing:
 ```sh
 chmod go-w "$(brew --prefix)/share"
 ```
+
+Node is not a Homebrew package here — nvm owns it, and the `nvm` block in
+`zsh/zshrc` stays silent until `~/.nvm/nvm.sh` exists:
+
+```sh
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.7/install.sh | bash
+nvm install --lts     # or any version; the newest installed one lands on PATH
+```
+
+The installer appends its own two-line loader to `~/.zshrc`; delete that — it is
+the ~0.85s load the block above exists to avoid.
 
 Already linked:
 
