@@ -297,6 +297,7 @@ close, so `prefix 1` always reaches the first window.
 | `prefix` `X` | Close this window, no confirmation |
 | `prefix` `c` | New window in the current pane's directory |
 | `prefix` `g` | lazygit in a popup, on the current pane's repository |
+| `prefix` `t` | tuicr in a popup, in the current pane's directory (overrides clock-mode) |
 | `prefix` `C-s` | Send a literal `C-s` to the pane |
 | `prefix` `C-r` | Reload the config in place |
 
