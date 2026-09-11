@@ -9,7 +9,7 @@ Personal configuration for my daily development setup.
 
 ## What I use
 
-Six tools make up my environment:
+Seven tools make up my environment:
 
 | Tool | Role |
 | --- | --- |
@@ -17,6 +17,7 @@ Six tools make up my environment:
 | [Ghostty](https://ghostty.org) | Terminal emulator |
 | Oh My Pi | Coding harness / agent environment |
 | [Cursor](https://cursor.com) | Code editor |
+| Gemini (Antigravity) | AI coding assistant / CLI |
 | [zsh](https://www.zsh.org) | Shell (macOS default) |
 | [tmux](https://github.com/tmux/tmux) | Terminal multiplexer |
 
@@ -130,13 +131,38 @@ replace the planner's how with its own. Pass the plan file plus this
 executes that plan: the next unfinished step, exactly as written, `git add`
 only that step's files, then `/skill:commit` with the plan's subject. It does
 not `git commit` itself. An empty index is not the end of the plan — add the
-files and commit. After the SHA lands, it takes the next step.
+files and commit. After the SHA lands, it takes the next step. After every
+step it emits a **report-arc** report.
+
+**`report-arc` skill** (`/skill:report-arc`) — the step-report shape (status,
+Done when table, changed, leftover unstaged, verification, next) and a
+second mode that turns any such report — pasted, a file, or this chat —
+into a page under `docs/reports/`. It does not implement. Pass the report
+plus this `SKILL.md` to any agent.
+
+**`repo-docs` skill** (`/skill:repo-docs`) — the same paired docs as
+`docs-twins` (architecture + plain-English, same number, stored baseline,
+one writer per pair, never commit), for **any** tree: a dotfiles repo, Python,
+Go, Rust, a single crate. The path → pair table lives in that repo's
+`docs/README.md`, not in the skill, so `docs-twins` can stay hardcoded for
+the monorepos it already serves. Incremental by default; `full` or named
+numbers for a sweep.
+
+**`docs-twins` skill** (`/skill:docs-twins`) — generates or refreshes twin
+documentation (technical doc in `docs/architecture/` and plain-English twin in
+`docs/plain-english/`) for monorepos, diff-driven from a stored baseline SHA
+in `docs/README.md`.
+
+**`docs-verify` skill** (`/skill:docs-verify`) — audits documentation claims
+against the code in the reverse direction of `docs-twins`. Finds dead paths,
+dead symbols, renamed modules, and stale counts, running `check-claims.py`
+mechanically and delegating prose checking.
 
 **`implement-commit-prompt` skill** (`/skill:implement-commit-prompt`) —
 extracts **one** step from that plan into a copy-pastable prompt for a fresh
 chat. If the step already has a Prompt block, that is what gets copied rather
 than a rewrite. Use this when you want a new session per commit; following
-the plan in-session is `follow-implementation-plan`. All four live in
+the plan in-session is `follow-implementation-plan`. These live in
 `ohmypi/skills/` and are linked into both omp and Cursor, same as
 `paper-target`.
 
@@ -199,8 +225,8 @@ keybindings, settings, and extensions carry over.
 **Skills** — Cursor discovers user-level skills from `~/.cursor/skills/` (and
 `~/.agents/skills/`, plus the Claude and Codex directories for compatibility),
 so `paper-target`, `implement-commit-prompt`, `implementation-plan`,
-`review-implementation-plan`, and `follow-implementation-plan` are linked there
-from `ohmypi/skills/`.
+`review-implementation-plan`, `follow-implementation-plan`, `report-arc`,
+and `repo-docs` are linked there from `ohmypi/skills/`.
 `~/.cursor/skills-cursor/` is Cursor's own directory for its built-in skills,
 kept in sync from a `.sync-manifest.json`; nothing of mine goes in it. `commit`
 is not linked in — it dispatches an omp task agent, which Cursor has no
@@ -212,6 +238,15 @@ skill is linked here for completeness; the intended use is to copy that
 written server: Cursor expands `${userHome}` in plugin manifests, so the same
 manifest that fails under omp spawns correctly, and its tool schemas are cached
 per project under `~/.cursor/projects/<slug>/mcps/`.
+
+### Gemini (Antigravity)
+
+Google's AI coding assistant environment (`agy`).
+
+**Skills** — Antigravity discovers global skills from `~/.gemini/config/skills/`
+(as well as workspace skills under `.agents/skills/`). The shared documentation
+and commit skills — `commit`, `docs-twins`, `docs-verify`, and `repo-docs` — are
+linked into `~/.gemini/config/skills/` from `ohmypi/skills/`.
 
 ### zsh
 
@@ -355,10 +390,14 @@ dotfiles/
 ├── ohmypi/     # harness sticky rules, skills, task agents, MCP servers
 │   ├── RULES.md
 │   ├── skills/commit/SKILL.md
+│   ├── skills/docs-twins/SKILL.md
+│   ├── skills/docs-verify/SKILL.md
 │   ├── skills/implement-commit-prompt/SKILL.md
 │   ├── skills/implementation-plan/SKILL.md
 │   ├── skills/review-implementation-plan/SKILL.md
 │   ├── skills/follow-implementation-plan/SKILL.md
+│   ├── skills/report-arc/SKILL.md
+│   ├── skills/repo-docs/SKILL.md
 │   ├── skills/paper-target/SKILL.md
 │   ├── agents/committer.md
 │   └── mcp.json
@@ -411,11 +450,15 @@ ln -sfn "$PWD/tmux/tmux.conf"  ~/.config/tmux/tmux.conf
 ln -sfn "$PWD/ghostty/config" ~/.config/ghostty/config
 ln -sfn "$PWD/ghostty/themes" ~/.config/ghostty/themes
 ln -sfn "$PWD/ohmypi/skills/commit"     ~/.omp/agent/skills/commit
+ln -sfn "$PWD/ohmypi/skills/docs-twins" ~/.omp/agent/skills/docs-twins
+ln -sfn "$PWD/ohmypi/skills/docs-verify" ~/.omp/agent/skills/docs-verify
 ln -sfn "$PWD/ohmypi/skills/paper-target" ~/.omp/agent/skills/paper-target
 ln -sfn "$PWD/ohmypi/skills/implement-commit-prompt" ~/.omp/agent/skills/implement-commit-prompt
 ln -sfn "$PWD/ohmypi/skills/implementation-plan" ~/.omp/agent/skills/implementation-plan
 ln -sfn "$PWD/ohmypi/skills/review-implementation-plan" ~/.omp/agent/skills/review-implementation-plan
 ln -sfn "$PWD/ohmypi/skills/follow-implementation-plan" ~/.omp/agent/skills/follow-implementation-plan
+ln -sfn "$PWD/ohmypi/skills/report-arc" ~/.omp/agent/skills/report-arc
+ln -sfn "$PWD/ohmypi/skills/repo-docs" ~/.omp/agent/skills/repo-docs
 ln -sfn "$PWD/ohmypi/agents/committer.md" ~/.omp/agent/agents/committer.md
 ln -sfn "$PWD/ohmypi/mcp.json"            ~/.omp/agent/mcp.json
 ln -sfn "$PWD/ohmypi/RULES.md"            ~/.omp/agent/RULES.md
@@ -425,6 +468,14 @@ ln -sfn "$PWD/ohmypi/skills/implement-commit-prompt" ~/.cursor/skills/implement-
 ln -sfn "$PWD/ohmypi/skills/implementation-plan" ~/.cursor/skills/implementation-plan
 ln -sfn "$PWD/ohmypi/skills/review-implementation-plan" ~/.cursor/skills/review-implementation-plan
 ln -sfn "$PWD/ohmypi/skills/follow-implementation-plan" ~/.cursor/skills/follow-implementation-plan
+ln -sfn "$PWD/ohmypi/skills/report-arc" ~/.cursor/skills/report-arc
+ln -sfn "$PWD/ohmypi/skills/repo-docs" ~/.cursor/skills/repo-docs
+
+mkdir -p ~/.gemini/config/skills
+ln -sfn "$PWD/ohmypi/skills/commit" ~/.gemini/config/skills/commit
+ln -sfn "$PWD/ohmypi/skills/docs-twins" ~/.gemini/config/skills/docs-twins
+ln -sfn "$PWD/ohmypi/skills/docs-verify" ~/.gemini/config/skills/docs-verify
+ln -sfn "$PWD/ohmypi/skills/repo-docs" ~/.gemini/config/skills/repo-docs
 ```
 
 Marketplace plugins live outside this repo, in `~/.omp/plugins`; ponytail is

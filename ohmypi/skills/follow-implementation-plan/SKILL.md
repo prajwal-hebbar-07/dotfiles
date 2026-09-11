@@ -84,9 +84,16 @@ Do not stop because commit could not run.
    files and run `commit` once more. That is not a reason to end the plan.
 4. If identity is missing or a pre-commit hook fails: **stop**. Relay that.
    Do not start the next step.
-5. When `git log` shows that subject, take the **next** unfinished step in
-   this same follow. Keep going until the plan is done or a step cannot
-   finish.
+5. When `git log` shows that subject, emit the step report (see below), then
+   take the **next** unfinished step in this same follow. Keep going until
+   the plan is done or a step cannot finish.
+
+## Report
+
+After every step — committed or blocked — emit one report in the **report-arc**
+shape. Read that skill's `template.md` if it is available. Status line, Done
+when table, Changed, Left unstaged, Verification (gate vs parent), Next. No
+"your call". A report is not permission to skip the next step.
 
 ## Never
 

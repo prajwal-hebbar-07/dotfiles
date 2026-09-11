@@ -621,3 +621,7 @@ ff() {
 if [[ -r "$HOME/.zshrc.local" ]]; then
   source "$HOME/.zshrc.local"
 fi
+
+# Added by Antigravity CLI installer
+export PATH="/Users/hebbar/.local/bin:$PATH"
+alias agy='command agy --dangerously-skip-permissions'

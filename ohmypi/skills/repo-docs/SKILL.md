@@ -1,175 +1,267 @@
 ---
 name: repo-docs
-description: Generate or refresh area documentation for any repository structure, not just monorepos. Uses a stored baseline to diff only what changed since docs were last generated. Never commits.
+description: >
+  Generate or refresh paired twin documentation for any repository — not only
+  JS/TS monorepos. One technical document under docs/architecture/ and one
+  plain-English companion with the same number under docs/plain-english/.
+  Incremental by default (pairs whose code changed since the stored baseline)
+  or a full sweep. Use when the user says "repo docs", "generate the docs",
+  "twin docs for this repo", "document this Python/Go/Rust/dotfiles repo",
+  or invokes /repo-docs. Do not use on a repo that already runs docs-twins
+  with a monorepo mapping; leave that skill alone.
+argument-hint: "[full | since <ref> | <doc numbers, e.g. 01 04>]"
 ---
 
-# repo-docs
+# repo-docs: twin docs for any repo
 
-Generate or refresh area documentation for **any** repository structure. Uses a stored baseline SHA to diff only what changed since the docs were last generated, then updates the affected area documents.
+Same job as `docs-twins`: every numbered document exists twice, both true to
+the code and true to each other. This skill does **not** assume `apps/`,
+`packages/`, pnpm, or Turbo. The path → pair table lives **in the repo**.
 
-This skill is the generic sibling of `docs-twins`. It produces one document per area under `docs/areas/`, not paired architecture/plain-English docs.
+| Where                             | For                                         |
+| --------------------------------- | ------------------------------------------- |
+| `docs/architecture/NN-<slug>.md`  | engineers — exact, cited, blunt about debt  |
+| `docs/plain-english/NN-<slug>.md` | everyone else — same subject, everyday words |
 
-## When to use
+Same number = same subject. Neither is a summary of the other.
 
-The user says "update the repo docs", "refresh docs", "generate docs for this repo", or invokes `/skill:repo-docs`.
+**Never commit.** Report and stop; the user runs `/skill:commit` when happy.
+**Never edit `docs-twins`.** That skill stays as-is for the repos it already
+serves.
 
-## Do this
+If this repo already has a `docs-twins` mapping (pairs plus a
+`docs-baseline:` and a skill-local path table you must not copy here), stop
+and say to run `docs-twins` instead.
 
-1. Capture `HEAD` SHA now.
-2. Find or create `docs/README.md` with a `docs-baseline:` marker.
-3. Diff changed files since that baseline.
-4. Map changed files to areas using auto-detection.
-5. Dispatch one `repo-docs-writer` per affected area.
-6. Update the baseline marker to the captured SHA if every touched area was checked.
-7. Verify counts and links.
-8. Report and stop. Do not commit.
-
-## Step 1 — capture HEAD
+## Step 1 — baseline and what changed
 
 ```bash
 git rev-parse HEAD
+grep -o 'docs-baseline: [0-9a-f]\{7,40\}' docs/README.md
 ```
 
-Save this SHA. It is the baseline for the next run.
+Capture `HEAD` **now**. That sha is what this sweep covers.
 
-## Step 2 — find or create the baseline marker
+The baseline is the `docs-baseline:` marker under `## Freshness` in
+`docs/README.md`. Never re-derive it from `git log -- docs/`: a typo fix in
+the docs would bury undocumented code.
+
+Diff code, not docs:
 
 ```bash
-grep 'docs-baseline:' docs/README.md
+git diff --name-only <baseline-sha>..HEAD \
+  -- . ':(exclude)docs/' ':(exclude)*.lock' ':(exclude)package-lock.json' \
+  ':(exclude)pnpm-lock.yaml' ':(exclude)Cargo.lock' ':(exclude)go.sum' \
+  ':(exclude)poetry.lock' ':(exclude)uv.lock' ':(exclude)yarn.lock'
 ```
 
-- If the marker exists, read the SHA.
-- If `docs/README.md` does not exist or has no marker, create it with:
+- No marker, and no `docs/architecture/` yet → **bootstrap**. Full sweep.
+  There is no baseline to diff against.
+- Marker missing but pairs exist → derive with
+  `git log -1 --format='%h %ad %s' --date=short -- docs/architecture docs/plain-english`,
+  say it is a guess, then diff.
+- Diff empty and not `full` / not named numbers → docs are current. Stop.
+- User said `full` or named numbers → skip the diff; use that scope.
 
-  ```markdown
-  # Documentation
+Glance at `git log --oneline <sha>..HEAD` when the diff is large — subjects
+are the intent the docs must capture.
 
-  Area docs live under `docs/areas/`.
+## Step 2 — map files to pair numbers
 
-  ## Freshness
+Read `## Mapping` in `docs/README.md`. That table is this repo's only map.
+A file may feed several pairs.
 
-  docs-baseline: <HEAD-sha-from-step-1>
+No mapping yet (bootstrap, or a new kind of tree) → **discover**, write the
+table, then continue.
 
-  Last sweep: <date>
-  ```
+### Discover
 
-  In this bootstrap case, the next step diff will be empty because the baseline is the current HEAD. That is fine: the user can ask for a `full` sweep, or the next commit will trigger incremental work.
+Ignore: `.git`, `node_modules`, `target`, `dist`, `build`, `vendor`, `.venv`,
+`venv`, `__pycache__`, `.tox`, `.mypy_cache`, coverage output, generated
+bundles.
 
-## Step 3 — find changed files
+Carve **few** areas (prefer 3–8, not one pair per file):
+
+1. **Root manifests** — `go.mod`, `Cargo.toml`, `pyproject.toml`,
+   `package.json`, `Makefile`, this repo's layout README → usually pair **01**
+   (how the project is put together).
+2. **Each significant top-level directory with source** — `src/`, `cmd/`,
+   `internal/`, `pkg/`, `zsh/`, `tmux/`, `crates/foo/`, a Python package dir.
+   One pair per directory unless two dirs are clearly one concern.
+3. **Build and CI** — `.github/`, `Dockerfile`, `Makefile` targets, release
+   scripts. Own pair if there is real content; otherwise fold into 01.
+4. **Tests** — `tests/`, `testdata/`, `*_test.go`, `*_spec.rb`, `benches/`.
+   Own pair if they are a layer; otherwise the owning area's §8.
+5. **Config a human edits** — `*.toml` besides the root manifest, `*.yml` CI
+   already claimed, `config/`, `*.conf`, shell rc files. Fold into the area
+   that reads them unless they are the product.
+
+Language is a hint, not a schema:
+
+- **Python** — package under `src/` or the import root; `tests/`; `pyproject.toml`.
+- **Go** — `cmd/`, `internal/`, `pkg/` or the module root `.go` files; `go.mod`.
+- **Rust** — each workspace crate, or `src/` for a single crate; `Cargo.toml`.
+- **Dotfiles / .files** — one pair per tool directory (`zsh`, `tmux`, `ghostty`,
+  `ohmypi`, …); 01 is the repo layout.
+
+Tiny tree: merge. Do not invent twelve pairs for a 400-line CLI.
+
+A path no row claims is a decision: add it to an existing pair, or open the
+next number (append-only — never renumber). Write that into `## Mapping`.
+
+## Step 3 — one subagent per pair
+
+Each pair is independent. Fan out in one batch. One agent owns **both files
+of one number**.
+
+If this host cannot dispatch, walk the pairs yourself under the same
+contract — still one pair at a time, both files, then the next.
+
+Batch context:
+
+```
+# Goal
+Refresh twin documentation after code changes. Any language, any layout.
+
+# Constraints
+- Read the real code before writing. Mark anything not directly observed [INFERENCE].
+- Touch ONLY your own two files. Never edit docs/README.md,
+  docs/architecture/README.md or docs/plain-english/README.md — the parent owns
+  shared files.
+- Do not run the test or build suite. Do not commit.
+- Wrap both files at 100 columns.
+
+# Contract
+Architecture: docs/architecture/NN-<slug>.md — ten-section skeleton from the
+repo-docs architecture template; opens with a `> **Plain English:**` pointer.
+Plain-English: docs/plain-english/NN-<slug>.md — opens with
+`**Twin of:** [<title>](../architecture/NN-<slug>.md)`.
+```
+
+Per-task text:
+
+```
+# Target
+docs/architecture/NN-<slug>.md and docs/plain-english/NN-<pe-slug>.md. Nothing else.
+IS_NEW: <true|false>
+
+# Change
+These files changed (or, on bootstrap, these paths are this area):
+<paths>
+
+Read them and the modules around them. Bring both documents in line with the
+code: inventory, flows, contracts, config, tests, debt. Delete claims that
+are no longer true. Keep structure and voice.
+
+# Acceptance
+Both files describe the current code. Every path and symbol named exists.
+The plain-English twin names no framework API and no source paths — only
+files or settings a non-engineer may edit (rc files, Cargo features as
+names, pyproject keys, config.toml, …).
+```
+
+On bootstrap, `IS_NEW` is true for every pair. The writer fills
+[architecture-template.md](architecture-template.md). The plain-English slug
+may be a metaphor; the architecture slug stays the area name.
+
+## Step 4 — parent owns the shared files
+
+Only the parent edits:
+
+- `docs/README.md` — area table, blurbs, `## Mapping`, `docs-baseline:` under
+  `## Freshness`
+- `docs/architecture/README.md` — document table, short system paragraph
+- `docs/plain-english/README.md` — twin mapping table
+
+On bootstrap, create all three if missing. Seed `docs/README.md` from
+[readme-seed.md](readme-seed.md), then fill the area table and `## Mapping`.
+
+## Step 5 — verify, then stamp
 
 ```bash
-git diff --name-only <baseline-sha>..HEAD
+ls docs/architecture/[0-9][0-9]-*.md | wc -l
+ls docs/plain-english/[0-9][0-9]-*.md | wc -l
+
+grep -l 'plain-english/' docs/architecture/[0-9][0-9]-*.md | wc -l
+grep -l '\.\./architecture/' docs/plain-english/[0-9][0-9]-*.md | wc -l
 ```
 
-- No output and not a `full` request → docs are current. Report that and stop.
-- User asked for `full` or named specific areas → skip the diff and use that scope.
-
-## Step 4 — map files to areas
-
-Auto-detect areas using this ladder, applied to each changed path:
-
-1. **Explicit mapping file** — if `docs/areas.yaml` or `docs/areas.json` exists, use it. Map paths by matching globs or directories listed there.
-2. **Top-level directory** — `web/`, `api/`, `infra/`, `packages/foo/`, `src/`, etc. become `web`, `api`, `infra`, `foo`, `src`.
-3. **Language/role heuristics** — group by extension or convention when there is no top-level directory:
-   - `.py` → `python`
-   - `.ts`, `.tsx`, `.js` → `typescript`
-   - `.tf`, `.hcl` → `infrastructure`
-   - `.md` outside `docs/` → `docs` (but do not include `docs/areas/*` itself)
-   - `.sh`, `.zsh`, `.bash` → `shell`
-   - `.yml`, `.yaml` (excluding lockfiles) → `config`
-   - `Makefile`, `Dockerfile`, `.dockerignore` → `build`
-4. **Fallback** — if a path matches none of the above, put it in `misc`.
-
-A file can belong to only one area. If a mapping file conflicts with heuristics, the mapping file wins.
-
-Extend `docs/areas.yaml` whenever a new top-level area appears. Example:
-
-```yaml
-areas:
-  web:
-    - apps/web/**
-    - packages/ui/**
-  api:
-    - apps/api/**
-    - packages/api/**
-  infra:
-    - terraform/**
-    - "*.tf"
-```
-
-## Step 5 — dispatch one writer per area
-
-For each affected area, build one `repo-docs-writer` task:
-
-```json
-{
-  "context": "Refresh area documentation after code changes. Do not commit. Touch only the assigned document.",
-  "tasks": [
-    {
-      "agent": "repo-docs-writer",
-      "name": "Docs-<area>",
-      "task": "AREA_NAME: <area>\nAREA_PATHS:\n<changed paths for this area, one per line>\nREPO_ROOT: <absolute repo root>\nDOC_PATH: docs/areas/<area>.md\nIS_NEW: <true|false>"
-    }
-  ]
-}
-```
-
-`IS_NEW` is `true` if `docs/areas/<area>.md` does not exist.
-
-Fan out all tasks in a single batch. Each writer owns exactly one document.
-
-## Step 6 — update the baseline marker
-
-If the run covered every area the diff touched (i.e., no writer failed and no area was skipped), update the marker:
+Counts must match. Then resolve relative links (Python, stdlib only):
 
 ```bash
-sed -i '' "s/docs-baseline: [0-9a-f]\{7,40\}/docs-baseline: <sha-from-step-1>/" docs/README.md
+python3 - <<'EOF'
+import os, re
+bad = 0
+roots = ['.', 'docs', 'docs/architecture', 'docs/plain-english']
+for d in roots:
+    if not os.path.isdir(d) and d != '.':
+        continue
+    names = ['README.md'] if d == '.' else sorted(os.listdir(d))
+    for f in names:
+        p = os.path.join(d, f)
+        if not p.endswith('.md') or not os.path.isfile(p):
+            continue
+        for m in re.finditer(r'\]\(([^)#\s]+)', open(p).read()):
+            link = m.group(1)
+            if link.startswith(('http', 'mailto:')):
+                continue
+            if not os.path.exists(os.path.normpath(os.path.join(d, link))):
+                print('BROKEN', p, '->', link); bad += 1
+print('OK' if not bad else f'{bad} broken')
+EOF
 ```
 
-Also update the human-readable "Last sweep" line.
+Format only if a formatter is already how this repo writes markdown. Do not
+introduce pnpm/prettier to a Go or Python tree.
 
-Skip this step if:
-- the run was scoped to specific areas,
-- a writer failed,
-- an area was left knowingly stale.
+Stamp `docs-baseline:` with the sha from step 1, **only** when every pair the
+diff (or the bootstrap) required was actually checked. Skip the stamp — and
+say so — on a scoped run, a failed writer, or a pair left stale.
 
-Say so in the report.
+Spot-check one older pair against its code each sweep.
 
-## Step 7 — verify
+Report: pairs touched, what changed in each, baseline old → new or skipped,
+nothing committed.
 
-```bash
-ls docs/areas/*.md | wc -l
-```
+## Architecture document
 
-Spot-check one older area per sweep by reading it against its code. A stored baseline only guarantees the docs were checked against code up to that point; it cannot catch a document that was wrong when written.
+Ten sections, in order — see [architecture-template.md](architecture-template.md).
 
-If `prettier` is available and there are markdown files under `docs/`:
+- Cite repo-relative paths. Symbols beat line numbers.
+- §9 is blunt. Never soften a trap that is still true.
+- §8 states what is *not* covered.
+- `[INFERENCE]` on unobserved claims. Mermaid when a diagram beats a paragraph.
 
-```bash
-pnpm exec prettier --write "docs/**/*.md" 2>/dev/null || npx prettier --write "docs/**/*.md" 2>/dev/null || true
-```
+## Plain-English twin
 
-Do not fail the skill if formatting is unavailable.
-
-## Step 8 — report
-
-Report:
-- baseline old → new (or "bootstrap" / "unchanged")
-- areas touched, and for each: created/refreshed/unchanged and the key change
-- any failed or skipped areas
-- whether the baseline was advanced
-- reminder that the user runs `/skill:commit` when happy
+- Opens with `**Twin of:** [<Architecture title>](../architecture/NN-<slug>.md)`.
+- Ordinary words, for someone who does not write code.
+- Banned: framework and library names, hooks, type names, function names,
+  paths under `src/`, `internal/`, `pkg/`, `crates/`, "how to use this
+  document", audience-routing tables.
+- Kept: what a non-engineer may touch — rc files, `config.toml`, feature
+  names, ports, persona codes, theme files.
+- One metaphor per document, held consistently.
+- Honest: if CI runs no tests, the twin says so. Marketing voice has failed.
+- Roughly 60–100 lines.
 
 ## Edge cases
 
-- **No `docs/` directory** → create it and the baseline README. Treat as bootstrap.
-- **No diff and not `full`** → docs are current. Stop.
-- **Writer fails** → do not advance the baseline. Report the failure and which area is stale.
-- **Area deleted** → if every path mapped to an area was deleted, mark the doc with a note in the inventory and report it. Do not delete the doc silently.
-- **New top-level directory appears** → add it as a new area doc, add a row to `docs/areas.yaml` if you created one, and include it in the report.
+- **Area deleted** → delete both files, remove rows from all three indexes and
+  from `## Mapping`. Retire the number; never reuse it.
+- **Only tests changed** → usually the tests pair only, plus §8 of the owner
+  if the map says so.
+- **Standalone docs** (`docs/workflow.md`, a product spec) are not pairs.
+  Leave them unless the user named them.
+- **Subject drifted** (one number now covers two things) → say so and propose
+  a split. Do not silently renumber.
+- **Host forbids the test/build suite** — do not run it. Architecture §8 is
+  read from test files on disk.
 
 ## Not this skill's job
 
-- Committing, pushing, or opening PRs. The user runs `/skill:commit` when ready.
-- Generating API reference docs (TypeDoc, JSDoc, Sphinx). Use the repo's own tooling for that.
-- Paired plain-English docs. Use `docs-twins` for that.
+Committing, pushing, generating language API reference (godoc, rustdoc,
+Sphinx, TypeDoc), or writing product code. Auditing claims the code no
+longer has, when nothing in the diff pointed at that doc, is `docs-verify`
+where that skill exists — this skill only follows change (or a requested
+full sweep).
