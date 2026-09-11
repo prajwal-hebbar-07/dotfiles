@@ -1,58 +1,109 @@
 ---
 name: commit
-description: Commit already-staged changes with a semantic message and pointer bullets, delegated to a cheap model. Use whenever the user asks to commit, or says "commit this", "/skill:commit".
+description: Commit already-staged changes with a semantic message and pointer bullets. Use whenever the user asks to commit, or says "commit this", "/skill:commit", or "/commit".
 ---
 
 # commit
 
-Turn staged changes into one semantic commit **without spending main-session tokens on
-the diff**. The diff is read by `committer`, which runs on `ollama-cloud/glm-5.3-flash`,
-so it spends no Claude credits at all.
+Turn staged changes into one semantic commit directly in-session.
 
-## Do this
+Work only through `git`. Do not edit files, do not stage, do not push, do not amend.
 
-Dispatch one task and stop. Do not run `git diff`, do not read the staged files, do not
-draft the message yourself — that defeats the purpose of the skill. That holds only
-while the dispatch works; the moment it fails, commit it yourself (see Edge cases).
+## Step 1 — identity
 
-```json
-{
-  "context": "Commit the staged changes in this repository.",
-  "tasks": [
-    {
-      "agent": "committer",
-      "name": "Commit",
-      "task": "Commit the changes currently staged in this repository, following your instructions exactly: verify git identity, confirm something is staged, write a semantic subject plus pointer bullets, add no co-author or tool trailers. Report the short SHA and subject."
-    }
-  ]
-}
+```sh
+git config user.name; git config user.email
 ```
 
-Relay the agent's report — SHA, subject, file count — and nothing more.
+If either is empty, STOP. Report which one is missing and the command to fix it
+(`git config --global user.name "..."`). Never set it yourself, never guess a value.
 
-## What the agent guarantees
+## Step 2 — staged changes
 
-1. `user.name` and `user.email` are set; if not, it stops and says which is missing
-   rather than committing as the wrong author.
-2. Something is actually staged; if not, it stops and lists what is unstaged. It never
-   runs `git add` — staging stays the user's decision.
-3. The message is `type(scope): imperative summary`, a blank line, then `- ` pointer
-   bullets explaining what changed and why.
-4. No `Co-Authored-By:` for Claude, Codex, omp, or Cursor, no "Generated with" line, no
-   robot emoji. Git history stays free of harness attribution.
+```sh
+git diff --cached --stat
+```
+
+If nothing is staged, STOP. Report that there is nothing to commit and list what is
+unstaged (`git status --short`) so the user can stage it. **Never run `git add`** — the
+user decides what goes in.
+
+## Step 3 — read the staged change, write the message
+
+```sh
+git diff --cached
+```
+
+Message shape: a semantic subject line, a blank line, then pointer bullets explaining
+the change.
+
+```
+type(scope): imperative summary
+
+- what changed and why, one bullet per meaningful change
+- name the file or symbol when it helps
+```
+
+Rules for the subject:
+
+- `type` is chosen by what the change *does*, judged on the whole diff:
+  - `feat` — adds a file, capability, binding, or option. A mixed diff that adds
+    something plus its documentation is still `feat`.
+  - `fix` — corrects broken behavior.
+  - `docs` — only when **every** changed file is prose. README-plus-code is never `docs`.
+  - `refactor` — same behavior, different structure. `perf`, `test`, `style`, `build`,
+    `ci`, `chore`, `revert` for their obvious cases.
+- `scope` is optional; use the top-level directory that changed (`tmux`, `zsh`, `ohmypi`)
+  and drop it when the change is repo-wide.
+- imperative mood ("add", not "added"/"adds"), no trailing period, 72 chars or fewer.
+
+Rules for the bullets:
+
+- Explain what the change does and why it was made, not a restatement of the diff.
+- One line each, starting with `- `. Hard limit 80 characters per line, including the
+  `- ` — count it and split or shorten anything longer.
+- 1–6 bullets. A one-line change needs no bullets; omit the body entirely.
+
+Commit it:
+
+```sh
+git commit -m 'type(scope): summary' -m '- first pointer
+- second pointer'
+```
+
+## Step 4 — forbidden trailers
+
+The message ends with the last pointer bullet. Never append, in any form:
+
+- `Co-Authored-By:` / `Co-authored-by:` for Claude, Codex, omp, Oh My Pi, Cursor, Gemini,
+  or any other agent or tool
+- `Generated with ...`, `Made with ...`, robot emoji, or any tool advertisement
+- `Signed-off-by:` unless the user asked for it
+
+No attribution to the model or harness belongs in git history.
+
+## Step 5 — verify and report
+
+```sh
+git --no-pager log -1 --format='%h %s'
+git --no-pager log -1 --format='%B' | grep -iE 'co-authored|generated with' && echo TRAILER-LEAK
+git status --short
+```
+
+If a pre-commit hook rejects the commit, report the hook output verbatim and stop. Never
+retry with `--no-verify`.
+
+Report in at most five lines: the short SHA and subject, the number of files committed,
+and anything left uncommitted. No preamble, no summary of these instructions.
 
 ## Edge cases
 
-- **Nothing staged** — relay the agent's report. Stage files yourself only if the user
+- **Nothing staged** — report what is unstaged. Stage files yourself only if the user
   asked for that; otherwise ask what they want in the commit.
-- **Missing identity** — relay the exact `git config --global` command. Do not set it.
-- **Pre-commit hook fails** — relay the hook output. Never re-run with `--no-verify`.
-- **`committer` fails** — any failure, once: provider error, 429, timeout, harness
-  crash, or a report with no SHA. Do not retry it and do not fall back to another
-  agent: commit directly yourself, upholding the four guarantees above, then say in one
-  line why delegation was skipped. Reading the diff at that point is the cheap option.
-- **User wants a specific message** — pass their wording through in the task text; the
-  agent still owns the trailer and format rules.
+- **Missing identity** — report the exact `git config --global` command. Do not set it.
+- **Pre-commit hook fails** — report the hook output. Never re-run with `--no-verify`.
+- **User wants a specific message** — pass their wording through; still enforce the
+  trailer and format rules.
 
 ## Not this skill's job
 
