@@ -12,7 +12,8 @@ so it spends no Claude credits at all.
 ## Do this
 
 Dispatch one task and stop. Do not run `git diff`, do not read the staged files, do not
-draft the message yourself — that defeats the purpose of the skill.
+draft the message yourself — that defeats the purpose of the skill. That holds only
+while the dispatch works; the moment it fails, commit it yourself (see Edge cases).
 
 ```json
 {
@@ -46,9 +47,10 @@ Relay the agent's report — SHA, subject, file count — and nothing more.
   asked for that; otherwise ask what they want in the commit.
 - **Missing identity** — relay the exact `git config --global` command. Do not set it.
 - **Pre-commit hook fails** — relay the hook output. Never re-run with `--no-verify`.
-- **`committer` unavailable** — dispatch the same task to `sonic`, whose instructions
-  live here rather than in agent frontmatter, so paste the four guarantees above into
-  the task text.
+- **`committer` fails** — any failure, once: provider error, 429, timeout, harness
+  crash, or a report with no SHA. Do not retry it and do not fall back to another
+  agent: commit directly yourself, upholding the four guarantees above, then say in one
+  line why delegation was skipped. Reading the diff at that point is the cheap option.
 - **User wants a specific message** — pass their wording through in the task text; the
   agent still owns the trailer and format rules.
 

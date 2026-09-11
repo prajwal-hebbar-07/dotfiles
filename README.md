@@ -111,6 +111,35 @@ agent, which runs `anthropic/claude-haiku-4-5` at `thinking-level: minimal` with
 `bash` as its only tool, so the diff is read by the cheap model and never enters
 the main session's context.
 
+**`implementation-plan` skill** (`/skill:implementation-plan`) — after an
+architecture conversation is done, writes `docs/implementation-plan.md`: one
+commit-by-commit contract. Each step is an outcome plus a prompt; how to build
+it is left to the implementing agent. The document itself is the protocol —
+implement one step exactly, stop for that commit, then the next — so it can
+be handed to a different model without this chat. Nothing in it is harness-
+specific.
+
+**`review-implementation-plan` skill** (`/skill:review-implementation-plan`) — a
+second agent (often a stronger implementer, and often not this harness) reads
+that plan and updates it before anyone codes: split or merge steps, reorder,
+strip how-to, add missing outcomes. It does not implement, and it does not
+replace the planner's how with its own. Pass the plan file plus this
+`SKILL.md`; it is a plain Agent Skill, not a Cursor feature.
+
+**`follow-implementation-plan` skill** (`/skill:follow-implementation-plan`) —
+executes that plan: the next unfinished step, exactly as written, then **stops
+at the commit**. It never stages and never commits — that stays with the user
+and `/skill:commit`. After the step's subject is in `git log`, the next turn
+may take the next step.
+
+**`implement-commit-prompt` skill** (`/skill:implement-commit-prompt`) —
+extracts **one** step from that plan into a copy-pastable prompt for a fresh
+chat. If the step already has a Prompt block, that is what gets copied rather
+than a rewrite. Use this when you want a new session per commit; following
+the plan in-session is `follow-implementation-plan`. All four live in
+`ohmypi/skills/` and are linked into both omp and Cursor, same as
+`paper-target`.
+
 **`paper-target` skill** (`/skill:paper-target`) — pins which Paper file and
 page a repository's design work reads from. It resolves them through the Paper
 MCP (`list_files`, `open_file`, `get_basic_info` — never a guessed id) and writes
@@ -169,11 +198,15 @@ keybindings, settings, and extensions carry over.
 
 **Skills** — Cursor discovers user-level skills from `~/.cursor/skills/` (and
 `~/.agents/skills/`, plus the Claude and Codex directories for compatibility),
-so `paper-target` is linked there from `ohmypi/skills/`. `~/.cursor/skills-cursor/`
-is Cursor's own directory for its built-in skills, kept in sync from a
-`.sync-manifest.json`; nothing of mine goes in it. `commit` is not linked in —
-it dispatches an omp task agent, which Cursor has no equivalent of, and Cursor's
-own commit flow covers that ground.
+so `paper-target`, `implement-commit-prompt`, `implementation-plan`,
+`review-implementation-plan`, and `follow-implementation-plan` are linked there
+from `ohmypi/skills/`.
+`~/.cursor/skills-cursor/` is Cursor's own directory for its built-in skills,
+kept in sync from a `.sync-manifest.json`; nothing of mine goes in it. `commit`
+is not linked in — it dispatches an omp task agent, which Cursor has no
+equivalent of, and Cursor's own commit flow covers that ground. The review
+skill is linked here for completeness; the intended use is to copy that
+`SKILL.md` plus the plan into another agent.
 
 **Paper MCP** — comes from the `paper-desktop` plugin here rather than a hand
 written server: Cursor expands `${userHome}` in plugin manifests, so the same
@@ -322,6 +355,10 @@ dotfiles/
 ├── ohmypi/     # harness sticky rules, skills, task agents, MCP servers
 │   ├── RULES.md
 │   ├── skills/commit/SKILL.md
+│   ├── skills/implement-commit-prompt/SKILL.md
+│   ├── skills/implementation-plan/SKILL.md
+│   ├── skills/review-implementation-plan/SKILL.md
+│   ├── skills/follow-implementation-plan/SKILL.md
 │   ├── skills/paper-target/SKILL.md
 │   ├── agents/committer.md
 │   └── mcp.json
@@ -375,11 +412,19 @@ ln -sfn "$PWD/ghostty/config" ~/.config/ghostty/config
 ln -sfn "$PWD/ghostty/themes" ~/.config/ghostty/themes
 ln -sfn "$PWD/ohmypi/skills/commit"     ~/.omp/agent/skills/commit
 ln -sfn "$PWD/ohmypi/skills/paper-target" ~/.omp/agent/skills/paper-target
+ln -sfn "$PWD/ohmypi/skills/implement-commit-prompt" ~/.omp/agent/skills/implement-commit-prompt
+ln -sfn "$PWD/ohmypi/skills/implementation-plan" ~/.omp/agent/skills/implementation-plan
+ln -sfn "$PWD/ohmypi/skills/review-implementation-plan" ~/.omp/agent/skills/review-implementation-plan
+ln -sfn "$PWD/ohmypi/skills/follow-implementation-plan" ~/.omp/agent/skills/follow-implementation-plan
 ln -sfn "$PWD/ohmypi/agents/committer.md" ~/.omp/agent/agents/committer.md
 ln -sfn "$PWD/ohmypi/mcp.json"            ~/.omp/agent/mcp.json
 ln -sfn "$PWD/ohmypi/RULES.md"            ~/.omp/agent/RULES.md
 
 ln -sfn "$PWD/ohmypi/skills/paper-target" ~/.cursor/skills/paper-target
+ln -sfn "$PWD/ohmypi/skills/implement-commit-prompt" ~/.cursor/skills/implement-commit-prompt
+ln -sfn "$PWD/ohmypi/skills/implementation-plan" ~/.cursor/skills/implementation-plan
+ln -sfn "$PWD/ohmypi/skills/review-implementation-plan" ~/.cursor/skills/review-implementation-plan
+ln -sfn "$PWD/ohmypi/skills/follow-implementation-plan" ~/.cursor/skills/follow-implementation-plan
 ```
 
 Marketplace plugins live outside this repo, in `~/.omp/plugins`; ponytail is
