@@ -18,12 +18,15 @@ stronger model than the one that wrote it — executes it.
    better one that still meets **Done when**, take yours.
 4. If a better approach would change later steps, **update this plan first**,
    then continue. Do not silently drift.
-5. When the step's **Done when** checks pass, **stop**. The commit subject
-   is the message on that step. Do not stage. Do not commit. Do not start
-   the next step until that subject exists in git.
-6. If a step cannot be finished (missing decision, failing checks, earlier
-   step not actually in the tree), **stop**. Do not skip it. Do not start
-   the next one.
+5. When the step's **Done when** checks pass, `git add` only this step's
+   files, then commit through the `commit` skill with **exactly** the
+   message on that step. Do not `git commit` yourself. Do not stop because
+   nothing was staged — add the files and commit. Then take the next step.
+6. If a step cannot be finished (missing decision, **this step added**
+   check failures, earlier step not actually in the tree, hook/identity
+   failure), **stop**. Do not skip it. Do not start the next one. A gate
+   that already failed at HEAD, with the same error set, is not a stop —
+   continue. Do not leave the plan to fix that baseline.
 7. Do not reopen finished steps unless a later step's prompt says to.
 
 Host rules that forbid starting apps, dev servers, or browsers still apply.
@@ -46,8 +49,9 @@ What this plan will not build, even if it came up in conversation.
 
 - One concern per commit.
 - Reviewable in about ten minutes. Prefer under ~300 lines.
-- Typecheck / tests as that step states. An empty or partial workspace must
-  still pass whatever that step requires.
+- Typecheck / tests as that step states: this step must not **add**
+  failures versus the parent commit. A command that is already red at HEAD
+  is not a reason to stop.
 - Subject is the conventional-commit message on the step. Do not invent a
   different subject. Body may add pointer bullets for what changed and why.
 - Do not start the next step in the same commit.
@@ -103,11 +107,13 @@ names. If you have a better way to reach Done when than anything this plan
 implies, take it — unless a Locked decision forbids it. If that would change
 later steps, update the plan first.
 
-When Done when passes, stop. The commit subject is:
+When Done when passes, git add only the files this step changed, then commit
+through the commit skill with subject:
 
 <type>(<scope>): <imperative summary>
 
-Do not stage. Do not commit. Do not start step 2.
+Do not git commit yourself. After that subject is in git log, this step is
+done. Do not start step 2 in the same uncommitted change.
 ```
 
 Repeat the `### N.` block for every step. Prompts stay in this file; do not

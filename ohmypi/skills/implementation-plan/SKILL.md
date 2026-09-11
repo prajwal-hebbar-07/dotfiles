@@ -45,7 +45,9 @@ make sense on its own.
 
 Each step states **what is true when it is done**, not how to make it true.
 No new file, folder, function, type, or package names unless this conversation
-or an existing `docs/` file already froze them.
+or an existing `docs/` file already froze them. A typecheck/test gate is
+"this step adds no new failures versus the parent commit", not "the whole
+repo is green".
 
 A technical choice belongs in **Locked decisions** only if later steps would
 be written differently depending on it. Otherwise the implementer of that
@@ -84,5 +86,6 @@ In the chat (not in the plan file):
    skill to the reviewing agent (often a different model) **before anyone
    codes**. The review skill is generic: it is a `SKILL.md`, not a Cursor
    feature.
-3. Execution is `follow-implementation-plan`: one step exactly, then stop
-   at that commit. This skill does not start step 1.
+3. Execution is `follow-implementation-plan`: one step exactly, stage those
+   files, `commit` skill, then the next step. This skill does not start
+   step 1.

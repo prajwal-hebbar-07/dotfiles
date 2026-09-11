@@ -127,10 +127,10 @@ replace the planner's how with its own. Pass the plan file plus this
 `SKILL.md`; it is a plain Agent Skill, not a Cursor feature.
 
 **`follow-implementation-plan` skill** (`/skill:follow-implementation-plan`) —
-executes that plan: the next unfinished step, exactly as written, then **stops
-at the commit**. It never stages and never commits — that stays with the user
-and `/skill:commit`. After the step's subject is in `git log`, the next turn
-may take the next step.
+executes that plan: the next unfinished step, exactly as written, `git add`
+only that step's files, then `/skill:commit` with the plan's subject. It does
+not `git commit` itself. An empty index is not the end of the plan — add the
+files and commit. After the SHA lands, it takes the next step.
 
 **`implement-commit-prompt` skill** (`/skill:implement-commit-prompt`) —
 extracts **one** step from that plan into a copy-pastable prompt for a fresh

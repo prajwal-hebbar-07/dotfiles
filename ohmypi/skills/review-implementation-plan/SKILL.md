@@ -4,10 +4,12 @@ description: >
   Reviews an implementation plan written by another agent and updates it
   before anyone codes. Challenges sequence, missing steps, over-sized
   commits, and any how-to that snuck in; leaves how-to-build to the
-  implementer. Use when the user asks to review the plan, "Opus review",
-  "update the plan before implementing", or invokes
-  /review-implementation-plan. Works as a generic Agent Skill: pass this
-  SKILL.md plus the plan file to any agent.
+  implementer. Does not write application code and does not start
+  follow-implementation-plan. Use when the user asks to review the plan,
+  "Opus review", "update the plan before implementing", or invokes
+  /review-implementation-plan. Do not use when the user asks to implement
+  the plan. Works as a generic Agent Skill: pass this SKILL.md plus the
+  plan file to any agent.
 argument-hint: "[path to plan]"
 ---
 
@@ -15,7 +17,8 @@ argument-hint: "[path to plan]"
 
 You are reviewing a plan another model wrote. You may be stronger than the
 planner. Your job is to improve the **sequence and the outcomes**, then stop.
-Do **not** implement.
+Do **not** implement. Do not start `follow-implementation-plan`. A review
+that continues into step 1 is a failed review.
 
 A better idea about *how* to build something is **not** a reason to write
 that how into the plan. It is a reason to make sure the step still states
@@ -41,9 +44,8 @@ that is a defect: fix it or ask.
 The plan is a contract for a later implementing agent.
 
 - **How to follow this plan** is present and is the execution protocol:
-  one step, then stop for that commit (do not stage or commit), then the
-  next step only after that subject exists in git. Do not delete or weaken
-  it. You may clarify it.
+  one step, stage only that step's files, commit through the `commit`
+  skill, then the next step. Do not delete or weaken it. You may clarify it.
 - Each step is one commit, one concern, reviewable in about ten minutes,
   preferably under ~300 lines.
 - **What lands** / **Done when** are observable outcomes, not file trees.
@@ -82,14 +84,21 @@ Work through this list. Edit the plan in place when you find a hit.
    outcomes plus fences (prior steps must exist; next step must not start).
    Keep an explicit line: if you have a better way to reach **Done when**,
    take it; if that changes later steps, update this plan first.
-8. **Unexecutable protocol.** Several steps in one change, auto-commit, or
-   skipping the stop-at-commit. Restore **How to follow this plan**: implement
-   one step, stop, do not stage or commit, next only after that subject
-   exists in git.
+8. **Unexecutable protocol.** Several steps in one uncommitted change,
+   skipping commit, stopping because nothing was staged, or a **Done when**
+   that requires a green typecheck/test/build when HEAD is already red.
+   Restore **How to follow this plan**: implement one step, `git add` only
+   that step's files, commit via the `commit` skill, next after that subject
+   exists in git. Rewrite whole-repo "must pass" gates to "this step adds
+   zero new failures versus the parent commit."
 
 ## What not to do
 
 - Do not implement, scaffold, or "just start step 1".
+- Do not edit anything except the plan file. No `packages/`, no app source,
+  no tests, no other `docs/` files unless the plan itself lives there and
+  you are only changing that plan.
+- Do not invoke or continue into `follow-implementation-plan`.
 - Do not add approach hints, recommended libraries, or proposed file maps —
    even as "optional". They become de facto requirements.
 - Do not invent product requirements the plan and `docs/` do not contain.
@@ -130,4 +139,6 @@ In the chat (not in the plan):
 2. **Still open** — anything the implementer must decide, in one list. These
    are how-questions, not missing product.
 3. **Ready** — whether the plan can be executed as-is. If not, what is left.
-4. Do not start step 1.
+   Ready is not permission to code.
+4. **Stop.** Do not start step 1. Do not offer to start it. Do not run
+   `follow-implementation-plan`. Implementation needs a later, explicit ask.
