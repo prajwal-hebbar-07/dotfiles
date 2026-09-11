@@ -75,13 +75,17 @@ NOT_CODE = {
     "false",
     "null",
     "undefined",
+    # HTTP cookie / security attributes cited in config docs; not our identifiers.
+    "SameSite",
+    "HttpOnly",
+    "Secure",
 }
 
 # Wording that means the doc names something on purpose because it is absent. A
 # negative claim ("there is no root vitest.config.ts", "no AbortController anywhere")
 # is documentation doing its job, and the §9 trap lists are full of them.
 DELIBERATE = re.compile(
-    r"no longer|does not exist|never exist|removed|deleted|replaced by|used to|"
+    r"no longer|d(?:oes|o) not exist|never exist|removed|deleted|replaced by|used to|"
     r"was renamed|not\s+`|instead of|dead code|superseded|retired|pre-refactor|"
     r"there is no|there are no|\bno\b[^.]{0,40}`|does not need|\banywhere\b|"
     r"exported-but-unused|unused|if it (grows|gains)|would be|rather than|"
@@ -328,6 +332,17 @@ def _resolves(root: str, path: str, citing_doc: str, facts: dict) -> bool:
         # an inventory row may cite a module without its extension
         if any(os.path.exists(base + ext) for ext in (".ts", ".tsx", ".json", "/index.ts")):
             return True
+    # TypeScript ESM: import './gate.js' in source points to gate.ts on disk.
+    # A doc that cites './gate.js' (explaining an import chain) is citing a real file.
+    if path.endswith(".js"):
+        ts_stem = path[:-3]
+        for ts_ext in (".ts", ".tsx"):
+            ts_path = ts_stem + ts_ext
+            if ts_path in facts["tracked"]:
+                return True
+            ts_needle = "/" + ts_path
+            if any(t.endswith(ts_needle) for t in facts["tracked"]):
+                return True
     return False
 
 

@@ -35,6 +35,14 @@ DOC = """# Test
 Imported as `@scope/thing/live` and, wrongly, as `@scope/thing/missing`.
 A third-party deep import, `@vendor/lib/internals`, is not ours to check.
 
+The spec imports `./live.js` which is the TypeScript ESM alias for `live.ts`.
+
+Defaults not overridden — session length, cookie name, `SameSite`, minimum
+password length — are whatever the auth library ships.
+
+They do not exist yet, but (`packages/thing/src/future.ts`, a planned module)
+will be added in the next slice.
+
 ## 9. Debt
 
 - **Dead code**: `removedExport` no longer exists anywhere.
@@ -94,31 +102,48 @@ def main() -> int:
             "theme.json": "bare file name held somewhere in the repo",
             "@scope/thing/live": "deep import that resolves",
             "@vendor/lib/internals": "third-party deep import",
+            # new rules
+            "SameSite": "HTTP cookie attribute in NOT_CODE",
+            "./live.js": "TypeScript ESM .js alias resolves to .ts source",
+            "packages/thing/src/future.ts": "path absent but 'do not exist' makes it deliberate",
         }
 
         failures = []
+        # hard_tokens: tokens that appear with deliberate?=false
+        hard_tokens = {t for (_, t), f in found.items() if not f["deliberate?"]}
+
         for token, why in must_flag.items():
-            if token not in tokens:
+            if token not in hard_tokens:
                 failures.append(f"MISSED  {token} ({why})")
         for token, why in must_pass.items():
-            if token in tokens:
+            if token in hard_tokens:
                 failures.append(f"FALSE+  {token} ({why})")
         # the brace form must report its dead half, naming the member that is missing
         brace = "packages/thing/src/{live,gone}.ts"
-        if not any(t.startswith(brace) and "gone.ts" in t for t in tokens):
+        if not any(t.startswith(brace) and "gone.ts" in t for t in hard_tokens):
             failures.append("MISSED  brace form whose second member is absent")
         # deliberate absences must be marked, not dropped
         for token in ("removedExport", "absent.config.ts", "vendorHelper"):
             hit = next((f for (k, t), f in found.items() if t == token), None)
             if hit and not hit["deliberate?"]:
                 failures.append(f"UNMARKED {token} (a stated absence, not a stale claim)")
+        # "do not exist" (plural) must also mark a path deliberate, not raise a hard finding
+        if "packages/thing/src/future.ts" in hard_tokens:
+            failures.append("UNMARKED packages/thing/src/future.ts ('do not exist' plural not recognised as deliberate)")
+        # SameSite must be completely absent (NOT_CODE, not even a deliberate finding)
+        if any(t == "SameSite" for (_, t) in found):
+            failures.append("FALSE+  SameSite (HTTP cookie attribute should be in NOT_CODE)")
+        # ./live.js must be completely absent (.js → .ts resolution)
+        if any(t == "./live.js" for (_, t) in found):
+            failures.append("FALSE+  ./live.js (TypeScript ESM alias should resolve to live.ts)")
 
         for line in failures:
             print(line)
-        total = len(must_flag) + len(must_pass) + 1
+        total = len(must_flag) + len(must_pass) + 4  # brace, do-not-exist, SameSite, ./live.js
         print(f"\n{total - len(failures)}/{total} checks passed")
         return 1 if failures else 0
 
 
 if __name__ == "__main__":
     sys.exit(main())
+
