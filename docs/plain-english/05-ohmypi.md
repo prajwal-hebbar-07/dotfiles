@@ -12,7 +12,7 @@ available at each one.
 
 ## The rules on the wall (`RULES.md`)
 
-Five hard rules are posted at eye level and re-read at the start of every working session.
+Seven hard rules are posted at eye level and re-read at the start of every working session.
 They override any other instruction, including instructions that come from the harness itself:
 
 1. **Never start, stop, or restart an application.** Name what needs a restart — I do it.
@@ -21,6 +21,10 @@ They override any other instruction, including instructions that come from the h
 3. **Never open or drive the browser tool** — including as "verification".
 4. **Investigate only when asked.** Implement what is requested and nothing else until told.
 5. **Never reach for the planning or delegation workflow** unless explicitly invoked.
+6. **Never write documentation outside a docs skill.** Markdown documents come only from the
+   documentation skills; report in chat instead of writing a file.
+7. **Never amend a commit.** No `--amend`, rebase, or force-push — a fix is always a new
+   commit on top.
 
 Permission lifts a rule only for the specific action named in that request. "Go ahead" or
 "make it work" is not permission.

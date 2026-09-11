@@ -13,7 +13,7 @@ hosts (Oh My Pi, Cursor, Antigravity/agy).
 
 | Path | Role |
 | --- | --- |
-| `ohmypi/RULES.md` | Five hard rules, loaded as a sticky rule (`~/.omp/agent/RULES.md`). Re-injected near every turn; overrides harness-default verification workflows. |
+| `ohmypi/RULES.md` | Seven hard rules, loaded as a sticky rule (`~/.omp/agent/RULES.md`). Re-injected near every turn; overrides harness-default verification workflows. |
 | `ohmypi/agents/committer.md` | Task agent definition. Runs `anthropic/claude-haiku-4-5` (declared as `ollama-cloud/glm-5.3-flash` in the file; [INFERENCE] may reflect a deprecated alias), `thinking-level: minimal`, `bash` only. Writes a semantic commit from staged changes. Never stages, pushes, or appends trailers. |
 | `ohmypi/mcp.json` | MCP server map. One server: `paper` — stdio, `~/.paper/bin/paper mcp`. |
 | `ohmypi/skills/commit/SKILL.md` | In-session semantic commit skill. Same logic as `committer` but runs in-session without delegation. Guards identity, staged index, and trailer policy. |
@@ -58,7 +58,7 @@ The `paper` MCP server exposes tools for reading Paper.design documents:
 
 ### RULES.md hard rules
 
-The five rules are enforced by sticky injection and override any harness-default instruction:
+The seven rules are enforced by sticky injection and override any harness-default instruction:
 
 1. **No start/stop/restart of any application** — includes `open -a`, signals, window reloads.
 2. **No starting the server, app, or dev command** — includes `npm run dev`, watchers, test
@@ -66,6 +66,10 @@ The five rules are enforced by sticky injection and override any harness-default
 3. **No opening or driving the browser tool** — including for "verification".
 4. **Investigate only when asked** — implement the request and nothing else until told.
 5. **No reaching for `planner` or `hand` subagents** — those run only on `/delegate`.
+6. **No documentation outside a docs skill** — `*.md` creation is reserved for `repo-docs`,
+   `docs-twins`, `docs-verify`, `design-sync`; updating an existing doc stays allowed.
+7. **Never amend** — no `--amend`, rebase, reset onto an existing commit, fixup/squash, or
+   force-push; corrections land as a new commit.
 
 Permission lifts a rule only for the action explicitly named in that turn.
 
@@ -99,7 +103,7 @@ Agent turn start
 ## Contracts and invariants
 
 - **Hard rules override everything.** `RULES.md` is a sticky rule: it is re-attached near
-  every turn, not just the first. The five prohibitions outrank harness verification prompts.
+  every turn, not just the first. The seven prohibitions outrank harness verification prompts.
 - **No Co-Authored-By trailers.** Neither the `commit` skill nor the `committer` agent appends
   any agent/model attribution to commit messages. The `committer` agent explicitly greps for
   trailer leaks before reporting done.

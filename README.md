@@ -70,7 +70,7 @@ its rules, skills, task agents, and MCP servers, symlinked into `~/.omp/agent/`.
 **Hard rules** (`ohmypi/RULES.md` → `~/.omp/agent/RULES.md`) — omp loads a
 top-level `RULES.md` as an always-apply *sticky* rule: unlike `AGENTS.md`, it is
 re-attached near the current turn, so it keeps its hold after a long conversation
-has pushed the opening context out of view. Five prohibitions live there, and
+has pushed the opening context out of view. Seven prohibitions live there, and
 they outrank the harness's own instruction to verify by running things:
 
 1. **No starting, stopping, or restarting applications** — no `open -a`,
@@ -87,6 +87,13 @@ they outrank the harness's own instruction to verify by running things:
 5. **No reaching for the `planner` or `hand` subagents** — that two-model
    workflow runs only on `/delegate` or an explicit request; otherwise the agent
    reads, decides, and edits with its own tools.
+6. **No documentation outside a docs skill** — `*.md` files are written only by
+   `repo-docs`, `docs-twins`, `docs-verify`, and `design-sync`, in the places
+   those skills own. No summaries, notes, or design docs anywhere else; keeping
+   an existing document true after a code change is still fine.
+7. **No amending** — no `--amend`, rebase, reset onto an existing commit,
+   fixup/squash, or force-push, even over my own one-line-old commit. A
+   correction is always a new commit on top.
 
 Permission lifts a rule only for the action I name in that request; "go ahead" or
 "make it work" is not permission. When a rule blocks verification the agent must
