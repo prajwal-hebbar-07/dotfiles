@@ -88,9 +88,10 @@ they outrank the harness's own instruction to verify by running things:
    workflow runs only on `/delegate` or an explicit request; otherwise the agent
    reads, decides, and edits with its own tools.
 6. **No documentation outside a docs skill** — `*.md` files are written only by
-   `repo-docs`, `docs-twins`, `docs-verify`, and `design-sync`, in the places
-   those skills own. No summaries, notes, or design docs anywhere else; keeping
-   an existing document true after a code change is still fine.
+   `repo-docs`, `docs-twins`, `docs-verify`, `design-sync`, and
+   `twitter-campaign`, in the places those skills own. No summaries, notes, or
+   design docs anywhere else; keeping an existing document true after a code
+   change is still fine.
 7. **No amending** — no `--amend`, rebase, reset onto an existing commit,
    fixup/squash, or force-push, even over my own one-line-old commit. A
    correction is always a new commit on top.
@@ -173,6 +174,18 @@ the plan in-session is `follow-implementation-plan`. These live in
 `ohmypi/skills/` and are linked into both omp and Cursor, same as
 `paper-target`.
 
+**`twitter-campaign` skill** (`/skill:twitter-campaign`) — walks a project
+directory and writes `docs/twitter-campaign.md`: a coordinated developer
+launch campaign for Twitter/X and Reddit, from architecture, release notes,
+and commit history. Copy is first-person and honest about trade-offs. Tweets
+are ≤ 280 characters; Reddit posts are long-form for named subreddits and
+reuse the Twitter screenshots/recordings 1:1. A
+`twitter-campaign-baseline:` sha in that file is the commit the plan was
+last read against; a later run diffs from there and appends, it does not
+start over. `full` rewrites. It does not post, and it does not invent
+features that are not in the tree. Linked into both omp and Cursor, same as
+`paper-target`.
+
 **`paper-target` skill** (`/skill:paper-target`) — pins which Paper file and
 page a repository's design work reads from. It resolves them through the Paper
 MCP (`list_files`, `open_file`, `get_basic_info` — never a guessed id) and writes
@@ -233,7 +246,7 @@ keybindings, settings, and extensions carry over.
 `~/.agents/skills/`, plus the Claude and Codex directories for compatibility),
 so `paper-target`, `implement-commit-prompt`, `implementation-plan`,
 `review-implementation-plan`, `follow-implementation-plan`, `report-arc`,
-and `repo-docs` are linked there from `ohmypi/skills/`.
+`repo-docs`, and `twitter-campaign` are linked there from `ohmypi/skills/`.
 `~/.cursor/skills-cursor/` is Cursor's own directory for its built-in skills,
 kept in sync from a `.sync-manifest.json`; nothing of mine goes in it. `commit`
 is not linked in — it dispatches an omp task agent, which Cursor has no
@@ -364,7 +377,7 @@ close, so `prefix 1` always reaches the first window.
 
 | Key | Action |
 | --- | --- |
-| `prefix` `\` or `\|` | Split left / right |
+| `prefix` `\` or `\|` | Split left / right — new pane takes 25%, current keeps 75% |
 | `prefix` `-` | Split top / bottom |
 | `prefix` `r` | Rename this window, from an empty prompt |
 | `prefix` `S` | Rename this session, from an empty prompt |
@@ -406,6 +419,7 @@ dotfiles/
 │   ├── skills/report-arc/SKILL.md
 │   ├── skills/repo-docs/SKILL.md
 │   ├── skills/paper-target/SKILL.md
+│   ├── skills/twitter-campaign/SKILL.md
 │   ├── agents/committer.md
 │   └── mcp.json
 ├── cursor/     # editor settings, keybindings, extension list
@@ -466,6 +480,7 @@ ln -sfn "$PWD/ohmypi/skills/review-implementation-plan" ~/.omp/agent/skills/revi
 ln -sfn "$PWD/ohmypi/skills/follow-implementation-plan" ~/.omp/agent/skills/follow-implementation-plan
 ln -sfn "$PWD/ohmypi/skills/report-arc" ~/.omp/agent/skills/report-arc
 ln -sfn "$PWD/ohmypi/skills/repo-docs" ~/.omp/agent/skills/repo-docs
+ln -sfn "$PWD/ohmypi/skills/twitter-campaign" ~/.omp/agent/skills/twitter-campaign
 ln -sfn "$PWD/ohmypi/agents/committer.md" ~/.omp/agent/agents/committer.md
 ln -sfn "$PWD/ohmypi/mcp.json"            ~/.omp/agent/mcp.json
 ln -sfn "$PWD/ohmypi/RULES.md"            ~/.omp/agent/RULES.md
@@ -477,6 +492,7 @@ ln -sfn "$PWD/ohmypi/skills/review-implementation-plan" ~/.cursor/skills/review-
 ln -sfn "$PWD/ohmypi/skills/follow-implementation-plan" ~/.cursor/skills/follow-implementation-plan
 ln -sfn "$PWD/ohmypi/skills/report-arc" ~/.cursor/skills/report-arc
 ln -sfn "$PWD/ohmypi/skills/repo-docs" ~/.cursor/skills/repo-docs
+ln -sfn "$PWD/ohmypi/skills/twitter-campaign" ~/.cursor/skills/twitter-campaign
 
 mkdir -p ~/.gemini/config/skills
 ln -sfn "$PWD/ohmypi/skills/commit" ~/.gemini/config/skills/commit

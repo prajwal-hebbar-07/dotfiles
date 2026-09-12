@@ -50,11 +50,12 @@ Pi: read, decide, and edit with your own tools.
 ## 6. Never write documentation outside a docs skill
 
 Markdown documents and documentation are generated only while running
-`repo-docs`, `docs-twins`, `docs-verify`, or `design-sync`, and only where that
-skill puts them. In every other context: no new `*.md`, no README, no notes
-file, no summary document, no design doc, no plan file — not as a deliverable,
-not "for reference", not because a change seems worth writing up. Keeping an
-existing document true after a code change is allowed; creating one is not.
+`repo-docs`, `docs-twins`, `docs-verify`, `design-sync`, or
+`twitter-campaign`, and only where that skill puts them. In every other
+context: no new `*.md`, no README, no notes file, no summary document, no
+design doc, no plan file — not as a deliverable, not "for reference", not
+because a change seems worth writing up. Keeping an existing document true
+after a code change is allowed; creating one is not.
 
 Report in chat instead, and say what you would have written.
 

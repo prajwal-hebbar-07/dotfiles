@@ -33,7 +33,7 @@ soul-cyan to infection-amber while the prefix is held.
 
 | Key sequence | Action |
 | --- | --- |
-| `prefix \` or `prefix \|` | Split current pane left/right (inherits directory) |
+| `prefix \` or `prefix \|` | Split current pane left/right, new pane 25% wide (inherits directory) |
 | `prefix -` | Split current pane top/bottom (inherits directory) |
 | `prefix r` | Rename current window (empty prompt) |
 | `prefix S` | Rename current session (empty prompt) |
@@ -68,7 +68,7 @@ tmux server start → reads ~/.config/tmux/tmux.conf
 User presses C-s (prefix)
   → tmux enters prefix key table
   → Next key dispatched:
-      \  →  split-window -h -c #{pane_current_path}
+      \  →  split-window -h -l 25% -c #{pane_current_path}
       g  →  display-popup -E -d #{pane_current_path} -w 90% -h 90% "lazygit"
       C-r →  source-file ~/.config/tmux/tmux.conf; display-message
 ```

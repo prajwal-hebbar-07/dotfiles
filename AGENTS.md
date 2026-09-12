@@ -16,6 +16,8 @@ Skills live under `ohmypi/skills/`:
 - `report-arc` — step reports and durable report pages.
 - `commit` — create a semantic commit from staged changes.
 - `paper-target` — pin a Paper.design file/page for this repo.
+- `twitter-campaign` — coordinated Twitter/X + Reddit launch campaign from a
+  project directory; incremental refresh from the stored generation commit.
 
 ## Agents
 

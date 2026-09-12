@@ -24,7 +24,7 @@ is forwarded as a literal `C-s`.
 
 | Key sequence | What it does |
 | --- | --- |
-| `C-s \` or `C-s |` | Split the current bay left and right |
+| `C-s \` or `C-s |` | Split the current bay left and right — the new bay on the right takes a quarter of the width |
 | `C-s -` | Split the current bay top and bottom |
 | `C-s m` | Zoom one bay to fill the whole bench (press again to restore) |
 | `C-s h` / `j` / `k` / `l` | Move left / down / up / right between bays |

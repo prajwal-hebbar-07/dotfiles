@@ -79,6 +79,8 @@ NOT_CODE = {
     "SameSite",
     "HttpOnly",
     "Secure",
+    # Third-party API error response codes
+    "ERROR_BAD_REQUEST",
 }
 
 # Wording that means the doc names something on purpose because it is absent. A
@@ -89,16 +91,19 @@ DELIBERATE = re.compile(
     r"was renamed|not\s+`|instead of|dead code|superseded|retired|pre-refactor|"
     r"there is no|there are no|\bno\b[^.]{0,40}`|does not need|\banywhere\b|"
     r"exported-but-unused|unused|if it (grows|gains)|would be|rather than|"
-    r"generated|TypeDoc|on the table|proposed|the fix|grows a new|\blibrary's\b",
+    r"generated|TypeDoc|on the table|proposed|the fix|grows a new|\blibrary's\b|"
+    r"\be\.g\.|\bfor example|\bsuch as|\brejected\b|not needed|not required|returns?\s+|"
+    r"\bfails?\s+with\s+|output filenames?",
     re.I,
 )
 
 
 def workspace_roots(root: str) -> list[str]:
-    roots = ["", "apps/web/"]
-    pkgs = os.path.join(root, "packages")
-    if os.path.isdir(pkgs):
-        roots += [f"packages/{d}/" for d in sorted(os.listdir(pkgs))]
+    roots = [""]
+    for parent in ("packages", "apps"):
+        d = os.path.join(root, parent)
+        if os.path.isdir(d):
+            roots += [f"{parent}/{sub}/" for sub in sorted(os.listdir(d)) if os.path.isdir(os.path.join(d, sub))]
     return roots
 
 
@@ -114,7 +119,10 @@ def expand_braces(token: str) -> list[str]:
 
 
 # Tracked files worth scanning for identifiers, by extension or exact name.
-SCANNABLE = (".ts", ".tsx", ".js", ".json", ".yml", ".yaml", ".conf", ".sh", ".md")
+SCANNABLE = (
+    ".ts", ".tsx", ".js", ".mjs", ".mts", ".rs", ".toml",
+    ".json", ".yml", ".yaml", ".conf", ".sh", ".md",
+)
 SCANNABLE_NAMES = {"Dockerfile", "Makefile", ".npmrc", ".env.test", ".env.example"}
 
 
@@ -135,8 +143,8 @@ def source_identifiers(root: str, files: list[str]) -> set[str]:
         base = os.path.basename(rel)
         if not (rel.endswith(SCANNABLE) or base in SCANNABLE_NAMES):
             continue
-        if rel.startswith("docs/"):
-            continue  # a doc may not vouch for itself
+        if rel.startswith("docs/") and not rel.startswith("docs/fixtures/"):
+            continue  # a doc may not vouch for itself, but fixtures are real observed data
         try:
             with open(os.path.join(root, rel), encoding="utf-8", errors="ignore") as fh:
                 text = fh.read()
@@ -302,6 +310,10 @@ def _is_path_claim(token: str, facts: dict) -> bool:
         return False
     if not PATHISH.match(token):
         return False
+    # Domain names/endpoints, e.g. api2.cursor.sh or ollama.com
+    if re.search(r"\b[a-zA-Z0-9-]+\.(com|org|net|io|ai|sh|app|dev)\b", token) and not token.startswith(ROOTED):
+        if "/" not in token and token.count(".") >= 2:
+            return False
     if token.startswith(ROOTED):
         return True
     if "/" not in token:
@@ -401,6 +413,7 @@ def main() -> int:
     if "--include-historical" not in sys.argv:
         # This one documents the *old* v2 repo on purpose; its paths are meant to be absent.
         docs = [d for d in docs if "v2-v3-gap-analysis" not in d]
+    docs = [d for d in docs if not _git_ignored(root, d)]
     if only:
         docs = [d for d in docs if d.endswith(only) or only.endswith(d)]
 

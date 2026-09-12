@@ -473,12 +473,29 @@ _pk_timer_read() {
   _pk_took="%F{${PK[stone]}}${human}%f "
 }
 
+# The first prompt line has to stay on one row: once it wraps, the path costs a
+# whole extra line to say what the window you are sitting in already told you.
+# Full path when it fits, the project directory alone when it does not, and a
+# hard truncation for whatever is still too wide for the pane.
+_pk_fit_head() {
+  emulate -L zsh -o extendedglob
+  local vcs=${${(%)vcs_info_msg_0_}//$'\e'\[[0-9;]##m/}   # branch text, no colour
+  local dir='%~'
+  local -i jobs=${(%):-%j}
+  local -i room=$(( COLUMNS - 1 - _pk_where_len - 2 ))    # cursor, user@host, ◈
+  (( jobs )) && (( room -= 2 + ${#jobs} ))                # • and the job count
+  (( room < 4 )) && room=4
+  (( ${#${(%):-%~}} + ${#vcs} > room )) && dir='%1~'
+  _pk_head="%${room}>…>%B%F{${PK[lifeblood]}}${dir}%f%b${vcs_info_msg_0_}%>>"
+}
+
 _pk_precmd() {
   local last=$?
   _pk_timer_read
   _pk_status=''
   (( last )) && _pk_status="%F{${PK[infection]}}× ${last}%f"
   vcs_info
+  _pk_fit_head
   # A blank line between the last output and the next prompt — but none wasted
   # at the top of a fresh shell.
   if (( ${_pk_drawn:-0} )); then print ""; else _pk_drawn=1; fi
@@ -489,13 +506,14 @@ add-zsh-hook precmd  _pk_precmd
 
 # user@host, but only when this is not a local login shell.
 _pk_where=''
+_pk_where_len=0
 if [[ -n $SSH_CONNECTION || -n $SSH_TTY ]]; then
   _pk_where="%F{${PK[infection]}}%n%f%F{${PK[stone]}}@%f%F{${PK[essence]}}%m%f "
+  _pk_where_len=${#${(%):-%n@%m }}
 fi
 
 PROMPT="${_pk_where}%F{${PK[soul]}}◈%f "
-PROMPT+="%B%F{${PK[lifeblood]}}%~%f%b"
-PROMPT+='${vcs_info_msg_0_}'
+PROMPT+='${_pk_head}'
 PROMPT+="%(1j. %F{${PK[essence]}}•%j%f.)"
 PROMPT+=$'\n'
 PROMPT+="%(?.%F{${PK[soul]}}.%F{${PK[infection]}})❯%f "

@@ -36,6 +36,7 @@ Imported as `@scope/thing/live` and, wrongly, as `@scope/thing/missing`.
 A third-party deep import, `@vendor/lib/internals`, is not ours to check.
 
 The spec imports `./live.js` which is the TypeScript ESM alias for `live.ts`.
+Hits the API at `api.vendor.sh` which is a remote endpoint.
 
 Defaults not overridden — session length, cookie name, `SameSite`, minimum
 password length — are whatever the auth library ships.
@@ -106,6 +107,7 @@ def main() -> int:
             "SameSite": "HTTP cookie attribute in NOT_CODE",
             "./live.js": "TypeScript ESM .js alias resolves to .ts source",
             "packages/thing/src/future.ts": "path absent but 'do not exist' makes it deliberate",
+            "api.vendor.sh": "domain name endpoint with .sh extension",
         }
 
         failures = []
