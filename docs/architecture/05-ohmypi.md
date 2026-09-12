@@ -66,8 +66,9 @@ The seven rules are enforced by sticky injection and override any harness-defaul
 3. **No opening or driving the browser tool** — including for "verification".
 4. **Investigate only when asked** — implement the request and nothing else until told.
 5. **No reaching for `planner` or `hand` subagents** — those run only on `/delegate`.
-6. **No documentation outside a docs skill** — `*.md` creation is reserved for `repo-docs`,
-   `docs-twins`, `docs-verify`, `design-sync`; updating an existing doc stays allowed.
+6. **No documents outside a skill I invoked** — creating a document in any format is
+   reserved for `repo-docs`, `docs-twins`, `docs-verify`, `design-sync`, and
+   `twitter-campaign`; updating an existing doc stays allowed.
 7. **Never amend** — no `--amend`, rebase, reset onto an existing commit, fixup/squash, or
    force-push; corrections land as a new commit.
 

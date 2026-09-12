@@ -87,11 +87,12 @@ they outrank the harness's own instruction to verify by running things:
 5. **No reaching for the `planner` or `hand` subagents** — that two-model
    workflow runs only on `/delegate` or an explicit request; otherwise the agent
    reads, decides, and edits with its own tools.
-6. **No documentation outside a docs skill** — `*.md` files are written only by
+6. **No documents outside a skill I invoked** — a document in any format
+   (`*.md`, notes, summary, report, plan, design doc) is written only by
    `repo-docs`, `docs-twins`, `docs-verify`, `design-sync`, and
-   `twitter-campaign`, in the places those skills own. No summaries, notes, or
-   design docs anywhere else; keeping an existing document true after a code
-   change is still fine.
+   `twitter-campaign`, in the places those skills own. Nothing anywhere else,
+   for any reason; keeping an existing document true after a code change is
+   still fine.
 7. **No amending** — no `--amend`, rebase, reset onto an existing commit,
    fixup/squash, or force-push, even over my own one-line-old commit. A
    correction is always a new commit on top.

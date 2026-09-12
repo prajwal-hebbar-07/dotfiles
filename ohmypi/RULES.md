@@ -47,17 +47,21 @@ That two-model workflow runs only when I invoke `/delegate`, or ask for it in
 words — then follow that command in full. Any other time, work as default Oh My
 Pi: read, decide, and edit with your own tools.
 
-## 6. Never write documentation outside a docs skill
+## 6. Never generate a document unless I invoked a skill that writes one
 
-Markdown documents and documentation are generated only while running
-`repo-docs`, `docs-twins`, `docs-verify`, `design-sync`, or
-`twitter-campaign`, and only where that skill puts them. In every other
-context: no new `*.md`, no README, no notes file, no summary document, no
-design doc, no plan file — not as a deliverable, not "for reference", not
-because a change seems worth writing up. Keeping an existing document true
-after a code change is allowed; creating one is not.
+No document, in any format: no `*.md`, `*.txt`, `*.rst`, `*.csv`, no PDF, no
+notes file, summary, report, plan, design doc, or README. The only exception is
+a skill I invoked whose job is to write documents — `repo-docs`, `docs-twins`,
+`docs-verify`, `design-sync`, `twitter-campaign` — and then only where that
+skill puts its output. The skill has to come from me: you never reach for one to
+justify writing a file.
 
-Report in chat instead, and say what you would have written.
+"The change is worth writing up", "for reference", "so it does not get lost",
+and "the task implies a deliverable" are not reasons. If I want a document
+outside a skill, I will generate it from another CLI.
+
+Keeping an existing document true after a code change is allowed; creating one
+is not. Report in chat instead, and say what you would have written.
 
 ## 7. Never amend; always a new commit
 
