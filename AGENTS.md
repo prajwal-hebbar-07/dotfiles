@@ -8,6 +8,7 @@ Skills live under `ohmypi/skills/<name>/SKILL.md`, linked into
 `~/.omp/agent/skills/`, `~/.cursor/skills/`, and `~/.gemini/config/skills/`:
 
 - `commit` — commits already-staged changes with a semantic message.
+- `paper-target` — pins the Paper file/page this repo's design work reads from.
 
 `ohmypi/skills/` was otherwise cleared on 2026-09-19 to start over; the old set
 is described in `SKILLS.md` at the repo root and archived at
