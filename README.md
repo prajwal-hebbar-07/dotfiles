@@ -479,6 +479,7 @@ ln -sfn "$PWD/tmux/tmux.conf"  ~/.config/tmux/tmux.conf
 ln -sfn "$PWD/ghostty/config" ~/.config/ghostty/config
 ln -sfn "$PWD/ghostty/themes" ~/.config/ghostty/themes
 ln -sfn "$PWD/ohmypi/skills/commit"     ~/.omp/agent/skills/commit
+ln -sfn "$PWD/ohmypi/skills/archify"    ~/.omp/agent/skills/archify
 ln -sfn "$PWD/ohmypi/skills/docs-twins" ~/.omp/agent/skills/docs-twins
 ln -sfn "$PWD/ohmypi/skills/docs-verify" ~/.omp/agent/skills/docs-verify
 ln -sfn "$PWD/ohmypi/skills/paper-target" ~/.omp/agent/skills/paper-target
@@ -494,6 +495,7 @@ ln -sfn "$PWD/ohmypi/mcp.json"            ~/.omp/agent/mcp.json
 ln -sfn "$PWD/ohmypi/RULES.md"            ~/.omp/agent/RULES.md
 
 ln -sfn "$PWD/ohmypi/skills/commit"     ~/.cursor/skills/commit
+ln -sfn "$PWD/ohmypi/skills/archify"    ~/.cursor/skills/archify
 ln -sfn "$PWD/ohmypi/skills/paper-target" ~/.cursor/skills/paper-target
 ln -sfn "$PWD/ohmypi/skills/implement-commit-prompt" ~/.cursor/skills/implement-commit-prompt
 ln -sfn "$PWD/ohmypi/skills/implementation-plan" ~/.cursor/skills/implementation-plan
@@ -505,6 +507,7 @@ ln -sfn "$PWD/ohmypi/skills/twitter-campaign" ~/.cursor/skills/twitter-campaign
 
 mkdir -p ~/.gemini/config/skills
 ln -sfn "$PWD/ohmypi/skills/commit" ~/.gemini/config/skills/commit
+ln -sfn "$PWD/ohmypi/skills/archify" ~/.gemini/config/skills/archify
 ln -sfn "$PWD/ohmypi/skills/docs-twins" ~/.gemini/config/skills/docs-twins
 ln -sfn "$PWD/ohmypi/skills/docs-verify" ~/.gemini/config/skills/docs-verify
 ln -sfn "$PWD/ohmypi/skills/follow-implementation-plan" ~/.gemini/config/skills/follow-implementation-plan
