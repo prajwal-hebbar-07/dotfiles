@@ -256,8 +256,8 @@ so `paper-target`, `implement-commit-prompt`, `implementation-plan`,
 `repo-docs`, and `twitter-campaign` are linked there from `ohmypi/skills/`.
 `~/.cursor/skills-cursor/` is Cursor's own directory for its built-in skills,
 kept in sync from a `.sync-manifest.json`; nothing of mine goes in it. `commit`
-is not linked in — it dispatches an omp task agent, which Cursor has no
-equivalent of, and Cursor's own commit flow covers that ground. The review
+is linked in too — it is plain `git` over the staged index, with no omp task
+agent behind it, so it behaves the same in every host. The review
 skill is linked here for completeness; the intended use is to copy that
 `SKILL.md` plus the plan into another agent.
 
@@ -493,6 +493,7 @@ ln -sfn "$PWD/ohmypi/agents/committer.md" ~/.omp/agent/agents/committer.md
 ln -sfn "$PWD/ohmypi/mcp.json"            ~/.omp/agent/mcp.json
 ln -sfn "$PWD/ohmypi/RULES.md"            ~/.omp/agent/RULES.md
 
+ln -sfn "$PWD/ohmypi/skills/commit"     ~/.cursor/skills/commit
 ln -sfn "$PWD/ohmypi/skills/paper-target" ~/.cursor/skills/paper-target
 ln -sfn "$PWD/ohmypi/skills/implement-commit-prompt" ~/.cursor/skills/implement-commit-prompt
 ln -sfn "$PWD/ohmypi/skills/implementation-plan" ~/.cursor/skills/implementation-plan
