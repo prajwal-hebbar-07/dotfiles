@@ -51,8 +51,8 @@ Pi: read, decide, and edit with your own tools.
 
 No document, in any format: no `*.md`, `*.txt`, `*.rst`, `*.csv`, no PDF, no
 notes file, summary, report, plan, design doc, or README. The only exception is
-a skill I invoked whose job is to write documents — `repo-docs`, `docs-twins`,
-`docs-verify`, `design-sync`, `twitter-campaign` — and then only where that
+a skill I invoked whose job is to write documents — `docs`, `arc-design`,
+`paper-target`, `implementation-plan` — and then only where that
 skill puts its output. The skill has to come from me: you never reach for one to
 justify writing a file.
 

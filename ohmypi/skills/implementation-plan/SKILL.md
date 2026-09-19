@@ -21,7 +21,7 @@ history** (never the same agent), so the user does not name `02.md`.
 Do **not** implement. Do **not** invent file names, folder layouts,
 function names, or libraries that were not locked. Do **not** document
 the product, and do **not** put documentation work in the plan. The user
-updates docs separately (`repo-docs`).
+updates docs separately (`docs`).
 
 The planner and the implementer may be different models. You are the
 planner. Over-specifying how is a bug in the plan.

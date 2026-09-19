@@ -13,6 +13,10 @@ Skills live under `ohmypi/skills/<name>/SKILL.md`, linked into
   plan files of at most five steps each.
 - `follow-implementation-plan` — implements the next unfinished plan step,
   commits via `commit`, stamps `Landed:<sha>`, chains the next file.
+- `arc-design` — directs `archify` to build a diagram set (overview + one per
+  piece) under `docs/architecture/diagrams/`, then commits via `commit`.
+- `docs` — generate or verify architecture docs (plain-English twins optional),
+  then commit via `commit`.
 
 `archify` (third-party, tt-a1i/archify) is **not** vendored here. Install it
 with `npx skills add tt-a1i/archify -g`; it lands in `~/.agents/skills/archify`
