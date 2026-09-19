@@ -122,26 +122,32 @@ agent, which runs `anthropic/claude-haiku-4-5` at `thinking-level: minimal` with
 the main session's context.
 
 **`implementation-plan` skill** (`/skill:implementation-plan`) — after an
-architecture conversation is done, writes `docs/implementation-plan.md`: one
-commit-by-commit contract. Each step is an outcome plus a prompt; how to build
-it is left to the implementing agent. The document itself is the protocol —
-implement one step exactly, stop for that commit, then the next — so it can
-be handed to a different model without this chat. Nothing in it is harness-
-specific.
+architecture conversation is done, writes numbered files under
+`docs/implementation-plan/` (gitignored): at most five commits each. Each
+step is an outcome plus a prompt; how to build it is left to the
+implementing agent. The file itself is the protocol — implement one step
+exactly, stop for that commit, then the next in that file. When the file
+is done it is deleted and the next file starts on its own. Nothing in it
+is harness-specific.
 
 **`review-implementation-plan` skill** (`/skill:review-implementation-plan`) — a
 second agent (often a stronger implementer, and often not this harness) reads
-that plan and updates it before anyone codes: split or merge steps, reorder,
-strip how-to, add missing outcomes. It does not implement, and it does not
-replace the planner's how with its own. Pass the plan file plus this
-`SKILL.md`; it is a plain Agent Skill, not a Cursor feature.
+one plan file and updates it before anyone codes: split or merge steps,
+reorder, strip how-to, add missing outcomes, re-chunk if a file grows past
+five commits. It does not implement, and it does not replace the planner's
+how with its own. Pass one plan file plus this `SKILL.md`; review the next
+file in a new window. It is a plain Agent Skill, not a Cursor feature.
 
 **`follow-implementation-plan` skill** (`/skill:follow-implementation-plan`) —
-executes that plan: the next unfinished step, exactly as written, `git add`
-only that step's files, then `/skill:commit` with the plan's subject. It does
-not `git commit` itself. An empty index is not the end of the plan — add the
-files and commit. After the SHA lands, it takes the next step. After every
-step it emits a **report-arc** report.
+executes the plan from one invoke: the next unfinished step, exactly as
+written, `git add` only that step's files, then `/skill:commit` with the
+plan's subject. It does not `git commit` itself. An empty index is not the
+end of the plan — add the files and commit. After the SHA lands, it takes
+the next step in that file. When the file is done, it deletes it and starts
+the next remaining file in a new agent with empty history — never this
+same agent. On Cursor that is a Task/subagent; on omp it is the `task`
+tool with agent `task` (not isolated). After every step it emits a
+**report-arc** report.
 
 **`report-arc` skill** (`/skill:report-arc`) — the step-report shape (status,
 Done when table, changed, leftover unstaged, verification, next) and a
@@ -171,7 +177,7 @@ mechanically and delegating prose checking.
 extracts **one** step from that plan into a copy-pastable prompt for a fresh
 chat. If the step already has a Prompt block, that is what gets copied rather
 than a rewrite. Use this when you want a new session per commit; following
-the plan in-session is `follow-implementation-plan`. These live in
+the whole sequence from one invoke is `follow-implementation-plan`. These live in
 `ohmypi/skills/` and are linked into both omp and Cursor, same as
 `paper-target`.
 
@@ -265,9 +271,10 @@ per project under `~/.cursor/projects/<slug>/mcps/`.
 Google's AI coding assistant environment (`agy`).
 
 **Skills** — Antigravity discovers global skills from `~/.gemini/config/skills/`
-(as well as workspace skills under `.agents/skills/`). The shared documentation
-and commit skills — `commit`, `docs-twins`, `docs-verify`, and `repo-docs` — are
-linked into `~/.gemini/config/skills/` from `ohmypi/skills/`.
+(as well as workspace skills under `.agents/skills/`). The shared documentation,
+commit, and implementation skills — `commit`, `docs-twins`, `docs-verify`,
+`follow-implementation-plan`, and `repo-docs` — are linked into
+`~/.gemini/config/skills/` from `ohmypi/skills/`.
 
 ### zsh
 
@@ -499,6 +506,7 @@ mkdir -p ~/.gemini/config/skills
 ln -sfn "$PWD/ohmypi/skills/commit" ~/.gemini/config/skills/commit
 ln -sfn "$PWD/ohmypi/skills/docs-twins" ~/.gemini/config/skills/docs-twins
 ln -sfn "$PWD/ohmypi/skills/docs-verify" ~/.gemini/config/skills/docs-verify
+ln -sfn "$PWD/ohmypi/skills/follow-implementation-plan" ~/.gemini/config/skills/follow-implementation-plan
 ln -sfn "$PWD/ohmypi/skills/repo-docs" ~/.gemini/config/skills/repo-docs
 ```
 

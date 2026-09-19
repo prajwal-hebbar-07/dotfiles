@@ -22,6 +22,7 @@ every tool that holds a key sees the new version the next time it opens its door
 | `ghostty/` | Terminal window settings and the Pale Knight colour palette |
 | `ohmypi/` | Coding assistant rules, specialised skills (task scripts), and MCP server connection |
 | `docs/` | Twin documentation — this file included |
+| `.gitignore` | Tells git to skip the ephemeral implementation-plan folder |
 
 ---
 
@@ -50,7 +51,7 @@ The coding-assistant skills in `ohmypi/skills/` are linked into three different 
 - **Oh My Pi** — the primary coding harness; gets all ten skills
 - **Cursor** — the code editor; gets seven (the commit skill is skipped because Cursor has
   its own commit workflow)
-- **Antigravity (agy)** — Google's coding assistant CLI; gets four skills
+- **Antigravity (agy)** — Google's coding assistant CLI; gets five skills
 
 One directory, three doors. Edit the skill once, all three tools see the change after they
 restart.

@@ -71,6 +71,11 @@ NOT_CODE = {
     "MKR",
     "CKR",
     "ADMIN",
+    "PLATFORM_ADMIN",
+    # Asset types for organization branding wire parameters
+    "SMALL_LOGO",
+    "LARGE_LOGO",
+    "SPA_CONFIG",
     "true",
     "false",
     "null",

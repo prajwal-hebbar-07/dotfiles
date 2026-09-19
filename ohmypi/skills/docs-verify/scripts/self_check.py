@@ -39,7 +39,7 @@ The spec imports `./live.js` which is the TypeScript ESM alias for `live.ts`.
 Hits the API at `api.vendor.sh` which is a remote endpoint.
 
 Defaults not overridden — session length, cookie name, `SameSite`, minimum
-password length — are whatever the auth library ships.
+password length — are whatever the auth library ships. Persona `PLATFORM_ADMIN` manages `SMALL_LOGO`.
 
 They do not exist yet, but (`packages/thing/src/future.ts`, a planned module)
 will be added in the next slice.
@@ -105,6 +105,8 @@ def main() -> int:
             "@vendor/lib/internals": "third-party deep import",
             # new rules
             "SameSite": "HTTP cookie attribute in NOT_CODE",
+            "PLATFORM_ADMIN": "platform persona in NOT_CODE",
+            "SMALL_LOGO": "asset type in NOT_CODE",
             "./live.js": "TypeScript ESM .js alias resolves to .ts source",
             "packages/thing/src/future.ts": "path absent but 'do not exist' makes it deliberate",
             "api.vendor.sh": "domain name endpoint with .sh extension",
@@ -135,6 +137,8 @@ def main() -> int:
         # SameSite must be completely absent (NOT_CODE, not even a deliberate finding)
         if any(t == "SameSite" for (_, t) in found):
             failures.append("FALSE+  SameSite (HTTP cookie attribute should be in NOT_CODE)")
+        if any(t in ("PLATFORM_ADMIN", "SMALL_LOGO") for (_, t) in found):
+            failures.append("FALSE+  PLATFORM_ADMIN/SMALL_LOGO should be in NOT_CODE")
         # ./live.js must be completely absent (.js → .ts resolution)
         if any(t == "./live.js" for (_, t) in found):
             failures.append("FALSE+  ./live.js (TypeScript ESM alias should resolve to live.ts)")

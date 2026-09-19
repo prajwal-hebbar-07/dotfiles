@@ -9,8 +9,8 @@ description: >
   "Opus review", "update the plan before implementing", or invokes
   /review-implementation-plan. Do not use when the user asks to implement
   the plan. Works as a generic Agent Skill: pass this SKILL.md plus the
-  plan file to any agent.
-argument-hint: "[path to plan]"
+  plan file to any agent. One file per window (at most five commits).
+argument-hint: "[path to plan file]"
 ---
 
 # Review implementation plan
@@ -28,10 +28,16 @@ you, in a later session — still chooses internals.
 ## Read first
 
 1. This skill.
-2. The plan — default `docs/implementation-plan.md`, then
-   `implementation-plan.md`, then `docs/plan.md`. An explicit path wins. If
-   missing, ask. Stop.
-3. Every file under `docs/` except `docs/plain-english/`.
+2. The plan. Explicit path wins: a `.md` file is this window's plan; a
+   directory means review one numbered `NN.md` at a time, starting with
+   the first that has unfinished steps. Default `docs/implementation-plan/`
+   numbered files. Else legacy: `docs/implementation-plan.md`, then
+   `implementation-plan.md`, then `docs/plan.md`. If missing, ask. Stop.
+   Review **one file per chat** (at most five commits) so the plan stays
+   under ~30% of context. Neighboring files: read their index tables only,
+   not their Prompt bodies.
+3. Every file under `docs/` except `docs/plain-english/` and except other
+   files in the plan directory (tables of neighbors excepted).
 4. `git log --oneline -20` and a quick look at the tree, so steps start from
    what is actually there.
 
@@ -43,11 +49,13 @@ that is a defect: fix it or ask.
 
 The plan is a contract for a later implementing agent.
 
-- **How to follow this plan** is present and is the execution protocol:
-  one step, stage only that step's files, commit through the `commit`
-  skill, then the next step. Do not delete or weaken it. You may clarify it.
-- Each step is one commit, one concern, reviewable in about ten minutes,
-  preferably under ~300 lines.
+- **This window** and **How to follow this plan** are present and are the
+  execution protocol: one step, stage only that step's files, commit
+  through the `commit` skill, then the next step **in this file**; when
+  the file is done, delete it and chain the next remaining file. Do not
+  delete or weaken them. You may clarify them.
+- Each file has **at most five** steps. Each step is one commit, one
+  concern, reviewable in about ten minutes, preferably under ~300 lines.
 - **What lands** / **Done when** are observable outcomes, not file trees.
 - **Locked decisions** are only choices that later steps would be written
   differently without. Everything else stays open.
@@ -89,15 +97,24 @@ Work through this list. Edit the plan in place when you find a hit.
    that requires a green typecheck/test/build when HEAD is already red.
    Restore **How to follow this plan**: implement one step, `git add` only
    that step's files, commit via the `commit` skill, next after that subject
-   exists in git. Rewrite whole-repo "must pass" gates to "this step adds
-   zero new failures versus the parent commit."
+   exists in git, **delete the file when it is done and chain the rest**.
+   Rewrite whole-repo "must pass" gates to "this step adds zero new failures
+   versus the parent commit."
+9. **Documentation in the plan.** A step whose **What lands** is docs,
+   twins, README, or "keep the docs in sync". Delete that step. The user
+   documents separately (`repo-docs` / `docs-twins`). Implementers read
+   `docs/`; they do not edit them.
+10. **Oversized file.** More than five steps in one file. Re-chunk
+    unfinished steps into files of at most five. Preserve numbers that
+    have already landed in git. Say which files moved.
 
 ## What not to do
 
 - Do not implement, scaffold, or "just start step 1".
-- Do not edit anything except the plan file. No `packages/`, no app source,
+- Do not edit anything except the plan files. No `packages/`, no app source,
   no tests, no other `docs/` files unless the plan itself lives there and
-  you are only changing that plan.
+  you are only changing those plan files. Do not load every part's Prompt
+  bodies into this chat.
 - Do not invoke or continue into `follow-implementation-plan`.
 - Do not add approach hints, recommended libraries, or proposed file maps —
    even as "optional". They become de facto requirements.
@@ -123,8 +140,10 @@ it in the changelog, still finish the review.
 
 ## Write
 
-Update the plan file. If you cannot write, emit the full updated document in
-one markdown fence and say it still needs to be saved.
+Update this window's plan file. If a split or merge overflows five steps,
+write the overflow into the next numbered file and say so. If you cannot
+write, emit each updated file in its own markdown fence and say they still
+need to be saved.
 
 Preserve step numbers that have already landed in git (match `git log` to
 commit messages). Renumber only steps that have not landed, and say so.
@@ -140,5 +159,7 @@ In the chat (not in the plan):
    are how-questions, not missing product.
 3. **Ready** — whether the plan can be executed as-is. If not, what is left.
    Ready is not permission to code.
-4. **Stop.** Do not start step 1. Do not offer to start it. Do not run
+4. **Next file** — if another part remains, name it and tell the user to
+   review it in a new window. Do not open it here.
+5. **Stop.** Do not start step 1. Do not offer to start it. Do not run
    `follow-implementation-plan`. Implementation needs a later, explicit ask.

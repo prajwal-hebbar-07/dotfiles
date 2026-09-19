@@ -62,10 +62,10 @@ Ten labelled drawers, each containing a step-by-step guide for a repeatable task
 | `repo-docs` | Generate or refresh paired technical and plain-English docs for any repo |
 | `docs-twins` | Same, but for repos with a fixed monorepo layout |
 | `docs-verify` | Check every documentation claim against the code; find dead paths and stale names |
-| `implementation-plan` | Write a commit-by-commit plan for a feature or refactor |
-| `review-implementation-plan` | Review that plan: split, merge, reorder, clarify |
-| `follow-implementation-plan` | Execute the next unfinished step of a plan |
-| `implement-commit-prompt` | Extract one plan step as a prompt for a fresh chat session |
+| `implementation-plan` | Write a commit-by-commit plan, five commits per file, so each file is one chat window |
+| `review-implementation-plan` | Review one plan file: split, merge, reorder, clarify |
+| `follow-implementation-plan` | Execute the plan; delete each finished file and start the next in a new agent |
+| `implement-commit-prompt` | Extract one plan step as a prompt for a fresh chat |
 | `report-arc` | Write a step report, or save any such report as a permanent page |
 | `paper-target` | Pin the relevant Paper.design file and page into this repository's context |
 
@@ -79,7 +79,7 @@ The drawers in `ohmypi/skills/` are shared across three coding assistants:
 | --- | --- |
 | Oh My Pi | All ten |
 | Cursor | Eight (all except `commit` and `docs-twins`; Cursor has its own commit workflow) |
-| Antigravity (agy) | Four: `commit`, `docs-twins`, `docs-verify`, `repo-docs` |
+| Antigravity (agy) | Five: `commit`, `docs-twins`, `docs-verify`, `follow-implementation-plan`, `repo-docs` |
 
 One directory, linked to three places. Edit a drawer once, and all three workbenches see
 the new instructions the next time they restart.

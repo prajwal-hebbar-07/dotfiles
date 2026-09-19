@@ -17,7 +17,7 @@ the symlink conventions that connect each config file to the location the tool e
 | `tmux/` | Tmux multiplexer: `tmux.conf` (166 lines). |
 | `ghostty/` | Ghostty terminal emulator: `config` (69 lines) and `themes/pale-knight` (75-line theme file). |
 | `ohmypi/` | Oh My Pi coding harness: `RULES.md`, `agents/committer.md`, `mcp.json`, and `skills/` (10 skill packages). |
-| `docs/` | Twin documentation, created by this sweep. Not yet present at the start of the bootstrap. |
+| `.gitignore` | Ignores `docs/implementation-plan/` so ephemeral plan files are not committed. |
 
 ## Public surface
 
@@ -40,8 +40,10 @@ the symlink conventions that connect each config file to the location the tool e
 ~/.cursor/skills/<name>          → ohmypi/skills/<name>   (7 entries, excludes commit)
 
 # Gemini / Antigravity CLI
-~/.gemini/config/skills/<name>   → ohmypi/skills/<name>   (4 entries: commit, docs-twins,
-                                                           docs-verify, repo-docs)
+~/.gemini/config/skills/<name>   → ohmypi/skills/<name>   (5 entries: commit, docs-twins,
+                                                           docs-verify,
+                                                           follow-implementation-plan,
+                                                           repo-docs)
 ```
 
 **Intended future directories** (recorded in `README.md`, not yet committed):

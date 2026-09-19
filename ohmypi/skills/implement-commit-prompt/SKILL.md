@@ -27,12 +27,17 @@ The focused commit is, in order:
 
 Find `docs/` at the repo root. If it is missing, ask where it lives. Stop.
 
-Read **every** file under `docs/` — markdown, nested dirs, fixtures. Skip
-`docs/plain-english/` entirely. Do not wait for the commit row to mention a
-file. The implementation plan is the sequence; the rest of `docs/` is the
-product, spec, and shape context the prompt must absorb.
+Find the plan: an explicit path wins. Else numbered `NN.md` files under
+`docs/implementation-plan/`, then legacy `docs/implementation-plan.md`,
+`implementation-plan.md`, `docs/plan.md`. The matching row may live in
+`02.md` (steps 6–10). Read **that file**, not other parts' Prompt bodies.
 
-Find the plan (first hit): `docs/implementation-plan.md`, `implementation-plan.md`, `docs/plan.md`. If the plan is outside `docs/`, read it in addition to the folder.
+Then read every other file under `docs/` — markdown, nested dirs, fixtures.
+Skip `docs/plain-english/` entirely. Skip other files in the plan directory.
+Do not wait for the commit row to mention a file. The implementation plan
+is the sequence; the rest of `docs/` is the product, spec, and shape context
+the prompt must absorb. If the plan is outside `docs/`, read it in addition
+to the folder.
 
 If the plan is missing, ask where it lives. Stop.
 
@@ -41,7 +46,7 @@ Pull the matching table row: **#**, commit message, what lands, review focus. Re
 If that step already has a **Prompt** fenced block, that fence **is** the
 copy-paste. Do not rewrite it. Add current-repo facts and the user's answers
 only if they are missing from it. This skill extracts one step into a fresh
-chat. It does not implement, and it does not commit. Whole-plan execution is
+chat. It does not implement, and it does not commit. One-file execution is
 `follow-implementation-plan`.
 
 ## Inspect the repo (read only)

@@ -21,10 +21,10 @@ hosts (Oh My Pi, Cursor, Antigravity/agy).
 | `ohmypi/skills/docs-verify/SKILL.md` | Audits doc claims against code. Delegates to `check-claims.py`. |
 | `ohmypi/skills/docs-verify/scripts/check-claims.py` | 426-line Python script. Extracts backtick-cited paths, symbols, and package exports from docs; checks each against tracked files and source identifiers. Reports broken links as `BROKEN`, unknown symbols with `deliberate?` if context looks intentional. |
 | `ohmypi/skills/docs-verify/scripts/self_check.py` | Self-check script for the verify skill itself. [INFERENCE: exact role not read] |
-| `ohmypi/skills/follow-implementation-plan/SKILL.md` | Executes the next unfinished step of a plan from `docs/implementation-plan.md`, stages only that step's files, then calls `/skill:commit`. |
+| `ohmypi/skills/follow-implementation-plan/SKILL.md` | Executes the next unfinished step of the plan, stages only that step's files, then calls `/skill:commit`. Deletes a finished plan file and starts the next remaining file in a new agent with empty history (Cursor Task, or omp `task` agent). |
 | `ohmypi/skills/implement-commit-prompt/SKILL.md` | Extracts one step from the plan into a copy-pasteable prompt for a fresh chat. |
-| `ohmypi/skills/implementation-plan/SKILL.md` | Writes `docs/implementation-plan.md`: one commit-by-commit contract after an architecture conversation. |
-| `ohmypi/skills/implementation-plan/template.md` | Template for the plan document. |
+| `ohmypi/skills/implementation-plan/SKILL.md` | Writes numbered plan files under `docs/implementation-plan/` (gitignored): at most five commits each, after an architecture conversation. |
+| `ohmypi/skills/implementation-plan/template.md` | Template for one five-commit plan file. |
 | `ohmypi/skills/paper-target/SKILL.md` | Pins a Paper.design file/page reference into `AGENTS.md` / `CLAUDE.md` between marker comments. Uses MCP tools only; never guesses page IDs. |
 | `ohmypi/skills/repo-docs/SKILL.md` | Twin documentation for any repo (not only monorepos). Reads path → pair mapping from the target repo's `docs/README.md`. Drives this very sweep. |
 | `ohmypi/skills/repo-docs/architecture-template.md` | Ten-section skeleton for architecture documents. |
@@ -32,7 +32,7 @@ hosts (Oh My Pi, Cursor, Antigravity/agy).
 | `ohmypi/skills/report-arc/SKILL.md` | Step report shape (status, done-when table, changed files, leftover unstaged, verification, next) plus a second mode to persist any such report as a page under `docs/reports/`. |
 | `ohmypi/skills/report-arc/template.md` | Step report template. |
 | `ohmypi/skills/report-arc/doc-template.md` | Persisted report page template. |
-| `ohmypi/skills/review-implementation-plan/SKILL.md` | Reviews a plan document: splits or merges steps, reorders, strips how-to, adds missing outcomes. Does not implement. |
+| `ohmypi/skills/review-implementation-plan/SKILL.md` | Reviews one plan file: splits or merges steps, reorders, strips how-to, adds missing outcomes, re-chunks past five commits. Does not implement. |
 
 ## Public surface
 
@@ -44,9 +44,9 @@ hosts (Oh My Pi, Cursor, Antigravity/agy).
 | `/skill:repo-docs` | `repo-docs` | Twin docs bootstrap or incremental refresh |
 | `/skill:docs-twins` | `docs-twins` | Twin docs for monorepo layout |
 | `/skill:docs-verify` | `docs-verify` | Audit doc claims against code |
-| `/skill:implementation-plan` | `implementation-plan` | Write commit-by-commit plan |
-| `/skill:review-implementation-plan` | `review-implementation-plan` | Review a plan |
-| `/skill:follow-implementation-plan` | `follow-implementation-plan` | Execute next plan step |
+| `/skill:implementation-plan` | `implementation-plan` | Write plan files, five commits each |
+| `/skill:review-implementation-plan` | `review-implementation-plan` | Review one plan file |
+| `/skill:follow-implementation-plan` | `follow-implementation-plan` | Execute the plan; chain remaining files |
 | `/skill:implement-commit-prompt` | `implement-commit-prompt` | Extract one plan step as a prompt |
 | `/skill:report-arc` | `report-arc` | Step report or persisted report page |
 | `/skill:paper-target` | `paper-target` | Pin Paper file/page in AGENTS.md |
@@ -126,7 +126,7 @@ Agent turn start
 | `ohmypi/mcp.json` | `~/.omp/agent/mcp.json` | Oh My Pi at startup |
 | `ohmypi/skills/*/SKILL.md` | `~/.omp/agent/skills/` | Oh My Pi at dispatch |
 | `ohmypi/skills/<7>/SKILL.md` | `~/.cursor/skills/` | Cursor at window reload |
-| `ohmypi/skills/<4>/SKILL.md` | `~/.gemini/config/skills/` | Antigravity at startup |
+| `ohmypi/skills/<5>/SKILL.md` | `~/.gemini/config/skills/` | Antigravity at startup |
 | `ohmypi/agents/committer.md` | `~/.omp/agent/agents/committer.md` | Oh My Pi on dispatch |
 
 **mcp.json schema:** `$schema` points to the Oh My Pi MCP schema. The `paper` server uses
@@ -143,7 +143,7 @@ Agent turn start
 | `repo-docs` | ✓ | ✓ | ✓ |
 | `implementation-plan` | ✓ | ✓ | — |
 | `review-implementation-plan` | ✓ | ✓ | — |
-| `follow-implementation-plan` | ✓ | ✓ | — |
+| `follow-implementation-plan` | ✓ | ✓ | ✓ |
 | `implement-commit-prompt` | ✓ | ✓ | — |
 | `report-arc` | ✓ | ✓ | — |
 | `paper-target` | ✓ | ✓ | — |
