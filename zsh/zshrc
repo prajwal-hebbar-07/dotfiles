@@ -611,6 +611,21 @@ alias t=tmux
 alias ta='tmux attach -t'
 alias tl='tmux list-sessions'
 
+# tn [name] [path] — create or attach a named session rooted at a directory.
+# Name defaults to the directory's basename, path to $PWD. -A attaches to an
+# existing session of that name instead of failing; from inside tmux the new
+# session is made detached and switched to, since sessions cannot nest.
+tn() {
+  local dir=${2:-$PWD} name=$1
+  dir=${dir:A}
+  : ${name:=${dir:t}}
+  if [[ -n $TMUX ]]; then
+    tmux new-session -dA -s "$name" -c "$dir" && tmux switch-client -t "$name"
+  else
+    tmux new-session -A -s "$name" -c "$dir"
+  fi
+}
+
 # mkcd — make it, then step into it.
 mkcd() { mkdir -p -- "$1" && cd -- "$1" }
 

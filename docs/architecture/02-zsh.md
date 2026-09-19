@@ -38,6 +38,7 @@ shim — all in a deliberate order required for correct widget stacking.
 | `g` / `gs` / `gd` / `gl` / `ga` / `gc` / `gp` | Common git shortcuts |
 | `lg` | `lazygit` |
 | `t` / `ta` / `tl` | tmux / tmux attach / tmux list-sessions |
+| `tn [name] [path]` | Create or attach a named tmux session rooted at `path` (defaults: `$PWD`, its basename) |
 | `ports` | `lsof -nP -iTCP -sTCP:LISTEN` |
 | `path` | Print `$path` array, one entry per line |
 | `zshrc` | Open `~/.zshrc` in `$EDITOR` |
