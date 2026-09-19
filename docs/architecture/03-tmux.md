@@ -39,7 +39,7 @@ soul-cyan to infection-amber while the prefix is held.
 | `prefix S` | Rename current session (empty prompt) |
 | `prefix x` | Kill current pane (no confirmation) |
 | `prefix X` | Kill current window (no confirmation) |
-| `prefix c` | New window at `$HOME` |
+| `prefix c` | New window at the session's root directory |
 | `prefix m` | Zoom current pane (toggle; overrides default `mark-pane`) |
 | `prefix h` / `j` / `k` / `l` | Select pane left / down / up / right (overrides `last-window` for `l`) |
 | `prefix g` | lazygit popup, 90 % × 90 %, current pane's repository |
@@ -81,7 +81,8 @@ current pane's working directory, so the popup inherits the right repository con
 - **1-based indexing.** `base-index 1` and `pane-base-index 1` are both set.
   `renumber-windows on` closes gaps. `prefix 1` always reaches the first window.
 - **Splits inherit directory.** All `split-window` bindings use `-c "#{pane_current_path}"`.
-  New windows (`prefix c`) start at `$HOME` deliberately.
+  New windows (`prefix c`) start at `#{session_path}`, the directory the session was
+  created in, so a project session keeps its root no matter where a pane wandered.
 - **`prefix C-s` round-trips.** `bind C-s send-prefix` ensures applications that need a
   literal `C-s` (flow control, terminal XOFF) can receive it.
 - **Palette variables are `%hidden`.** They are resolved at config parse time and do not
@@ -143,9 +144,9 @@ Visual verification is required for colour accuracy and popup functionality.
   binding. Mark-pane functionality is unavailable without rebinding.
 - **`lazygit` and `tuicr` are not guarded.** If either is absent from `PATH`, `prefix g`/`t`
   opens a popup that immediately exits with an error message. No fallback or guard exists.
-- **`new-window` starts at `$HOME`.** `bind c new-window -c "$HOME"` is evaluated at bind
-  time, not at invocation time. If `$HOME` is somehow unset, this silently opens in the
-  server's working directory. [INFERENCE]
+- **`new-window` follows the session root, not the pane.** `bind c new-window -c
+  "#{session_path}"` is resolved by tmux at invocation. A session started without `-c`
+  inherits the shell's directory at creation time, which may be `$HOME`.
 
 ## Change guide
 

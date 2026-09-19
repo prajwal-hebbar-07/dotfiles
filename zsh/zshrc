@@ -658,3 +658,4 @@ fi
 # Added by Antigravity CLI installer
 export PATH="/Users/hebbar/.local/bin:$PATH"
 alias agy='command agy --dangerously-skip-permissions'
+source /Users/hebbar/.local/share/leaf/completions/_leaf
