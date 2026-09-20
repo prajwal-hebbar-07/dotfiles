@@ -63,11 +63,20 @@ export HOMEBREW_NO_ENV_HINTS=1
 typeset -U path fpath PATH FPATH          # no duplicate entries, ever
 path=("$HOME/.local/bin" $path)
 
-export EDITOR='cursor --wait'
+export EDITOR=nvim
 export VISUAL=$EDITOR
 export PAGER=less
 export LESS='-R -F -i -M --mouse'         # keep colour, quit if it all fits
 export LANG="${LANG:-en_US.UTF-8}"
+
+# This repo's git/config becomes the global one, so its difftool cannot lose to
+# whatever ~/.gitconfig already says. That file includes ~/.gitconfig first, so
+# identity and machine settings still come from the machine. The path is derived
+# from where this file really lives (~/.zshrc -> dotfiles/zsh/zshrc), never
+# hardcoded.
+_pk_gitconfig=${${(%):-%N}:A:h:h}/git/config
+[[ -r $_pk_gitconfig ]] && export GIT_CONFIG_GLOBAL=$_pk_gitconfig
+unset _pk_gitconfig
 
 
 # ── Options ──────────────────────────────────────────────────────────────────
@@ -597,6 +606,13 @@ alias ports='lsof -nP -iTCP -sTCP:LISTEN'
 alias path='print -l $path'
 alias reload='exec zsh'
 alias zshrc='${=EDITOR} ~/.zshrc'
+
+# The editor. `fc` is the graphical IDE, opt-in — it shadows zsh's history
+# builtin, which is still reachable as `builtin fc`.
+alias v=nvim
+alias vr='nvim -R'                        # read-only: reviewing, not editing
+alias vd='nvim -d'                        # two-file diff
+alias fc='cursor --wait'
 
 alias g=git
 alias gs='git status --short --branch'

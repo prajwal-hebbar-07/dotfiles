@@ -1,0 +1,33 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# git — Pale Knight
+#
+# This file is git's *global* config: zsh exports GIT_CONFIG_GLOBAL to it, so
+# it is read instead of ~/.gitconfig and ~/.config/git/config. Those two are
+# included first, which means identity, credentials, and every machine-local
+# setting still come from the machine — and the tools below, read afterwards,
+# win over anything they set.
+#
+# No identity lives here on purpose: this repo is public and accounts are
+# per-repo.
+#
+# Source of truth: dotfiles/git/config  (via $GIT_CONFIG_GLOBAL)
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Missing include paths are ignored, so a machine without either file is fine.
+[include]
+	path = ~/.gitconfig
+	path = ~/.config/git/config
+
+# Review diffs and resolve conflicts in the terminal editor, not the IDE.
+# `nvimdiff` is git's own built-in tool definition: nvim -d.
+[diff]
+	tool = nvimdiff
+
+[difftool]
+	prompt = false
+
+[merge]
+	tool = nvimdiff
+
+[mergetool]
+	keepBackup = false
