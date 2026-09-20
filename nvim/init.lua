@@ -193,3 +193,72 @@ map('n', '<leader>w', '<cmd>write<cr>', 'write this file')
 map('n', '<leader>q', '<cmd>quit<cr>', 'quit this window')
 map('n', '<leader>x', '<cmd>wall | qall<cr>', 'write everything and quit')
 map('n', '<leader>?', cheatsheet, 'list these maps')
+
+
+-- ── Plugins ──────────────────────────────────────────────────────────────────
+-- lazy.nvim clones itself and every plugin into Neovim's data directory. This
+-- repo holds the spec and `lazy-lock.json` (which lazy keeps next to this file,
+-- in stdpath('config')) — never a plugin source tree.
+--
+-- Every plugin is optional at runtime: if the clone never happened, if there is
+-- no network, or if a parser fails to build, everything above this line still
+-- works. That is what the guards are for, not defensiveness for its own sake.
+local uv = vim.uv or vim.loop
+local lazypath = vim.fn.stdpath('data') .. '/lazy/lazy.nvim'
+
+if not uv.fs_stat(lazypath) then
+  vim.fn.system({
+    'git', 'clone', '--filter=blob:none', '--branch=stable',
+    'https://github.com/folke/lazy.nvim.git', lazypath,
+  })
+end
+
+-- Treesitter off for machine-written files: a 900 kB lockfile or a minified
+-- bundle would otherwise parse on every glance.
+local function pathological(_, buf)
+  local name = vim.api.nvim_buf_get_name(buf)
+  local stat = name ~= '' and uv.fs_stat(name) or nil
+  if stat and stat.size > 512 * 1024 then
+    return true
+  end
+  for _, line in ipairs(vim.api.nvim_buf_get_lines(buf, 0, 8, false)) do
+    if #line > 2000 then
+      return true
+    end
+  end
+  return false
+end
+
+if uv.fs_stat(lazypath) then
+  vim.opt.rtp:prepend(lazypath)
+  local ok, lazy = pcall(require, 'lazy')
+  if ok then
+    pcall(lazy.setup, {
+      { 'folke/lazy.nvim', version = '*' }, -- the installer manages itself
+      {
+        -- ponytail: the frozen master branch, because its `configs.setup` is one
+        -- call; move to the `main` rewrite when a parser it lacks is needed.
+        'nvim-treesitter/nvim-treesitter',
+        branch = 'master',
+        build = ':TSUpdate',
+        config = function()
+          require('nvim-treesitter.configs').setup({
+            -- The locked language set. Tailwind is CSS/HTML/JS context, so it
+            -- has no parser of its own; markdown_inline is markdown's other half.
+            ensure_installed = {
+              'javascript', 'typescript', 'tsx', 'html', 'css',
+              'go', 'odin',
+              'lua', 'bash', 'json', 'yaml', 'toml',
+              'markdown', 'markdown_inline', 'gitcommit', 'diff',
+            },
+            auto_install = true, -- a language met later installs itself
+            highlight = { enable = true, disable = pathological },
+          })
+        end,
+      },
+    }, {
+      change_detection = { notify = false },
+      ui = { border = 'rounded' },
+    })
+  end
+end
