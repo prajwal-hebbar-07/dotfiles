@@ -256,9 +256,68 @@ if uv.fs_stat(lazypath) then
           })
         end,
       },
+      {
+        'neovim/nvim-lspconfig',
+        config = function()
+          -- Servers come from PATH — whatever nvm, brew, or go install already
+          -- put there. A version directory is never written into this file, and
+          -- a language whose server is absent simply has no LSP.
+          local servers = {
+            ts_ls = 'typescript-language-server', -- JS, TS, TSX, Node/Express
+            tailwindcss = 'tailwindcss-language-server',
+            html = 'vscode-html-language-server',
+            cssls = 'vscode-css-language-server',
+            jsonls = 'vscode-json-language-server',
+            gopls = 'gopls',
+            ols = 'ols',
+            lua_ls = 'lua-language-server',
+          }
+          local present = {}
+          for name, binary in pairs(servers) do
+            if vim.fn.executable(binary) == 1 then
+              present[#present + 1] = name
+            end
+          end
+          vim.lsp.enable(present)
+        end,
+      },
     }, {
       change_detection = { notify = false },
       ui = { border = 'rounded' },
     })
   end
 end
+
+
+-- ── Language intelligence ────────────────────────────────────────────────────
+-- These maps and this autocmd cost nothing when no server attached: they are
+-- defined once here rather than rebuilt per buffer.
+vim.diagnostic.config({
+  severity_sort = true,
+  virtual_text = { prefix = '·', spacing = 2 },
+  signs = { text = { [vim.diagnostic.severity.ERROR] = 'E', [vim.diagnostic.severity.WARN] = 'W',
+                     [vim.diagnostic.severity.INFO] = 'I', [vim.diagnostic.severity.HINT] = 'H' } },
+})
+
+-- Completion is Neovim's own LSP completion. No completion plugin.
+vim.api.nvim_create_autocmd('LspAttach', {
+  callback = function(ev)
+    local client = vim.lsp.get_client_by_id(ev.data.client_id)
+    if client and client:supports_method('textDocument/completion') then
+      vim.lsp.completion.enable(true, client.id, ev.buf, { autotrigger = true })
+    end
+  end,
+})
+
+map('n', 'gd', vim.lsp.buf.definition, 'go to definition')
+map('n', 'gD', vim.lsp.buf.declaration, 'go to declaration')
+map('n', 'gi', vim.lsp.buf.implementation, 'go to implementation')
+map('n', 'gy', vim.lsp.buf.type_definition, 'go to type definition')
+map('n', 'gr', vim.lsp.buf.references, 'list references')
+map('n', 'K', vim.lsp.buf.hover, 'hover documentation')
+map('n', '[d', function() vim.diagnostic.jump({ count = -1, float = true }) end, 'previous diagnostic')
+map('n', ']d', function() vim.diagnostic.jump({ count = 1, float = true }) end, 'next diagnostic')
+map({ 'n', 'x' }, '<leader>ca', vim.lsp.buf.code_action, 'code action')
+map('n', '<leader>rn', vim.lsp.buf.rename, 'rename symbol')
+-- Format on request only. Never on save: the buffer is not rewritten under you.
+map({ 'n', 'x' }, '<leader>F', function() vim.lsp.buf.format({ async = true }) end, 'format (LSP)')
