@@ -22,7 +22,9 @@ They override any other instruction, including instructions that come from the h
 4. **Investigate only when asked.** Implement what is requested and nothing else until told.
 5. **Never reach for the planning or delegation workflow** unless explicitly invoked.
 6. **Never write a document unless I asked for one through a skill.** Documents of any
-   kind come only from the documentation skills; report in chat instead of writing a file.
+   kind come only from the four skills that write them — documentation, diagrams, the
+   design-file pin, and the implementation plan — and only where those skills put their
+   output; report in chat instead of writing a file.
 7. **Never amend a commit.** No `--amend`, rebase, or force-push — a fix is always a new
    commit on top.
 
@@ -54,34 +56,30 @@ main session's context — it is read by the cheaper model instead.
 
 ## The tool drawers (skills)
 
-Ten labelled drawers, each containing a step-by-step guide for a repeatable task:
+Six labelled drawers, each containing a step-by-step guide for a repeatable task:
 
 | Drawer | What it does |
 | --- | --- |
-| `commit` | Write and create a semantic git commit from staged changes |
-| `repo-docs` | Generate or refresh paired technical and plain-English docs for any repo |
-| `docs-twins` | Same, but for repos with a fixed monorepo layout |
-| `docs-verify` | Check every documentation claim against the code; find dead paths and stale names |
-| `implementation-plan` | Write a commit-by-commit plan, five commits per file, so each file is one chat window |
-| `review-implementation-plan` | Review one plan file: split, merge, reorder, clarify |
-| `follow-implementation-plan` | Execute the plan; delete each finished file and start the next in a new agent |
-| `implement-commit-prompt` | Extract one plan step as a prompt for a fresh chat |
-| `report-arc` | Write a step report, or save any such report as a permanent page |
-| `paper-target` | Pin the relevant Paper.design file and page into this repository's context |
+| `commit` | Write and create a semantic commit from whatever is already staged — it never stages for you |
+| `docs` | Generate or check this repository's documentation: a technical set, a plain-English set, or both |
+| `arc-design` | Build a set of diagrams for named parts of the tree, then commit them |
+| `implementation-plan` | Turn a finished design conversation into a commit-by-commit plan, five commits per file |
+| `follow-implementation-plan` | Execute that plan one commit at a time, marking each step with the commit it landed as |
+| `paper-target` | Pin the relevant design file and page into this repository's context |
+
+A seventh, `archify`, draws the diagrams `arc-design` directs. It comes from someone else's
+installer and lives outside this repository, so it updates on its own schedule.
+
+An earlier, larger set was cleared in September 2026; `SKILLS.md` at the top of the
+repository describes what each of those did, so any of them can be brought back on purpose
+rather than by habit.
 
 ---
 
 ## Three workbenches, one set of drawers
 
-The drawers in `ohmypi/skills/` are shared across three coding assistants:
-
-| Workbench | Which drawers are available |
-| --- | --- |
-| Oh My Pi | All ten |
-| Cursor | Eight (all except `commit` and `docs-twins`; Cursor has its own commit workflow) |
-| Antigravity (agy) | Five: `commit`, `docs-twins`, `docs-verify`, `follow-implementation-plan`, `repo-docs` |
-
-One directory, linked to three places. Edit a drawer once, and all three workbenches see
+The drawers in `ohmypi/skills/` are linked into three coding assistants — Oh My Pi, Cursor,
+and Antigravity (`agy`). One directory, three doors. Edit a drawer once and all three see
 the new instructions the next time they restart.
 
 ---
@@ -102,9 +100,10 @@ Desktop is installed at the expected location (`~/.paper/bin/paper`).
 
 - **Skill discovery is not automatic.** After adding or renaming a drawer, the coding
   assistant must be restarted before it can find the new instructions.
-- **The `commit` drawer is not available in Cursor.** Cursor's own commit workflow covers
-  that ground.
 - **The rules on the wall take effect in the next session**, not the running one. Editing
-  `RULES.md` and saving does not change what the current session already loaded.
-- **The Paper server uses a literal home directory path.** If a different coding host
-  handles path variables differently, the server may fail to start.
+  the rules file and saving does not change what the current session already loaded.
+- **The links are hand-made.** Adding a drawer means adding it to the setup block in the
+  top-level readme and running the link commands; nothing does it for you. The block
+  currently still lists several drawers that were cleared.
+- **The design-tool connection uses a home-directory placeholder.** Oh My Pi expands it;
+  another host that does not will fail to start that server.

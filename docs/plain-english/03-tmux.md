@@ -31,8 +31,9 @@ is forwarded as a literal `C-s`.
 | `C-s x` | Close this bay, immediately, no confirmation |
 | `C-s X` | Close this whole bench, immediately, no confirmation |
 
-New splits inherit the directory you are currently in. New benches (`C-s c`) always open at
-your home directory.
+New splits inherit the directory you are currently in. New benches (`C-s c`) open at the
+session's own root — the directory the session was created in, not your home directory and
+not wherever the current bay has wandered to.
 
 Benches are numbered from **1**, not 0. Closing a bench in the middle automatically closes
 the gap, so `C-s 1` always reaches the first bench.
@@ -60,7 +61,7 @@ closes with an error.
 | --- | --- |
 | `C-s r` | Rename this bench (starts from an empty prompt — nothing to delete) |
 | `C-s S` | Rename this session (same empty-prompt behaviour) |
-| `C-s c` | Open a new bench at your home directory |
+| `C-s c` | Open a new bench at the session's root directory |
 
 ---
 

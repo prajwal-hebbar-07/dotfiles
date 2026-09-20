@@ -12,9 +12,13 @@ Twin docs: a technical reading and a plain-English reading of the same area.
 
 ## Freshness
 
-docs-baseline: 0147ec0533f47d608b53b798e533efcd2127bf9f
+plain-english: on
 
-Last sweep: 2026-09-11
+docs-baseline: 425d279a0545fd400f6928631b278ea5a5cb5da9
+
+Last sweep: 2026-09-20 — plain English only (`no-arch`). The architecture pages were not
+refreshed and still read against `0147ec0`; run the docs skill with `full arch` to catch
+that surface up.
 
 ## Mapping
 
@@ -24,6 +28,8 @@ Path globs to pair numbers. A path may list several numbers.
 | --- | --- |
 | `README.md` | `01` |
 | `AGENTS.md` | `01` |
+| `SKILLS.md` | `01` |
+| `.gitignore` | `01` |
 | `zsh/**` | `02` |
 | `tmux/**` | `03` |
 | `ghostty/**` | `04` |

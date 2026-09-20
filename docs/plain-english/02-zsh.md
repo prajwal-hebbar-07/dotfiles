@@ -34,6 +34,11 @@ What each piece means:
 
 `user@host` is only shown when connected over SSH.
 
+**The top line never wraps.** If the path and branch together would run past the edge of
+the pane, the shell shows just the project directory instead of the full path; if even that
+is too wide, the front of it is clipped to a `…`. A wrapped prompt costs an extra row to
+repeat what the window title already told you, so it is not allowed to happen.
+
 ---
 
 ## The typing helpers
@@ -121,6 +126,20 @@ so they cannot drift from Pale Knight.
 | `d` | Show the last 10 directories you visited |
 | `M-c` | Pick a directory below here with the fuzzy picker |
 
+---
+
+## Starting a workspace
+
+| Command | What it does |
+| --- | --- |
+| `tn` | Start a session named after the current directory, rooted there |
+| `tn work ~/code/thing` | Same, with a name and a directory you choose |
+| `ta <name>` | Attach to an existing session |
+| `tl` | List the sessions that are running |
+
+`tn` attaches instead of complaining when a session of that name already exists, so it is
+safe to type twice. Run from inside a session, it creates the new one in the background and
+switches you to it — sessions cannot be nested inside each other.
 ---
 
 ## Node and nvm
