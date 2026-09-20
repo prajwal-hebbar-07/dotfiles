@@ -1,13 +1,18 @@
 # Documentation
 
+architecture: <on|off>
 plain-english: <on|off>
 
-Technical pages live in `docs/architecture/`. When plain-english is on,
-each numbered page has a jargon-free twin in `docs/plain-english/`.
+Technical pages live in `docs/architecture/`. Jargon-free pages live in
+`docs/plain-english/`. Each surface is independent: keep one, the other,
+or both. When both are on, the same number in each directory is a twin
+pair.
 
 | Architecture | Plain English |
 | --- | --- |
 | [`NN-<slug>.md`](architecture/NN-<slug>.md) | [`NN-<pe-slug>.md`](plain-english/NN-<pe-slug>.md) |
+
+Drop the column of any surface that is off.
 
 ## Freshness
 

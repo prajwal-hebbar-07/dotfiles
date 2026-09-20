@@ -1,7 +1,8 @@
 # generate
 
-Refresh architecture pages (and twins if on) for code that changed since
-the stored baseline. Then stage and commit per SKILL.md.
+Refresh the surfaces this repo has turned on — architecture pages,
+plain-English pages, or both — for code that changed since the stored
+baseline. Then stage and commit per SKILL.md.
 
 ## Step 1 — HEAD, pin, baseline
 
@@ -13,8 +14,9 @@ Capture that sha **now**. That is what this sweep covers. Uncommitted
 files are out of scope. If the tree is dirty, say so; do not document
 the dirty files.
 
-Read `docs/README.md`: `plain-english:`, `docs-baseline:`, `## Mapping`.
-Resolve the twins toggle per SKILL.md.
+Read `docs/README.md`: `architecture:`, `plain-english:`,
+`docs-baseline:`, `## Mapping`. Resolve **both** toggles per SKILL.md
+before writing anything. Both off → stop here.
 
 ```sh
 git diff --name-only <baseline-sha>..HEAD \
@@ -23,11 +25,11 @@ git diff --name-only <baseline-sha>..HEAD \
   ':(exclude)poetry.lock' ':(exclude)uv.lock' ':(exclude)yarn.lock'
 ```
 
-- No marker and no `docs/architecture/NN-*.md` → **bootstrap**. Full
-  sweep. There is no baseline to diff against.
+- No marker and no `docs/architecture/NN-*.md` or
+  `docs/plain-english/NN-*.md` → **bootstrap**. Full sweep. There is no
+  baseline to diff against.
 - Marker missing but pages exist → derive with
-  `git log -1 --format='%h' -- docs/architecture`, say it is a guess,
-  then diff.
+  `git log -1 --format='%h' -- docs/`, say it is a guess, then diff.
 - Diff empty and not `full` / not named numbers → docs are current.
   Stop. Do not rewrite. Do not commit.
 - User said `full` or named numbers → skip the diff; use that scope.
@@ -69,23 +71,31 @@ and stamp anyway.
 Walk the stale numbers yourself (one number at a time). Do not spawn
 `planner` / `hand`. Do not require subagents.
 
-Each number:
+Each number, read the real files at **HEAD** before writing. Then write
+only the surfaces that are on this run.
 
-- Read the real files at **HEAD** before writing.
-- Architecture: `docs/architecture/NN-<slug>.md` from
-  [architecture-template.md](architecture-template.md). Ten sections in
-  that order. Empty section = one honest line, not padding. Cite
-  repo-relative paths. Symbols beat line numbers. `[INFERENCE]` on
-  unobserved claims. Wrap at 100 columns.
-- Twins **on**: also `docs/plain-english/NN-<slug>.md`. Ordinary words.
-  Banned: framework/library names, hooks, type names, function names,
-  paths under `src/`, `internal/`, `pkg/`, `crates/`. Kept: rc files,
-  config keys, ports, names a non-engineer may edit. One metaphor,
-  held. Honest about missing tests. Roughly 60–100 lines. Opens with
-  `**Twin of:**`.
-- Twins **off**: do not write or refresh PE files.
-- `IS_NEW` on bootstrap: fill the template. Architecture slug stays the
-  area name.
+Architecture, when on — `docs/architecture/NN-<slug>.md` from
+[architecture-template.md](architecture-template.md). Ten sections in
+that order. Empty section = one honest line, not padding. Cite
+repo-relative paths. Symbols beat line numbers. `[INFERENCE]` on
+unobserved claims. Wrap at 100 columns. Omit the `> **Plain English:**`
+pointer when plain English is off — never leave a broken link.
+
+Plain English, when on — `docs/plain-english/NN-<slug>.md`. Ordinary
+words. Banned: framework/library names, hooks, type names, function
+names, paths under `src/`, `internal/`, `pkg/`, `crates/`. Kept: rc
+files, config keys, ports, names a non-engineer may edit. One metaphor,
+held. Honest about missing tests. Roughly 60–100 lines. Opens with
+`**Twin of:**` when architecture is also on, else `**Covers:**` and the
+area in plain words.
+
+Architecture off, plain English on: the plain-English page is written
+from the code, not from a missing twin. Read the same files the
+architecture page would have cited — you just do not write that page,
+and you do not name those paths in the prose.
+
+`IS_NEW` on bootstrap: fill the template. Architecture slug stays the
+area name.
 
 Delete claims that are no longer true. Keep structure and voice on
 edits.
@@ -94,15 +104,18 @@ edits.
 
 Only this generate run edits:
 
-- `docs/README.md` — area table, blurbs, `## Mapping`, `plain-english:`,
-  `docs-baseline:` under `## Freshness`
-- `docs/architecture/README.md` — document table
-- `docs/plain-english/README.md` — only if twins are on this run
+- `docs/README.md` — area table, blurbs, `## Mapping`, both toggle
+  pins, `docs-baseline:` under `## Freshness`
+- `docs/architecture/README.md` — document table; only if architecture
+  is on this run
+- `docs/plain-english/README.md` — only if plain English is on this run
 
-On bootstrap, create the indexes if missing. Seed `docs/README.md` from
-[readme-seed.md](readme-seed.md), then fill the area table and mapping.
+On bootstrap, create the indexes the live toggles call for. Seed
+`docs/README.md` from [readme-seed.md](readme-seed.md), then fill the
+area table and mapping.
 
-When twins are off, the area table is architecture-only (no PE column).
+The area table carries one column per surface that is on: both columns
+when both are on, a single column otherwise.
 
 ## Step 5 — check, then stamp
 
@@ -115,8 +128,9 @@ python3 <this-skill>/scripts/self_check.py
 
 Self-check is for when you changed the script. If you did not, skip it.
 
-If twins are on, architecture `NN-*.md` count must equal PE `NN-*.md`
-count, and each architecture file must point at its twin.
+Both surfaces on: architecture `NN-*.md` count must equal
+plain-English `NN-*.md` count, and each architecture file must point at
+its twin. One surface off: no count check, and no pointer to check.
 
 Stamp `docs-baseline:` with the sha from step 1 **only** when every
 number the diff (or the bootstrap, or `full`) required was actually
@@ -127,8 +141,9 @@ Then stage and commit per SKILL.md.
 
 ## Edge cases
 
-- Area deleted → delete architecture (and twin if it exists), drop rows,
-  retire the number.
+- Area deleted → delete whichever of the two pages exist (both, even if
+  a toggle is off this run — deleting a retired area is not writing a
+  frozen surface), drop rows, retire the number.
 - Only tests changed → usually that area's Tests section, plus a tests
   number if the map has one.
 - Standalone docs (`docs/workflow.md`, product specs) are not numbered
