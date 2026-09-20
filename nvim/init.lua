@@ -164,6 +164,20 @@ for group, spec in pairs({
   DiagnosticInfo  = { fg = c.soul },
   DiagnosticHint  = { fg = c.stone },
   DiagnosticOk    = { fg = c.green },
+
+  -- Hunk signs and the statusline segments: defined here, before the plugins
+  -- load, so gitsigns keeps these instead of inventing its own.
+  GitSignsAdd    = { fg = c.green, bg = c.void },
+  GitSignsChange = { fg = c.infection, bg = c.void },
+  GitSignsDelete = { fg = c.red, bg = c.void },
+  StatusLineHead = { fg = c.soul, bg = c.crypt },
+  StatusLineAdd  = { fg = c.green, bg = c.crypt },
+  StatusLineMod  = { fg = c.infection, bg = c.crypt },
+  StatusLineDel  = { fg = c.red, bg = c.crypt },
+  StatusLineErr  = { fg = c.red, bg = c.crypt },
+  StatusLineWarn = { fg = c.infection, bg = c.crypt },
+  StatusLineInfo = { fg = c.soul, bg = c.crypt },
+  StatusLineHint = { fg = c.stone, bg = c.crypt },
 }) do
   vim.api.nvim_set_hl(0, group, spec)
 end
@@ -281,6 +295,40 @@ if uv.fs_stat(lazypath) then
           vim.lsp.enable(present)
         end,
       },
+      {
+        'ibhagwan/fzf-lua',
+        config = function()
+          -- `fzf_colors = true` derives fzf's chrome from the highlight groups
+          -- above, so the picker is the same Pale Knight as $FZF_DEFAULT_OPTS
+          -- in the shell instead of fzf-lua's own theme. Glyphs match too.
+          require('fzf-lua').setup({
+            fzf_colors = true,
+            winopts = { border = 'rounded', preview = { border = 'rounded' } },
+            fzf_opts = {
+              ['--layout'] = 'reverse',
+              ['--info'] = 'inline-right',
+              ['--pointer'] = '❯',
+              ['--marker'] = '◆',
+              ['--scrollbar'] = '▌',
+            },
+          })
+        end,
+      },
+      {
+        'lewis6991/gitsigns.nvim',
+        config = function()
+          require('gitsigns').setup({
+            signs = {
+              add = { text = '│' },
+              change = { text = '│' },
+              delete = { text = '▁' },
+              topdelete = { text = '▔' },
+              changedelete = { text = '~' },
+              untracked = { text = '┆' },
+            },
+          })
+        end,
+      },
     }, {
       change_detection = { notify = false },
       ui = { border = 'rounded' },
@@ -321,3 +369,89 @@ map({ 'n', 'x' }, '<leader>ca', vim.lsp.buf.code_action, 'code action')
 map('n', '<leader>rn', vim.lsp.buf.rename, 'rename symbol')
 -- Format on request only. Never on save: the buffer is not rewritten under you.
 map({ 'n', 'x' }, '<leader>F', function() vim.lsp.buf.format({ async = true }) end, 'format (LSP)')
+
+
+-- ── Find and review ──────────────────────────────────────────────────────────
+-- Pickers and hunk motions resolve their plugin at call time, so a machine
+-- where the clone never happened just gets a one-line message.
+local function pick(fn)
+  return function()
+    local ok_fzf, fzf = pcall(require, 'fzf-lua')
+    if ok_fzf then
+      fzf[fn]()
+    else
+      vim.notify('fzf-lua is not installed', vim.log.levels.WARN)
+    end
+  end
+end
+
+map('n', '<leader>f', pick('files'), 'find files')
+map('n', '<leader>g', pick('live_grep'), 'grep the tree')
+map('n', '<leader>b', pick('buffers'), 'switch buffer')
+map('n', '<leader>/', pick('grep_cword'), 'grep the word under the cursor')
+
+local function hunk(direction)
+  return function()
+    -- In a diff (git difftool, nvim -d) ]c and [c are already hunk motions.
+    if vim.wo.diff then
+      return vim.cmd.normal({ direction == 'next' and ']c' or '[c', bang = true })
+    end
+    local ok_gs, gs = pcall(require, 'gitsigns')
+    if ok_gs then
+      gs.nav_hunk(direction)
+    end
+  end
+end
+
+map('n', ']c', hunk('next'), 'next git hunk')
+map('n', '[c', hunk('prev'), 'previous git hunk')
+map('n', '<leader>p', function()
+  local ok_gs, gs = pcall(require, 'gitsigns')
+  if ok_gs then
+    gs.preview_hunk()
+  end
+end, 'preview this git hunk')
+
+
+-- ── Statusline ───────────────────────────────────────────────────────────────
+-- Hand-rolled: path, branch, hunk counts, diagnostic counts, position. A
+-- statusline plugin would be a second theme to keep in step with this file.
+local severities = {
+  { vim.diagnostic.severity.ERROR, 'StatusLineErr', 'E' },
+  { vim.diagnostic.severity.WARN, 'StatusLineWarn', 'W' },
+  { vim.diagnostic.severity.INFO, 'StatusLineInfo', 'I' },
+  { vim.diagnostic.severity.HINT, 'StatusLineHint', 'H' },
+}
+
+function _G.pk_statusline()
+  local out = { '%#StatusLine# %f %m%r' }
+
+  local git = vim.b.gitsigns_status_dict
+  if git then
+    if git.head and git.head ~= '' then
+      out[#out + 1] = ('%%#StatusLineHead#  %s'):format(git.head)
+    end
+    for _, seg in ipairs({
+      { git.added, 'StatusLineAdd', '+' },
+      { git.changed, 'StatusLineMod', '~' },
+      { git.removed, 'StatusLineDel', '-' },
+    }) do
+      if (seg[1] or 0) > 0 then
+        out[#out + 1] = ('%%#%s# %s%d'):format(seg[2], seg[3], seg[1])
+      end
+    end
+  end
+
+  local counts = vim.diagnostic.count(0)
+  for _, seg in ipairs(severities) do
+    local n = counts[seg[1]] or 0
+    if n > 0 then
+      out[#out + 1] = ('%%#%s# %s%d'):format(seg[2], seg[3], n)
+    end
+  end
+
+  out[#out + 1] = '%#StatusLine#%= %l:%c  %P '
+  return table.concat(out)
+end
+
+vim.o.statusline = '%!v:lua.pk_statusline()'
