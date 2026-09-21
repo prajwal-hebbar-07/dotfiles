@@ -73,11 +73,27 @@ o.undofile = true
 
 
 -- ── Clipboard ────────────────────────────────────────────────────────────────
--- Yank goes to the macOS pasteboard via pbcopy, which works inside tmux. Over
--- SSH there is no local pasteboard to reach, so hand the bytes to the terminal
--- with OSC 52; tmux forwards it (set-clipboard on/external, the default).
+-- Neovim finds the right tool by itself when a session owns a clipboard:
+-- pbcopy on macOS, wl-copy under Wayland, xclip or xsel under X11. When none
+-- of those can reach the clipboard you are actually looking at — over SSH, or
+-- on a Linux box with no display server — hand the bytes to the terminal with
+-- OSC 52 instead; tmux forwards it (set-clipboard on/external, the default).
 o.clipboard = 'unnamedplus'
-if vim.env.SSH_TTY then
+
+local function session_clipboard()
+  if vim.fn.executable('pbcopy') == 1 then
+    return true
+  end
+  if vim.env.WAYLAND_DISPLAY and vim.fn.executable('wl-copy') == 1 then
+    return true
+  end
+  if vim.env.DISPLAY and (vim.fn.executable('xclip') == 1 or vim.fn.executable('xsel') == 1) then
+    return true
+  end
+  return false
+end
+
+if vim.env.SSH_TTY or not session_clipboard() then
   local ok, osc52 = pcall(require, 'vim.ui.clipboard.osc52')
   if ok then
     vim.g.clipboard = {
