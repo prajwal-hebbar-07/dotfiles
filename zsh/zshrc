@@ -671,7 +671,11 @@ if [[ -r "$HOME/.zshrc.local" ]]; then
   source "$HOME/.zshrc.local"
 fi
 
-# Added by Antigravity CLI installer
-export PATH="/Users/hebbar/.local/bin:$PATH"
+# Added by the Antigravity CLI installer, rewritten off /Users/hebbar: the
+# completion file only exists where that CLI is installed, and sourcing a
+# missing one made every non-Mac shell start with an error.
+path=("$HOME/.local/bin" $path)
 alias agy='command agy --dangerously-skip-permissions'
-source /Users/hebbar/.local/share/leaf/completions/_leaf
+if [[ -r "$HOME/.local/share/leaf/completions/_leaf" ]]; then
+  source "$HOME/.local/share/leaf/completions/_leaf"
+fi

@@ -1,0 +1,75 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# bash — the Linux door
+#
+# Ubuntu boxes run the coding harness, tmux, and Neovim in bash. This file is
+# that shell's share of zsh/zshrc: the editor, the tmux helpers, and git's diff
+# tool. Nothing here needs Homebrew, Ghostty, Cursor, eza, bat, or fzf, and
+# nothing here is macOS-only — the Mac keeps using zsh/zshrc.
+#
+# Source of truth: dotfiles/bash/bashrc  (~/.bashrc -> here)
+# Reload in place: exec bash
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Non-interactive shells (scp, rsync, ssh <command>) stop here.
+case $- in
+  *i*) ;;
+  *) return ;;
+esac
+
+
+# ── Environment ──────────────────────────────────────────────────────────────
+# Where this file really lives: ~/.bashrc is a symlink into the repo, so resolve
+# it and climb out of bash/ to the repo root. Never a hardcoded home directory.
+_pk_file=$(readlink -f -- "${BASH_SOURCE[0]}" 2>/dev/null) || _pk_file=${BASH_SOURCE[0]}
+_pk_root=${_pk_file%/*/*}
+
+# The harness and other user-level tools install here.
+case ":$PATH:" in
+  *":$HOME/.local/bin:"*) ;;
+  *) PATH="$HOME/.local/bin:$PATH" ;;
+esac
+export PATH
+
+export EDITOR=nvim
+export VISUAL=$EDITOR
+
+# This repo's git/config becomes the global one, so its nvimdiff difftool cannot
+# lose to whatever ~/.gitconfig already says; that file includes ~/.gitconfig
+# first, so identity still comes from the machine. Same outcome as zsh.
+if [[ -r $_pk_root/git/config ]]; then
+  export GIT_CONFIG_GLOBAL=$_pk_root/git/config
+fi
+
+unset _pk_file _pk_root
+
+# Ctrl-S is tmux's prefix, so the tty must not eat it as flow control (and
+# Ctrl-Q with it). Only meaningful on a real terminal.
+if [[ -t 0 ]]; then
+  stty -ixon 2>/dev/null
+fi
+
+
+# ── The editor ───────────────────────────────────────────────────────────────
+alias v=nvim
+alias vr='nvim -R'                        # read-only: reviewing, not editing
+alias vd='nvim -d'                        # two-file diff
+
+
+# ── tmux ─────────────────────────────────────────────────────────────────────
+alias t=tmux
+alias ta='tmux attach -t'
+alias tl='tmux list-sessions'
+
+# tn [name] [path] — create or attach a named session rooted at a directory.
+# Name defaults to the directory's basename, path to $PWD. From inside tmux the
+# new session is made detached and switched to, since sessions cannot nest.
+tn() {
+  local dir name
+  dir=$(cd -- "${2:-$PWD}" 2>/dev/null && pwd) || dir=$PWD
+  name=${1:-${dir##*/}}
+  if [[ -n $TMUX ]]; then
+    tmux new-session -dA -s "$name" -c "$dir" && tmux switch-client -t "$name"
+  else
+    tmux new-session -A -s "$name" -c "$dir"
+  fi
+}
