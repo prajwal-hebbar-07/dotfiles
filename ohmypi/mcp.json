@@ -3,8 +3,11 @@
   "mcpServers": {
     "paper": {
       "type": "stdio",
-      "command": "${HOME}/.paper/bin/paper",
-      "args": ["mcp"]
+      "command": "sh",
+      "args": [
+        "-c",
+        "p=\"$HOME/.paper/bin/paper\"; [ -x \"$p\" ] || exit 0; exec \"$p\" mcp"
+      ]
     }
   }
 }
