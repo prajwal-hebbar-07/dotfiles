@@ -1,0 +1,100 @@
+# Pale Knight — Helix theme
+#
+# Same palette as ghostty/themes/pale-knight, tmux/tmux.conf and zsh/zshrc:
+# indigo-violet ground, Palenight's own foreground, soul-cyan for the cursor,
+# six equal-weight accents. Helix reads custom themes from the `themes`
+# subdirectory of its config directory; `theme = "pale-knight"` in
+# helix/config.toml selects this one.
+
+# ── Surface ──────────────────────────────────────────────────────────────────
+"ui.background" = { bg = "background" }
+"ui.text" = { fg = "foreground" }
+"ui.text.focus" = { fg = "pale" }
+"ui.window" = { fg = "shade" }
+"ui.cursorline.primary" = { bg = "crypt" }
+
+# Block cursor is the largest solid colour on screen: normal-weight cyan.
+"ui.cursor" = { fg = "background", bg = "stone" }
+"ui.cursor.primary" = { fg = "background", bg = "cyan" }
+
+"ui.selection" = { bg = "shade" }
+"ui.selection.primary" = { fg = "pale", bg = "shade" }
+
+"ui.linenr" = { fg = "stone" }
+"ui.linenr.selected" = { fg = "foreground" }
+"ui.virtual.whitespace" = { fg = "crypt" }
+"ui.virtual.ruler" = { bg = "crypt" }
+"ui.virtual.indent-guide" = { fg = "crypt" }
+"ui.virtual.inlay-hint" = { fg = "stone" }
+
+# ── Chrome ───────────────────────────────────────────────────────────────────
+"ui.statusline" = { fg = "foreground", bg = "crypt" }
+"ui.statusline.inactive" = { fg = "stone", bg = "crypt" }
+"ui.statusline.normal" = { fg = "background", bg = "cyan" }
+"ui.statusline.insert" = { fg = "background", bg = "green" }
+"ui.statusline.select" = { fg = "background", bg = "violet" }
+"ui.bufferline" = { fg = "stone", bg = "crypt" }
+"ui.bufferline.active" = { fg = "pale", bg = "shade" }
+"ui.popup" = { fg = "foreground", bg = "crypt" }
+"ui.help" = { fg = "foreground", bg = "crypt" }
+"ui.menu" = { fg = "foreground", bg = "crypt" }
+"ui.menu.selected" = { fg = "background", bg = "cyan" }
+
+# Find highlight: muted infection on void, like the tmux message bar.
+"ui.highlight" = { bg = "shade" }
+"ui.cursor.match" = { fg = "background", bg = "yellow" }
+
+# ── Changes and diagnostics ──────────────────────────────────────────────────
+"diff.plus" = "green"
+"diff.minus" = "red"
+"diff.delta" = "yellow"
+"error" = "red"
+"warning" = "yellow"
+"info" = "blue"
+"hint" = "cyan"
+"diagnostic.error" = { underline = { color = "red", style = "curl" } }
+"diagnostic.warning" = { underline = { color = "yellow", style = "curl" } }
+"diagnostic.info" = { underline = { color = "blue", style = "curl" } }
+"diagnostic.hint" = { underline = { color = "cyan", style = "curl" } }
+
+# ── Syntax ───────────────────────────────────────────────────────────────────
+"comment" = { fg = "stone", modifiers = ["italic"] }
+"keyword" = "violet"
+"operator" = "cyan"
+"function" = "blue"
+"function.macro" = "violet"
+"type" = "yellow"
+"constructor" = "yellow"
+"constant" = "yellow"
+"constant.numeric" = "yellow"
+"constant.character.escape" = "cyan"
+"string" = "green"
+"variable" = "foreground"
+"variable.parameter" = "ash"
+"variable.other.member" = "red"
+"label" = "violet"
+"namespace" = "yellow"
+"punctuation" = "ash"
+"attribute" = "violet"
+"tag" = "red"
+"markup.heading" = { fg = "violet", modifiers = ["bold"] }
+"markup.bold" = { modifiers = ["bold"] }
+"markup.italic" = { modifiers = ["italic"] }
+"markup.link.url" = { fg = "cyan", modifiers = ["underlined"] }
+"markup.link.text" = "blue"
+"markup.raw" = "green"
+
+[palette]
+background = "#0f111a"
+crypt = "#32334a"
+shade = "#444364"
+stone = "#696e93"
+ash = "#9297ba"
+foreground = "#a6accd"
+pale = "#d4d7f1"
+red = "#da8c8d"
+green = "#91b171"
+yellow = "#c39e5c"
+blue = "#86a4e1"
+violet = "#ba92d5"
+cyan = "#5cb1d2"
