@@ -19,3 +19,22 @@ color-modes = true
 [editor.file-picker]
 # false means hidden files are listed.
 hidden = false
+
+# Leader, matching the Neovim one. Space f, Space b, Space ?, and Ctrl-w
+# window mode stay Helix's own.
+[keys.normal]
+K = "hover"
+
+[keys.normal.space]
+w = ":write"
+q = ":quit"
+x = ":write-quit-all"
+g = "global_search"
+G = "changed_file_picker"
+F = ":format"
+
+[keys.normal."]"]
+c = "goto_next_change"
+
+[keys.normal."["]
+c = "goto_prev_change"
