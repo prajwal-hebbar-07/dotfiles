@@ -63,7 +63,7 @@ export HOMEBREW_NO_ENV_HINTS=1
 typeset -U path fpath PATH FPATH          # no duplicate entries, ever
 path=("$HOME/.local/bin" $path)
 
-export EDITOR=nvim
+export EDITOR=hx
 export VISUAL=$EDITOR
 export PAGER=less
 export LESS='-R -F -i -M --mouse'         # keep colour, quit if it all fits
@@ -609,9 +609,7 @@ alias zshrc='${=EDITOR} ~/.zshrc'
 
 # The editor. `fc` is the graphical IDE, opt-in — it shadows zsh's history
 # builtin, which is still reachable as `builtin fc`.
-alias v=nvim
-alias vr='nvim -R'                        # read-only: reviewing, not editing
-alias vd='nvim -d'                        # two-file diff
+alias v=hx
 alias fc='cursor --wait'
 
 alias g=git
