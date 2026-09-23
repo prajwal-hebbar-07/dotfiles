@@ -6,12 +6,13 @@
 local M = {}
 
 M.base46 = {
-	theme = "onedark",
+	-- lua/base46/themes/pale-knight.lua — the workshop palette.
+	theme = "pale-knight",
 
-	-- hl_override = {
-	-- 	Comment = { italic = true },
-	-- 	["@comment"] = { italic = true },
-	-- },
+	hl_override = {
+		Comment = { italic = true },
+		["@comment"] = { italic = true },
+	},
 }
 
 -- M.nvdash = { load_on_startup = true }
