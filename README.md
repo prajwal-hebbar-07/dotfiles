@@ -438,7 +438,15 @@ dotfiles/
 ## Setup
 
 No install script exists yet. Each tool's files are symlinked into the location
-that tool expects on this machine (macOS, Apple silicon).
+that tool expects. Two kinds of machine use this repo, and they take different
+slices of it:
+
+- **macOS (Apple silicon)** — the whole workshop: Ghostty, zsh, tmux, Neovim,
+  Oh My Pi, Cursor, Gemini.
+- **Ubuntu server** — bash, tmux, Neovim, git, and the Oh My Pi skills that
+  need nothing Mac-only. Ghostty, zsh, Cursor, Gemini and their links stay out.
+
+### macOS
 
 The shell depends on Homebrew packages. Nothing in `zsh/zshrc` breaks without
 them — every block is guarded — but the shell is only itself with all of them:
@@ -516,6 +524,60 @@ ln -sfn "$PWD/ohmypi/skills/docs-verify" ~/.gemini/config/skills/docs-verify
 ln -sfn "$PWD/ohmypi/skills/follow-implementation-plan" ~/.gemini/config/skills/follow-implementation-plan
 ln -sfn "$PWD/ohmypi/skills/repo-docs" ~/.gemini/config/skills/repo-docs
 ```
+
+### Ubuntu server
+
+A headless box reached over ssh (Tailscale) from the Mac. It runs the coding
+harness, tmux and Neovim in bash — `bash/bashrc` is that shell's share of
+`zsh/zshrc` and needs no Homebrew, Ghostty, eza, bat or fzf. Nothing under
+`ghostty/`, `zsh/`, or the Cursor and Gemini link lists above belongs here.
+
+Packages, all from apt:
+
+```sh
+sudo apt install git tmux neovim ripgrep build-essential
+```
+
+`build-essential` is for Treesitter — `nvim/init.lua` compiles its parsers with
+`cc` on first launch and silently falls back to plain syntax colour without it.
+The harness itself installs to `~/.local/bin` with `curl -fsSL https://omp.sh/install | sh`.
+
+Links — only the Linux slice:
+
+```sh
+ln -sfn "$PWD/bash/bashrc"     ~/.bashrc
+mkdir -p ~/.config/tmux ~/.config/nvim ~/.omp/agent/skills ~/.omp/agent/agents
+ln -sfn "$PWD/tmux/tmux.conf"  ~/.config/tmux/tmux.conf
+ln -sfn "$PWD/nvim/init.lua"      ~/.config/nvim/init.lua
+ln -sfn "$PWD/nvim/lazy-lock.json" ~/.config/nvim/lazy-lock.json
+ln -sfn "$PWD/ohmypi/skills/commit"                     ~/.omp/agent/skills/commit
+ln -sfn "$PWD/ohmypi/skills/docs"                       ~/.omp/agent/skills/docs
+ln -sfn "$PWD/ohmypi/skills/implementation-plan"        ~/.omp/agent/skills/implementation-plan
+ln -sfn "$PWD/ohmypi/skills/follow-implementation-plan" ~/.omp/agent/skills/follow-implementation-plan
+ln -sfn "$PWD/ohmypi/agents/committer.md" ~/.omp/agent/agents/committer.md
+ln -sfn "$PWD/ohmypi/mcp.json"            ~/.omp/agent/mcp.json
+ln -sfn "$PWD/ohmypi/RULES.md"            ~/.omp/agent/RULES.md
+```
+
+Not linked on purpose: `paper-target` (Paper is a Mac app; `mcp.json` already
+exits quietly when `~/.paper/bin/paper` is absent) and `arc-design` (needs
+`archify` via `npx`, and there is no Node here). `git/config` needs no link —
+`bash/bashrc` points `GIT_CONFIG_GLOBAL` at it, and it includes `~/.gitconfig`
+for the machine's identity.
+
+**Ghostty over ssh.** Ghostty sets `TERM=xterm-ghostty`, and ssh forwards it.
+A stock Ubuntu has no terminfo entry by that name, so tmux, nvim, less and
+`clear` all fail with `'xterm-ghostty': unknown terminal type`. `bash/bashrc`
+falls back to `xterm-256color` whenever `infocmp "$TERM"` fails, which is
+enough. To have the real entry instead (keeps Ghostty's own capabilities), run
+once from the Mac:
+
+```sh
+infocmp -x xterm-ghostty | ssh <server> -- tic -x -
+```
+
+Ghostty can also do this on every connection by itself with
+`shell-integration-features = ssh-terminfo` in `ghostty/config`.
 
 Marketplace plugins live outside this repo, in `~/.omp/plugins`; ponytail is
 reinstalled on a new machine with:
