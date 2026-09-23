@@ -1,0 +1,21 @@
+[editor]
+line-number = "absolute"
+mouse = true
+true-color = true
+cursorline = true
+bufferline = "multiple"
+# A prefix that waits for another key lists the keys that follow.
+auto-info = true
+
+[editor.cursor-shape]
+normal = "block"
+insert = "bar"
+select = "underline"
+
+[editor.statusline]
+# Paint the status line in the mode's colour.
+color-modes = true
+
+[editor.file-picker]
+# false means hidden files are listed.
+hidden = false
