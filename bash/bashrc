@@ -6,6 +6,12 @@
 # tool. Nothing here needs Homebrew, Ghostty, Cursor, eza, bat, or fzf, and
 # nothing here is macOS-only — the Mac keeps using zsh/zshrc.
 #
+# The palette is Pale Knight, the same one zsh/zshrc, tmux/tmux.conf, and
+# ghostty/themes/pale-knight already use — truecolour hexes straight from that
+# palette, so what ssh shows is exactly what the Mac sees. Everything colour
+# sits behind an interactive-shell guard, and the whole block is skipped by
+# pipes and non-interactive shells.
+#
 # Source of truth: dotfiles/bash/bashrc  (~/.bashrc -> here)
 # Reload in place: exec bash
 # ─────────────────────────────────────────────────────────────────────────────
@@ -42,10 +48,123 @@ fi
 
 unset _pk_file _pk_root
 
+# The parts of Ubuntu's stock ~/.bashrc worth keeping now that this file
+# replaces it: /etc/bash.bashrc sets the prompt, but leaves completion off.
+HISTCONTROL=ignoreboth                    # drop duplicates and space-prefixed
+shopt -s histappend checkwinsize
+if ! shopt -oq posix; then
+  if [[ -f /usr/share/bash-completion/bash_completion ]]; then
+    . /usr/share/bash-completion/bash_completion
+  elif [[ -f /etc/bash_completion ]]; then
+    . /etc/bash_completion
+  fi
+fi
+
 # Ctrl-S is tmux's prefix, so the tty must not eat it as flow control (and
 # Ctrl-Q with it). Only meaningful on a real terminal.
 if [[ -t 0 ]]; then
   stty -ixon 2>/dev/null
+fi
+
+# Ghostty on the Mac announces itself as TERM=xterm-ghostty, and ssh carries
+# that over. Until this box has that terminfo entry (see README: "Ubuntu
+# server"), everything curses-based — tmux, nvim, less, clear — refuses the
+# terminal ("unknown terminal type"). Fall back to plain xterm-256color, which
+# every Ubuntu ships and which Ghostty answers to perfectly well.
+if [[ -n $TERM ]] && command -v infocmp >/dev/null 2>&1 \
+   && ! infocmp "$TERM" >/dev/null 2>&1; then
+  export TERM=xterm-256color
+fi
+
+
+# ── Colours ──────────────────────────────────────────────────────────────────
+# Pale Knight, the same palette zsh/zshrc uses: truecolour hexes, not ANSI
+# slots, so what ssh shows is exactly what the Mac sees. Ghostty answers
+# truecolour over ssh and tmux passes it through (terminal-features RGB), so
+# nothing here has to guess. The whole block is skipped in non-interactive
+# shells (scp, rsync) — where colours are noise — and every --color flag is
+# auto, so pipes stay plain.
+
+# soul      #5cb1d2  focus and life — the prompt marks, the clean-branch marker
+# lifeblood #86a4e1  secondary accent — the path, executables
+# infection #c39e5c  warnings — a dirty branch, a failed status, grep matches
+# essence   #ba92d5  quiet metadata — branch names, symlinks, media
+# bone      #a6accd  body text — regular files
+# stone     #696e93  dim text — separators, logs
+if [[ $- == *i* ]]; then
+  __pk_soul=$'\e[38;2;92;177;210m'
+  __pk_lifeblood=$'\e[38;2;134;164;225m'
+  __pk_infection=$'\e[38;2;195;158;92m'
+  __pk_essence=$'\e[38;2;186;146;213m'
+  __pk_bone=$'\e[38;2;166;172;205m'
+  __pk_stone=$'\e[38;2;105;110;147m'
+  __pk_reset=$'\e[0m'
+
+  # ── Prompt ─────────────────────────────────────────────────────────────────
+  # ◆ ~/dotfiles on main ● ❯   — zsh's prompt, minus the second line and the
+  # timing. Every escape code is wrapped in \[ \] — and only escape codes —
+  # because readline must not count their bytes against the line length, or
+  # long lines smear.
+  __pk_git_segment() {
+    local b
+    b=$(git symbolic-ref --quiet --short HEAD 2>/dev/null) \
+      || b=$(git describe --tags --exact-match 2>/dev/null) \
+      || b=$(git rev-parse --short HEAD 2>/dev/null) || return 0
+    printf '\[%s\] on \[%s\]%s\[%s\]' \
+      "$__pk_stone" "$__pk_essence" "$b" "$__pk_reset"
+    if [[ -n $(git status --porcelain=v1 2>/dev/null | head -n1) ]]; then
+      printf '\[%s\]●\[%s\]' "$__pk_infection" "$__pk_reset"
+    fi
+  }
+
+  # $? has to be captured before anything else in here overwrites it.
+  __pk_prompt() {
+    local status=$?
+    local git=''
+    git=$(__pk_git_segment)
+    local status_mark=''
+    (( status )) && status_mark=" \[${__pk_infection}\]× ${status}\[${__pk_reset}\]"
+    PS1="\[${__pk_soul}\]◆\[${__pk_reset}\] \[${__pk_lifeblood}\]\w\[${__pk_reset}\]"
+    PS1+="${git:+ ${git}}${status_mark}"
+    PS1+="\n\[${__pk_soul}\]❯\[${__pk_reset}\] "
+  }
+  PROMPT_COMMAND=__pk_prompt
+
+  # ── ls ─────────────────────────────────────────────────────────────────────
+  # The same LS_COLORS the zsh side builds, translated to bash string form.
+  # One palette, two shells: directories soul, symlinks essence, archives and
+  # broken links infection, executables and configs lifeblood, noise stone.
+  export LS_COLORS="\
+di=38;2;92;177;210:ln=38;2;186;146;213:or=01;38;2;195;158;92:\
+ex=01;38;2;134;164;225:fi=38;2;166;172;205:\
+pi=38;2;105;110;147:so=38;2;186;146;213:bd=38;2;105;110;147:cd=38;2;105;110;147:\
+su=38;2;38;40;59;48;2;195;158;92:sg=38;2;38;40;59;48;2;195;158;92:\
+tw=01;38;2;92;177;210:ow=01;38;2;92;177;210:\
+*.zip=38;2;195;158;92:*.tar=38;2;195;158;92:*.gz=38;2;195;158;92:\
+*.tgz=38;2;195;158;92:*.bz2=38;2;195;158;92:*.xz=38;2;195;158;92:\
+*.zst=38;2;195;158;92:*.7z=38;2;195;158;92:*.rar=38;2;195;158;92:\
+*.png=38;2;186;146;213:*.jpg=38;2;186;146;213:*.jpeg=38;2;186;146;213:\
+*.gif=38;2;186;146;213:*.svg=38;2;186;146;213:*.webp=38;2;186;146;213:\
+*.mp4=38;2;186;146;213:*.mov=38;2;186;146;213:*.mp3=38;2;186;146;213:\
+*.pdf=38;2;186;146;213:\
+*.json=38;2;134;164;225:*.toml=38;2;134;164;225:*.yaml=38;2;134;164;225:\
+*.yml=38;2;134;164;225:*.ini=38;2;134;164;225:*.conf=38;2;134;164;225:\
+*.md=38;2;134;164;225:*.txt=38;2;134;164;225:\
+*.lock=38;2;105;110;147:*.log=38;2;105;110;147:*.bak=38;2;105;110;147:\
+*.tmp=38;2;105;110;147"
+
+  # grep — the match itself in infection-amber; --color=auto stays quiet in pipes.
+  alias grep='grep --color=auto'
+  export GREP_COLORS='ms=38;2;195;158;92'
+
+  # diff — removed lines lifeblood, added lines infection, like git's own
+  # Pale Knight diffs.
+  alias diff='diff --color=auto'
+
+  # less — keep ANSI colour through the pager (git log, man, ripgrep), and
+  # quit at once when everything fits on one screen.
+  export LESS='-R -F -i -M'
+  export PAGER=less
 fi
 
 
@@ -71,3 +190,6 @@ tn() {
     tmux new-session -A -s "$name" -c "$dir"
   fi
 }
+
+# opencode
+export PATH=/home/chaotic-thoughts/.opencode/bin:$PATH
