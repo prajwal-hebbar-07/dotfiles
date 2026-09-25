@@ -8,8 +8,8 @@ description: >
   follow-implementation-plan. Use when the user asks to review the plan,
   "Opus review", "update the plan before implementing", or invokes
   /review-implementation-plan or /skill:review-implementation-plan. Do not
-  use when the user asks to implement the plan. One plan file per chat (at
-  most five steps).
+  use when the user asks to implement the plan. Reviews every numbered
+  plan file in order (01.md, 02.md, …), one after the other.
 argument-hint: "[path to plan file or directory]"
 ---
 
@@ -30,14 +30,13 @@ you, in a later session — still chooses internals.
 
 1. This skill, and the plan shape in
    [../implementation-plan/template.md](../implementation-plan/template.md).
-2. The plan. Explicit path wins: a `.md` file is the file to review; a
-   directory means its numbered `NN.md` files. Default
-   `docs/implementation-plan/`. Review the first file that still has a
-   `### N.` step with no `**Landed:**` line. Missing → ask. Stop.
-   Review **one file per chat**. Neighboring files: read their index
-   tables only, not their Prompt bodies.
-3. Every file under `docs/` except `docs/plain-english/` and except other
-   files in the plan directory (tables of neighbors excepted).
+2. The plan. Explicit path wins: a `.md` file means review only that file;
+   a directory means all its numbered `NN.md` files. Default
+   `docs/implementation-plan/`. Missing or no `NN.md` files → ask. Stop.
+   The queue is every `NN.md` in numeric order, skipping files where every
+   `### N.` step already has `**Landed:**`.
+3. Every file under `docs/` except `docs/plain-english/` and except the
+   plan directory.
 4. `git log --oneline -20` and a quick look at the tree, so steps start from
    what is actually there.
 
@@ -115,8 +114,7 @@ Work through this list. Edit the plan in place when you find a hit.
 
 - Do not implement, scaffold, or "just start step 1".
 - Do not edit anything except the plan files. No app source, no tests, no
-  other `docs/` files. Do not load other files' Prompt bodies into this
-  chat.
+  other `docs/` files.
 - Do not stage or commit plan files. They are gitignored scratch.
 - Do not touch a step that has `**Landed:**`: no renumber, no rewording,
   no moving it between files. Do not write `**Landed:**` yourself.
@@ -143,24 +141,39 @@ Number the questions. Wait. Then edit.
 Non-blocking: pick the plan's default (or what is already in the repo), state
 it in the changelog, still finish the review.
 
+## Walk the files
+
+Review the queue one file at a time, in order:
+
+1. Read the current file in full. Run **What to challenge** on it and edit
+   it in place.
+2. Check the seams with the files already reviewed: nothing depends on a
+   later file, **Previous** / **Next** point at the right siblings, step
+   numbers stay global and contiguous.
+3. Note the file's changelog, then move to the next file in the queue. Do
+   not wait for the user between files.
+
+A blocking question stops the walk at the current file. Report the files
+already reviewed, ask, and resume from that file after the answer.
+
 ## Write
 
-Update this file in place. If a split or merge overflows five steps, write
+Edit each file in place. If a split or merge overflows five steps, move
 the overflow into the next numbered file (creating or shifting later files
-as needed) and say so. Renumber only steps with no `**Landed:**`, and say
-so. If you cannot write, emit each updated file in its own markdown fence
-labelled with its path and say they still need to be saved.
+as needed); it is reviewed when the walk reaches it. Renumber only steps
+with no `**Landed:**`, and say so. If you cannot write, emit each updated
+file in its own markdown fence labelled with its path and say they still
+need to be saved.
 
-## After writing — in chat, not in the plan
+## After the walk — in chat, not in the plan
 
-1. **Changelog** — one bullet per edit: split, merge, reorder, unlocked a
-   false lock, stripped how-to, added a missing outcome. Changed nothing →
-   say so and why it was already sound.
+1. **Changelog** — per file, one bullet per edit: split, merge, reorder,
+   unlocked a false lock, stripped how-to, added a missing outcome, moved
+   steps between files. A file with no edits → say so and why it was
+   already sound.
 2. **Still open** — anything the implementer must decide, in one list.
    These are how-questions, not missing product.
-3. **Ready** — whether this file can be executed as-is. If not, what is
+3. **Ready** — per file, whether it can be executed as-is. If not, what is
    left. Ready is not permission to code.
-4. **Next file** — if another file remains unreviewed, name it and tell the
-   user to review it in a new chat. Do not open it here.
-5. **Stop.** Do not start step 1. Do not offer to start it. Do not run
+4. **Stop.** Do not start step 1. Do not offer to start it. Do not run
    `follow-implementation-plan`. Implementation needs a later, explicit ask.

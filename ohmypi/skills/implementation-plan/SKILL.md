@@ -144,7 +144,7 @@ change, do not commit.
    runs the current file; finished files are deleted; the next file starts
    in a new agent with empty history. They do not name `02.md`.
 3. Review is **optional**. If they want a second model on the plan, they
-   invoke `review-implementation-plan` themselves, one file per chat,
-   **before** follow. This skill does not require review and does not
-   start it.
+   invoke `review-implementation-plan` themselves **before** follow; it
+   reviews every plan file in order. This skill does not require review
+   and does not start it.
 4. This skill does not start step 1.

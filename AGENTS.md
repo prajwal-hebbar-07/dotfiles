@@ -11,8 +11,8 @@ Skills live under `ohmypi/skills/<name>/SKILL.md`, linked into
 - `paper-target` — pins the Paper file/page this repo's design work reads from.
 - `implementation-plan` — turns a finished design chat into commit-by-commit
   plan files of at most five steps each.
-- `review-implementation-plan` — a second model edits one plan file's
-  sequence and outcomes before follow; never implements.
+- `review-implementation-plan` — a second model reviews every plan file in
+  order, editing sequence and outcomes before follow; never implements.
 - `follow-implementation-plan` — implements the next unfinished plan step,
   commits via `commit`, stamps `Landed:<sha>`, chains the next file.
 - `arc-design` — directs `archify` to build a diagram set (overview + one per
