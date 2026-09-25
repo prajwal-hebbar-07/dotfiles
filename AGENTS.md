@@ -20,9 +20,8 @@ Skills live under `ohmypi/skills/<name>/SKILL.md`, linked into
 - `docs` — generate or verify architecture and/or plain-English docs
   (each surface pinned per repo in `docs/README.md`), then commit via
   `commit`.
-- `sync-lyik-docs` — mirrors `lyik_forms_v3/docs/{architecture,plain-english}`
-  into `lyik_docs/docs/lyik_enterprise/design/`, bumps its sync line, then
-  commits there via `commit`.
+- `sync-lyik-docs` — copies `lyik_forms_v3/docs/architecture/` into
+  `lyik_docs/docs/lyik_enterprise/design/architecture/`. No checks, no commit.
 
 `archify` (third-party, tt-a1i/archify) is **not** vendored here. Install it
 with `npx skills add tt-a1i/archify -g`; it lands in `~/.agents/skills/archify`
