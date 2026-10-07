@@ -1,12 +1,12 @@
 ---
 name: follow-implementation-plan
 description: >
-  Implements the next unfinished step of an implementation plan as code,
-  stages only that step's files, commits through the commit skill (no
-  subject), stamps Landed:<sha> on the step, then continues in this file.
-  When every step in the file has Landed, deletes that file and starts the
-  next remaining file in a new agent with empty history. Use only when the
-  user explicitly asks to implement, execute, or follow the plan as code,
+  Implements the next unfinished window of an implementation plan as code,
+  at most five commits. Stages only that step's non-markdown files, commits
+  through the commit skill (no subject), stamps Landed:<sha> on the step,
+  then continues in the same window. When the window is done, starts the
+  next window in a new chat with empty history. Use only when the user
+  explicitly asks to implement, execute, or follow the plan as code,
   "implement this doc", "next step", or /follow-implementation-plan. Do not
   use when the user asks to review, write, update, or look at the plan.
 argument-hint: "[path to plan file or directory]"
@@ -15,8 +15,9 @@ argument-hint: "[path to plan file or directory]"
 # Follow implementation plan
 
 Follow **every step exactly**, in order. The plan is the contract. One
-invoke runs every remaining step **in the current file**. You do not wait
-for the user to name the next file.
+invoke runs the current window only: at most five commits. You do not wait
+for the user to name the next window. When the window is done, a new chat
+starts automatically.
 
 ## This turn must be an implement ask
 
@@ -38,39 +39,57 @@ Wait for a later message that asks to implement.
 
 ## Find the plan
 
-Explicit path wins: a `.md` file is the current file; a directory means
-the numbered `NN.md` files in it.
+Explicit path wins. A `.md` file is the plan. A directory means `plan.md`
+in that directory.
 
-Else `docs/implementation-plan/` numbered `NN.md` files, sorted.
-If missing, ask. Stop. Do not search legacy single-file plan paths.
+Else `docs/implementation-plan/plan.md`.
 
-The current file is the first of those files that still has a step with
-no `**Landed:**` line. Read **that file only**.
+If that file is missing and numbered `NN.md` files are there, those are an
+older plan. Treat the first file that still has a step with no
+`**Landed:**` as the current window. When that file is done, delete it (do
+not `git add` the deletion) and start the next file in a new chat. Do not
+merge them into `plan.md` while implementing.
+
+If nothing is there, ask. Stop.
+
+Read **the plan file**. On `plan.md`, the current window is the first
+`## Window` that still has a `### N.` step with no `**Landed:**` line.
+Implement only that window. Do not start the next `## Window` in this chat.
 
 Also read every file under `docs/` except `docs/plain-english/` and except
-other files in the plan directory.
+other files in the plan directory. Read them. Do not edit them.
 
-## Never touch documentation
+## Never touch markdown
 
-Implementing a step never writes, refreshes, or edits documentation. That
-includes `docs/` of every kind, README files, and agent memory documents —
-`AGENTS.md`, `CLAUDE.md`, `.cursor/rules/`, and any other memory or rules
-file. Not a line, not a "while I am here", not because a step's change
-makes a doc stale. Docs are a later, deliberate pass the user runs.
+Implementing a step never creates, edits, or deletes a markdown document.
+That includes `docs/` of every kind, README files, changelogs, ADRs, and
+agent memory documents — `AGENTS.md`, `CLAUDE.md`, `.cursor/rules/`, and
+any other `.md` file. Not a line, not a "while I am here", not because a
+step's change makes a document stale. Docs are a later, deliberate pass
+the user runs.
 
-Read them as source of truth; leave them exactly as they are. If a step's
-plan text asks for a documentation edit, skip that part, say so in one
-line, and continue. The only files this skill edits outside the step's
-code are the current plan file, to stamp `**Landed:**` or record drift.
+The git commit contains no `.md` file. Do not `git add` one.
+
+The only write allowed on the plan file is `**Landed:** \`<sha>\`` on the
+step you just committed. That stamp is not part of the commit. Do not
+redesign the plan. Do not stage the plan file.
+
+If a step's plan text asks for a markdown edit, skip that part, say so in
+one line, and continue. If you already changed a markdown file other than
+the `**Landed:**` stamp, restore that file before you commit and say so.
+Do not restore a markdown file that was already dirty when you started.
 
 ## Find the next step
 
-The next step is the first `### N.` in **this file** with no
+The next step is the first `### N.` **in the current window** with no
 `**Landed:** \`<sha>\`` line. Do not grep `git log` for a planned subject.
 The **commit** skill invents the git message from the staged diff.
 
-If an earlier step's work is not in the tree — including a previous file's
-last step — stop. Do not skip it. Do not start a later one.
+If the current window contains more than five steps, **stop**. Say so. Do
+not implement a sixth.
+
+If an earlier step's work is not in the tree — including an earlier
+window's last step — stop. Do not skip it. Do not start a later one.
 
 ## Implement that step only
 
@@ -78,10 +97,9 @@ Use that step's **Prompt**, **Done when**, **Must not start**, and any
 **Locked decisions** that apply. Follow them exactly: do not drop an
 outcome, do not add the next step, do not reorder.
 
-You choose how. If a better how would change later steps **in this file**,
-update this plan first, then continue this step. If it would change a
-later plan file, **stop and ask**. Do not silently drift. Do not read
-other plan files.
+You choose how. The how must not touch a markdown document. If a better
+how would change a later step, **stop and ask**. Do not edit the plan to
+redesign it. Do not silently drift.
 
 ## Gates
 
@@ -105,61 +123,68 @@ When **Done when** passes, the step is not finished until its commit
 exists and `**Landed:**` is on the step. Do not stop because commit could
 not run.
 
-1. `git add` **only** the files this step created or changed. Leave
-   unrelated dirty files unstaged. Do not stage plan files; they are
-   gitignored. Do not `git add -A`.
+1. `git add` **only** the non-markdown files this step created or changed.
+   Leave unrelated dirty files unstaged. Do not stage any `.md` file. Do
+   not stage the plan. Do not `git add -A`.
 2. If the index already contains files this step did not change: **stop**.
    Relay that. Do not unstage the user's other work. Do not commit a mixed
    index. Do not start the next step.
-3. Run the **commit** skill. Do not pass a subject. Do not `git commit`
+3. If the index contains a markdown file: **stop**. Relay that. Do not
+   commit it.
+4. Run the **commit** skill. Do not pass a subject. Do not `git commit`
    yourself. Do not draft the message.
-4. If commit reports nothing staged: you failed to add. Add this step's
-   files and run commit **once** more. That is not a reason to end the plan.
-   If it is still empty after that, stop and relay.
-5. If identity is missing or a pre-commit hook fails: **stop**. Relay that.
+5. If commit reports nothing staged: you failed to add. Add this step's
+   non-markdown files and run commit **once** more. That is not a reason to
+   end the plan. If it is still empty after that, stop and relay.
+6. If identity is missing or a pre-commit hook fails: **stop**. Relay that.
    Do not start the next step. Do not `--no-verify`.
-6. When commit returns a SHA, write `**Landed:** \`<sha>\`` on this step
+7. When commit returns a SHA, write `**Landed:** \`<sha>\`` on this step
    in the plan file (next to the step heading, not in git). Emit the step
-   report (below), then take the **next** unfinished step **in this file**.
-   Keep going until this file is done or a step cannot finish.
-7. When every step in this file has `**Landed:**`: **delete this file**.
-   Do not `git add` the deletion. If the plan directory is empty, remove
-   it. Then **chain** (below). Do not ask the user to run the next file.
+   report (below), then take the **next** unfinished step **in this
+   window**. Keep going until this window is done or a step cannot finish.
+8. When every step in this window has `**Landed:**`, **chain** (below). Do
+   not ask the user to start the next window. Do not delete `plan.md`
+   between windows. On an older `NN.md` plan, delete that finished file
+   instead (do not `git add` the deletion), then chain. If the plan
+   directory is empty after that deletion, remove it.
 
-## Chain the next file
+## Chain the next window
 
-After a finished file is deleted:
+After the current window is done:
 
-- If no plan files remain: stop. The plan is done.
-- If numbered files remain: you **must** start a **new agent**. This
-  agent's context already holds this file's work. Continuing here fills
+- If no unfinished window remains: delete `plan.md` if it is still there.
+  Do not `git add` the deletion. If the plan directory is empty, remove
+  it. Stop. The plan is done.
+- If a later window remains: you **must** start a **new chat**. This
+  chat's context already holds this window's work. Continuing here fills
   the window. That is a bug.
 
 How to start it — same prompt on every host, empty history, then this
 agent stops implementing:
 
-Prompt (implement ask, nothing else — no diffs, no reports, no deleted
-file, no this chat):
+Prompt (implement ask, nothing else — no diffs, no reports, no this chat):
 
 Follow the implementation plan. This message is an implement ask.
-Read the follow-implementation-plan skill and execute it on the
-remaining files in docs/implementation-plan/. Do not wait for the
-user.
+Read the follow-implementation-plan skill and execute the next window
+of docs/implementation-plan/plan.md. This chat has empty history. Do
+not wait for the user. Stop after that window and start another new
+chat if a further window remains.
+
+On an older `NN.md` plan, name the plan directory instead of `plan.md`.
 
 - **Cursor:** new Task / subagent, `generalPurpose`, background. Do not
   resume. Do not self-fork.
 - **Oh My Pi (omp):** `task` tool, agent `task` (never `planner` or
-  `hand`). Batch: a one-line `context` ("Empty history. Follow the
-  remaining implementation plan.") plus one item with that prompt as
+  `hand`). Batch: a one-line `context` ("Empty history. Follow the next
+  window of the implementation plan.") plus one item with that prompt as
   `task`. Do **not** set `isolated` — commits must land in this repo.
   Child sessions do not inherit this conversation.
 
 Then **stop implementing in this agent**. One line in the report: next
-file chained in a new agent. Do not read the next file. Do not take its
-first step.
+window started in a new chat. Do not take the next window's first step.
 
-If you cannot start a new agent (`task` missing, recursion cap, unknown
-host): **stop**. Name the remaining file. Do **not** continue it here.
+If you cannot start a new chat (`task` missing, recursion cap, unknown
+host): **stop**. Name the next window. Do **not** continue it here.
 
 ## Report
 
@@ -182,40 +207,45 @@ Do not write `docs/reports/`. Chat only.
 **Left unstaged**
 - <paths this step did not own, or `none`>
 
+**Markdown**
+- no markdown document created, edited, or deleted
+
 **Verification**
 - <commands you ran, and the result>
 - Gate vs parent: <unchanged error set → met | this step added N | skipped, host rule>
 
 **Next**
-Step N+1 — <concern>. Or: stopped — <identity | hook | mixed index | this step added failures>.
-Or: next file chained in a new agent. Or: plan done.
+Step N+1 — <concern>. Or: stopped — <identity | hook | mixed index | markdown in the index | this step added failures>.
+Or: next window started in a new chat. Or: plan done.
 ```
 
 Unknown cells say "unknown". No "your call". A report is not permission to
-skip the next step.
+skip the next step. If the **Markdown** line is not true, the step is not
+done: restore the markdown, say so, and do not stamp `**Landed:**`.
 
 ## Never
 
 - Skip, merge, or reorder steps
 - Several steps in one uncommitted change
+- More than the current window (five commits) in this chat
 - `git commit` yourself while the `commit` skill can run
 - Pass a subject to commit
 - Grep `git log` for a planned subject to decide if a step landed
 - Stop the plan because nothing was staged (retry add + commit once)
 - Commit when the index already holds files this step did not change
+- Commit a markdown file
 - Unstage the user's other work
 - Stop the plan because a gate was already red at HEAD
 - Pause to fix baseline errors that this step did not add
-- Rewrite a later plan file while implementing
+- Rewrite the plan while implementing, except the `**Landed:**` stamp
 - Implement because a review in this chat just finished
-- Write, refresh, or edit documentation (`docs/architecture/`,
-  `docs/plain-english/`, area docs, README docs) or agent memory documents
-  (`AGENTS.md`, `CLAUDE.md`, `.cursor/rules/`)
-- Wait for the user to name `02.md`
-- Read other files in the plan directory besides the current one
-- Stage or commit plan files
-- Continue the next plan file in this same agent
-- Resume or self-fork this conversation into the next file
-- Pass this chat's history, diffs, or a finished plan file into the next agent
+- Create, edit, or delete a markdown document (`docs/`, README,
+  changelog, ADR, `AGENTS.md`, `CLAUDE.md`, `.cursor/rules/`, any other
+  `.md`)
+- Wait for the user to name the next window
+- Stage or commit the plan file
+- Continue the next window in this same chat
+- Resume or self-fork this conversation into the next window
+- Pass this chat's history, diffs, or a finished window into the next chat
 - Use omp `planner` or `hand` for the chain
-- Spawn the next file `isolated` on omp
+- Spawn the next window `isolated` on omp

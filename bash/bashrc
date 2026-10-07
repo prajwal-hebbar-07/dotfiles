@@ -36,7 +36,7 @@ case ":$PATH:" in
 esac
 export PATH
 
-export EDITOR=hx
+export EDITOR=nvim
 export VISUAL=$EDITOR
 
 # This repo's git/config becomes the global one, so its nvimdiff difftool cannot

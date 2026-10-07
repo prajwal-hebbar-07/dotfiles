@@ -9,12 +9,17 @@ Skills live under `ohmypi/skills/<name>/SKILL.md`, linked into
 
 - `commit` — commits already-staged changes with a semantic message.
 - `paper-target` — pins the Paper file/page this repo's design work reads from.
-- `implementation-plan` — turns a finished design chat into commit-by-commit
-  plan files of at most five steps each.
-- `review-implementation-plan` — a second model reviews every plan file in
-  order, editing sequence and outcomes before follow; never implements.
-- `follow-implementation-plan` — implements the next unfinished plan step,
-  commits via `commit`, stamps `Landed:<sha>`, chains the next file.
+- `paper-design-prompt` — turns a design direction into one Paper prompt
+  (a reference UI as the base, then the requested changes). Does not draw.
+- `paper-design` — builds that prompt (`paper-design-prompt.md`) in Paper:
+  tokens and design system, then the screens in order. Does not write code.
+- `implementation-plan` — turns this chat's finalized decisions into one
+  commit-by-commit plan file, in windows of at most five commits.
+- `review-implementation-plan` — a second model reviews that plan file,
+  editing sequence and outcomes before follow; never implements.
+- `follow-implementation-plan` — implements the current window (at most five
+  commits) via `commit`, stamps `Landed:<sha>`, then starts the next window
+  in a new chat.
 - `arc-design` — directs `archify` to build a diagram set (overview + one per
   piece) under `docs/architecture/diagrams/`, then commits via `commit`.
 - `docs` — generate or verify architecture and/or plain-English docs
@@ -32,6 +37,39 @@ sources into `ohmypi/skills/` — the installer owns updates.
 is described in `SKILLS.md` at the repo root and archived at
 `~/.local/share/ohmypi/skills-archive-20260919-171738/skills` (also in git
 history). List new skills here.
+
+## Cursor skills
+
+Cursor's built-in skills are copied from `~/.cursor/skills-cursor/` into
+`cursor/skills/<name>/`. Cursor still loads the live copies from
+`~/.cursor/skills-cursor/`; this tree is the repo copy.
+
+- `automate`
+- `autopilot`
+- `canvas`
+- `create-hook`
+- `create-rule`
+- `create-skill`
+- `create-subagent`
+- `deploy-with-vercel`
+- `goal`
+- `loop`
+- `migrate-to-skills`
+- `new-repo`
+- `onboard`
+- `origin`
+- `rename-chat`
+- `review`
+- `review-bugbot`
+- `review-security`
+- `sdk`
+- `share`
+- `shell`
+- `split-to-prs`
+- `statusline`
+- `update-cli-config`
+- `update-cursor-settings`
+- `visualize`
 
 ## Agents
 

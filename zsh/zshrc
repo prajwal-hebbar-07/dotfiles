@@ -63,7 +63,7 @@ export HOMEBREW_NO_ENV_HINTS=1
 typeset -U path fpath PATH FPATH          # no duplicate entries, ever
 path=("$HOME/.local/bin" $path)
 
-export EDITOR=hx
+export EDITOR=nvim
 export VISUAL=$EDITOR
 export PAGER=less
 export LESS='-R -F -i -M --mouse'         # keep colour, quit if it all fits
