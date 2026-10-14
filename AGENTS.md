@@ -20,6 +20,10 @@ Skills live under `ohmypi/skills/<name>/SKILL.md`, linked into
 - `follow-implementation-plan` — implements the current window (at most five
   commits) via `commit`, stamps `Landed:<sha>`, then starts the next window
   in a new chat.
+- `follow-plan-with-review` — same plan as `follow-implementation-plan`, but
+  stops after each step for review; commits via `commit` only on the user's
+  go-ahead, then does the next step. At the window's end it hands over a
+  prompt for the next window's new chat instead of starting one.
 - `arc-design` — directs `archify` to build a diagram set (overview + one per
   piece) under `docs/architecture/diagrams/`, then commits via `commit`.
 - `docs` — generate or verify architecture and/or plain-English docs
