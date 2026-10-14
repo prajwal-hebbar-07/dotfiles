@@ -4,8 +4,15 @@ description: >
   Reviews the single implementation-plan document written by another agent
   and updates it before anyone codes. Challenges sequence, missing commits,
   oversized windows, and any how-to that snuck in; leaves how-to-build to
-  the implementer. Rejects any commit that creates or edits a markdown
-  document. Does not write application code and does not start
+  the implementer.   Requires each code commit to update the existing
+  architecture pages it makes stale, and to create or update only the
+  markdown documents that step names. follow-implementation-plan creates
+  and updates those documents. implementation-plan may add that work to
+  the plan. Requires code-level tests for the behaviour a code commit
+  changes. Accepts docs commits that record decisions or findings the
+  planning chat finalized (including throwaway experiments outside the
+  repo), and requires them to touch no code and to be checked for
+  consistency. Manual and UI testing stay with the user. Does not write application code and does not start
   follow-implementation-plan. Use when the user asks to review the plan,
   "Opus review", "update the plan before implementing", or invokes
   /review-implementation-plan or /skill:review-implementation-plan. Do not
@@ -53,8 +60,10 @@ The plan is one document, a contract for a later implementing agent that
 does not have the planning chat.
 
 - **How this file is followed** and **How to follow this plan** are present
-  and match the template: one commit at a time, `git add` only that
-  commit's non-markdown files, run the `commit` skill with no subject,
+  and match the template: one commit at a time, `git add` that
+  commit's code, any existing architecture pages it updated, and any
+  markdown document that step names, run the
+  `commit` skill with no subject,
   stamp `**Landed:** \`<sha>\`` on the step, then the next step **in this
   window**; when every step in the window has `Landed`, start the next
   window in a **new chat with empty history**. Do not delete `plan.md`
@@ -65,11 +74,41 @@ does not have the planning chat.
   `02.md` split.
 - Each commit is one concern, reviewable in about ten minutes, preferably
   under ~300 lines.
-- **What lands** / **Done when** are observable outcomes, not file trees
-  and not markdown edits.
-- Every commit's explanation — **Markdown**, **Done when**, and **Prompt**
-  — contains, verbatim: `This commit does not create, edit, or delete any
-  markdown document.`
+- Every commit has a **Kind:** line, `code` or `docs`. A missing line
+  means `code`.
+- **What lands** / **Done when** are observable outcomes, not file trees.
+  When a code commit changes behaviour an existing architecture page
+  describes, **Done when** says those pages are true afterwards.
+- Every code commit's explanation — **Markdown**, **Done when**, and
+  **Prompt** — contains, verbatim: `This commit updates the existing
+  architecture pages it makes stale, and creates or updates only the
+  markdown documents this step names.`
+  A step may name markdown documents to create or to update.
+  `implementation-plan` may add that work to the plan.
+  `follow-implementation-plan` creates and updates those documents. Do not
+  delete that work, and do not rewrite the step so those documents are
+  forbidden.
+- Every code commit's explanation — **Tests**, **Done when**, and
+  **Prompt** — contains, verbatim: `This commit adds or updates code-level
+  tests for the behaviour it changes and runs them. Manual testing and UI
+  testing are left to the user.`
+  **Done when** also names a sanity check and a functionality check for
+  the behaviour that commit changes. It does not require a browser, a
+  manual pass, or a UI test.
+- Every docs commit records decisions or findings the plan's locked
+  decisions contain, and its explanation contains, verbatim, in
+  **Markdown**, **Done when**, and **Prompt**: `This docs commit creates
+  or updates only the markdown documents this step names, and touches no
+  code.` and, in
+  **Tests**, **Done when**, and **Prompt**: `This docs commit changes no
+  code, so it adds no code-level tests; it is checked by every document it
+  touches agreeing with the decision and with each other.` Its **Done
+  when** names consistency checks and the documents it creates or updates.
+  `implementation-plan` may add those documents to the plan.
+  `follow-implementation-plan` creates and updates them. A throwaway
+  experiment lives outside the repo, is never staged, records what
+  actually ran, and a named step deletes it. Issue-tracker updates name
+  their items and come after the commit.
 - **Locked decisions** are only choices finalized in the planning chat that
   later commits would be written differently without. Everything else stays
   open.
@@ -98,7 +137,10 @@ Work through this list. Edit the plan in place when you find a hit.
 4. **Over-specified how.** File names, folder layouts, function names,
    "create `src/…`", guessed libraries, layer diagrams. Delete those from
    prompts, **What lands**, and locked decisions unless they were actually
-   frozen. Do not replace them with *your* how.
+   frozen. A markdown document the step says to create or update stays:
+   that path was frozen by the plan. `implementation-plan` may add it.
+   `follow-implementation-plan` creates or updates it. Do not replace
+   either with *your* how.
 5. **False lock.** A library, pattern, or structure listed as locked that
    later commits do not actually depend on, or that the planning chat never
    finalized. Move it out of locked decisions. The implementer of that
@@ -120,15 +162,49 @@ Work through this list. Edit the plan in place when you find a hit.
    Restore the template's **How to follow this plan**. Rewrite whole-repo
    "must pass" gates to "this commit adds zero new failures versus the
    parent commit."
-9. **Markdown in a commit.** A commit whose **What lands**, **Done when**,
-   **Prompt**, or **Out of scope** writes, refreshes, or "keeps in sync"
-   any markdown document — docs, README, changelog, ADR, `AGENTS.md`,
-   `CLAUDE.md`, `.cursor/rules/`, or any other `.md` file. Delete that
-   work from the commit. If the commit is only a markdown update, delete
-   the commit. Every remaining commit must carry the verbatim sentence
-   `This commit does not create, edit, or delete any markdown document.`
-   in **Markdown**, **Done when**, and **Prompt**.
-10. **Oversized window.** More than five commits in one window, or a second
+9. **Markdown the step names.** A code commit that changes behaviour an
+   existing `docs/architecture/` page describes must say, in **Done when**,
+   that those pages are true afterwards. A step may also create a markdown
+   document or update an existing one, including a new architecture page,
+   a README, a changelog, an ADR, `AGENTS.md`, `CLAUDE.md`, or
+   `.cursor/rules/`. That is valid plan content. `implementation-plan` may
+   add it. `follow-implementation-plan` creates and updates the documents
+   the step names. Do not strip it. Do not move it to another commit
+   unless it is a different concern. If the step names a document, **Done
+   when** says that document exists and is true. If the markdown sentence
+   still forbids every document except existing architecture pages,
+   replace it with `This commit updates the existing architecture pages it
+   makes stale, and creates or updates only the markdown documents this
+   step names.` in **Markdown**, **Done when**, and **Prompt**. Do not add
+   a markdown document the plan does not already name.
+10. **Untested behaviour (code commits).** A code commit that changes
+    behaviour has no code-level sanity check and no functionality check in
+    **Done when**. Add them. Do not require a browser, a manual pass, or a
+    UI test; those stay with the user. Every code commit must carry,
+    verbatim, in **Tests**, **Done when**, and **Prompt**: `This commit
+    adds or updates code-level tests for the behaviour it changes and runs
+    them. Manual testing and UI testing are left to the user.`
+11. **Bad docs commit.** A docs commit is valid only when its deliverable
+    is documentation the planning chat finalized: decisions, answered
+    questions, requirement or design changes, or findings from an
+    experiment the chat asked for. It may create or update the markdown
+    documents it names. `implementation-plan` may add those documents.
+    `follow-implementation-plan` creates and updates them. Delete a docs
+    commit that is only a general refresh the chat did not finalize.
+    Strip any code or tests from it. Make sure **Done when** names
+    consistency checks (where the decision now appears; nothing still
+    contradicts it; answered questions closed where they are tracked) and
+    names each document created or updated. Make sure an experiment is
+    outside the repo, never staged, reports what actually ran, has a
+    fallback when the chat gave one, and is deleted by a named step. Make
+    sure each docs commit carries both docs-commit sentences verbatim in
+    **Markdown** / **Tests**, **Done when**, and **Prompt**: `This docs
+    commit creates or updates only the markdown documents this step names,
+    and touches no code.` and `This docs commit changes no code, so it
+    adds no code-level tests; it is checked by every document it touches
+    agreeing with the decision and with each other.` A plan whose steps
+    lack a **Kind** line is still valid; treat them as code.
+12. **Oversized window.** More than five commits in one window, or a second
     plan file that should be one document. Re-chunk unfinished commits into
     windows of at most five inside the same `plan.md`. Do not create
     `01.md`, `02.md`, or another plan file. Say which commits moved.
@@ -143,7 +219,10 @@ Work through this list. Edit the plan in place when you find a hit.
   no moving it between windows. Do not write `**Landed:**` yourself.
 - Do not invoke or continue into `follow-implementation-plan`.
 - Do not add approach hints, recommended libraries, or proposed file maps —
-  even as "optional". They become de facto requirements.
+  even as "optional". They become de facto requirements. A markdown
+  document the plan already says to create or update is not a hint. Leave
+  it. `follow-implementation-plan` creates and updates it.
+  `implementation-plan` may add it.
 - Do not invent product requirements the plan does not contain. The plan
   came from the chat that wrote it; do not grow it from docs the chat did
   not finalize.
@@ -198,12 +277,20 @@ it still needs to be saved.
 
 1. **Changelog** — per window, one bullet per edit: split, merge, reorder,
    unlocked a false lock, stripped how-to, added a missing outcome, moved
-   commits between windows, stripped a markdown update. A window with no
+   commits between windows, required an architecture-page update, required
+   code-level tests, kept a markdown document the step creates or updates. A window with no
    edits → say so and why it was already sound.
 2. **Still open** — anything the implementer must decide, in one list.
    These are how-questions, not missing product.
 3. **Ready** — whether the file can be executed as-is. If not, what is
-   left. Ready is not permission to code. Confirm that no commit updates a
-   markdown document.
+   left.    Ready is not permission to code. Confirm that each code commit
+   updates the existing architecture pages it makes stale, creates or
+   updates only the markdown documents that step names, and adds or
+   updates code-level tests and runs them; that each docs commit records
+   only finalized decisions or findings, creates or updates only the
+   markdown documents it names, touches no code, and names its consistency
+   checks; and that manual and UI testing are left to the user.
+   `follow-implementation-plan` performs those creates and updates.
+   `implementation-plan` may put them in the plan.
 4. **Stop.** Do not start commit 1. Do not offer to start it. Do not run
    `follow-implementation-plan`. Implementation needs a later, explicit ask.

@@ -4,8 +4,15 @@ description: >
   Turns the decisions finalized in the chat where it is called into one
   commit-by-commit plan document. The document is split into windows of
   at most five commits; follow runs one window, then starts a new chat
-  with empty history for the next window. No commit updates a markdown
-  document. Use when the user asks to build the implementation plan,
+  with empty history for the next window. Each commit is a code commit
+  or a docs commit.   A code commit updates the existing architecture pages
+  it makes stale, creates or updates only the markdown documents that
+  step names, and adds or updates code-level tests for the behaviour it
+  changes and runs them. A docs commit records decisions or findings this
+  chat finalized by creating or updating the markdown documents they make
+  stale, touches no code, and may answer a question with a throwaway
+  experiment outside the repo. Manual and UI testing stay with the user.
+  Use when the user asks to build the implementation plan,
   "write the plan", "plan the commits", "the conversation is done, make
   the plan", or invokes /implementation-plan or /skill:implementation-plan.
 argument-hint: "[output directory]"
@@ -20,8 +27,12 @@ a **new chat with empty history**. The user does not open that chat and
 does not name a second file.
 
 Do **not** implement. Do **not** invent file names, folder layouts,
-function names, or libraries that were not locked in this chat. Do **not**
-document the product. Do **not** put documentation work in the plan.
+function names, or libraries that were not locked in this chat. When this
+chat finalized a markdown document, name it on the step that owns it.
+`follow-implementation-plan` creates or updates that document. A code
+step may name documents that travel with the change. A docs step is for
+when the documents are the deliverable (see **Docs commits**). Do not add
+a markdown document this chat did not finalize.
 
 The planner and the implementer may be different models. You are the
 planner. Over-specifying how is a bug in the plan.
@@ -64,24 +75,116 @@ true. No new file, folder, function, type, or package names unless this
 chat already froze them. A typecheck / test gate is "this commit adds no
 new failures versus the parent commit", not "the whole repo is green".
 
-**No markdown.** No commit creates, edits, or deletes a markdown document.
-That includes `docs/`, README files, `AGENTS.md`, `CLAUDE.md`,
-`.cursor/rules/`, changelogs, ADRs, and any other `.md` file. Do not add a
-commit that writes, refreshes, or "keeps the docs in sync". Do not list a
-markdown path as **What lands**. Existing `docs/` are read as background;
-the implementer must not edit them. Documentation is a later, deliberate
-pass the user runs (`docs`). Never a side effect of implementing.
+## Two kinds of commit
 
-Every commit's own explanation carries this sentence, verbatim, in
+Every commit has a **Kind**: `code` or `docs`.
+
+- **code** (the default): changes the product. The architecture-page rule
+  and the code-level test rule under **Code commits** apply.
+- **docs**: the deliverable is the documents themselves, because this chat
+  finalized it: recording decisions, answering open questions, changing
+  requirement or design documents to match a decision, or writing up the
+  findings of a throwaway experiment. A docs commit never touches code.
+
+Use `docs` only for documentation work this chat finalized. Refreshing docs
+after code changed is not a docs commit: the code commit updates its own
+stale architecture pages, and the `docs` skill owns full refreshes, new
+areas, plain-English pages and the baseline. A plan may be all docs commits
+(for example a decisions-and-checks phase) or mix both kinds. Do not split
+one concern into a code commit plus a docs commit just to update docs.
+
+### Docs commits
+
+A docs commit may create or update the markdown documents its decisions
+or findings make stale, or whose path this chat froze. That includes a
+new document. It leaves every document it touches consistent with the
+decision and with each other. When the repo has its own documentation
+conventions (a decision log, stable requirement IDs, an open-questions
+list, "answered" markers), the commit follows them, and the plan says so
+instead of restating them. Name each document in the step.
+`follow-implementation-plan` creates and updates those documents.
+
+A docs commit does not touch code or tests, and does not stamp
+`docs-baseline:`. It does not edit the plan's directory.
+
+Its **Done when** replaces code-level tests with consistency checks: where
+the decision now appears, that no document still contradicts it, and that
+answered questions are marked answered and removed from wherever open
+questions are tracked.
+
+**Throwaway experiments.** When this chat said a question must be answered
+by testing it, a docs commit may run a throwaway experiment (a spike). The
+experiment lives **outside the repository**, nothing from it is staged, and
+the plan names the step that deletes it. The finding must come from what
+actually ran (versions, what was tried, what was observed). If this chat
+finalized a fallback for a failed check, the step states it. A step may
+allow starting local services the experiment needs (for example databases
+in Docker); say so in the step.
+
+**Outside the repository.** A step may update an issue tracker or similar
+only when this chat authorized it, naming which items and what changes.
+That update happens after the step's commit and never closes anything this
+chat did not say to close.
+
+Every docs commit's own explanation carries these sentences, verbatim. The
+first in **Markdown**, in **Done when**, and in **Prompt**:
+
+`This docs commit creates or updates only the markdown documents this step names, and touches no code.`
+
+The second in **Tests**, in **Done when**, and in **Prompt**:
+
+`This docs commit changes no code, so it adds no code-level tests; it is checked by every document it touches agreeing with the decision and with each other.`
+
+### Code commits
+
+The rest of this section applies to code commits.
+
+**Architecture pages travel with the code.** When a commit changes
+behaviour an existing page under `docs/architecture/` describes, that same
+commit updates those pages so they stay true. Do that when this repo's
+`architecture:` pin in `docs/README.md` is `on` (or the pin is absent and
+those pages already exist). A new architecture document is allowed when
+this chat finalized it and the step names it. Do not stamp
+`docs-baseline:` unless the step says so.
+
+A code commit may also create or update other markdown documents when
+this chat finalized them as part of that commit. Name each one in the
+step. `follow-implementation-plan` creates and updates the documents the
+step names, and does not create or edit a markdown document the step does
+not name. Do not list a markdown path as **What lands** unless this chat
+already froze that path. The `docs` skill still owns a full refresh the
+chat did not finalize.
+
+Every code commit's own explanation carries this sentence, verbatim, in
 **Markdown**, in **Done when**, and in **Prompt**:
 
-`This commit does not create, edit, or delete any markdown document.`
+`This commit updates the existing architecture pages it makes stale, and creates or updates only the markdown documents this step names.`
 
-Before saving, re-read every commit. If **What lands**, **Done when**,
-**Out of scope**, or **Prompt** tells the implementer to write or update
-markdown, rewrite the commit so the outcome needs no markdown edit, or
-drop the commit and name it in the walkthrough. A plan that updates a
-markdown document is not finished.
+Before saving, re-read every commit. If a code commit creates or updates
+a markdown document, the step must name it. If a docs commit touches code,
+or records something this chat did not finalize, rewrite it. A plan that
+leaves a described architecture page stale, or that creates or updates a
+markdown document the step does not name, is not finished.
+
+**Code-level tests travel with the code.** Every code commit adds or updates
+tests that sanity-check the behaviour it changes and that exercise that
+functionality. Typecheck alone is not that coverage. The tests run under
+the project's unit-test command for the tests that commit touches. The
+plan does not ask for a manual pass, a browser session, or a UI test.
+The user does those.
+
+Every code commit's own explanation carries this sentence, verbatim, in
+**Tests**, in **Done when**, and in **Prompt**:
+
+`This commit adds or updates code-level tests for the behaviour it changes and runs them. Manual testing and UI testing are left to the user.`
+
+Before saving, re-read every code commit. If **Done when** changes behaviour
+and names no sanity check and no functionality check, add them. If it
+tells the implementer to open a browser or do a manual or UI pass, delete
+that. A plan that leaves changed behaviour untested at code level is not
+finished.
+
+## Both kinds
 
 The only markdown this skill writes is the one plan document (and a
 `.gitignore` line if needed). That write is not a commit in the plan.
@@ -140,9 +243,13 @@ Index table columns, in this order: **#**, concern, what lands, review
 focus. Each window has its own table, listing only that window's commits.
 **Concern** is a human label, not a git subject.
 
+Every commit block carries a **Kind:** line (`code` or `docs`) and the
+sentences for its kind. The template shows both variants.
+
 Each commit's **Prompt** is for the implementing agent. It restates that
-commit's outcome, the locked decisions that apply, what must already exist,
-what must not be started, and the markdown sentence above. It does **not**
+commit's outcome, its kind, the locked decisions that apply, what must
+already exist, what must not be started, and the sentences for its kind.
+It does **not**
 prescribe design. It names **this file**. It does not dump the conversation
 and it does not point at a second plan file.
 
@@ -163,9 +270,12 @@ change, do not commit.
 
 1. A plain-English walk through **all** commits so the user can reject the
    sequence without reading prompts. Everyday words. Lead with what will
-   be true at the end of the whole plan, then one sentence per commit.
-   State once that no commit creates or edits a markdown document. Do not
-   describe a markdown update for any commit.
+   be true at the end of the whole plan, then one sentence per commit,
+   saying which commits are docs commits. State once that each code commit
+   updates the existing architecture pages it makes stale, and creates or
+   updates only the markdown documents that step names. Docs commits
+   create or update only the markdown documents they name, and touch no
+   code. Name any throwaway experiment and any issue-tracker update.
 2. Give the one path. List each window and its commit range. One
    `/follow-implementation-plan` runs the current window only. When that
    window has landed, follow starts a new chat with empty history for the

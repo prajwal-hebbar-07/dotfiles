@@ -50,6 +50,15 @@ writing an architecture page.
 
 If asked to do any of those, refuse.
 
+## What follow writes
+
+`follow-implementation-plan` may edit existing pages under
+`docs/architecture/` (not `diagrams/`) in the same commit as the code
+that made them stale, and only when this repo's architecture pin is on
+(or the pin is absent and those pages already exist). It does not open
+new `NN` numbers, does not write `docs/plain-english/`, and does not
+stamp `docs-baseline:`. New areas and the baseline stay with this skill.
+
 ## Modes
 
 | Mode | When | Writes? | Commit? |
