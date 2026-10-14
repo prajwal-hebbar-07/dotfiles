@@ -385,7 +385,7 @@ close, so `prefix 1` always reaches the first window.
 
 | Key | Action |
 | --- | --- |
-| `prefix` `\` or `\|` | Split left / right — new pane takes 25%, current keeps 75% |
+| `prefix` `\` or `\|` | Split left / right, in half |
 | `prefix` `-` | Split top / bottom |
 | `prefix` `r` | Rename this window, from an empty prompt |
 | `prefix` `S` | Rename this session, from an empty prompt |
