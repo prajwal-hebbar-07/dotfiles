@@ -1,0 +1,20 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# yazi — terminal file manager, opened in a popup by `prefix y` in tmux.
+#
+# `o` / Enter on a Markdown file renders it in the browser via pk-mdopen (the
+# same renderer `prefix v` uses); `O` offers the editor as the alternative.
+# Everything else keeps yazi's default openers.
+#
+# Source of truth: dotfiles/yazi/yazi.toml  (~/.config/yazi/yazi.toml -> here)
+# ─────────────────────────────────────────────────────────────────────────────
+
+[opener]
+markdown = [
+	{ run = "pk-mdopen %s1", desc = "Render in browser", for = "unix" },
+]
+
+[open]
+prepend_rules = [
+	{ url = "*.md", use = [ "markdown", "edit" ] },
+	{ url = "*.markdown", use = [ "markdown", "edit" ] },
+]

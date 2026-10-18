@@ -1,0 +1,63 @@
+#!/bin/sh
+# ─────────────────────────────────────────────────────────────────────────────
+# pk-mdopen — render a Markdown file in the default browser.
+#
+# Writes a small HTML page that carries the file base64-encoded and renders it
+# client-side with marked + github-markdown-css, so the Markdown never leaves
+# the machine and no renderer has to be installed. A <base> pointing at the
+# file's directory keeps relative images and links working.
+#
+# Usage: pk-mdopen FILE.md
+# Bound to `prefix v` in tmux/tmux.conf, behind an fzf picker.
+#
+# Source of truth: dotfiles/zsh/bin/pk-mdopen  (~/.local/bin/pk-mdopen -> here)
+# ─────────────────────────────────────────────────────────────────────────────
+
+set -eu
+
+[ $# -eq 1 ] && [ -f "$1" ] || { echo "usage: pk-mdopen FILE.md" >&2; exit 2; }
+
+file=$(cd "$(dirname -- "$1")" && pwd -P)/$(basename -- "$1")
+dir=$(dirname -- "$file")
+name=$(basename -- "$file")
+
+out_dir="${TMPDIR:-/tmp}/pk-mdopen"
+mkdir -p "$out_dir"
+# One page per source path, so reopening a file replaces its old render.
+out="$out_dir/$(printf %s "$file" | cksum | cut -d' ' -f1)-$name.html"
+
+b64() { base64 < "$1" | tr -d '\n'; }
+md=$(b64 "$file")
+base=$(printf '%s/' "$dir" | base64 | tr -d '\n')
+title=$(printf %s "$name" | sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g')
+
+cat > "$out" <<EOF
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>$title</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@5/github-markdown.min.css">
+<style>
+  body { margin: 0; }
+  .markdown-body { box-sizing: border-box; max-width: 980px; margin: 0 auto; padding: 45px; }
+  @media (max-width: 767px) { .markdown-body { padding: 15px; } }
+  @media (prefers-color-scheme: dark) { body { background: #0d1117; } }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/marked@15/marked.min.js"></script>
+</head>
+<body>
+<article class="markdown-body" id="content"></article>
+<script>
+  const decode = (s) => new TextDecoder().decode(Uint8Array.from(atob(s), (c) => c.charCodeAt(0)));
+  const base = document.createElement("base");
+  base.href = "file://" + decode("$base").split("/").map(encodeURIComponent).join("/");
+  document.head.prepend(base);
+  document.getElementById("content").innerHTML = marked.parse(decode("$md"), { gfm: true });
+</script>
+</body>
+</html>
+EOF
+
+if command -v xdg-open >/dev/null 2>&1; then xdg-open "$out"; else open "$out"; fi

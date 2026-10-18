@@ -35,5 +35,6 @@ Path globs to page numbers. A path may list several numbers.
 | `.gitignore` | `01` |
 | `zsh/**` | `02` |
 | `tmux/**` | `03` |
+| `yazi/**` | `01`, `03` |
 | `ghostty/**` | `04` |
 | `ohmypi/**` | `05` |

@@ -393,17 +393,30 @@ close, so `prefix 1` always reaches the first window.
 | `prefix` `X` | Close this window, no confirmation |
 | `prefix` `c` | New window in the current pane's directory |
 | `prefix` `g` | lazygit in a popup, on the current pane's repository |
-| `prefix` `t` | tuicr in a popup, in the current pane's directory (overrides clock-mode) |
+| `prefix` `v` | fzf over the Markdown files below the current pane's directory; Enter renders the pick in the browser |
+| `prefix` `y` | yazi in a popup, on the current pane's directory; `o` on a Markdown file renders it in the browser |
 | `prefix` `C-s` | Send a literal `C-s` to the pane |
 | `prefix` `C-r` | Reload the config in place |
 
-Splits, new windows, and the lazygit popup all inherit the current pane's
+Splits, new windows, and the popups all inherit the current pane's
 directory. Renaming starts from an empty prompt, so the new name is typed from
 scratch with nothing to delete first. Mouse mode is on — drop the
 `set -g mouse on` line to disable it.
 
 `prefix g` needs [lazygit](https://github.com/jesseduffield/lazygit) on `PATH`
-(`brew install lazygit`).
+(`brew install lazygit`). `prefix v` needs `fd` and `fzf`, and
+`zsh/bin/pk-mdopen` linked into `~/.local/bin`: it writes an HTML page under
+`$TMPDIR/pk-mdopen/` that renders the file client-side with
+[marked](https://github.com/markedjs/marked) and github-markdown-css (both
+from jsdelivr), so the Markdown itself never leaves the machine, then opens it
+in the default browser. Relative images and links resolve against the file's
+own directory.
+
+`prefix y` needs [yazi](https://github.com/sxyazi/yazi) (`brew install yazi`)
+and `yazi/yazi.toml` linked into `~/.config/yazi/`. That config sends `.md`
+and `.markdown` files to `pk-mdopen` on `o` / Enter, with the editor offered
+under `O`; every other file type keeps yazi's default opener. The popup stays
+open after a render, so several files can be opened in a row; `q` closes it.
 
 ## Intended layout
 
@@ -432,7 +445,8 @@ dotfiles/
 │   └── mcp.json
 ├── cursor/     # editor settings, keybindings, extension list
 ├── zsh/        # zshrc, and bin/pk-preview for the fzf preview pane
-└── tmux/       # tmux.conf, Pale Knight theme and keys
+├── tmux/       # tmux.conf, Pale Knight theme and keys
+└── yazi/       # yazi.toml, Markdown opens through pk-mdopen
 ```
 
 ## Setup
@@ -481,9 +495,11 @@ Already linked:
 
 ```sh
 ln -sfn "$PWD/zsh/zshrc"       ~/.zshrc
-mkdir -p ~/.local/bin ~/.config/tmux ~/.config/ghostty ~/.omp/agent/skills ~/.omp/agent/agents ~/.cursor/skills
+mkdir -p ~/.local/bin ~/.config/tmux ~/.config/yazi ~/.config/ghostty ~/.omp/agent/skills ~/.omp/agent/agents ~/.cursor/skills
 ln -sfn "$PWD/zsh/bin/pk-preview" ~/.local/bin/pk-preview
+ln -sfn "$PWD/zsh/bin/pk-mdopen" ~/.local/bin/pk-mdopen
 ln -sfn "$PWD/tmux/tmux.conf"  ~/.config/tmux/tmux.conf
+ln -sfn "$PWD/yazi/yazi.toml"  ~/.config/yazi/yazi.toml
 ln -sfn "$PWD/ghostty/config" ~/.config/ghostty/config
 ln -sfn "$PWD/ghostty/themes" ~/.config/ghostty/themes
 ln -sfn "$PWD/ohmypi/skills/commit"     ~/.omp/agent/skills/commit

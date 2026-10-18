@@ -678,3 +678,6 @@ alias agy='command agy --dangerously-skip-permissions'
 if [[ -r "$HOME/.local/share/leaf/completions/_leaf" ]]; then
   source "$HOME/.local/share/leaf/completions/_leaf"
 fi
+
+# opencode
+export PATH=/Users/hebbar/.opencode/bin:$PATH

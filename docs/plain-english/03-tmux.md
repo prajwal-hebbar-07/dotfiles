@@ -42,16 +42,19 @@ the gap, so `C-s 1` always reaches the first bench.
 
 ## Pull-down tool trays (popups)
 
-Two commands open a full-screen overlay over the current workbench — a pop-up tray that
+Three commands open a full-screen overlay over the current workbench — a pop-up tray that
 closes when you are done, returning you exactly where you were:
 
 | Key | What opens |
 | --- | --- |
 | `C-s g` | lazygit — a visual git manager, opened on the current repository |
-| `C-s t` | tuicr — a TUI task runner, opened in the current directory |
+| `C-s v` | A searchable list of the Markdown files in the current folder and below; pick one and it opens, formatted, in the web browser |
+| `C-s y` | yazi — a file browser, opened on the current folder. Move with the arrow keys or `h`/`j`/`k`/`l`; press `o` on a Markdown file and it opens, formatted, in the web browser. The tray stays open for the next file; `q` closes it |
 
-Both need the respective tool installed. If it is missing, the tray opens briefly and
-closes with an error.
+lazygit must be installed; if it is missing, the tray opens briefly and closes with an
+error. The Markdown list needs `fd`, `fzf`, and the repo's `pk-mdopen` script on the path.
+The file browser needs yazi installed and the repo's `yazi/yazi.toml` linked into
+`~/.config/yazi/`; it formats Markdown with the same `pk-mdopen` script.
 
 ---
 

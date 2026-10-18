@@ -29,4 +29,23 @@ return {
       indent = { enable = true },
     },
   },
+
+  -- Live markdown preview in Brave; renders mermaid, KaTeX, PlantUML.
+  -- build downloads the prebuilt server, so no node/yarn step.
+  {
+    "iamcco/markdown-preview.nvim",
+    cmd = { "MarkdownPreview", "MarkdownPreviewStop", "MarkdownPreviewToggle" },
+    ft = { "markdown" },
+    -- prebuilt server binary; synchronous so headless `Lazy build` works
+    build = "cd app && ./install.sh",
+    init = function()
+      vim.g.mkdp_filetypes = { "markdown" }
+      vim.g.mkdp_browser = "Brave Browser" -- macOS app name, passed to `open -a`
+      vim.g.mkdp_auto_close = 0 -- keep the tab when switching buffers
+      vim.g.mkdp_theme = "dark"
+    end,
+    keys = {
+      { "<leader>mp", "<cmd>MarkdownPreviewToggle<cr>", ft = "markdown", desc = "markdown preview toggle (Brave)" },
+    },
+  },
 }

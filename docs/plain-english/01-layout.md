@@ -19,6 +19,7 @@ every tool that holds a key sees the new version the next time it opens its door
 | --- | --- |
 | `zsh/` | Shell startup file and the preview helper script for the fuzzy picker |
 | `tmux/` | Session manager settings — split layouts, key shortcuts, colour strip at the bottom |
+| `yazi/` | File browser settings — Markdown files open formatted in the web browser |
 | `ghostty/` | Terminal window settings and the Pale Knight colour palette |
 | `ohmypi/` | Coding assistant rules, specialised skills (task scripts), and MCP server connection |
 | `docs/` | Plain-English documentation — this file included |
