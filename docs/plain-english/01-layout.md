@@ -22,6 +22,7 @@ every tool that holds a key sees the new version the next time it opens its door
 | `yazi/` | File browser settings — Markdown files open formatted in the web browser |
 | `ghostty/` | Terminal window settings and the Pale Knight colour palette |
 | `skills/` | Specialised skills (task scripts) shared by the coding assistants |
+| `omp/` | Oh My Pi coding-assistant settings, design-tool connection, standing rule, and factory skill |
 | `docs/` | Plain-English documentation — this file included |
 | `.gitignore` | Tells git to skip the ephemeral implementation-plan folder |
 | `SKILLS.md` | A written-out inventory of the old skill set, kept so it can be re-added piece by piece |
@@ -46,11 +47,12 @@ no copy step, no drift, no "which version is live?"
 
 ---
 
-## Two coding editors share the same skills
+## Three coding editors share the same skills
 
-The coding-assistant skills in `skills/` are linked into two different places —
-Cursor and Antigravity (`agy`). One directory, two doors: edit the skill once
-and both tools see the change after they restart.
+The coding-assistant skills in `skills/` are linked into three different places —
+Cursor, Antigravity (`agy`), and Claude Code. One directory, three doors: edit the
+skill once and all three tools see the change after they restart. Oh My Pi has its own
+folder, `omp/`, for its settings and its one skill of its own.
 
 Six skill folders live here today — commit, docs, arc-design, implementation-plan,
 follow-implementation-plan, and paper-target. The set was cleared and restarted in
@@ -68,7 +70,8 @@ alongside them.
 | Shell config (`zsh/zshrc`) | Open a new terminal tab, or type `reload` |
 | Session manager (`tmux/tmux.conf`) | Press prefix then `C-r` inside tmux |
 | Terminal window (`ghostty/config` or theme) | Press `Cmd+Shift+,` in Ghostty |
-| A coding skill | Restart the coding assistant (Cursor or agy) |
+| A coding skill | Restart the coding assistant (Cursor, agy, or Claude Code) |
+| Oh My Pi settings, rule, or skill (`omp/`) | Start a new Oh My Pi session |
 
 ---
 

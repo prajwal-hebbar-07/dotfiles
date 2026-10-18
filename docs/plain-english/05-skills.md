@@ -1,10 +1,12 @@
 # The Tool Drawers
 
-**Covers:** the shared coding-assistant skills and where they are linked
+**Covers:** the shared coding-assistant skills, where they are linked, and the Oh My Pi
+settings
 
 Think of `skills/` as a row of labelled tool drawers, each containing step-by-step
-instructions for a specific task. The drawers are connected to two different workbenches
-(Cursor and Antigravity), and the same drawers are available at each one.
+instructions for a specific task. The drawers are connected to three different workbenches
+(Cursor, Antigravity, and Claude Code), and the same drawers are available at each one.
+`omp/` is the setup sheet for a fourth workbench, Oh My Pi.
 
 ---
 
@@ -30,11 +32,29 @@ rather than by habit.
 
 ---
 
-## Two workbenches, one set of drawers
+## Three workbenches, one set of drawers
 
-The drawers in `skills/` are linked into two coding assistants — Cursor and Antigravity
-(`agy`). One directory, two doors. Edit a drawer once and both see the new instructions
-the next time they restart.
+The drawers in `skills/` are linked into three coding assistants — Cursor, Antigravity
+(`agy`), and Claude Code. One directory, three doors. Edit a drawer once and all three see
+the new instructions the next time they restart. Claude Code sees the documentation
+drawer under the name `pdocs`, because it already has a drawer called `docs`.
+
+---
+
+## The Oh My Pi setup sheet (`omp/`)
+
+Oh My Pi is the coding assistant this repository is mostly edited with. Its folder holds:
+
+- **Settings** — which model handles which kind of work, plus the colour theme. Oh My Pi
+  also saves changes into this file itself.
+- **The design-tool connection** — one entry that lets the assistant talk to Paper, the
+  design app.
+- **A standing rule** — never start an app, a server, or a test run unless asked for that
+  in the current request.
+- **The factory** — a skill and a matching `/factory` command that walk a feature or fix
+  through review gates, saving a checkpoint commit at each one.
+
+Each file is linked back to where Oh My Pi looks for it, the same way the drawers are.
 
 ---
 

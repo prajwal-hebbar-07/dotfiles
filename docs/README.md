@@ -38,3 +38,4 @@ Path globs to page numbers. A path may list several numbers.
 | `yazi/**` | `01`, `03` |
 | `ghostty/**` | `04` |
 | `skills/**` | `05` |
+| `omp/**` | `05` |

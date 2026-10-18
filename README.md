@@ -9,12 +9,13 @@ Personal configuration for my daily development setup.
 
 ## What I use
 
-Six tools make up my environment:
+Seven tools make up my environment:
 
 | Tool | Role |
 | --- | --- |
 | [Brave](https://brave.com) | Browser |
 | [Ghostty](https://ghostty.org) | Terminal emulator |
+| Oh My Pi | Coding harness / agent environment |
 | [Cursor](https://cursor.com) | Code editor |
 | Gemini (Antigravity) | AI coding assistant / CLI |
 | [zsh](https://www.zsh.org) | Shell (macOS default) |
@@ -59,6 +60,31 @@ Two Ghostty parser details worth remembering when editing that file:
   directory, so `theme = pale-knight` resolves to
   `~/.config/ghostty/themes/pale-knight`. Check a theme is visible with
   `ghostty +list-themes`, and check a config with `ghostty +validate-config`.
+
+### Oh My Pi
+
+The coding harness (`omp`). `omp/` holds its settings, MCP servers, rules, and
+its own skills and commands, each symlinked to where omp reads it:
+
+| Repo file | Live path | What it is |
+| --- | --- | --- |
+| `omp/config.yml` | `~/.omp/agent/config.yml` | Settings: model roles, per-agent model overrides, theme, symbol preset |
+| `omp/mcp.json` | `~/.omp/agent/mcp.json` | MCP servers: `paper`, started from the binary inside `/Applications/Paper.app` |
+| `omp/rules/explicit-runtime-permission.md` | `~/.agents/rules/explicit-runtime-permission.md` | Account-wide rule: no launching apps, servers, or tests without an explicit request |
+| `omp/skills/factory/` | `~/.omp/agent/skills/factory` | `factory` skill: human-gated feature/fix pipeline with checkpoint commits on a per-work branch |
+| `omp/commands/factory.md` | `~/.omp/agent/commands/factory.md` | `/factory` slash command, the entry point to that skill |
+
+`config.yml` is also written by omp itself (settings UI, `/model`, saved
+settings). Edits made there land in the repo file through the link; if a save
+ever replaces the link with a plain file, copy it back over `omp/config.yml`
+and re-link.
+
+`/factory` reads the skill by absolute path
+(`~/.omp/agent/skills/factory/SKILL.md`), so that link must exist for the
+command to work.
+
+Skills and rules are read at startup: a new or renamed skill, or an edited
+rule, takes hold in the next omp session.
 
 ### Cursor
 
@@ -237,8 +263,12 @@ open after a render, so several files can be opened in a row; `q` closes it.
 ## Skills
 
 `skills/` holds plain Agent Skills packages — Markdown instructions, nothing
-host-specific — linked into Cursor (`~/.cursor/skills/`) and Gemini
-(`~/.gemini/config/skills/`).
+host-specific — linked into Cursor (`~/.cursor/skills/`), Gemini
+(`~/.gemini/config/skills/`), and Claude Code (`~/.claude/skills/`).
+
+**`pdocs` skill** (`/pdocs`) — the `docs` skill under another name for Claude
+Code, whose account-synced skills already include a `docs`. Only `SKILL.md` is
+its own; every other file is a relative link into `skills/docs/`.
 
 **`commit` skill** (`/commit`) — turns staged changes into one semantic
 commit. It checks that `user.name` and `user.email` are set, refuses to run with
@@ -344,7 +374,13 @@ dotfiles/
 ├── ghostty/    # terminal config
 │   ├── config
 │   └── themes/pale-knight
-├── skills/     # Agent Skills, linked into Cursor and Gemini
+├── omp/        # Oh My Pi settings, MCP servers, rules, factory skill/command
+│   ├── config.yml
+│   ├── mcp.json
+│   ├── rules/explicit-runtime-permission.md
+│   ├── commands/factory.md
+│   └── skills/factory/
+├── skills/     # Agent Skills, linked into Cursor, Gemini, and Claude Code
 │   ├── commit/SKILL.md
 │   ├── docs/SKILL.md
 │   ├── implementation-plan/SKILL.md
@@ -355,7 +391,8 @@ dotfiles/
 │   ├── paper-target/SKILL.md
 │   ├── paper-design-prompt/SKILL.md
 │   ├── paper-design/SKILL.md
-│   └── sync-lyik-docs/SKILL.md
+│   ├── sync-lyik-docs/SKILL.md
+│   └── pdocs/SKILL.md
 ├── cursor/     # editor settings, keybindings, extension list
 ├── zsh/        # zshrc, and bin/pk-preview for the fzf preview pane
 ├── tmux/       # tmux.conf, Pale Knight theme and keys
@@ -435,6 +472,20 @@ ln -sfn "$PWD/skills/docs-twins" ~/.gemini/config/skills/docs-twins
 ln -sfn "$PWD/skills/docs-verify" ~/.gemini/config/skills/docs-verify
 ln -sfn "$PWD/skills/follow-implementation-plan" ~/.gemini/config/skills/follow-implementation-plan
 ln -sfn "$PWD/skills/repo-docs" ~/.gemini/config/skills/repo-docs
+
+mkdir -p ~/.omp/agent/commands ~/.omp/agent/skills ~/.agents/rules
+ln -sfn "$PWD/omp/config.yml"  ~/.omp/agent/config.yml
+ln -sfn "$PWD/omp/mcp.json"    ~/.omp/agent/mcp.json
+ln -sfn "$PWD/omp/commands/factory.md" ~/.omp/agent/commands/factory.md
+ln -sfn "$PWD/omp/skills/factory"      ~/.omp/agent/skills/factory
+ln -sfn "$PWD/omp/rules/explicit-runtime-permission.md" ~/.agents/rules/explicit-runtime-permission.md
+
+mkdir -p ~/.claude/skills
+for s in arc-design commit follow-implementation-plan follow-plan-with-review \
+         implementation-plan paper-design paper-design-prompt paper-target \
+         review-implementation-plan sync-lyik-docs pdocs; do
+  ln -sfn "$PWD/skills/$s" ~/.claude/skills/$s
+done
 ```
 
 ### Ubuntu server

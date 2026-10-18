@@ -2,8 +2,8 @@
 
 ## Skills
 
-Skills live under `skills/<name>/SKILL.md`, linked into `~/.cursor/skills/`
-and `~/.gemini/config/skills/`:
+Skills live under `skills/<name>/SKILL.md`, linked into `~/.cursor/skills/`,
+`~/.gemini/config/skills/`, and `~/.claude/skills/`:
 
 - `commit` — commits already-staged changes with a semantic message.
 - `paper-target` — pins the Paper file/page this repo's design work reads from.
@@ -29,16 +29,30 @@ and `~/.gemini/config/skills/`:
   `commit`.
 - `sync-lyik-docs` — copies `lyik_forms_v3/docs/architecture/` into
   `lyik_docs/docs/lyik_enterprise/design/architecture/`. No checks, no commit.
+- `pdocs` — `docs` renamed for Claude Code; only `SKILL.md` is its own, the
+  rest are relative links into `skills/docs/`.
 
 `archify` (third-party, tt-a1i/archify) is **not** vendored here. Install it
 with `npx skills add tt-a1i/archify -g`; it lands in `~/.agents/skills/archify`
-and is symlinked into the Cursor and Gemini skill dirs. Do not copy its Node
+and is symlinked into the Cursor, Gemini, and Claude Code skill dirs. Do not copy its Node
 sources into `skills/` — the installer owns updates.
 
 The skill directory was otherwise cleared on 2026-09-19 to start over; the old
 set is described in `SKILLS.md` at the repo root and archived at
 `~/.local/share/ohmypi/skills-archive-20260919-171738/skills` (also in git
 history). List new skills here.
+
+## Oh My Pi
+
+`omp/` holds the omp harness config, each file symlinked to its live path:
+
+- `config.yml` → `~/.omp/agent/config.yml` — settings and model roles; omp
+  also writes this file.
+- `mcp.json` → `~/.omp/agent/mcp.json` — MCP servers (`paper`).
+- `rules/explicit-runtime-permission.md` →
+  `~/.agents/rules/explicit-runtime-permission.md` — account-wide rule.
+- `skills/factory/` → `~/.omp/agent/skills/factory` — `factory` skill.
+- `commands/factory.md` → `~/.omp/agent/commands/factory.md` — `/factory`.
 
 ## Cursor skills
 
