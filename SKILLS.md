@@ -1,9 +1,7 @@
-# What every skill in `ohmypi/skills/` actually does
+# What every skill in the old skill set actually does
 
 Plain-English inventory, written so you can delete the whole directory and
-re-add only what you want. 11 skills, 19 files, 2,950 lines. One agent
-(`ohmypi/agents/committer.md`, 97 lines) is included because it duplicates a
-skill.
+re-add only what you want. 11 skills, 19 files, 2,950 lines.
 
 A "skill" here is just a markdown file of instructions. When you say one of its
 trigger phrases, the agent reads the file and follows it. Nothing runs on its
@@ -62,7 +60,7 @@ index files. Never commits.
 
 **This repo's `docs/` is its output.** Evidence: `docs/README.md` has the
 seed's `## Freshness` + `docs-baseline: 0147ec0…` + `## Mapping` rows
-(`zsh/**`→02, `tmux/**`→03, `ghostty/**`→04, `ohmypi/**`→05), and all five
+(`zsh/**`→02, `tmux/**`→03, `ghostty/**`→04), and the
 plain-English files open with the mandated `**Twin of:**` line.
 
 **Honest weight:** most of the 266 lines are rules and prohibitions, not steps
@@ -218,7 +216,7 @@ plan file by `template.md`, so it lives in two places that must stay in sync.
   `git commit -m subject -m bullets`.
 - Format: `type(scope): imperative summary`, ≤72 chars, no trailing period;
   blank line; 1–6 `- ` bullets, ≤80 chars each, saying *why* not restating the
-  diff. Scope is the top-level directory (`zsh`, `tmux`, `ohmypi`), dropped for
+  diff. Scope is the top-level directory (`zsh`, `tmux`, `skills`), dropped for
   repo-wide changes. `docs` only when *every* changed file is prose.
 - Refuses all AI attribution: no `Co-Authored-By`, no "Generated with", no robot
   emoji. Verifies afterwards with `git log -1` and a grep leak check.
@@ -228,17 +226,6 @@ plan file by `template.md`, so it lives in two places that must stay in sync.
 both say "commit through the commit skill". Deleting this breaks them.
 
 **Verdict: keep.** Cheapest, most-used skill here.
-
-### `ohmypi/agents/committer.md` — 97 lines (an agent, not a skill)
-
-Steps 1–5 of the commit skill, copy-pasted nearly word for word, with
-frontmatter pinning `model: ollama-cloud/glm-5.3-flash` and `tools: bash`. It
-exists for cost, not behaviour — it doesn't call the commit skill, it duplicates
-it, and the copies have already drifted (the agent's banned-trailer list dropped
-"Gemini"; it also lost the skill's edge-cases section).
-
-**Verdict:** pick one. Either delete the agent, or shrink it to three lines that
-say "follow the commit skill".
 
 ### implement-commit-prompt — 163 lines
 
@@ -288,9 +275,8 @@ are we using", `/paper-target`. Arguments: `file=`, `page=`, `show`, `clear`.
 
 Paper (paper.design) is a design tool like Figma; a *file* is one design
 document, a *page* is one canvas tab in it. The agent can only see Paper through
-the **Paper Desktop MCP server** (configured in `ohmypi/mcp.json` as
-`${HOME}/.paper/bin/paper mcp`). No Paper Desktop, no skill — there is no
-fallback.
+the **Paper Desktop MCP server** (`~/.paper/bin/paper mcp`). No Paper Desktop,
+no skill — there is no fallback.
 
 It resolves the file by id, URL, or name (asking when zero or several match),
 resolves the page as best it can — the MCP server **cannot list pages**, so it
@@ -348,12 +334,5 @@ is a third hand-maintained copy of the same stored-sha pattern used by
    added after a model did the wrong thing once. Re-adding a skill from scratch
    means re-earning those rules the hard way — worth skimming the old file
    before you rewrite it.
-4. **`ohmypi/RULES.md` (94 lines) is not a skill** and is loaded every session:
-   no app restarts, no dev servers, no browser, no unasked investigation, no
-   `planner`/`hand` subagents, **no documents unless a document-writing skill
-   was invoked**, and never amend — a correction is always a new commit. Rule 6
-   names five skills as document-writers (`repo-docs`, `docs-twins`,
-   `docs-verify`, `design-sync`, `twitter-campaign`); `design-sync` doesn't
-   exist either, so that list needs editing whenever you change the skill set.
-5. **`AGENTS.md` at the repo root lists the skills.** It will be wrong the
+4. **`AGENTS.md` at the repo root lists the skills.** It will be wrong the
    moment you delete any of them.

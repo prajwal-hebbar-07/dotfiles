@@ -14,7 +14,7 @@ description: >
   experiment outside the repo. Manual and UI testing stay with the user.
   Use when the user asks to build the implementation plan,
   "write the plan", "plan the commits", "the conversation is done, make
-  the plan", or invokes /implementation-plan or /skill:implementation-plan.
+  the plan", or invokes /implementation-plan.
 argument-hint: "[output directory]"
 ---
 

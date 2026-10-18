@@ -5,9 +5,8 @@ description: >
   staged diff. Never stages, never takes a subject from the caller, never
   pushes, never rebases, never opens a PR. Amends only to strip a
   Co-authored-by / attribution trailer from the commit this skill just
-  created. Use when the user says "commit", "commit this", "/commit",
-  "/skill:commit", or when another skill has staged its files and needs a
-  commit.
+  created. Use when the user says "commit", "commit this", "/commit", or
+  when another skill has staged its files and needs a commit.
 ---
 
 # commit
@@ -84,7 +83,7 @@ Subject:
   - `fix` — corrects broken behavior.
   - `docs` — only when **every** staged file is prose. README-plus-code is never `docs`.
   - `refactor` — same behavior, different structure. `perf`, `test`, `style`, `build`, `ci`, `chore`, `revert` for their obvious cases.
-- `scope` is optional: the top-level directory that changed (`tmux`, `zsh`, `ohmypi`). Drop it when the change is repo-wide.
+- `scope` is optional: the top-level directory that changed (`tmux`, `zsh`, `skills`). Drop it when the change is repo-wide.
 - Imperative ("add", not "added"/"adds"), no trailing period, 72 characters or fewer.
 
 Bullets:

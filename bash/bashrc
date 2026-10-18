@@ -1,7 +1,7 @@
 # ─────────────────────────────────────────────────────────────────────────────
 # bash — the Linux door
 #
-# Ubuntu boxes run the coding harness, tmux, and Neovim in bash. This file is
+# Ubuntu boxes run tmux and Neovim in bash. This file is
 # that shell's share of zsh/zshrc: the editor, the tmux helpers, and git's diff
 # tool. Nothing here needs Homebrew, Ghostty, Cursor, eza, bat, or fzf, and
 # nothing here is macOS-only — the Mac keeps using zsh/zshrc.
@@ -29,7 +29,7 @@ esac
 _pk_file=$(readlink -f -- "${BASH_SOURCE[0]}" 2>/dev/null) || _pk_file=${BASH_SOURCE[0]}
 _pk_root=${_pk_file%/*/*}
 
-# The harness and other user-level tools install here.
+# User-level tools install here.
 case ":$PATH:" in
   *":$HOME/.local/bin:"*) ;;
   *) PATH="$HOME/.local/bin:$PATH" ;;

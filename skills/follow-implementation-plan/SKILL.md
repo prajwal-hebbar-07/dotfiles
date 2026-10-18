@@ -275,19 +275,14 @@ On an older `NN.md` plan, name the plan directory instead of `plan.md`.
   worker prompt.
 - **Cursor:** new Task / subagent, `generalPurpose`, background. Do not
   resume. Do not self-fork.
-- **Oh My Pi (omp):** `task` tool, agent `task` (never `planner` or
-  `hand`). Batch: a one-line `context` ("Empty history. Follow the next
-  window of the implementation plan.") plus one item with that prompt as
-  `task`. Do **not** set `isolated` — commits must land in this repo.
-  Child sessions do not inherit this conversation.
 
-On Cursor and omp, then **stop implementing in this agent**. One line in
+On Cursor, then **stop implementing in this agent**. One line in
 the report: next window started in a new chat. Do not take the next
 window's first step. (On Claude Code the driver does not implement the
 next window either; it keeps running workers until the plan is done.)
 
-If you cannot start a new chat (`task` missing, recursion cap, unknown
-host): **stop**. Name the next window. Do **not** continue it here.
+If you cannot start a new chat (subagent tool missing, recursion cap,
+unknown host): **stop**. Name the next window. Do **not** continue it here.
 
 ### Claude Code: driver and workers
 

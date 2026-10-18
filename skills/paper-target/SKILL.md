@@ -7,7 +7,7 @@ description: >
   skill. Also shows or clears the pin. Use when the user says "use this Paper
   file", "set the Paper target", "point Paper at <file>", "the design lives
   in <file>", "which Paper file are we using", "clear the Paper target", or
-  invokes /paper-target or /skill:paper-target.
+  invokes /paper-target.
 argument-hint: "[file=<name|id|url>] [page=<name|id>] [show|clear] [memory file path]"
 ---
 

@@ -5,7 +5,7 @@ description: >
   lyik_docs MkDocs site at docs/lyik_enterprise/design/architecture/.
   Architecture only; no checks, no commit. Use when the user says "sync
   the lyik docs", "copy the docs to lyik_docs", "publish the architecture
-  docs", or invokes /sync-lyik-docs or /skill:sync-lyik-docs.
+  docs", or invokes /sync-lyik-docs.
 disable-model-invocation: true
 ---
 

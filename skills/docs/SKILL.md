@@ -9,7 +9,7 @@ description: >
   or a plain-english pin, both pinned per repo in docs/README.md. Stages
   its docs files and runs the commit skill. Use when the user says "docs",
   "generate the docs", "plain English docs only", "verify the docs", "are
-  the docs still true", or invokes /docs or /skill:docs.
+  the docs still true", or invokes /docs.
 argument-hint: "[generate | verify] [full | since <ref> | <NN> ...] [arch | no-arch] [plain | no-plain] [report | fix]"
 disable-model-invocation: true
 ---
@@ -29,7 +29,7 @@ writing an architecture page.
 
 ## Never
 
-- Write product code, `AGENTS.md`, `CLAUDE.md`, or `ohmypi/RULES.md`.
+- Write product code, `AGENTS.md`, or `CLAUDE.md`.
 - Write `docs/architecture/diagrams/` (that is `arc-design`).
 - Write `docs/implementation-plan/` (that is `implementation-plan`).
 - Restore `docs-twins`, `repo-docs`, or `check-claims.py`.

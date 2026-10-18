@@ -15,7 +15,7 @@ description: >
   consistency. Manual and UI testing stay with the user. Does not write application code and does not start
   follow-implementation-plan. Use when the user asks to review the plan,
   "Opus review", "update the plan before implementing", or invokes
-  /review-implementation-plan or /skill:review-implementation-plan. Do not
+  /review-implementation-plan. Do not
   use when the user asks to implement the plan.
 argument-hint: "[path to plan file or directory]"
 ---

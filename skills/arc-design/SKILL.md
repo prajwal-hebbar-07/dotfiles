@@ -7,7 +7,7 @@ description: >
   Writes HTML under docs/architecture/diagrams/, then stages those files
   and runs the commit skill once. Use when the user says "arc design",
   "architecture diagrams", "diagram this module", "archify this", "diagram
-  this feature", or invokes /arc-design or /skill:arc-design.
+  this feature", or invokes /arc-design.
 argument-hint: "[files | folders | modules | features]"
 ---
 
@@ -63,8 +63,7 @@ repo.
 Resolve the Archify skill directory, in order:
 
 1. `~/.agents/skills/archify`
-2. `~/.omp/agent/skills/archify`
-3. `~/.cursor/skills/archify`
+2. `~/.cursor/skills/archify`
 
 Need `SKILL.md` and `bin/archify.mjs`. If missing, STOP. Tell the user to
 install Archify (`npx skills add tt-a1i/archify -g` or their usual path).

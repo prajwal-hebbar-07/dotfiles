@@ -9,4 +9,4 @@ Written without technical jargon, framework internals, or private implementation
 | [`02-zsh.md`](02-zsh.md) | The Command Deck — the shell prompt, typing helpers, and navigation |
 | [`03-tmux.md`](03-tmux.md) | The Workspace Grid — dividing windows, panes, and popups |
 | [`04-ghostty.md`](04-ghostty.md) | The Terminal Window — the glass, the frame, and the palette |
-| [`05-ohmypi.md`](05-ohmypi.md) | The Agent Workshop — assistants, safety rules, and toolkits |
+| [`05-skills.md`](05-skills.md) | The Tool Drawers — the shared coding-assistant skills |

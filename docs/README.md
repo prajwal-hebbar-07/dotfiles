@@ -15,7 +15,7 @@ under the numbers already in use below.
 | [`02-zsh.md`](plain-english/02-zsh.md) — The Command Deck |
 | [`03-tmux.md`](plain-english/03-tmux.md) — The Workspace Grid |
 | [`04-ghostty.md`](plain-english/04-ghostty.md) — The Terminal Window |
-| [`05-ohmypi.md`](plain-english/05-ohmypi.md) — The Agent Workshop |
+| [`05-skills.md`](plain-english/05-skills.md) — The Tool Drawers |
 
 ## Freshness
 
@@ -37,4 +37,4 @@ Path globs to page numbers. A path may list several numbers.
 | `tmux/**` | `03` |
 | `yazi/**` | `01`, `03` |
 | `ghostty/**` | `04` |
-| `ohmypi/**` | `05` |
+| `skills/**` | `05` |
