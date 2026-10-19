@@ -22,6 +22,20 @@ modelRoles:
   dictation: local/whisper-large-v3-turbo
   review: openai-codex/gpt-6.1-sol:high
   scout: anthropic/claude-haiku-5-5:medium
+  factory_builder: anthropic/claude-opus-5-5:high
+  factory_arch_open: ollama-cloud/glm-5.3-flash:high
+  factory_slice_open: ollama-cloud/glm-5.3-flash:high
+  factory_tests_open: ollama-cloud/deepseek-v4.1-flash:high
+  factory_security_open: ollama-cloud/glm-5.3:high
+  factory_code_open: ollama-cloud/kimi-k2.7-code:high
+  factory_ux_open: ollama-cloud/gemma4:31b:high
+  factory_ui_open: ollama-cloud/glm-5.3-flash:high
+  factory_qa: ollama-cloud/glm-5.3-flash:high
+  factory_gpt: openai-codex/gpt-6.1-sol:high
+  factory_designer: openai-codex/gpt-6.1-sol:high
+  factory_standin: ollama-cloud/kimi-k2.7-code:high
+  factory_standin_alt: ollama-cloud/minimax-m3:high
+  factory_features: anthropic/claude-sonnet-5-5:high
 dev:
   autoqaConsent: granted
 task:
