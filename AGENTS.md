@@ -51,8 +51,12 @@ history). List new skills here.
 - `mcp.json` → `~/.omp/agent/mcp.json` — MCP servers (`paper`).
 - `rules/explicit-runtime-permission.md` →
   `~/.agents/rules/explicit-runtime-permission.md` — account-wide rule.
-- `skills/factory/` → `~/.omp/agent/skills/factory` — `factory` skill.
-- `commands/factory.md` → `~/.omp/agent/commands/factory.md` — `/factory`.
+
+The `factory` skill and `/factory` command were removed on 2026-10-19 to start
+over; they are archived at
+`~/.local/share/ohmypi/factory-archive-20261019-101151/` (also in git history).
+`SOFTWARE-FACTORY.md` at the repo root summarizes the research (super-board,
+Tessl harness engineering) and the combined design to rebuild from.
 
 ## Cursor skills
 
