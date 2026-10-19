@@ -53,7 +53,7 @@ history). List new skills here.
   `~/.agents/rules/explicit-runtime-permission.md` — account-wide rule.
 - `factory/` — the software factory, a local omp plugin installed with
   `omp plugin link omp/factory` (not symlinked file by file). It holds the
-  `factory` skill (`skills/factory/`), the `/factory` command (`commands/`), 14
+  `factory` skill (`skills/factory/`), the `/factory` command (`commands/`), 15
   agent definitions (`agents/`, models chosen through the `factory_*` aliases in
   `config.yml`), the holdout guard extension (`extensions/holdout-guard.ts`,
   declared in `package.json`), and evals for the factory itself (`evals/`).

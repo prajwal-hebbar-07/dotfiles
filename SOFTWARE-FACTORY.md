@@ -486,8 +486,9 @@ One local omp plugin at `omp/factory/` in this repo, installed once:
 omp/factory/
   skills/factory/SKILL.md     orchestrator: commands, gates, loop, state
   skills/factory/reference/   one file per step and per subagent prompt
-  agents/*.md                 builder; GPT designer; one open-weight reviewer per review
-                              step; GPT reviewer; two stand-ins; feature lister; holdout QA runner
+  agents/*.md                 builder; Sonnet designer; GPT-6 Astra design reviewer; one
+                              open-weight reviewer per review step; GPT reviewer; two
+                              stand-ins; feature lister; holdout QA runner
   extensions/holdout-guard.ts tool_call guard, declared in package.json omp.extensions
   evals/                      fixed eval tasks for the factory itself
   package.json
@@ -540,8 +541,9 @@ omp/factory/
   The factory never merges: merge the PR on GitHub, then /factory resume.
   ```
 - **Agents:** each definition sets its tools and a model role alias (one per review
-  step's open-weight reviewer, plus `@factory_builder`, `@factory_designer`, `@factory_gpt`,
-  `@factory_standin`, `@factory_standin_alt`, `@factory_qa`, `@factory_features`), mapped
+  step's open-weight reviewer, plus `@factory_builder`, `@factory_designer`,
+  `@factory_design_review`, `@factory_gpt`, `@factory_standin`, `@factory_standin_alt`,
+  `@factory_qa`, `@factory_features`), mapped
   in `omp/config.yml` `modelRoles`, so each step's model swaps without editing agents. A
   review step hands the same checklist (its reference file) to each of
   its reviewer agents. The orchestrator spawns them all at depth 1 (omp's
@@ -591,7 +593,7 @@ flowchart TD
   A2 --> GA{Human: approve architecture}
   GA -- revise --> A1
   GA -- needs other stack choice --> S1
-  GA -- ok --> D1[Design in Paper: direction, draft, review]
+  GA -- ok --> D1[Design in Paper: direction, draft, GPT-6 Astra review]
   D1 --> GD{Human: approve design}
   GD -- revise --> D1
   GD -- ok --> IS[Create one GitHub issue per module or feature]
@@ -683,13 +685,17 @@ The agent decides; it does not interview. Decisions are written for the approved
 
 - Only for work with UI, through the Paper MCP server (`omp/mcp.json`).
 - The human gives the Paper file and page; the work record stores them.
-- The `factory-designer` agent (GPT, `@factory_designer`) owns the creative direction and
-  every Paper write; the orchestrator runs the gate. GPT was chosen over Claude for
-  stronger creative direction. When needed it proposes the direction first: a reference
-  UI as the base, then the requested changes. Then it builds tokens and the design system,
-  then the screens in order, and screenshots them for review.
-- Review rounds until approved. Approved artboards become the visual reference for the
-  UI lens and holdout QA.
+- The `factory-designer` agent (Sonnet 5.5 at xhigh effort, `@factory_designer`) owns the
+  creative direction and every Paper write; the orchestrator runs the gate. When needed it
+  proposes the direction first: a reference UI as the base, then the requested changes.
+  Then it builds tokens and the design system, then the screens in order, and screenshots
+  them.
+- The `factory-review-design` agent (GPT-6 Astra, `@factory_design_review`) reviews every
+  built or revised design in Paper, read-only, before the human sees it: requirement
+  coverage, direction, tokens, hierarchy, accessibility, copy, buildability. `CHANGES` goes
+  back to the designer in revise mode; max 3 review rounds, then the human decides.
+- Human review rounds until approved. Approved artboards become the visual reference for
+  the UI lens and holdout QA.
 
 ### Build (no human)
 
@@ -828,13 +834,14 @@ marks what changed.
 
 Pick models by cost per verified outcome, not token price (Tessl).
 
-All models run at high effort.
+All models run at high effort, except the designer at xhigh.
 
 | Role | Role alias | Model |
 | --- | --- | --- |
 | Orchestrator, Gates 1–4 (runs Gate 4, does not draw), pre-push, retro | `default` | `anthropic/claude-opus-5-5` |
 | Builder (fresh per slice) | `@factory_builder` | `anthropic/claude-opus-5-5` |
-| Designer: Gate 4 direction and every Paper write (fresh per round) | `@factory_designer` | `openai-codex/gpt-6.1-sol` |
+| Designer: Gate 4 direction and every Paper write (fresh per round) | `@factory_designer` | `anthropic/claude-sonnet-5-5` (xhigh) |
+| Design reviewer: Gate 4, read-only in Paper (fresh per round) | `@factory_design_review` | `openai-codex/gpt-6-astra` |
 | Open-weight reviewers, one alias per review step | `@factory_<step>_open` | see the next table |
 | Holdout QA runner (needs images) | `@factory_qa` | `ollama-cloud/glm-5.3-flash` |
 | GPT reviewer | `@factory_gpt` | `openai-codex/gpt-6.1-sol` |
@@ -889,7 +896,8 @@ modelRoles:
   factory_ui_open: ollama-cloud/glm-5.3-flash:high
   factory_qa: ollama-cloud/glm-5.3-flash:high
   factory_gpt: openai-codex/gpt-6.1-sol:high
-  factory_designer: openai-codex/gpt-6.1-sol:high
+  factory_designer: anthropic/claude-sonnet-5-5:xhigh
+  factory_design_review: openai-codex/gpt-6-astra:high
   factory_standin: ollama-cloud/kimi-k2.7-code:high
   factory_standin_alt: ollama-cloud/minimax-m3:high
   factory_features: anthropic/claude-sonnet-5-5:high
@@ -901,6 +909,7 @@ Agent definitions in `omp/factory/agents/`, each pointing at one alias:
 | --- | --- | --- |
 | `factory-builder` | `@factory_builder` | read, grep, glob, edit, write, bash, lsp |
 | `factory-designer` | `@factory_designer` | read, grep, glob, write (its one output file, `design.md`), Paper MCP |
+| `factory-review-design` | `@factory_design_review` | read, grep, glob, write (its verdict file only), Paper MCP read-only |
 | `factory-review-<step>` for arch, slice, tests, security, code | `@factory_<step>_open` | read, grep, glob, bash, write (its verdict file only) |
 | `factory-review-ux`, `factory-review-ui` | `@factory_ux_open`, `@factory_ui_open` | read, grep, glob, bash, browser, write |
 | `factory-review-gpt` | `@factory_gpt` | read, grep, glob, bash, browser, write |

@@ -2,7 +2,7 @@
 
 ## Pairing
 
-Every review step has one open-weight reviewer and one premium reviewer (GPT), spawned in the same message, blind to each other. No Claude model reviews: Opus writes the architecture and the code.
+Every review step has one open-weight reviewer and one premium reviewer (GPT), spawned in the same message, blind to each other. No Claude model reviews: Opus writes the architecture and the code, Sonnet designs.
 
 | Step | Open-weight agent | Premium agent | Stand-in when GPT is rate-limited |
 | --- | --- | --- | --- |
@@ -15,6 +15,8 @@ Every review step has one open-weight reviewer and one premium reviewer (GPT), s
 | ui | `factory-review-ui` | `factory-review-gpt` | `factory-review-standin` |
 
 A stand-in never duplicates a model already in its step. Use one only when the GPT spawn fails with a rate-limit or quota error; record it in `state.json.standins_used` and in the issue's evidence.
+
+Gate 4 design is the one exception: a single reviewer, `factory-review-design` (GPT-6 Astra, `@factory_design_review`), no open-weight pair and no stand-in. Its prompt and loop are in `gate-4-design.md`; it uses the verdict file and rules below, with artboard names in place of `path:line`.
 
 A step passes only when **every** reviewer in it writes `VERDICT: PASS`. Findings stay per reviewer; never merge, average, or drop one. A round ends only when every reviewer's file exists; never resume the builder mid-round. A reviewer that finishes without its file, or whose first line is not a verdict, is rerun once, then reported to the human.
 
@@ -112,3 +114,16 @@ Use the twins, never real services; never sign in to or submit forms against any
 ## ui
 
 Same launch rules as ux. Screens against the approved Paper artboards and tokens in `design.md`: colours, type scale, spacing, radii, backgrounds; existing styling system used, no one-off CSS or hard-coded values where a token exists; alignment and hierarchy; readable contrast; nothing overflows at phone width. Screenshot desktop and phone widths and reference them in findings.
+
+## design
+
+Read-only in Paper; screenshot every artboard you judge and name it in findings.
+
+- Every requirement with a UI maps to an artboard, and every state it names is drawn: empty, loading, error, validation, confirmations, notices.
+- The design follows the approved direction in `design.md`; no second direction, no drift between screens.
+- Tokens: colours, type scale, spacing and radii come from the page's tokens; no one-off values where a token exists; `design.md` lists the same tokens Paper has.
+- Hierarchy and alignment: one primary action per screen, consistent placement of navigation and actions, nothing clipped or overflowing at the target width.
+- Accessibility: text contrast at least WCAG AA, touch targets at least 44×44 (48×48 on Android), labels on every input, state never shown by colour alone.
+- Copy: short, plain, consistent, and using the requirements' and architecture's names for things.
+- Buildable on the approved stack (`stack.md`) without packages Gate 2 did not approve.
+- `design.md`: STATUS line, artboard → R-ID map matches the page, no node IDs.

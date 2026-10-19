@@ -23,6 +23,7 @@ In the repo, never committed:
   questions.md          queued gated questions and their answers
   trace.jsonl           one JSON line per agent run (see retro.md)
   arch-review/r<N>/<agent>.md
+  design-review/r<N>/factory-review-design.md
   issues/<n>/
     slices/<k>/build.md                  builder report
     slices/<k>/r<N>/<agent>.md           slice review verdicts

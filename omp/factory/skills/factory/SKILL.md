@@ -29,7 +29,7 @@ When a work ID or issue is omitted, resolve it as `reference/state.md` "Resolvin
 
 ```
 start → Gate 1 requirements → Gate 2 stack + grant → Gate 3 architecture + issue plan
-      → Gate 4 design (UI work only) → create issues
+      → Gate 4 design + design review (UI work only) → create issues
       → per issue: branch from base → [Slice 0 on the first issue] → slices
                    → test-suite review → holdout QA → final review
                    → pre-push → risk look (if triggered) → walkthrough → push + draft PR
@@ -43,7 +43,7 @@ start → Gate 1 requirements → Gate 2 stack + grant → Gate 3 architecture +
 | Gate 1: requirements and holdout scenarios | `reference/gate-1-requirements.md` |
 | Gate 2: stack, packages, external services, run grant, push target, budget | `reference/gate-2-stack.md` |
 | Gate 3: architecture, decision register, issue plan, architecture review | `reference/gate-3-architecture.md` |
-| Gate 4: Paper design | `reference/gate-4-design.md` |
+| Gate 4: Paper design and design review | `reference/gate-4-design.md` |
 | Issues, branches, Slice 0, slice loop, commits | `reference/build.md` |
 | Every review step: pairing, verdict format, checklists, rounds, stand-ins | `reference/review.md` |
 | Holdout QA | `reference/holdout-qa.md` |
@@ -61,7 +61,8 @@ All at depth 1 through the `task` tool, by exact agent name. Never pass a model;
 | Agent | Role |
 | --- | --- |
 | `factory-builder` | Builds one slice (fresh per slice, resumed by name across that slice's review rounds) |
-| `factory-designer` | Gate 4: sets the creative direction and does every Paper write (GPT, fresh per round) |
+| `factory-designer` | Gate 4: sets the creative direction and does every Paper write (Sonnet, fresh per round) |
+| `factory-review-design` | Gate 4: reviews the built design in Paper (GPT-6 Astra, fresh per round) |
 | `factory-review-arch` | Open-weight reviewer, architecture |
 | `factory-review-slice` | Open-weight reviewer, slices |
 | `factory-review-tests` | Open-weight reviewer, test suite |
@@ -69,13 +70,13 @@ All at depth 1 through the `task` tool, by exact agent name. Never pass a model;
 | `factory-review-code` | Open-weight reviewer, final code lens |
 | `factory-review-ux` | Open-weight reviewer, final UX lens (images) |
 | `factory-review-ui` | Open-weight reviewer, final UI lens (images) |
-| `factory-review-gpt` | Premium reviewer in every review step |
+| `factory-review-gpt` | Premium reviewer in every review step except Gate 4 design |
 | `factory-review-standin` | Replaces `factory-review-gpt` when GPT is rate-limited (all steps except the code lens) |
 | `factory-review-standin-alt` | Replaces `factory-review-gpt` in the code lens |
 | `factory-qa` | Holdout QA runner; the only subagent allowed to read the scenarios |
 | `factory-features` | `/factory features` lister, read-only |
 
-No Claude model ever reviews or designs: you (Opus) write the architecture, `factory-builder` (Opus) writes the code, and `factory-designer` (GPT) owns the Paper design.
+No Claude model ever reviews: you (Opus) write the architecture, `factory-builder` (Opus) writes the code, `factory-designer` (Sonnet) owns the Paper design, and `factory-review-design` (GPT) reviews it.
 
 ## Hard limits
 
