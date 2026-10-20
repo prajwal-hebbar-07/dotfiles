@@ -424,6 +424,31 @@ On an existing repo, the stage detects what is there first (CDD step 1) and
 issue #0 adds only what is missing. Coverage and mutation targets start as
 ratchets at today's values.
 
+### 4.8 Requirement changes after issues exist
+
+You can change a requirement at any time ("Change of plan: deleting a task
+should archive it"). The factory then:
+
+1. Stops building, edits REQUIREMENTS.md, and reopens its gate (§4.3). The
+   gate's "what changed" header lists each added, changed, or removed `R`
+   number **and every issue and PR that cites it**, with what will happen to
+   each. Approving the document approves that list.
+2. Reopens STACK.md or ARCHITECTURE.md only if the change touches them
+   (archived eval 05: "not Gate 2, which the change doesn't touch").
+3. After approval, updates the work that cites a changed `R`:
+
+   | Issue state | What happens |
+   | --- | --- |
+   | Not started | issue body rewritten: acceptance criteria re-copied from the new Given / When / Then, doc links moved to the new approved sha, a comment says what changed |
+   | In progress | builder stopped; issue rewritten as above and set back to `factory:queued`; the branch is kept and its verdicts no longer count |
+   | PR open | the change goes to the builder as an "Act on" item on the same branch (§5.7), then every invalidated review runs again and you are asked "Raise PR?" again |
+   | Merged | a new follow-up issue citing the changed `R` and the merged issue |
+
+   A removed `R` closes the issues that covered only it ("not planned"). An
+   added `R` gets new issues through the same slicing and coverage check as
+   §4.6. `factory-qa-author` rewrites the holdout scenarios for every changed
+   `R`.
+
 ## 5. Per-issue pipeline (stage 7) — `factory-build`
 
 ### 5.1 Order
@@ -598,14 +623,23 @@ another skill does not reliably load it
 - **Depth:** omp's `task.maxRecursionDepth` defaults to 2. Keep the main
   session as the only orchestrator, with every role agent at depth 1. Then
   reviewers can still spawn scouts, and no issue-runner layer is needed.
+- **Budget per issue.** omp already caps each helper agent: a soft budget of
+  200 model requests (`task.softRequestBudget`), then a forced stop at 1.5×.
+  On top of that, the factory caps each issue at a wall-clock time and a
+  number of helper-agent runs (Q7, §11). Whichever runs out first ends the
+  issue the same way as a fourth attempt: `factory:needs-human`, a ledger
+  summary of what was spent and why, and the factory moves on or stops. omp
+  shows recorded cost but has no money cap, so time and runs are the
+  enforceable limits. To keep part of your subscription quota for your own
+  work, set `retry.usageAwareFallback: true` with a reserve
+  (`retry.usageReservePct`, default 10%).
 
 ### 5.4 Pre-PR gate and the PR (stage 8)
 
 - **GO / NO-GO** (addyosmani `/ship`), in this order:
   1. Every verdict covers the head's patch (§5.1), and no
      `factory:needs-human` label is set.
-  2. The project's full local checks pass (`check:full` from CONSTRAINTS.md),
-     run under the §8 run permission.
+  2. The project's full local checks pass (`check:full` from CONSTRAINTS.md).
   3. The branch is pushed to `factory/<issue>-<slug>`, with no PR, by a plain
      `git push` (`github` `pr_push` only works on branches made by
      `pr_checkout`). The hook allows this push (§7).
@@ -615,7 +649,11 @@ another skill does not reliably load it
 - **PR body:** pstack `opening-a-pr` sections (Why · What changed · Scope ·
   Tradeoffs · Blast Radius · Verification) plus mattpocock `pr`'s Merge Danger
   (one-way vs two-way door). Verification is built from the ledger plus the CI
-  run link. The body ends `Closes #<issue>`.
+  run link, and links the QA and UI evidence (`qa-evidence/<issue>/<sha>/`).
+  A **Manual check** section follows: the QA journeys rewritten as short
+  steps for you (how to start the app, what to click, what you should see),
+  because the factory's browser testing comes first and your own pass comes
+  after it. The body ends `Closes #<issue>`.
 - **Ask:** §4.3 with one question, "Raise PR for #N?", showing the PR body as
   the preview. **Approve** → `github` `pr_create` from the already-pushed
   `factory/*` branch (ready, not draft). Labels `factory:pr-ready` → closed
@@ -751,8 +789,8 @@ on its state. No watcher runs in between.
 | Skill | Use in the factory | Change needed |
 | --- | --- | --- |
 | `commit` | every commit the factory makes | none |
-| `implementation-plan` + `review-implementation-plan` | per-issue plan + second-model plan review | its rule "Manual and UI testing stay with the user" contradicts automated QA. The factory needs its own variant or a flag |
-| `follow-implementation-plan` | builder inner loop | it restarts chats per window; inside the factory a fresh sub-agent replaces that |
+| `implementation-plan` + `review-implementation-plan` | per-issue plan + second-model plan review | Small. Its plans already run the unit tests ("runs the project's unit-test command"), and they leave out browser and UI steps, which is right for the builder: QA and UI review are separate agents. Only its fixed commit sentence, "Manual testing and UI testing are left to the user.", is wrong inside the factory. `factory-planner` writes "Browser and UI checks are done by the factory's QA and UI review first; you do a manual pass on the PR." instead |
+| `follow-implementation-plan` | builder inner loop | it restarts chats per window; inside the factory a fresh sub-agent replaces that. Its "do not start the app" rule stays: the builder never drives the app, `factory-qa` does |
 | `paper-design-prompt` | architecture-stage UI direction | none |
 | `paper-design` | `factory-designer` | Three changes. (1) It is `disable-model-invocation: true`, so load it via `autoloadSkills` [INFERENCE: hidden skills load through autoload the same way they load through `skill://`; check before relying on it]. (2) Today it builds every screen in the brief; per issue it must build only that issue's screens. (3) It stops when the Paper MCP is down, and it may not start Paper Desktop. Inside the factory, label the issue `factory:needs-human` and continue with issues that have no UI |
 | `paper-target` | pin the Paper file per target repo | none |
@@ -809,14 +847,12 @@ covers the irreversible actions.
 
 ## 8. omp-specific constraints
 
-1. **The account-wide rule `explicit-runtime-permission.md` blocks automated
-   QA.** It forbids running tests, apps, dev servers, or browser checks unless
-   you explicitly ask for that task, and it says a request to build a feature
-   is not permission. An autonomous pipeline that runs tests and drives the app
-   breaks it. Fix: `factory-build` opens with a gate question, "Run tests, dev
-   server, and browser checks for issues #a–#b in this run?". Approve is the
-   explicit, scoped permission the rule asks for. Leave the rule file
-   unchanged.
+1. **No run-permission gate.** The account-wide rule
+   `explicit-runtime-permission.md`, which blocked running tests, apps, and
+   browser checks without an explicit request, was removed on 2026-10-20.
+   Builder, test review, QA, and UI review run tests and drive the app with no
+   question to you. What still needs your approval is unchanged: the gates,
+   the push outside `factory/*`, and opening a PR (§4.3, §5.4, §7).
 2. **`github.enabled` defaults to `false`.** Turn it on (Settings → Tools) for
    `pr_create` and `run_watch`. `pr_create` and `pr_push` also go through
    omp's execution approval.
@@ -918,7 +954,7 @@ Each step is usable before the next one exists.
 | Q4 | "Raise PR" on Approve: agent opens it, or agent pushes the branch and you open it? | agent opens it |
 | Q5 | Whole-app mode: one PR for the epic, or one per frontier wave? | one per wave (smaller reviews) |
 | Q6 | Holdout QA scenarios (builder never sees them)? | yes |
-| Q7 | A cost or time limit for an unattended run? Attempts are capped (§5.3), total spend is not | none set; needs your number |
+| Q7 | Limits per issue for the unattended part | 3 hours wall clock or 40 helper-agent runs per issue, whichever comes first; each helper agent stopped after 60 minutes (`task.maxRuntimeMs: 3600000`); 10% of subscription quota kept back |
 | Q8 | Docs refresh after a merge: its own PR, or a commit on the next PR? | its own PR (§5.7) |
 
 ## 12. Research reports: compared, mostly not adopted
@@ -936,7 +972,7 @@ needs it and the existing skills lack it.
 | github/spec-kit (GPT) | numbered requirements with Given / When / Then; coverage categories; requirement checklists; consistency analysis | **Adopted numbering + Given / When / Then** (issues and QA need them). The checklists and analysis duplicate the builder check |
 | magnus919 `product-discovery` (GPT) | open-question rules, SAID / INFERRED tags, draft-review route | not adopted: `interview-me` covers it; the tags add bookkeeping the gate does not need |
 | Dengk3Li `product-grilling` (GPT) | — | not adopted: it is mattpocock `grilling`, credited as such |
-| Dengk3Li `product-requirements` (GPT) | requirement graph + checker script | not adopted: heavy, and running the script needs runtime permission |
+| Dengk3Li `product-requirements` (GPT) | requirement graph + checker script | not adopted: heavy, and the builder check covers the same gaps |
 | pablasso `prd` + `prd-review` (Claude) | one-page PRD + review checklist | not adopted: `to-spec` + builder check cover it |
 | idnotbe `prd-creator` (Claude) | large Epic/Feature/Story template | not adopted: too heavy for the gate to review section by section |
 | github/awesome-copilot `prd` (Claude) | enterprise PRD schema | not adopted: overlaps `to-spec` |
@@ -1250,25 +1286,16 @@ a few design decisions, and omp behaviour to confirm by running it.
 
 The general research (§12) settled every stage that had no design: QA,
 builder, recovery, tech stack, both reviews, UI review, issues and board,
-per-issue security, evals, bootstrap (issue #0), and stage 9. What it did not
-settle:
-
-- **Cost and time budget** (Q7 in §11). Attempts are capped; total spend is
-  not.
-- **Requirement changes after issues exist.** A reopened REQUIREMENTS.md gate
-  must list the issues and open PRs citing each changed `R` number, and send
-  them back to `factory:queued`. Archived eval 05 checks that only the
-  affected gates reopen.
-- **`implementation-plan` conflict** (§6). Its "manual and UI testing stay
-  with the user" rule must be overridden in `factory-planner`, or the planner
-  writes plans with no QA step.
+per-issue security, evals, bootstrap (issue #0), and stage 9. The three
+items it left were decided on 2026-10-20: the budget per issue (§5.3, Q7),
+requirement changes after issues exist (§4.8), and the `implementation-plan`
+sentence (§6).
 
 ### 14.3 omp behaviour to confirm by running it (needs your permission)
 
 | # | Question | How to check |
 | --- | --- | --- |
 | V1 | Does `autoloadSkills` load a `disable-model-invocation: true` skill (`paper-design`)? Docs say it loads "skills from the parent session", and hidden skills stay loaded, so probably yes | spawn a test agent with `autoloadSkills: paper-design` and ask it to quote the skill |
-| V2 | Do sub-agents get the account rule `explicit-runtime-permission.md`? If they do, QA and test agents refuse to run tests even after you approve in the main session, unless the approval text goes into their task | spawn a `task` agent and ask what rules it has |
 | V3 | Can the `factory-guard` hook block `github` `pr_create` and `git push` inside sub-agents? Extensions are rebound to every sub-agent session (`omp://extensions.md`) | a throwaway hook that blocks `git push`, then a sub-agent that tries it |
 | V4 | Is the `ask` dialog's `preview` usable for a whole document section? | one gate run on a sample REQUIREMENTS.md |
 | V5 | Does `task.isolation` with branch merge work on this Mac (APFS)? | one isolated sub-agent edits one file; check the `omp/task/<id>` branch |
@@ -1279,5 +1306,5 @@ settle:
 
 ### 14.4 Your decisions still pending
 
-Q1–Q8 in §11 still carry defaults that you have not confirmed. Q7 has no
-default.
+Q1–Q8 in §11 still carry defaults that you have not confirmed. Q7's numbers
+are a first guess, to be tuned after issue #0 and the first feature issue.

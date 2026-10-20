@@ -49,8 +49,10 @@ history). List new skills here.
 - `config.yml` → `~/.omp/agent/config.yml` — settings and model roles; omp also
   writes this file.
 - `mcp.json` → `~/.omp/agent/mcp.json` — MCP servers (`paper`).
-- `rules/explicit-runtime-permission.md` →
-  `~/.agents/rules/explicit-runtime-permission.md` — account-wide rule.
+
+The account-wide rule `rules/explicit-runtime-permission.md` (no launching
+apps, servers, or tests without an explicit request) was removed on
+2026-10-20 at the user's request; it is in git history.
 
 The software factory (`omp/factory/` plugin, `factory_*` model aliases,
 `SOFTWARE-FACTORY.md`) was removed on 2026-10-20 to be rebuilt from scratch as

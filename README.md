@@ -63,21 +63,18 @@ Two Ghostty parser details worth remembering when editing that file:
 
 ### Oh My Pi
 
-The coding harness (`omp`). `omp/` holds its settings, MCP servers, and rules,
-each symlinked to where omp reads it:
+The coding harness (`omp`). `omp/` holds its settings and MCP servers, each
+symlinked to where omp reads it:
 
 | Repo file | Live path | What it is |
 | --- | --- | --- |
 | `omp/config.yml` | `~/.omp/agent/config.yml` | Settings: model roles, per-agent model overrides, theme, symbol preset |
 | `omp/mcp.json` | `~/.omp/agent/mcp.json` | MCP servers: `paper`, started from the binary inside `/Applications/Paper.app` |
-| `omp/rules/explicit-runtime-permission.md` | `~/.agents/rules/explicit-runtime-permission.md` | Account-wide rule: no launching apps, servers, or tests without an explicit request |
 
 `config.yml` is also written by omp itself (settings UI, `/model`, saved
 settings). Edits made there land in the repo file through the link; if a save
 ever replaces the link with a plain file, copy it back over `omp/config.yml`
 and re-link.
-
-Rules are read at startup: an edited rule takes hold in the next omp session.
 
 omp has no skills or commands of its own right now.
 
@@ -369,10 +366,9 @@ dotfiles/
 ├── ghostty/    # terminal config
 │   ├── config
 │   └── themes/pale-knight
-├── omp/        # Oh My Pi settings, MCP servers, rules
+├── omp/        # Oh My Pi settings, MCP servers
 │   ├── config.yml
-│   ├── mcp.json
-│   └── rules/explicit-runtime-permission.md
+│   └── mcp.json
 ├── skills/     # Agent Skills, linked into Cursor, Gemini, and Claude Code
 │   ├── commit/SKILL.md
 │   ├── docs/SKILL.md
@@ -466,10 +462,9 @@ ln -sfn "$PWD/skills/docs-verify" ~/.gemini/config/skills/docs-verify
 ln -sfn "$PWD/skills/follow-implementation-plan" ~/.gemini/config/skills/follow-implementation-plan
 ln -sfn "$PWD/skills/repo-docs" ~/.gemini/config/skills/repo-docs
 
-mkdir -p ~/.omp/agent ~/.agents/rules
+mkdir -p ~/.omp/agent
 ln -sfn "$PWD/omp/config.yml"  ~/.omp/agent/config.yml
 ln -sfn "$PWD/omp/mcp.json"    ~/.omp/agent/mcp.json
-ln -sfn "$PWD/omp/rules/explicit-runtime-permission.md" ~/.agents/rules/explicit-runtime-permission.md
 
 mkdir -p ~/.claude/skills
 for s in arc-design commit follow-implementation-plan follow-plan-with-review \
