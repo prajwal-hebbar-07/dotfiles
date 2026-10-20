@@ -473,19 +473,76 @@ another skill does not reliably load it
 
 ### 5.4 Pre-PR gate and the PR (stage 8)
 
-- **GO / NO-GO** (addyosmani `/ship`): every verdict PASS at the head SHA,
-  CI green (`github` tool `run_watch` once the branch is pushed), no
-  `factory:needs-human`.
+- **GO / NO-GO** (addyosmani `/ship`), in this order:
+  1. Every verdict is PASS at the head SHA, and no `factory:needs-human`
+     label is set.
+  2. The project's full local checks pass (`check:full` from CONSTRAINTS.md),
+     run under the §8 run permission.
+  3. The branch is pushed to `factory/<issue>-<slug>`, with no PR. The hook
+     allows only this push (§7).
+  4. GitHub CI runs on that push and the `github` tool's `run_watch` reports
+     it green. The target repo's CI must trigger on pushes to `factory/**`;
+     `factory-architecture` adds that trigger when it writes CONSTRAINTS.md.
+     CI runs again when the PR opens.
 - **PR body:** pstack `opening-a-pr` sections (Why · What changed · Scope ·
   Tradeoffs · Blast Radius · Verification) plus mattpocock `pr`'s Merge Danger
-  (one-way vs two-way door). Verification is built from the ledger. The body
-  ends `Closes #<issue>`.
+  (one-way vs two-way door). Verification is built from the ledger plus the CI
+  run link. The body ends `Closes #<issue>`.
 - **Ask:** §4.3 with one question, "Raise PR for #N?", showing the PR body as
-  the preview. **Approve** → push the branch and run `github` `pr_create`
-  (ready, not draft). Labels `factory:pr-ready` → closed when you merge.
-  **No** → your reason goes back into the loop as an "Act on" item.
-- The factory never merges and never pushes before this approval. A hook
-  enforces it (§7).
+  the preview. **Approve** → `github` `pr_create` from the already-pushed
+  `factory/*` branch (ready, not draft). Labels `factory:pr-ready` → closed
+  when you merge. **No** → your reason goes back into the loop as an "Act on"
+  item.
+- The factory never merges, never pushes outside `factory/*`, and never opens
+  a PR before this approval. A hook enforces it (§7).
+
+### 5.5 Questionnaires from helper agents
+
+Helper agents run headless and cannot call `ask` (`omp://tools/ask.md`,
+`omp://approval-mode.md`). Any of them can still raise questions:
+
+- **The agent returns a questionnaire instead of guessing.** Every factory
+  agent's structured output may include `questions`, in the same shape the
+  `ask` tool takes: `id`, `question`, two to five `options` with
+  `label`/`description`, and an optional `recommended`. It then stops.
+  Typical triggers are a `MISSING REQUIREMENT` (§5.3), two readings of an
+  acceptance criterion, or a design choice the brief does not settle.
+- **The main session handles it.** First it answers from the approved docs
+  (REQUIREMENTS, STACK, ARCHITECTURE, CONSTRAINTS, ADRs). An answer found
+  there is recorded in the ledger as "factory's call" with its source.
+  Anything else goes to you through `ask`, unchanged. An answer that changes
+  an approved doc reopens that doc's gate (§4.3).
+- **The answer goes back to the same agent** with `write agent://<id>`. omp
+  revives a parked agent, so the agent continues with its context intact.
+- Approval-tier tools (`git push`, `github` `pr_create`) also stay in the main
+  session. A helper that needs one returns the request, as it would a
+  question.
+
+### 5.6 Stops between sessions
+
+The factory stops at fixed points so you can close the session and start a
+fresh one from there. Nothing it needs lives only in chat.
+
+| Stop | After |
+| --- | --- |
+| S1 | REQUIREMENTS.md approved |
+| S2 | STACK.md approved |
+| S3 | ARCHITECTURE.md (+ CONSTRAINTS, design brief) approved |
+| S4 | Issues published to the board |
+| S5 | Each issue's "Raise PR?" answered. In whole-app mode, each frontier wave |
+
+At every stop the factory:
+
+1. commits the stage's artifacts through `commit`;
+2. writes `.factory/state.json`: stage, gate stamps, issue statuses, and the
+   next action;
+3. ends with one line: *"Stop S<n>. Start a new omp session in this repo and
+   run `/skill:factory`."*
+
+`/skill:factory` reads `state.json`, the ledger, and the issue labels, then
+resumes at the next action. It never relies on an earlier chat. Work that was
+in progress when a session died is redone from its last recorded step: a
+verdict missing from the ledger means that review runs again.
 
 ## 6. What to reuse from this repo
 
@@ -516,7 +573,7 @@ skills/
   factory-stack/           stage 4; template.md = STACK.md
   factory-architecture/    stage 5; template.md, CONSTRAINTS template
   factory-issues/          stage 6; issue template, gh commands, labels, board
-  factory-build/           stage 7–8; pipeline, loop rules, PR template
+  factory-build/           stage 7–8; pipeline, loop rules, questionnaire relay, PR template
   factory-review/          shared rubric + verdict formats (autoloaded by reviewer agents)
 omp/
   agents/                  → ~/.omp/agent/agents/   factory-builder-check (§4.3) + the eleven agents in §5.2
@@ -526,10 +583,12 @@ omp/
 `factory-guard.ts` is a `tool_call` hook (omp `hooks.md`). It returns
 `{ block: true, reason }` for:
 
-1. `git push`, `gh pr create`, `gh pr merge`, and `github` `pr_create` /
-   `pr_push`, unless `.factory/state.json` holds a PR approval for the current
-   branch and HEAD SHA. mattpocock's `git-guardrails-claude-code` does the
-   same for Claude Code.
+1. `gh pr create`, `gh pr merge`, `github` `pr_create`, and any `git push`
+   (including `github` `pr_push`) to a branch outside `factory/*`. A
+   `pr_create` needs a PR approval in `.factory/state.json` for that branch and
+   HEAD SHA. A plain push to `factory/*` is allowed so CI can run before you
+   are asked (§5.4); a force push there is not. mattpocock's
+   `git-guardrails-claude-code` does the same job for Claude Code.
 2. Any read of `.factory/holdout/` by an agent other than `factory-qa` /
    `factory-qa-author`. The archived factory's `holdout-guard.ts` already does
    this.
@@ -565,6 +624,18 @@ covers the irreversible actions.
    pointers, not copies.
 6. **Plan mode** strips sub-agents to read-only tools and rejects `isolated`.
    Do not run `factory-build` in plan mode.
+7. **`AGENTS.md` and `CLAUDE.md` must reach every context**, including helper
+   agents and every new session. omp loads both into the main session's system
+   prompt, so they survive compaction and come back in each new session. But
+   it drops any file named `agents.md` when it spawns a helper agent, and
+   passes only `CLAUDE.md` on (`omp://system-prompt-customization.md`). The
+   fix is that the target repo's `CLAUDE.md` holds a bare `@AGENTS.md` line,
+   outside any code fence. omp expands `@` imports before injection, and
+   imported text is not filtered, so every helper agent receives both files
+   (`omp://context-files.md`). `/skill:factory` checks that line on every
+   start and adds it if missing. The fallback is a small extension that
+   injects `AGENTS.md` when `ctx.agent.kind === "sub"`. V6 (§14.3) confirms
+   which one works.
 
 ## 9. Build order
 
@@ -865,24 +936,16 @@ Reviewed on 2026-10-20 after the six research rounds in §12. Three kinds of
 work remain: design conflicts to fix, stages with no research yet, and omp
 behaviour to confirm by running it.
 
-### 14.1 Conflicts in this design (fix, no research needed)
+### 14.1 Conflicts in this design — decided 2026-10-20
 
-1. **CI before the PR cannot happen.** §5.4 wants CI green before it asks
-   "Raise PR?", but the hook (§7) blocks every push until you approve, so CI
-   never runs. Options:
-   - run CONSTRAINTS' `check:full` locally as the pre-PR gate, under the §8
-     run permission, and let GitHub CI run after the PR opens;
-   - let the hook allow pushes to a `factory/*` branch, with no PR, before
-     asking you.
-2. **Sub-agents do not see the target repo's `AGENTS.md`.** omp drops any
-   `agents.md` file when it spawns a task agent, though `CLAUDE.md` is still
-   passed on (`omp://system-prompt-customization.md`). The builder and the
-   reviewers would miss the repo's conventions. Either pass the `AGENTS.md`
-   path in every task's `context`, or keep the conventions in `CLAUDE.md`.
-3. **Sub-agents cannot answer prompts.** They run headless, and any tool call
-   that needs approval is rejected (`omp://approval-mode.md`). `ask`,
-   `github` `pr_create`, and every gate must therefore run in the main
-   session. The design already assumes this; each skill has to say it.
+1. **CI before the PR.** Both fixes apply. `check:full` runs locally first,
+   then a push to `factory/*` runs GitHub CI before you are asked (§5.4, §7).
+2. **`AGENTS.md` missing in helper agents.** Both `AGENTS.md` and `CLAUDE.md`
+   must reach every context. The target repo's `CLAUDE.md` imports
+   `@AGENTS.md` (§8 item 7).
+3. **Helper agents cannot answer prompts.** They return a questionnaire, and
+   the main session handles it (§5.5).
+4. **New:** fixed stops between sessions, resumed with `/skill:factory` (§5.6).
 
 ### 14.2 Stages with no dedicated research yet
 
@@ -894,7 +957,7 @@ human catches their mistakes.
 | --- | --- | --- | --- |
 | R1 | QA (§5.2 `factory-qa`, `factory-qa-author`) | The least specified part: how an agent starts the app, seeds data, drives the browser, and records evidence unattended | verification / QA-agent skills, Playwright or browser-driving skills, holdout acceptance tests, pstack `create-verification-skill` in depth, omp `browser` tool |
 | R2 | Builder (§5.2 `factory-builder`) | The biggest unattended step: TDD inside one issue, commits, staying inside scope | superpowers `subagent-driven-development`, `executing-plans`, `test-driven-development`; mattpocock `implement`; Ralph-style loops; "autonomous coding agent skill" |
-| R3 | Unattended run and resume (§5.3) | A long session dies, compacts, or stops; the factory must pick up from `.factory/state.json` | omp `session_stop` hook (can keep the main session going, capped at 8 continuations), handoff and compaction, pstack `orchestrate` / `autonomous-run`, "long-running agent resume" |
+| R3 | Recovery inside a stage (§5.6 covers stage boundaries) | A session that dies mid-issue must resume from its last ledger entry without redoing passed work or skipping failed work | omp `session_stop` hook, compaction and handoff, pstack `orchestrate` / `autonomous-run`, "long-running agent resume" |
 | R4 | Tech stack (§4.4) | A human gate with no research: candidates, scoring, fresh facts | "tech stack selection skill", "technology decision record", me-cedric `architecture-advisor` options matrix (already read), Thoughtworks Radar-style evaluation |
 | R5 | Code review (§5.2) | Covered only by the first pass. omp ships `reviewer` and `security-reviewer` agents that may replace the custom ones | superpowers `requesting-code-review`, Anthropic `code-review` plugin, Cursor Bugbot rules, omp bundled `reviewer` / `security-reviewer` |
 | R6 | Unit-test review (§5.2) | No research beyond mattpocock `tdd` | mutation testing (Stryker, mutmut), "test quality review skill", test-smell catalogues |
@@ -916,8 +979,8 @@ adopted only if the workflow needs it and nothing here covers it.
 | V3 | Can the `factory-guard` hook block `github` `pr_create` and `git push` inside sub-agents? Extensions are rebound to every sub-agent session (`omp://extensions.md`) | a throwaway hook that blocks `git push`, then a sub-agent that tries it |
 | V4 | Is the `ask` dialog's `preview` usable for a whole document section? | one gate run on a sample REQUIREMENTS.md |
 | V5 | Does `task.isolation` with branch merge work on this Mac (APFS)? | one isolated sub-agent edits one file; check the `omp/task/<id>` branch |
+| V6 | Does a `CLAUDE.md` holding `@AGENTS.md` deliver `AGENTS.md` to a helper agent? Does the main session then see `AGENTS.md` twice (directly and through the import)? | a repo with both files; spawn a `task` agent and ask it to quote `AGENTS.md`; check the main prompt for duplication |
 
 ### 14.4 Your decisions still pending
 
-Q1–Q6 in §11 still carry defaults that you have not confirmed. 14.1-1 (how
-CI runs before the PR) is a new one.
+Q1–Q6 in §11 still carry defaults that you have not confirmed.
