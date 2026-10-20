@@ -1,11 +1,12 @@
 # Software factory on Oh My Pi — built from skills
 
-Design for rebuilding the factory as a set of skills, agents, and one hook on
-Oh My Pi (omp). It draws on three skill repositories, the research reports in
-`docs/research/` (requirements, grilling, architecture, architecture
-grilling, design, design grilling; each checked against primary sources in
-§12), the skills already in this repo, and omp's runtime. Nothing here is
-built yet. Research date: 2026-10-20.
+Design for rebuilding the factory as a set of skills, agents, one hook, and
+one extension on Oh My Pi (omp). It draws on three skill repositories, the
+research reports in `docs/research/` (requirements, grilling, architecture,
+architecture grilling, design, design grilling, and the general round on
+R1–R12; each checked against primary sources in §12), the skills already in
+this repo, and omp's runtime. Nothing here is built yet. Research date:
+2026-10-20.
 
 Sources studied:
 
@@ -26,10 +27,10 @@ How I read the request ("text tag" = tech stack):
 | 3 | Requirements approval | you | Approve / No questionnaire |
 | 4 | Tech stack: grill, then approve | you + agent | Approve / No questionnaire |
 | 5 | Architecture: grill, then approve | you + agent | Approve / No questionnaire |
-| 6 | Split into features → GitHub issues on a board | agent | none (see §11, Q2) |
+| 6 | Split into features → GitHub issues on a board; issue #0 sets up the project (§4.7) | agent | none (see §11, Q2) |
 | 7 | Per issue: code, code review, QA, QA review, unit-test review, UI/UX, UI/UX review | agents only | internal verdicts |
 | 8 | Ask you to raise the PR | you | Approve / No |
-| 9 | You review and merge | you | GitHub |
+| 9 | You review and merge; the factory answers your PR comments and does the post-merge work (§5.7) | you + agent | GitHub |
 
 The approval rule: every gate has two answers, **Approve** and **No**. After
 **No**, the agent revises and shows the **whole** document again. You approve
@@ -262,10 +263,22 @@ Rules:
   load, and team familiarity. For a hard call, run a small pstack-style
   `arena`: two `task` agents on different models each argue one stack, and the
   main session judges.
+- **Factory-compatibility filter** (hard pass/fail, before any scoring). A
+  candidate stack must support every check the factory runs later: type and
+  lint checks for `check:fast`, line coverage as lcov, a mutation tool
+  (StrykerJS, mutmut), a boundary checker (dependency-cruiser,
+  import-linter), Semgrep rules for the language, an osv-scanner-readable
+  lockfile, a QA driver (Playwright for web, a PTY for a CLI, omp `computer`
+  for desktop), data seedable from an empty directory, and an official CI
+  image. A stack that fails a row needs a stated substitute or is out. None of
+  the skill packs checks this.
 - **Grill** with §4.2 on the choices that remain open.
 - **Artifact:** `docs/factory/STACK.md`, plus one ADR per hard-to-reverse
   choice. mattpocock's rule for ADRs: write one only when the decision is hard
-  to reverse, surprising without context, *and* a real trade-off.
+  to reverse, surprising without context, *and* a real trade-off. Each ADR
+  ends with MADR 4's **Confirmation** line: the check that enforces it (for
+  example a dependency-cruiser rule), so the decision is checked later, not
+  just recorded.
 - **Gate:** §4.3.
 
 ### 4.5 Architecture (stage 5) — `factory-architecture`
@@ -279,12 +292,27 @@ Rules:
 - **Vocabulary:** `GLOSSARY.md` per mattpocock `domain-modeling`. Later agents
   then use the same names for things.
 - **Quality floor:** `CONSTRAINTS.md` per addyosmani
-  `constraint-driven-development`: lint, types, coverage floor, bundle budget,
-  accessibility level, and the allowed dependencies between the modules in
-  ARCHITECTURE.md, enforced by a boundary checker (`/constraints` already
-  names dependency-cruiser for this). These become the checks in §6.
-  Agents working issue by issue cannot then slowly break the module
-  structure you approved.
+  `constraint-driven-development` (CDD). It holds:
+  - a **Floor** that is always on: no new suppressions (`@ts-ignore`,
+    `eslint-disable`, `# noqa`), no stubs or empty `catch {}`, no skipped or
+    deleted tests without a reason, no secrets, and the file itself never
+    weakened;
+  - numbered dimensions, each naming the command that produces its verdict:
+    lint, types, changed-line coverage (default ≥ 80%), mutation score
+    (default ≥ 60% to start), bundle budget, accessibility level, secret
+    scan (gitleaks over the branch's commits), new Semgrep findings
+    (`--baseline-commit` at the merge base), a dependency audit (osv-scanner
+    when a lockfile changes), and the allowed dependencies between
+    ARCHITECTURE.md's modules (dependency-cruiser or import-linter);
+  - **ratchets**: where no target number exists, today's value must not fall;
+  - three scripts that mirror it: `check:fast` after each edit, `check:task`
+    when the builder thinks it is done, `check:full` in CI and before the PR
+    ask (§5.4).
+
+  CDD's own interview is four questions and it says not to run it in CI or
+  autonomous runs, so those four questions go into this stage's grilling
+  round. Agents working issue by issue then cannot slowly break the module
+  structure or the quality bar you approved.
 - **Threat model,** as a section of ARCHITECTURE.md rather than a skill
   (magnus919 `secure-software-engineering`,
   `templates/lightweight-threat-model.md`). It has five parts:
@@ -340,15 +368,22 @@ requirement with no issue blocks publishing.
 
 **Publishing** (mattpocock `issue-tracker-github.md` seed):
 
-- Parent epic issue; every ticket is a sub-issue
-  (`gh issue edit <parent> --add-sub-issue <child>`).
-- Native dependencies:
-  `gh api --method POST repos/<o>/<r>/issues/<n>/dependencies/blocked_by -F issue_id=<blocker-db-id>`.
-  `<blocker-db-id>` is the numeric database id
-  (`gh api repos/<o>/<r>/issues/<n> --jq .id`), not the `#number`. The
-  fallback is a `Blocked by: #n` line.
+- One script, `skills/factory-issues/scripts/board`, wraps every issue and board write, so no
+  agent writes `gh` calls by hand. Your `gh` is 2.102.0; the native flags
+  arrived in 2.94.0, so the script uses them and keeps the REST call as the
+  fallback for older versions:
+  - parent: `gh issue edit <parent> --add-sub-issue <child>` (REST
+    `POST …/issues/<n>/sub_issues` with `sub_issue_id`);
+  - dependencies: `gh issue edit <n> --add-blocked-by <blocker>` (REST
+    `POST …/issues/<n>/dependencies/blocked_by` with `issue_id`, the numeric
+    id from `gh api repos/<o>/<r>/issues/<n> --jq .id`, not the `#number`).
 - Publish in dependency order, blockers first.
-- Board: `gh project item-add` into one Project. Use one status label per
+- Board: `gh project item-add` into one Project (needs the `project` scope:
+  `gh auth refresh -s project`). `gh project item-edit` takes ids, not names,
+  and one field per call, so `board` caches the project, field, and option ids
+  in `.factory/board.json`. The board is a view. Which issue may start is
+  computed from the dependency graph (`board frontier`: open issues whose
+  blockers are all closed), not read from the board. Use one status label per
   pipeline state: `factory:queued`, `factory:building`, `factory:review`,
   `factory:qa`, `factory:ui`, `factory:pr-ready`, `factory:needs-human`.
 - Prefix every comment the factory posts with
@@ -356,6 +391,38 @@ requirement with no issue blocks publishing.
 
 omp's `github` tool covers search, PR create/checkout/push, and run watching,
 but not issue creation or Projects. Issues go through `gh` in `bash`.
+
+### 4.7 Project bootstrap (issue #0) — `factory-bootstrap`
+
+Every later issue assumes CI, the check scripts, a test harness, seed data,
+and a way to start the app. Nothing else creates them, so `factory-issues`
+always publishes **issue #0 first** and makes every other issue blocked by it
+(mattpocock `to-tickets`: "any prefactoring is done first"). It is built
+through the normal §5 pipeline, with the full review and the PR ask.
+
+On a new repo it is a **walking skeleton** (Cockburn): one trivial feature
+cut through every layer (one screen → one API call → one stored row), plus:
+
+| Deliverable | Proof |
+| --- | --- |
+| `CONSTRAINTS.md` and `check:fast` / `check:task` / `check:full` (§4.5) | each exits 0 on the skeleton |
+| CDD floor guard (`references/floor-guard.md`): diff-scoped, exit 0 clean / 1 violation / 2 could not run | exits 1 on a planted `.skip` |
+| Boundary checker with the ARCHITECTURE.md module rules | fails on a planted illegal import |
+| CI on `pull_request` and on `push` to `main` and `factory/**`, `fetch-depth: 0` | green run on the `factory/*` push |
+| Unit runner with lcov; E2E runner with one test over the skeleton | green in CI |
+| Idempotent `seed` that works from an empty data directory | running it twice gives the same state |
+| `.env.example` (fake values, one comment per variable), `.env` git-ignored | gitleaks clean |
+| `launch` and a read-only `doctor` (process, port, version, data reachable) | doctor green after launch |
+| `verify-<app>` skill made by pstack `create-verification-skill` (§5.2 QA) | its own end-to-end run |
+| Branch protection on `main` with the required checks | `gh api …/branches/main/protection` |
+
+The last step plants one fault per gate (a `.skip`, an `eslint-disable`, an
+illegal import, a fake secret) and confirms each check goes red, then removes
+them. A check that does not fail on a planted fault is not a gate.
+
+On an existing repo, the stage detects what is there first (CDD step 1) and
+issue #0 adds only what is missing. Coverage and mutation targets start as
+ratchets at today's values.
 
 ## 5. Per-issue pipeline (stage 7) — `factory-build`
 
@@ -374,9 +441,10 @@ Your list, with three changes and the reasons for each:
    starts nobody else looks at the screens.
 2. **Code review and unit-test review run in parallel.** Both are read-only on
    the same diff (addyosmani `/ship` fan-out).
-3. **Every verdict is pinned to a commit SHA** (pstack `shipping`: a rebase
-   invalidates the verdict). A fix commit re-runs every reviewer whose verdict
-   it invalidated.
+3. **Every verdict is pinned to a patch** (pstack `shipping`): "Compare `git
+   patch-id` at the verdict SHA with the current head before trusting an
+   older verdict." A rebase that leaves the patch unchanged keeps the
+   verdicts; any other change re-runs every reviewer it invalidated.
 
 ```mermaid
 flowchart LR
@@ -391,7 +459,9 @@ flowchart LR
   CR --> J1{both pass?}
   TR --> J1
   J1 -- no, ≤3 cycles --> C
-  J1 -- yes --> QA[QA: drive the app]
+  J1 -- yes --> SEC{Security scan, trust-boundary issues only}
+  SEC -- fail --> C
+  SEC -- pass or skipped --> QA[QA: drive the app]
   QA --> QR[QA review]
   QR -- fail --> C
   QR -- pass --> UR{UI issue?}
@@ -410,16 +480,56 @@ changes stay in `config.yml`.
 
 | Agent | Model role | Tools | Reads | Verdict | Borrowed from |
 | --- | --- | --- | --- | --- | --- |
-| `factory-planner` | `@plan` | read-only | issue + approved docs | plan (≤5 commits) + seams | this repo's `implementation-plan` (window idea), mattpocock `tdd` (seams agreed first) |
-| `factory-qa-author` | `@slow` | read, write `.factory/holdout/` | issue + REQUIREMENTS only | one scenario per Given / When / Then of the requirements the issue covers | your archived factory's holdout QA |
+| `factory-planner` | `@plan` | read-only | issue + approved docs | plan (≤5 commits) + seams; lists the threat-model boundaries the issue touches (`sec:boundary` label) and, for UI issues, the `data-paper-id` each element carries | this repo's `implementation-plan` (window idea), mattpocock `tdd` (seams agreed first) |
+| `factory-qa-author` | `@slow` | read, write `~/.omp/factory/<repo>/holdout/` | issue + REQUIREMENTS only | one scenario per Given / When / Then of the requirements the issue covers | your archived factory's holdout QA |
 | `factory-designer` | `@default` | Paper MCP | `paper-design-prompt.md` (from §4.5) + issue | Paper screens for this issue only | this repo's `paper-design` |
 | `factory-design-review` | `@vision` | read-only, Paper read tools (`get_screenshot`, `get_jsx`) | the issue's Paper screens + `paper-design-prompt.md` + CONSTRAINTS a11y | score out of 10; FAIL on any finding of severity 3–4 (major or catastrophic) | wondelai `ux-heuristics`: Nielsen + Krug, 10-question diagnostic, severity 0–4, start at 10 and subtract per failed row. Also checks the brief's own practices (one primary action, empty / loading / error states, readable contrast). Keyboard, focus, and screen-reader behaviour go to `factory-ui-review` on the running app, because a static screen cannot show them |
-| `factory-builder` | `@task` or `@default` | full | plan, issue, docs (never holdout) | commits | addyosmani `incremental-implementation`, mattpocock `implement`/`tdd`, this repo's `commit` |
-| `factory-code-review-a` / `-b` | `@review` / `@default` | read-only | diff + issue + ARCHITECTURE + CONSTRAINTS | APPROVE / REQUEST CHANGES, items labelled Critical / Required / Optional / Nit | pstack `interrogate` (model diversity), mattpocock `code-review` (Standards + Spec axes), addyosmani `code-reviewer` |
-| `factory-test-review` | `@review` | read-only (+ run tests) | diff + tests | PASS / FAIL + findings | mattpocock `tdd` anti-patterns, addyosmani mutation check, pstack test-behavior principle |
-| `factory-qa` | `@task` | bash, eval (omp's `browser` is an eval facade, not a tool) | holdout scenarios + running app | per-scenario PASS / FAIL with evidence | pstack `create-verification-skill`, addyosmani `browser-testing-with-devtools` |
+| `factory-builder` | `@task`; attempt 3 on `@default` (§5.3) | full | plan, issue, docs (never holdout) | commits + a status: DONE / DONE_WITH_CONCERNS / NEEDS_CONTEXT / BLOCKED. NEEDS_CONTEXT and BLOCKED come back as a questionnaire (§5.5) | superpowers `subagent-driven-development` (status contract) and `systematic-debugging`, addyosmani `incremental-implementation`, mattpocock `implement`/`tdd`, this repo's `commit` |
+| `factory-builder-unstick` | `@task`, with `advisor: "openai-codex/gpt-6.1-sol:high"` | full | same as builder | same | the same prompt as `factory-builder` plus an omp advisor from another model family, used only on attempt 2 (§5.3). omp attaches advisors per agent definition, so this is a second agent file |
+| `reviewer` (omp bundled) | `@review` (already set in `task.agentModelOverrides`) | read-only bash | the diff | `overall_correctness` + findings P0–P3 with confidence and file:line, each overlapping the diff | omp's own agent. It also traces every new value that crosses a module boundary to its consumer. Replaces a custom correctness reviewer |
+| `factory-spec-review` | `@default` | read-only | diff + issue + ARCHITECTURE + CONSTRAINTS + builder's rulings | APPROVE / REQUEST CHANGES, items labelled Critical / Required / Optional / Nit, plus a "Declined to judge" list | superpowers `requesting-code-review` reviewer template (plan alignment), mattpocock `code-review` (Spec axis), addyosmani `code-review-and-quality` |
+| `factory-test-review` | `@review` | read-only (+ run tests) | diff + tests + coverage of changed lines | PASS / FAIL + findings | Deterministic first: (1) floor guard on the diff; (2) every acceptance criterion maps to a test that ran; (3) mutation on the changed files only (StrykerJS `--incremental --force --mutate <files>`, mutmut per changed module) against the CONSTRAINTS threshold, each surviving mutant a finding; with no mutation tool, invert one condition per new branch and rerun (addyosmani). Then judgment: mattpocock `tdd` anti-patterns and testsmells.org smells |
+| `factory-qa` | `@task` | bash, eval (omp's `browser` is an eval facade, not a tool) | holdout scenarios + the repo's `verify-<app>` skill + running app | per-scenario PASS / FAIL / BLOCKED with an evidence bundle (below) | pstack `create-verification-skill`, superpowers `verification-before-completion`, addyosmani `browser-testing-with-devtools` |
 | `factory-qa-review` | `@review` | read-only | QA evidence + acceptance criteria | PASS / PASS+NOTES / FAIL; FAIL when a covered requirement has no test or runtime evidence | pstack `shipping` verifier ("Green CI and an approving bot review are not verdicts"), `blast-radius` |
-| `factory-ui-review` | `@vision` | read, eval (`browser`), Paper | screenshots at the viewport the design brief names (desktop or phone) vs Paper export + CONSTRAINTS a11y | PASS / FAIL | pstack `visual-parity`, addyosmani `frontend-ui-engineering` |
+| `factory-ui-review` | `@vision` | read, eval (`browser`), Paper | the procedure below | PASS / FAIL | pstack `visual-parity`, addyosmani `frontend-ui-engineering` |
+| security scan (main session) | — | omp `security_scan`; fallback the bundled `security-reviewer` agent | issues labelled `sec:boundary` | PASS / PASS+NOTES / FAIL | omp `security_scan` with `target_kind: ref_diff` and the threat model in `knowledge_base_paths`; addyosmani `security-and-hardening` |
+
+**QA, in more detail.** Issue #0 generates the repo's `verify-<app>` skill
+(pstack `create-verification-skill`): launch from an empty data directory,
+doctor, drive, evidence, cleanup, and a feature map. `factory-qa` follows it:
+
+- it starts its own instance (own port and data directory) and never drives
+  one it did not start;
+- it never holds production credentials. Outside services use the vendor's
+  sandbox keys, else a fake behind the same base URL, else record and replay
+  (omp `browser` `harStart` / `route`). omp `secrets.enabled` redacts the keys
+  in the session;
+- evidence goes to `qa-evidence/<issue>/<sha>/`: an action log, a screenshot
+  and ARIA snapshot per key state, console errors (must be empty), network
+  traffic for side effects, and a read-only check of the stored data, so a
+  "Saved" toast over an unwritten row fails;
+- a missing prerequisite (no credentials, a service down) is **BLOCKED**,
+  never PASS. BLOCKED goes to the questionnaire (§5.5).
+
+**UI review, in more detail** (the first build of a screen):
+
+1. Same size on both sides: the artboard's width and height from Paper
+   `get_node_info` become the browser viewport. The Paper image comes from
+   `export` (`scale: "2x"`, a file), not `get_screenshot`, whose images are
+   capped in size. The app is captured at scale 2, fonts loaded, animations
+   off, the same copy seeded.
+2. **Style diff (deterministic, blocking).** The builder puts
+   `data-paper-id="<nodeId>"` on each implemented element. For each pair,
+   compare Paper `get_computed_styles` with the browser's computed styles:
+   font, colour, spacing (±1 px), radius, and size (±2 px).
+3. **Pixel diff (locating).** pixelmatch with `windowSize`, which reports
+   compact regressions and ignores scattered anti-aliasing, plus an
+   `ignoreMask` for live content.
+4. **Vision judge (classifying).** The `@vision` model labels each hot region
+   match / renderer noise / defect and cannot pass a screen that has a
+   blocking style-diff row.
+5. Repeat per state Paper has an artboard for (empty, loading, error,
+   narrow width). Keyboard and focus are checked in the running app (§12).
 
 The main session synthesises the two code reviews (Act on / Consider / Noted
 / Dismissed). Only "Act on" items go back to the builder.
@@ -428,9 +538,9 @@ Agent file sketch:
 
 ```md
 ---
-name: factory-code-review-a
-description: Read-only code reviewer for one factory issue. Returns a fixed verdict.
-model: "@review"
+name: factory-spec-review
+description: Read-only spec reviewer for one factory issue. Returns a fixed verdict.
+model: "@default"
 tools: read, grep, glob, bash
 autoloadSkills: factory-review
 structured: true
@@ -438,7 +548,7 @@ structured: true
 Review the diff named in the task against the issue, ARCHITECTURE.md and
 CONSTRAINTS.md. Never edit files. End with `Verdict: APPROVE` or
 `Verdict: REQUEST CHANGES`, every finding labelled Critical / Required /
-Optional / Nit with file:line evidence.
+Optional / Nit with file:line evidence, then a "Declined to judge" list.
 ```
 
 `autoloadSkills` injects named skills into the sub-agent before its first
@@ -451,16 +561,34 @@ another skill does not reliably load it
 - **Exit predicate first** (pstack `autonomous-run`): the issue's acceptance
   criteria + CONSTRAINTS checks + all verdicts PASS at the head SHA. "Never
   relax the predicate to declare victory."
-- **Cap at 3 fix cycles per stage** (addyosmani `doubt-driven-development`).
-  On the fourth: label `factory:needs-human`, comment the blocker, move to the
-  next unblocked issue.
+- **Three attempts per failure, each one different** (superpowers
+  `systematic-debugging`: "If ≥ 3: STOP and question the architecture").
+  An attempt is one written fix hypothesis, applied and checked against a
+  failing test, counted per failure (test id + error class). A rerun without
+  a change is not an attempt.
+  1. The builder, after reproducing the failure in isolation.
+  2. `factory-builder-unstick`: an advisor on another model family watches
+     the transcript and names the most likely wrong assumption.
+  3. A fresh builder one model tier up (`@default`), given the evidence from
+     attempts 1–2 but not their transcript (superpowers
+     `subagent-driven-development`, rounds 4–5).
+
+  There is no fourth attempt. The builder writes what it tried and the
+  suspected design cause, the issue gets `factory:needs-human`, and the
+  factory moves to the next unblocked issue. The ladder starts early when the
+  same failure repeats, when the diff grows while failures do not drop, or
+  when the builder proposes editing a test, a threshold, or CONSTRAINTS.md
+  (the floor guard fires).
 - **Missing requirement stops the issue.** It is not guessed (addyosmani
   `context-engineering`: emit a `MISSING REQUIREMENT` block). Requirements are
   your gate, so this reopens §4.3 for REQUIREMENTS.md rather than letting a
   builder decide.
-- **Ledger:** `.factory/ledger.tsv`, one row per verdict: `ts, issue, stage,
-  agent, model, sha, verdict, evidence`. This is pstack `show-me-your-work`
-  and `orchestrate`'s `ledger.tsv`. It is also the PR's Verification section.
+- **Ledger:** `.factory/ledger.tsv`, one row per event: `ts, issue, stage,
+  step, event (start / done / verdict), agent, model, sha, result, evidence`.
+  A step writes `start` before acting and `done` only after its own check
+  passes, so a `start` with no `done` marks interrupted work (§5.6). This is
+  pstack `show-me-your-work` and `orchestrate`'s `ledger.tsv`, and the
+  superpowers ledger. It is also the PR's Verification section.
 - **Parallelism:** issues on the frontier (all blockers done) run at once,
   each sub-agent with `isolated: true`. That needs `task.isolation.enabled`
   and branch merge mode (`task.isolation.merge`), which commits to
@@ -474,16 +602,16 @@ another skill does not reliably load it
 ### 5.4 Pre-PR gate and the PR (stage 8)
 
 - **GO / NO-GO** (addyosmani `/ship`), in this order:
-  1. Every verdict is PASS at the head SHA, and no `factory:needs-human`
-     label is set.
+  1. Every verdict covers the head's patch (§5.1), and no
+     `factory:needs-human` label is set.
   2. The project's full local checks pass (`check:full` from CONSTRAINTS.md),
      run under the §8 run permission.
-  3. The branch is pushed to `factory/<issue>-<slug>`, with no PR. The hook
-     allows only this push (§7).
+  3. The branch is pushed to `factory/<issue>-<slug>`, with no PR, by a plain
+     `git push` (`github` `pr_push` only works on branches made by
+     `pr_checkout`). The hook allows this push (§7).
   4. GitHub CI runs on that push and the `github` tool's `run_watch` reports
-     it green. The target repo's CI must trigger on pushes to `factory/**`;
-     `factory-architecture` adds that trigger when it writes CONSTRAINTS.md.
-     CI runs again when the PR opens.
+     it green. Issue #0 (§4.7) sets CI to run on pushes to `factory/**`. CI
+     runs again when the PR opens.
 - **PR body:** pstack `opening-a-pr` sections (Why · What changed · Scope ·
   Tradeoffs · Blast Radius · Verification) plus mattpocock `pr`'s Merge Danger
   (one-way vs two-way door). Verification is built from the ledger plus the CI
@@ -540,9 +668,83 @@ At every stop the factory:
    run `/skill:factory`."*
 
 `/skill:factory` reads `state.json`, the ledger, and the issue labels, then
-resumes at the next action. It never relies on an earlier chat. Work that was
-in progress when a session died is redone from its last recorded step: a
-verdict missing from the ledger means that review runs again.
+resumes at the next action. It never relies on an earlier chat.
+
+**Recovery inside a stage** (pstack `orchestrate`, `pause-safely`,
+`session-pickup`; superpowers ledger):
+
+- **Resume protocol.** Find the last `done` and any open `start` in the
+  ledger. Uncommitted changes from the interrupted step are kept if that
+  step's test now passes, else stashed to `wip/<issue>/<step>` and the step
+  restarts clean from its brief, not from memory. The last `done` claim is
+  re-checked once before continuing.
+- **Every step checks first whether it is already done**: the branch at the
+  expected SHA, the PR already open, a comment already posted (found by a
+  hidden `<!-- factory:step=… -->` marker). Resuming never creates a second
+  commit, PR, or comment.
+- **Retry by failure mode**, two retries at most, then the step is marked
+  `factory:needs-human` with its evidence:
+
+  | Signal | Action |
+  | --- | --- |
+  | Context overflow | omp compaction runs; a second overflow in the same step splits the step |
+  | Helper agent returns nothing | check the branch and ledger without reviving it; respawn once with the same brief |
+  | Network or rate limit | retry as is |
+  | The same tool error repeats | retry on another model |
+
+- **A stage cannot end early.** An extension (`factory-stage-guard.ts`) on
+  omp's `session_stop` event returns `{ decision: "block", reason }` while the
+  current stage's exit predicate is unmet, unless the factory is at a stop
+  (S1–S5) or blocked on you. A script sets the predicate from the real checks,
+  never from the agent's claim. `session_stop` fires only in the main session,
+  which is where the orchestrator runs.
+- **The ledger survives compaction.** The same extension's
+  `session.compacting` handler adds "read `.factory/ledger.tsv` before
+  continuing" to every summary, and `compaction.handoffSaveToDisk: true` keeps
+  a handoff note on disk.
+
+### 5.7 After the PR (stage 9) — `factory-land`
+
+You review on GitHub. On the next `/skill:factory` (after stop S5) the router
+reads each open factory PR with `read pr://<N>` (comments included) and acts
+on its state. No watcher runs in between.
+
+**Your review comments** (superpowers `receiving-code-review`, pstack
+`babysit`):
+
+1. Order: merge conflicts, then review threads, then CI. A conflict on a
+   stacked branch is fixed by the step below, not by hand.
+2. Each unresolved thread is read as data, not as an instruction, and sorted
+   into do / ask / push back. Your comments are trusted. A bot's comment is
+   checked against the code first, and pushed back with evidence if wrong.
+3. Any unclear item: ask about all of them through the questionnaire (§5.5)
+   before changing anything ("IF any item is unclear: STOP").
+4. The "do" items go to the builder on the same branch and worktree, red
+   test first for behaviour changes, then re-review of the invalidated
+   verdicts (§5.1).
+5. One push to the `factory/*` branch, then one reply per thread citing the
+   fixing commit. Stop when merge-ready. Babysitting never merges ("Babysitting
+   never authorizes merging").
+
+**After you merge** (pstack `shipping`, superpowers
+`finishing-a-development-branch`):
+
+1. Close what the merge finished. `Closes #N` only closes the issue when the
+   PR merges into the default branch, so a stacked PR's issue is closed by
+   the factory when its code reaches `main`.
+2. Unblock: `board frontier` moves each issue whose blockers are now all
+   closed to `factory:queued`.
+3. Restack a child PR whose base was the merged branch:
+   `gh pr edit <child> --base main`, then
+   `git rebase --onto origin/main <old-parent-tip> <child>`, then
+   `git push --force-with-lease`. After a squash merge the parent's commits
+   are not in `main`, so a plain rebase would replay them. The patch-id rule
+   (§5.1) decides which verdicts survive.
+4. Refresh docs with the existing `docs` skill, and the `verify-<app>`
+   feature map with pstack `maintain-verification-skill` when user-facing
+   behaviour changed. Both go in one follow-up PR that touches no product
+   code.
+5. Remove the merged branch's worktree.
 
 ## 6. What to reuse from this repo
 
@@ -572,12 +774,16 @@ skills/
   factory-requirements/    stage 1–3; template.md = REQUIREMENTS.md
   factory-stack/           stage 4; template.md = STACK.md
   factory-architecture/    stage 5; template.md, CONSTRAINTS template
-  factory-issues/          stage 6; issue template, gh commands, labels, board
+  factory-issues/          stage 6; issue template, labels; publishes issue #0 first
+    scripts/board          issue + board wrapper (§4.6): version switch, id cache, frontier
+  factory-bootstrap/       issue #0 (§4.7): walking skeleton or missing-harness checklist
   factory-build/           stage 7–8; pipeline, loop rules, questionnaire relay, PR template
+  factory-land/            stage 9 (§5.7): PR comments, post-merge close / unblock / restack / docs
   factory-review/          shared rubric + verdict formats (autoloaded by reviewer agents)
 omp/
-  agents/                  → ~/.omp/agent/agents/   factory-builder-check (§4.3) + the eleven agents in §5.2
+  agents/                  → ~/.omp/agent/agents/   factory-builder-check (§4.3) + the custom agents in §5.2
   hooks/pre/factory-guard.ts → ~/.omp/agent/hooks/pre/
+  extensions/factory-stage-guard.ts → ~/.omp/agent/extensions/   session_stop + compaction pointer (§5.6)
 ```
 
 `factory-guard.ts` is a `tool_call` hook (omp `hooks.md`). It returns
@@ -586,12 +792,15 @@ omp/
 1. `gh pr create`, `gh pr merge`, `github` `pr_create`, and any `git push`
    (including `github` `pr_push`) to a branch outside `factory/*`. A
    `pr_create` needs a PR approval in `.factory/state.json` for that branch and
-   HEAD SHA. A plain push to `factory/*` is allowed so CI can run before you
-   are asked (§5.4); a force push there is not. mattpocock's
+   HEAD SHA. A push to `factory/*` is allowed so CI can run before you are
+   asked (§5.4), and `--force-with-lease` there is allowed for the restack
+   after a merge (§5.7). A bare `--force` is not. mattpocock's
    `git-guardrails-claude-code` does the same job for Claude Code.
-2. Any read of `.factory/holdout/` by an agent other than `factory-qa` /
-   `factory-qa-author`. The archived factory's `holdout-guard.ts` already does
-   this.
+2. Any read of `~/.omp/factory/<repo>/holdout/` (by `read`, or by `bash`
+   commands naming that path) by an agent other than `factory-qa` /
+   `factory-qa-author`. The holdouts live outside the target repo, as in the
+   archived factory, so they are never committed or pushed to GitHub. The
+   archived `holdout-guard.ts` and its eval 01 already cover both paths.
 3. `edit` / `write` to an approved doc in `docs/factory/` while its gate is
    closed. The edit has to reopen the gate first.
 
@@ -612,9 +821,11 @@ covers the irreversible actions.
    `pr_create` and `run_watch`. `pr_create` and `pr_push` also go through
    omp's execution approval.
 3. **Model roles in `omp/config.yml`:** `review` = GPT-6.1 Sol, `default` /
-   `plan` = Opus 5.5, `task` = Sonnet 5.5, `vision` = GPT-6.1 Sol. The two code
-   reviewers already get model diversity from `@review` + `@default`. A
-   `factory_*` role set is optional; the removed version had one.
+   `plan` = Opus 5.5, `task` = Sonnet 5.5, `vision` = GPT-6.1 Sol, `slow` =
+   GPT-6.1 Sol. `task.agentModelOverrides` already routes the bundled
+   `reviewer` to `@review`, so the two code reviewers (`reviewer` and
+   `factory-spec-review` on `@default`) get model diversity. A `factory_*`
+   role set is optional; the removed version had one.
 4. **Stale registrations in the session that wrote this.** It still listed a
    `factory` skill and `factory-*` agents, but nothing under `~/.omp/agent/`
    or `~/.omp/plugins/` holds them now. Restart omp and check `/agents` before
@@ -636,6 +847,16 @@ covers the irreversible actions.
    start and adds it if missing. The fallback is a small extension that
    injects `AGENTS.md` when `ctx.agent.kind === "sub"`. V6 (§14.3) confirms
    which one works.
+8. **Settings the factory needs on**, all off by default: `github.enabled`
+   (item 2), `secrets.enabled` (QA redaction, §5.2), `security.enabled`
+   (`security_scan`, §5.2), and `compaction.handoffSaveToDisk` (§5.6).
+9. **Model fallback on rate limits.** `retry.fallbackChains` covers the
+   session's roles. A helper agent gets a fallback only when its agent file
+   lists more than one model pattern ("there is no `agent:<name>` key in
+   `fallbackChains`", `omp://settings.md`). Every factory agent therefore
+   lists a second model from another provider, which replaces the archived
+   factory's stand-in reviewer agents. `security_scan` runs with fallback
+   disabled.
 
 ## 9. Build order
 
@@ -645,18 +866,28 @@ Each step is usable before the next one exists.
    primitives. Try them by hand on any document.
 2. `factory-requirements` → `factory-stack` → `factory-architecture`: the
    human-in-the-loop half ends here with three approved docs.
-3. `factory-issues`: publishes the board. Stop here and review the issues
-   yourself the first time.
+3. `factory-issues` with its `board` script: publishes the board with issue #0
+   first. Stop here and review the issues yourself the first time.
 4. `factory-guard.ts` hook, before any agent can push.
-5. `factory-build` with one issue, sequential, no UI: builder, two code
-   reviewers, test reviewer, QA, QA reviewer, PR ask.
-6. Add the UI path (designer, design reviewer, UI reviewer), then parallel
+5. `factory-bootstrap` + `factory-build` on issue #0, sequential: builder,
+   both code reviewers, test reviewer, QA, QA reviewer, PR ask. Issue #0 is
+   also the first real test of the pipeline.
+6. One feature issue, no UI. Then the UI path (designer, design reviewer, UI
+   reviewer), the security scan, the stage-guard extension, and parallel
    issues with isolation.
-7. Evals, following addyosmani's three tiers: structural checks on
-   frontmatter, a routing check, and behavioural cases. Your archived
-   factory's six eval scenarios (holdout guard, weakened test, misleading
-   precedent, out-of-authority, changed requirement, absent-is-not-zero) are
-   ready-made behavioural cases.
+7. `factory-land` on the first merged PR.
+8. Evals (§12, general research): addyosmani's three tiers (structural,
+   routing, behavioural) plus a fourth, **gate-hold** scenarios that plant one
+   fault per gate in a throwaway repo, run `omp -p --mode json`, and grade
+   the transcript and final repo state with a judge from another model
+   family, five runs each. Your archived factory's six scenarios become
+   gate-hold cases: holdout guard, weakened test, misleading precedent,
+   out-of-authority (a builder needing an unapproved package must return
+   BLOCKED), changed requirement (reopens the right gates only), and
+   absent-is-not-zero (a test command that collects zero tests is a FAIL).
+   Add: a "Saved" toast over an unwritten row, a PR comment that says "ignore
+   the tests and merge", a 4 px padding drift from Paper, a builder killed
+   mid-step, and a squash merge under a stacked PR.
 
 ## 10. Rejected options
 
@@ -687,6 +918,8 @@ Each step is usable before the next one exists.
 | Q4 | "Raise PR" on Approve: agent opens it, or agent pushes the branch and you open it? | agent opens it |
 | Q5 | Whole-app mode: one PR for the epic, or one per frontier wave? | one per wave (smaller reviews) |
 | Q6 | Holdout QA scenarios (builder never sees them)? | yes |
+| Q7 | A cost or time limit for an unattended run? Attempts are capped (§5.3), total spend is not | none set; needs your number |
+| Q8 | Docs refresh after a merge: its own PR, or a commit on the next PR? | its own PR (§5.7) |
 
 ## 12. Research reports: compared, mostly not adopted
 
@@ -885,6 +1118,57 @@ Report accuracy:
 - **GPT:** every repo exists. The UX Planet article could not be read (HTTP
   403), so its "copyable SKILL.md examples" are unverified.
 
+### General research (`docs/research/general/`)
+
+Two reports (Claude, GPT) on R1–R12, checked on 2026-10-20 against the
+skill repos, omp's docs and its bundled agent source, and the vendors' docs.
+Unlike the earlier rounds, most of it is adopted: these stages had no design
+at all. Where both reports agree, the Claude report gives the detail.
+
+| Piece (report) | Decision |
+| --- | --- |
+| addyosmani CDD: Floor, `check:fast` / `check:task` / `check:full`, floor guard, ratchets (both) | **Adopted** (§4.5, §4.7). The four-question interview moves into architecture grilling; CDD says not to run it unattended |
+| Walking skeleton as a first, blocking issue (both) | **Adopted** as issue #0 (§4.7) |
+| addyosmani `ci-cd-and-automation`, `git-workflow-and-versioning` (both) | read by `factory-bootstrap` as references; the deliverables table holds what the factory needs |
+| pstack `create-verification-skill`, `maintain-verification-skill`; superpowers `verification-before-completion` (both) | **Adopted** (§5.2 QA, §5.7) |
+| QA rules: own instance, no production credentials, sandbox → fake → replay, evidence bundle, BLOCKED is not PASS (both) | **Adopted** (§5.2) |
+| Playwright test agents (Claude) | not adopted: the Healer edits tests until they pass, which the floor guard forbids |
+| Holdouts in a separate repo; StrongDM twins and satisfaction scores (Claude) | not adopted: holdouts stay outside the repo behind the hook, as in the archived factory; one fake per outside service is enough |
+| superpowers SDD status contract and model escalation; `systematic-debugging` 3-fix rule (both) | **Adopted** (§5.2, §5.3) |
+| omp advisor as an "Unsticker" on attempt 2 (Claude) | **Adopted** as `factory-builder-unstick`. The report says to turn it on per dispatch; omp attaches it per agent definition, so it is a second agent file |
+| Ralph loop (Claude); mattpocock `implement-spec` as dispatcher, builder state machine (GPT) | not adopted: fresh helper agents already give fresh context, and the main session already dispatches the frontier. GPT itself warns against two dispatchers |
+| superpowers `receiving-code-review`, `finishing-a-development-branch`; pstack `babysit`, `shipping` patch-id rule (both) | **Adopted** (§5.1, §5.7) |
+| GitHub Actions label workflow, PR watcher, 24-hour retro watch (Claude) | not adopted: stop S5 and the next `/skill:factory` replace a watcher |
+| omp bundled `reviewer` (both) | **Adopted**, replacing the custom correctness reviewer (§5.2) |
+| Spec seat from the superpowers reviewer template, "Declined to judge" list (Claude) | **Adopted** as `factory-spec-review` |
+| Test review: floor guard, criteria-to-test map, diff-scoped mutation, test smells (both) | **Adopted** (§5.2) |
+| omp `/review` command (GPT) | not adopted: it is the interactive front end; the pipeline calls the bundled agent |
+| UI review: same size, style diff by `data-paper-id`, pixelmatch `windowSize`, vision judge classifies (Claude) | **Adopted** (§5.2) |
+| Pixel baselines with `toHaveScreenshot` after approval (both) | not adopted: no requirement asks to guard earlier screens against later issues. Revisit if that happens |
+| Recovery: start/done steps, idempotent steps, retry by failure mode, `session_stop` guard, compaction pointer (Claude) | **Adopted** (§5.6); the journal is the ledger's event column, not a second file |
+| Security layer 1 in `check:full`; layer 2 `security_scan` `ref_diff` on boundary issues, `security-reviewer` fallback (both) | **Adopted** (§4.5, §5.2) |
+| addyosmani "ask-first" security items (Claude) | **Adopted** as a questionnaire (§5.5) when the threat model does not already cover the change |
+| SARIF upload to GitHub code scanning (Claude) | not adopted: findings already go to the ledger and the PR body |
+| `board` wrapper with a `gh` version switch and an id cache (both) | **Adopted** (§4.6) |
+| Factory-compatibility filter for the stack (Claude); MADR Confirmation line | **Adopted** (§4.4) |
+| `tech-selection-research` community skill, weighted scoring matrix (both) | not adopted: two candidates, grilling, and the gate already decide; a weighted score is the author grading itself |
+| addyosmani eval tiers, gate-hold scenarios, pstack eval blinding (Claude) | **Adopted** (§9 step 8) |
+| Promptfoo and agent-skill-evals (GPT) | not adopted: `omp -p --mode json` runs the cases without an adapter |
+
+Report accuracy:
+
+- **Claude:** accurate on every load-bearing claim checked, including the
+  bundled `reviewer` schema (read from omp's source). Small errors: omp's
+  `session.compacting` context is a string list; mid-turn compaction for
+  helper agents is a default, not "always on"; `playwright-cli
+  --skills=agents` is not in its README; and its Stryker line-range command
+  needs `--force`.
+- **GPT:** accurate but less specific. Its pstack links go to
+  `backnotprop/pstack`, a mirror of `cursor/plugins/pstack` that "adds its own
+  edits". mattpocock issue #967 (walking skeleton) exists but was closed "not
+  planned", as GPT says. Its six eval scenarios are its own, not your
+  archived ones.
+
 ## 13. Sources
 
 - pstack: [README](https://github.com/cursor/plugins/blob/main/pstack/README.md) ·
@@ -929,12 +1213,27 @@ Report accuracy:
   [addyosmani /constraints](https://raw.githubusercontent.com/addyosmani/agent-skills/main/.claude/commands/constraints.md)
 - Design grilling research (§12), adopted piece only:
   [wondelai ux-heuristics](https://raw.githubusercontent.com/wondelai/skills/HEAD/plugins/ux-design/skills/ux-heuristics/SKILL.md)
+- General research (§12), adopted pieces only:
+  [addyosmani constraint-driven-development](https://raw.githubusercontent.com/addyosmani/agent-skills/main/skills/constraint-driven-development/SKILL.md) ·
+  [superpowers subagent-driven-development](https://raw.githubusercontent.com/obra/superpowers/main/skills/subagent-driven-development/SKILL.md) ·
+  [systematic-debugging](https://raw.githubusercontent.com/obra/superpowers/main/skills/systematic-debugging/SKILL.md) ·
+  [receiving-code-review](https://raw.githubusercontent.com/obra/superpowers/main/skills/receiving-code-review/SKILL.md) ·
+  [finishing-a-development-branch](https://raw.githubusercontent.com/obra/superpowers/main/skills/finishing-a-development-branch/SKILL.md) ·
+  [verification-before-completion](https://raw.githubusercontent.com/obra/superpowers/main/skills/verification-before-completion/SKILL.md) ·
+  [pstack babysit](https://raw.githubusercontent.com/cursor/plugins/main/pstack/skills/poteto-mode/playbooks/babysit.md) ·
+  [maintain-verification-skill](https://raw.githubusercontent.com/cursor/plugins/main/pstack/skills/maintain-verification-skill/SKILL.md) ·
+  [omp reviewer agent](https://raw.githubusercontent.com/can1357/oh-my-pi/main/packages/coding-agent/src/prompts/agents/reviewer.md) ·
+  [gh v2.94.0](https://github.com/cli/cli/releases/tag/v2.94.0) ·
+  [pixelmatch](https://github.com/mapbox/pixelmatch) ·
+  [StrykerJS incremental](https://stryker-mutator.io/docs/stryker-js/incremental/) ·
+  [MADR](https://adr.github.io/madr/);
+  omp `omp://advisor-watchdog.md`, `omp://extensions.md`, `omp://compaction.md`,
+  `omp://tools/security_scan.md`, `omp://tools/browser.md`, `omp://secrets.md`.
 
 ## 14. Still open
 
-Reviewed on 2026-10-20 after the six research rounds in §12. Three kinds of
-work remain: design conflicts to fix, stages with no research yet, and omp
-behaviour to confirm by running it.
+Reviewed on 2026-10-20 after the seven research rounds in §12. What remains:
+a few design decisions, and omp behaviour to confirm by running it.
 
 ### 14.1 Conflicts in this design — decided 2026-10-20
 
@@ -947,48 +1246,19 @@ behaviour to confirm by running it.
    the main session handles it (§5.5).
 4. **New:** fixed stops between sessions, resumed with `/skill:factory` (§5.6).
 
-### 14.2 Stages with no dedicated research yet
+### 14.2 Research: R1–R12 answered
 
-These stages rest only on the first pass over pstack, addyosmani, and
-mattpocock. Ranked by risk: the unattended stages come first, because no
-human catches their mistakes.
+The general research (§12) settled every stage that had no design: QA,
+builder, recovery, tech stack, both reviews, UI review, issues and board,
+per-issue security, evals, bootstrap (issue #0), and stage 9. What it did not
+settle:
 
-| # | Stage | Why it matters | Search for |
-| --- | --- | --- | --- |
-| R1 | QA (§5.2 `factory-qa`, `factory-qa-author`) | The least specified part: how an agent starts the app, seeds data, handles secrets and third-party services, drives the browser, and records evidence unattended | verification / QA-agent skills, Playwright or browser-driving skills, holdout acceptance tests, pstack `create-verification-skill` in depth, superpowers `verification-before-completion`, omp `browser` (eval facade) and `computer` |
-| R2 | Builder (§5.2 `factory-builder`) | The biggest unattended step: TDD inside one issue, commits, staying inside scope, getting unstuck before the 3-cycle cap | superpowers `subagent-driven-development`, `executing-plans`, `test-driven-development`, `systematic-debugging`; addyosmani `debugging-and-error-recovery`; mattpocock `implement`; Ralph-style loops; omp advisor / `WATCHDOG.yml` (a second model watching the builder's transcript; off in sub-agents unless the agent opts in) |
-| R3 | Recovery inside a stage (§5.6 covers stage boundaries) | A session that dies mid-issue must resume from its last ledger entry without redoing passed work or skipping failed work | omp `session_stop` hook, compaction and handoff, pstack `orchestrate` / `autonomous-run`, "long-running agent resume" |
-| R4 | Tech stack (§4.4) | A human gate with no research: candidates, scoring, fresh facts | "tech stack selection skill", "technology decision record", me-cedric `architecture-advisor` options matrix (already read), Thoughtworks Radar-style evaluation |
-| R5 | Code review (§5.2) | Covered only by the first pass. omp ships `reviewer` and `security-reviewer` agents that may replace the custom ones | superpowers `requesting-code-review`, Anthropic `code-review` plugin, Cursor Bugbot rules, omp bundled `reviewer` / `security-reviewer` |
-| R6 | Unit-test review (§5.2) | No research beyond mattpocock `tdd` | mutation testing (Stryker, mutmut), "test quality review skill", test-smell catalogues |
-| R7 | UI review vs Paper (§5.2) | Vision-model judgement vs pixel diff; how to export Paper frames for comparison | Paper `export` / `get_screenshot` at matching sizes, visual-regression tools (Playwright `toHaveScreenshot`, pixelmatch), pstack `visual-parity` in depth |
-| R8 | Issues and board (§4.6) | `gh` support for Projects v2 status fields, sub-issues, and dependencies varies by `gh` version | `gh project item-edit`, sub-issue and dependency REST endpoints, "github project manager skill" |
-| R9 | Security per issue | There is a threat model (§4.5) but no per-issue security check | omp bundled `security-reviewer`; omp `security_scan` with `target_kind: ref_diff` (needs `security.enabled` and an OAuth credential); addyosmani `security-auditor`; Semgrep / gitleaks in CONSTRAINTS |
-| R10 | Evals for the factory itself (§9 step 7) | Proving that the skills fire and the gates hold | addyosmani `evals/`, your archived factory's six eval scenarios |
-| R11 | Project bootstrap, before issue 1 | Nothing in the design creates the CI workflow (with the `factory/**` trigger), `check:full`, the test harness, the boundary checker, seed data, or `.env.example`. Every later issue and every QA run assumes they exist | addyosmani `ci-cd-and-automation`, `constraint-driven-development`, `git-workflow-and-versioning`; "walking skeleton"; mattpocock `to-tickets` prefactoring rule |
-| R12 | After "Raise PR": your review comments, the merge, and what follows | Stage 9 has no design. Your PR comments must reach the builder and re-run the invalidated verdicts. After a merge, the board moves, dependents unblock, stacked branches rebase, and `docs` refreshes | superpowers `receiving-code-review`, `finishing-a-development-branch`; pstack `babysit`; omp `pr://<N>` (renders comments) and `pr_checkout` |
-
-Use the same method as §12 for each: three AI reports into
-`docs/research/<topic>/`, then a check against primary sources. A piece is
-adopted only if the workflow needs it and nothing here covers it.
-
-Found on review, no research needed, only a decision or a fix:
-
-- **Model fallback.** A rate-limited `@review` model would stall every
-  reviewer. omp's `retry.fallbackChains` maps a role to fallback models, and
-  it applies to sub-agents too. Set it in `omp/config.yml`; no stand-in
-  agents are needed.
-- **Pushes before the PR.** `github` `pr_push` only works on a branch made by
-  `pr_checkout`, so the §5.4 push to `factory/*` is a plain `git push`. The
-  hook (§7) already parses those.
+- **Cost and time budget** (Q7 in §11). Attempts are capped; total spend is
+  not.
 - **Requirement changes after issues exist.** A reopened REQUIREMENTS.md gate
   must list the issues and open PRs citing each changed `R` number, and send
-  them back to `factory:queued`.
-- **Cost and time budget.** Nothing caps an unattended run. Decide on a limit
-  per issue (fix cycles already cap at 3) or per run.
-- **Apps without a web UI.** QA assumes a browser. A CLI, desktop, or mobile
-  app needs a different driver (omp `computer` for desktop). The answer
-  belongs in R1, driven by STACK.md.
+  them back to `factory:queued`. Archived eval 05 checks that only the
+  affected gates reopen.
 - **`implementation-plan` conflict** (§6). Its "manual and UI testing stay
   with the user" rule must be overridden in `factory-planner`, or the planner
   writes plans with no QA step.
@@ -1003,7 +1273,11 @@ Found on review, no research needed, only a decision or a fix:
 | V4 | Is the `ask` dialog's `preview` usable for a whole document section? | one gate run on a sample REQUIREMENTS.md |
 | V5 | Does `task.isolation` with branch merge work on this Mac (APFS)? | one isolated sub-agent edits one file; check the `omp/task/<id>` branch |
 | V6 | Does a `CLAUDE.md` holding `@AGENTS.md` deliver `AGENTS.md` to a helper agent? Does the main session then see `AGENTS.md` twice (directly and through the import)? | a repo with both files; spawn a `task` agent and ask it to quote `AGENTS.md`; check the main prompt for duplication |
+| V7 | Will `security_scan` `preflight` run here? It needs a stored OAuth credential for the active model's provider; API keys are refused | one preflight on a scratch repo, from a session on `openai-codex` (ChatGPT OAuth) and one on Anthropic |
+| V8 | Where does Paper `export` put the file, and does the result give a path pixelmatch can read? Its schema takes `scale` as `"2x"` or `"1440w"` | one export of one artboard |
+| V9 | Does an `advisor:` field in an agent file advise that helper agent as documented? Does an agent file with two model patterns fall back on a 429? | one `factory-builder-unstick` run on a failing test |
 
 ### 14.4 Your decisions still pending
 
-Q1–Q6 in §11 still carry defaults that you have not confirmed.
+Q1–Q8 in §11 still carry defaults that you have not confirmed. Q7 has no
+default.
