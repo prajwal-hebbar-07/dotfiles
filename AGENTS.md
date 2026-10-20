@@ -56,6 +56,9 @@ The software factory (`omp/factory/` plugin, `factory_*` model aliases,
 `SOFTWARE-FACTORY.md`) was removed on 2026-10-20 to be rebuilt from scratch as
 multiple skills. The removed version is archived at
 `~/.local/share/ohmypi/factory-archive-20261020-084936/` (also in git history).
+The rebuild design — which skills to borrow from pstack,
+addyosmani/agent-skills, and mattpocock/skills, and how they map onto omp —
+is `SOFTWARE-FACTORY.md` at the repo root.
 
 ## Cursor skills
 
