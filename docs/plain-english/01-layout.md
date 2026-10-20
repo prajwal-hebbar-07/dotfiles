@@ -26,7 +26,6 @@ every tool that holds a key sees the new version the next time it opens its door
 | `docs/` | Plain-English documentation — this file included |
 | `.gitignore` | Tells git to skip the ephemeral implementation-plan folder |
 | `SKILLS.md` | A written-out inventory of the old skill set, kept so it can be re-added piece by piece |
-| `SOFTWARE-FACTORY.md` | Research notes and a starting design for rebuilding the Oh My Pi software factory |
 
 ---
 

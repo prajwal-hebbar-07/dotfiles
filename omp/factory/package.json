@@ -1,9 +1,0 @@
-{
-  "name": "omp-factory",
-  "version": "1.0.0",
-  "private": true,
-  "description": "Human-in-the-loop software factory for omp: four human gates, then issue-by-issue build, open-weight + GPT review, holdout QA, draft PRs.",
-  "omp": {
-    "extensions": ["./extensions/holdout-guard.ts"]
-  }
-}

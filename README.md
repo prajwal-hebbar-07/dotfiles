@@ -79,9 +79,7 @@ and re-link.
 
 Rules are read at startup: an edited rule takes hold in the next omp session.
 
-omp has no skills or commands of its own right now. The previous `factory`
-skill was removed on 2026-10-19; `SOFTWARE-FACTORY.md` holds the research for
-rebuilding it.
+omp has no skills or commands of its own right now.
 
 ### Cursor
 

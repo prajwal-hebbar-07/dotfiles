@@ -46,24 +46,16 @@ history). List new skills here.
 
 `omp/` holds the omp harness config, each file symlinked to its live path:
 
-- `config.yml` → `~/.omp/agent/config.yml` — settings and model roles (including
-  the `factory_*` aliases); omp also writes this file.
+- `config.yml` → `~/.omp/agent/config.yml` — settings and model roles; omp also
+  writes this file.
 - `mcp.json` → `~/.omp/agent/mcp.json` — MCP servers (`paper`).
 - `rules/explicit-runtime-permission.md` →
   `~/.agents/rules/explicit-runtime-permission.md` — account-wide rule.
-- `factory/` — the software factory, a local omp plugin installed with
-  `omp plugin link omp/factory` (not symlinked file by file). It holds the
-  `factory` skill (`skills/factory/`), the `/factory` command (`commands/`), 15
-  agent definitions (`agents/`, models chosen through the `factory_*` aliases in
-  `config.yml`), the holdout guard extension (`extensions/holdout-guard.ts`,
-  declared in `package.json`), and evals for the factory itself (`evals/`).
-  `/factory help` lists the commands.
 
-The factory was rebuilt on 2026-10-19 from `SOFTWARE-FACTORY.md` at the repo root,
-which holds the research (super-board, Tessl harness engineering, StrongDM,
-ZazenCodes, Claude for Small Business), the user's requirements, and the design.
-The earlier `factory` skill is archived at
-`~/.local/share/ohmypi/factory-archive-20261019-101151/` (also in git history).
+The software factory (`omp/factory/` plugin, `factory_*` model aliases,
+`SOFTWARE-FACTORY.md`) was removed on 2026-10-20 to be rebuilt from scratch as
+multiple skills. The removed version is archived at
+`~/.local/share/ohmypi/factory-archive-20261020-084936/` (also in git history).
 
 ## Cursor skills
 

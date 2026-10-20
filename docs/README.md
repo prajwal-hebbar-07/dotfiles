@@ -32,7 +32,6 @@ Path globs to page numbers. A path may list several numbers.
 | `README.md` | `01` |
 | `AGENTS.md` | `01` |
 | `SKILLS.md` | `01` |
-| `SOFTWARE-FACTORY.md` | `01` |
 | `.gitignore` | `01` |
 | `zsh/**` | `02` |
 | `tmux/**` | `03` |

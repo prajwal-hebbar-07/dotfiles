@@ -52,10 +52,6 @@ Oh My Pi is the coding assistant this repository is mostly edited with. Its fold
 - **A standing rule** — never start an app, a server, or a test run unless asked for that
   in the current request.
 
-There is no factory any more: the earlier factory skill and its `/factory` command were
-removed in October 2026 so it can be rebuilt from scratch. `SOFTWARE-FACTORY.md` at the
-top of the repository collects the research and the plan to rebuild it from.
-
 Each file is linked back to where Oh My Pi looks for it, the same way the drawers are.
 
 ---
