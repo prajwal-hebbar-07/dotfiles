@@ -3,9 +3,9 @@
 Design for rebuilding the factory as a set of skills, agents, and one hook on
 Oh My Pi (omp). It draws on three skill repositories, the research reports in
 `docs/research/` (requirements, grilling, architecture, architecture
-grilling, design; each checked against primary sources in §12), the skills
-already in this repo, and omp's runtime. Nothing here is built yet. Research
-date: 2026-10-20.
+grilling, design, design grilling; each checked against primary sources in
+§12), the skills already in this repo, and omp's runtime. Nothing here is
+built yet. Research date: 2026-10-20.
 
 Sources studied:
 
@@ -364,7 +364,14 @@ but not issue creation or Projects. Issues go through `gh` in `bash`.
 Your list, with three changes and the reasons for each:
 
 1. **UI/UX design moves before code** for issues marked UI: yes. Designing
-   after the code is written means rework. UI/UX **review** stays after QA.
+   after the code is written means rework. Your "UI/UX review" becomes two
+   checks:
+   - **Design review**, right after the Paper screens are drawn and before
+     code. It checks whether the design is usable.
+   - **UI review**, after QA. It checks whether the code matches the design.
+
+   UI review alone would pass a bad design built faithfully, and once code
+   starts nobody else looks at the screens.
 2. **Code review and unit-test review run in parallel.** Both are read-only on
    the same diff (addyosmani `/ship` fan-out).
 3. **Every verdict is pinned to a commit SHA** (pstack `shipping`: a rebase
@@ -376,7 +383,9 @@ flowchart LR
   P[Plan + QA scenarios] --> D{UI issue?}
   D -- yes --> UX[UI/UX design in Paper]
   D -- no --> C
-  UX --> C[Code + unit tests]
+  UX --> DR{Design review}
+  DR -- fail, ≤3 cycles --> UX
+  DR -- pass --> C[Code + unit tests]
   C --> CR[Code review A+B]
   C --> TR[Unit-test review]
   CR --> J1{both pass?}
@@ -404,6 +413,7 @@ changes stay in `config.yml`.
 | `factory-planner` | `@plan` | read-only | issue + approved docs | plan (≤5 commits) + seams | this repo's `implementation-plan` (window idea), mattpocock `tdd` (seams agreed first) |
 | `factory-qa-author` | `@slow` | read, write `.factory/holdout/` | issue + REQUIREMENTS only | one scenario per Given / When / Then of the requirements the issue covers | your archived factory's holdout QA |
 | `factory-designer` | `@default` | Paper MCP | `paper-design-prompt.md` (from §4.5) + issue | Paper screens for this issue only | this repo's `paper-design` |
+| `factory-design-review` | `@vision` | read-only, Paper read tools (`get_screenshot`, `get_jsx`) | the issue's Paper screens + `paper-design-prompt.md` + CONSTRAINTS a11y | score out of 10; FAIL on any finding of severity 3–4 (major or catastrophic) | wondelai `ux-heuristics`: Nielsen + Krug, 10-question diagnostic, severity 0–4, start at 10 and subtract per failed row. Also checks the brief's own practices (one primary action, empty / loading / error states, readable contrast). Keyboard, focus, and screen-reader behaviour go to `factory-ui-review` on the running app, because a static screen cannot show them |
 | `factory-builder` | `@task` or `@default` | full | plan, issue, docs (never holdout) | commits | addyosmani `incremental-implementation`, mattpocock `implement`/`tdd`, this repo's `commit` |
 | `factory-code-review-a` / `-b` | `@review` / `@default` | read-only | diff + issue + ARCHITECTURE + CONSTRAINTS | APPROVE / REQUEST CHANGES, items labelled Critical / Required / Optional / Nit | pstack `interrogate` (model diversity), mattpocock `code-review` (Standards + Spec axes), addyosmani `code-reviewer` |
 | `factory-test-review` | `@review` | read-only (+ run tests) | diff + tests | PASS / FAIL + findings | mattpocock `tdd` anti-patterns, addyosmani mutation check, pstack test-behavior principle |
@@ -509,7 +519,7 @@ skills/
   factory-build/           stage 7–8; pipeline, loop rules, PR template
   factory-review/          shared rubric + verdict formats (autoloaded by reviewer agents)
 omp/
-  agents/                  → ~/.omp/agent/agents/   factory-builder-check (§4.3) + the nine agents in §5.2
+  agents/                  → ~/.omp/agent/agents/   factory-builder-check (§4.3) + the eleven agents in §5.2
   hooks/pre/factory-guard.ts → ~/.omp/agent/hooks/pre/
 ```
 
@@ -569,8 +579,8 @@ Each step is usable before the next one exists.
 4. `factory-guard.ts` hook, before any agent can push.
 5. `factory-build` with one issue, sequential, no UI: builder, two code
    reviewers, test reviewer, QA, QA reviewer, PR ask.
-6. Add the UI path (designer, UI reviewer), then parallel issues with
-   isolation.
+6. Add the UI path (designer, design reviewer, UI reviewer), then parallel
+   issues with isolation.
 7. Evals, following addyosmani's three tiers: structural checks on
    frontmatter, a routing check, and behavioural cases. Your archived
    factory's six eval scenarios (holdout guard, weakened test, misleading
@@ -768,6 +778,42 @@ Report accuracy:
 - **GPT:** all repos exist. The official `agent-plugins` repo ships no
   design skill, only MCP packaging.
 
+### Design grilling research (`docs/research/design-grill/`)
+
+Checked the same way on 2026-10-20. The reports offer two kinds of skill:
+ones that interrogate you about your design, and ones that critique a design
+on their own. The interrogation kind does not fit. Per-issue design is
+hands-off, and you already approve the design direction at the architecture
+gate. The critique kind did expose a real gap: the UX quality of the Paper
+screens was checked by no one, because UI review only checks that the code
+matches them. **One addition:** the `factory-design-review` agent (§5.1,
+§5.2), with wondelai `ux-heuristics` as its rubric. It was the only source
+that can work unattended:
+
+- it needs no running app;
+- it asks you no questions;
+- it gives a repeatable score, which the factory turns into a verdict.
+
+| Skill (report) | Static | Asks you | Fixed verdict | Decision |
+| --- | --- | --- | --- | --- |
+| wondelai `ux-heuristics` (GPT) | yes | no | score out of 10, severity 0–4 | **Adopted** as the design-review rubric. The factory adds its own threshold: FAIL on severity 3–4 |
+| EliaAlberti `ux-audit-skill` (GPT) | yes (screenshots) | yes, an intake stop | no | not adopted: the intake stop blocks hands-off use. Its rule that keyboard and focus "are not assessable from static screens" is followed by sending them to UI review |
+| pbakaus `impeccable` `critique` (Claude) | no, needs a browser for web | yes | 0–40 score | not adopted: needs the running app and asks questions |
+| cuellarfr `design-critique` (GPT) | yes | no | severity only | not adopted: no verdict, and a very large rubric |
+| mohitagw15856 `design-critique` (Claude) | yes | rarely | no threshold | not adopted: no verdict, and fills gaps with assumptions |
+| NickCrew `design-critiquer` (Claude) | yes | no | no | not adopted: no verdict; its contrast and 44px target checks are part of CONSTRAINTS a11y |
+| anthropics `knowledge-work-plugins` `design-critique`, `accessibility-review`, `design-system` (GPT) | yes | yes, if no input | no | not adopted: asks you, no verdict |
+| mattpocock, satya-janghu, vvanagas `grill-me` (Claude, GPT) | — | yes, by design | — | not adopted: per-issue design has no human in the loop. Compared in earlier tables |
+| paper-design `agent-plugins` (both) | — | — | — | already covered by Design research above |
+
+Report accuracy:
+
+- **Claude:** `impeccable` `critique` is a reference file inside the
+  `impeccable` skill, not a separate skill. NickCrew's skill lives in
+  `Claude-Cortex`, not a separate `claude-ctx-plugin` repo.
+- **GPT:** every repo exists. The UX Planet article could not be read (HTTP
+  403), so its "copyable SKILL.md examples" are unverified.
+
 ## 13. Sources
 
 - pstack: [README](https://github.com/cursor/plugins/blob/main/pstack/README.md) ·
@@ -810,3 +856,68 @@ Report accuracy:
 - Architecture research (§12), adopted pieces only:
   [magnus919 lightweight threat model](https://raw.githubusercontent.com/magnus919/agent-skills/HEAD/secure-software-engineering/templates/lightweight-threat-model.md) ·
   [addyosmani /constraints](https://raw.githubusercontent.com/addyosmani/agent-skills/main/.claude/commands/constraints.md)
+- Design grilling research (§12), adopted piece only:
+  [wondelai ux-heuristics](https://raw.githubusercontent.com/wondelai/skills/HEAD/plugins/ux-design/skills/ux-heuristics/SKILL.md)
+
+## 14. Still open
+
+Reviewed on 2026-10-20 after the six research rounds in §12. Three kinds of
+work remain: design conflicts to fix, stages with no research yet, and omp
+behaviour to confirm by running it.
+
+### 14.1 Conflicts in this design (fix, no research needed)
+
+1. **CI before the PR cannot happen.** §5.4 wants CI green before it asks
+   "Raise PR?", but the hook (§7) blocks every push until you approve, so CI
+   never runs. Options:
+   - run CONSTRAINTS' `check:full` locally as the pre-PR gate, under the §8
+     run permission, and let GitHub CI run after the PR opens;
+   - let the hook allow pushes to a `factory/*` branch, with no PR, before
+     asking you.
+2. **Sub-agents do not see the target repo's `AGENTS.md`.** omp drops any
+   `agents.md` file when it spawns a task agent, though `CLAUDE.md` is still
+   passed on (`omp://system-prompt-customization.md`). The builder and the
+   reviewers would miss the repo's conventions. Either pass the `AGENTS.md`
+   path in every task's `context`, or keep the conventions in `CLAUDE.md`.
+3. **Sub-agents cannot answer prompts.** They run headless, and any tool call
+   that needs approval is rejected (`omp://approval-mode.md`). `ask`,
+   `github` `pr_create`, and every gate must therefore run in the main
+   session. The design already assumes this; each skill has to say it.
+
+### 14.2 Stages with no dedicated research yet
+
+These stages rest only on the first pass over pstack, addyosmani, and
+mattpocock. Ranked by risk: the unattended stages come first, because no
+human catches their mistakes.
+
+| # | Stage | Why it matters | Search for |
+| --- | --- | --- | --- |
+| R1 | QA (§5.2 `factory-qa`, `factory-qa-author`) | The least specified part: how an agent starts the app, seeds data, drives the browser, and records evidence unattended | verification / QA-agent skills, Playwright or browser-driving skills, holdout acceptance tests, pstack `create-verification-skill` in depth, omp `browser` tool |
+| R2 | Builder (§5.2 `factory-builder`) | The biggest unattended step: TDD inside one issue, commits, staying inside scope | superpowers `subagent-driven-development`, `executing-plans`, `test-driven-development`; mattpocock `implement`; Ralph-style loops; "autonomous coding agent skill" |
+| R3 | Unattended run and resume (§5.3) | A long session dies, compacts, or stops; the factory must pick up from `.factory/state.json` | omp `session_stop` hook (can keep the main session going, capped at 8 continuations), handoff and compaction, pstack `orchestrate` / `autonomous-run`, "long-running agent resume" |
+| R4 | Tech stack (§4.4) | A human gate with no research: candidates, scoring, fresh facts | "tech stack selection skill", "technology decision record", me-cedric `architecture-advisor` options matrix (already read), Thoughtworks Radar-style evaluation |
+| R5 | Code review (§5.2) | Covered only by the first pass. omp ships `reviewer` and `security-reviewer` agents that may replace the custom ones | superpowers `requesting-code-review`, Anthropic `code-review` plugin, Cursor Bugbot rules, omp bundled `reviewer` / `security-reviewer` |
+| R6 | Unit-test review (§5.2) | No research beyond mattpocock `tdd` | mutation testing (Stryker, mutmut), "test quality review skill", test-smell catalogues |
+| R7 | UI review vs Paper (§5.2) | Vision-model judgement vs pixel diff; how to export Paper frames for comparison | Paper `export` / `get_screenshot` at matching sizes, visual-regression tools (Playwright `toHaveScreenshot`, pixelmatch), pstack `visual-parity` in depth |
+| R8 | Issues and board (§4.6) | `gh` support for Projects v2 status fields, sub-issues, and dependencies varies by `gh` version | `gh project item-edit`, sub-issue and dependency REST endpoints, "github project manager skill" |
+| R9 | Security per issue | There is a threat model (§4.5) but no per-issue security check | omp bundled `security-reviewer`, addyosmani `security-auditor`, Semgrep / gitleaks in CONSTRAINTS |
+| R10 | Evals for the factory itself (§9 step 7) | Proving that the skills fire and the gates hold | addyosmani `evals/`, your archived factory's six eval scenarios |
+
+Use the same method as §12 for each: three AI reports into
+`docs/research/<topic>/`, then a check against primary sources. A piece is
+adopted only if the workflow needs it and nothing here covers it.
+
+### 14.3 omp behaviour to confirm by running it (needs your permission)
+
+| # | Question | How to check |
+| --- | --- | --- |
+| V1 | Does `autoloadSkills` load a `disable-model-invocation: true` skill (`paper-design`)? Docs say it loads "skills from the parent session", and hidden skills stay loaded, so probably yes | spawn a test agent with `autoloadSkills: paper-design` and ask it to quote the skill |
+| V2 | Do sub-agents get the account rule `explicit-runtime-permission.md`? If they do, QA and test agents refuse to run tests even after you approve in the main session, unless the approval text goes into their task | spawn a `task` agent and ask what rules it has |
+| V3 | Can the `factory-guard` hook block `github` `pr_create` and `git push` inside sub-agents? Extensions are rebound to every sub-agent session (`omp://extensions.md`) | a throwaway hook that blocks `git push`, then a sub-agent that tries it |
+| V4 | Is the `ask` dialog's `preview` usable for a whole document section? | one gate run on a sample REQUIREMENTS.md |
+| V5 | Does `task.isolation` with branch merge work on this Mac (APFS)? | one isolated sub-agent edits one file; check the `omp/task/<id>` branch |
+
+### 14.4 Your decisions still pending
+
+Q1–Q6 in §11 still carry defaults that you have not confirmed. 14.1-1 (how
+CI runs before the PR) is a new one.
