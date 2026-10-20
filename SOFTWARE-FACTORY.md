@@ -417,9 +417,9 @@ changes stay in `config.yml`.
 | `factory-builder` | `@task` or `@default` | full | plan, issue, docs (never holdout) | commits | addyosmani `incremental-implementation`, mattpocock `implement`/`tdd`, this repo's `commit` |
 | `factory-code-review-a` / `-b` | `@review` / `@default` | read-only | diff + issue + ARCHITECTURE + CONSTRAINTS | APPROVE / REQUEST CHANGES, items labelled Critical / Required / Optional / Nit | pstack `interrogate` (model diversity), mattpocock `code-review` (Standards + Spec axes), addyosmani `code-reviewer` |
 | `factory-test-review` | `@review` | read-only (+ run tests) | diff + tests | PASS / FAIL + findings | mattpocock `tdd` anti-patterns, addyosmani mutation check, pstack test-behavior principle |
-| `factory-qa` | `@task` | bash, browser | holdout scenarios + running app | per-scenario PASS / FAIL with evidence | pstack `create-verification-skill`, addyosmani `browser-testing-with-devtools` |
+| `factory-qa` | `@task` | bash, eval (omp's `browser` is an eval facade, not a tool) | holdout scenarios + running app | per-scenario PASS / FAIL with evidence | pstack `create-verification-skill`, addyosmani `browser-testing-with-devtools` |
 | `factory-qa-review` | `@review` | read-only | QA evidence + acceptance criteria | PASS / PASS+NOTES / FAIL; FAIL when a covered requirement has no test or runtime evidence | pstack `shipping` verifier ("Green CI and an approving bot review are not verdicts"), `blast-radius` |
-| `factory-ui-review` | `@vision` | read, browser, Paper | screenshots at the viewport the design brief names (desktop or phone) vs Paper export + CONSTRAINTS a11y | PASS / FAIL | pstack `visual-parity`, addyosmani `frontend-ui-engineering` |
+| `factory-ui-review` | `@vision` | read, eval (`browser`), Paper | screenshots at the viewport the design brief names (desktop or phone) vs Paper export + CONSTRAINTS a11y | PASS / FAIL | pstack `visual-parity`, addyosmani `frontend-ui-engineering` |
 
 The main session synthesises the two code reviews (Act on / Consider / Noted
 / Dismissed). Only "Act on" items go back to the builder.
@@ -955,20 +955,43 @@ human catches their mistakes.
 
 | # | Stage | Why it matters | Search for |
 | --- | --- | --- | --- |
-| R1 | QA (§5.2 `factory-qa`, `factory-qa-author`) | The least specified part: how an agent starts the app, seeds data, drives the browser, and records evidence unattended | verification / QA-agent skills, Playwright or browser-driving skills, holdout acceptance tests, pstack `create-verification-skill` in depth, omp `browser` tool |
-| R2 | Builder (§5.2 `factory-builder`) | The biggest unattended step: TDD inside one issue, commits, staying inside scope | superpowers `subagent-driven-development`, `executing-plans`, `test-driven-development`; mattpocock `implement`; Ralph-style loops; "autonomous coding agent skill" |
+| R1 | QA (§5.2 `factory-qa`, `factory-qa-author`) | The least specified part: how an agent starts the app, seeds data, handles secrets and third-party services, drives the browser, and records evidence unattended | verification / QA-agent skills, Playwright or browser-driving skills, holdout acceptance tests, pstack `create-verification-skill` in depth, superpowers `verification-before-completion`, omp `browser` (eval facade) and `computer` |
+| R2 | Builder (§5.2 `factory-builder`) | The biggest unattended step: TDD inside one issue, commits, staying inside scope, getting unstuck before the 3-cycle cap | superpowers `subagent-driven-development`, `executing-plans`, `test-driven-development`, `systematic-debugging`; addyosmani `debugging-and-error-recovery`; mattpocock `implement`; Ralph-style loops; omp advisor / `WATCHDOG.yml` (a second model watching the builder's transcript; off in sub-agents unless the agent opts in) |
 | R3 | Recovery inside a stage (§5.6 covers stage boundaries) | A session that dies mid-issue must resume from its last ledger entry without redoing passed work or skipping failed work | omp `session_stop` hook, compaction and handoff, pstack `orchestrate` / `autonomous-run`, "long-running agent resume" |
 | R4 | Tech stack (§4.4) | A human gate with no research: candidates, scoring, fresh facts | "tech stack selection skill", "technology decision record", me-cedric `architecture-advisor` options matrix (already read), Thoughtworks Radar-style evaluation |
 | R5 | Code review (§5.2) | Covered only by the first pass. omp ships `reviewer` and `security-reviewer` agents that may replace the custom ones | superpowers `requesting-code-review`, Anthropic `code-review` plugin, Cursor Bugbot rules, omp bundled `reviewer` / `security-reviewer` |
 | R6 | Unit-test review (§5.2) | No research beyond mattpocock `tdd` | mutation testing (Stryker, mutmut), "test quality review skill", test-smell catalogues |
 | R7 | UI review vs Paper (§5.2) | Vision-model judgement vs pixel diff; how to export Paper frames for comparison | Paper `export` / `get_screenshot` at matching sizes, visual-regression tools (Playwright `toHaveScreenshot`, pixelmatch), pstack `visual-parity` in depth |
 | R8 | Issues and board (§4.6) | `gh` support for Projects v2 status fields, sub-issues, and dependencies varies by `gh` version | `gh project item-edit`, sub-issue and dependency REST endpoints, "github project manager skill" |
-| R9 | Security per issue | There is a threat model (§4.5) but no per-issue security check | omp bundled `security-reviewer`, addyosmani `security-auditor`, Semgrep / gitleaks in CONSTRAINTS |
+| R9 | Security per issue | There is a threat model (§4.5) but no per-issue security check | omp bundled `security-reviewer`; omp `security_scan` with `target_kind: ref_diff` (needs `security.enabled` and an OAuth credential); addyosmani `security-auditor`; Semgrep / gitleaks in CONSTRAINTS |
 | R10 | Evals for the factory itself (§9 step 7) | Proving that the skills fire and the gates hold | addyosmani `evals/`, your archived factory's six eval scenarios |
+| R11 | Project bootstrap, before issue 1 | Nothing in the design creates the CI workflow (with the `factory/**` trigger), `check:full`, the test harness, the boundary checker, seed data, or `.env.example`. Every later issue and every QA run assumes they exist | addyosmani `ci-cd-and-automation`, `constraint-driven-development`, `git-workflow-and-versioning`; "walking skeleton"; mattpocock `to-tickets` prefactoring rule |
+| R12 | After "Raise PR": your review comments, the merge, and what follows | Stage 9 has no design. Your PR comments must reach the builder and re-run the invalidated verdicts. After a merge, the board moves, dependents unblock, stacked branches rebase, and `docs` refreshes | superpowers `receiving-code-review`, `finishing-a-development-branch`; pstack `babysit`; omp `pr://<N>` (renders comments) and `pr_checkout` |
 
 Use the same method as §12 for each: three AI reports into
 `docs/research/<topic>/`, then a check against primary sources. A piece is
 adopted only if the workflow needs it and nothing here covers it.
+
+Found on review, no research needed, only a decision or a fix:
+
+- **Model fallback.** A rate-limited `@review` model would stall every
+  reviewer. omp's `retry.fallbackChains` maps a role to fallback models, and
+  it applies to sub-agents too. Set it in `omp/config.yml`; no stand-in
+  agents are needed.
+- **Pushes before the PR.** `github` `pr_push` only works on a branch made by
+  `pr_checkout`, so the §5.4 push to `factory/*` is a plain `git push`. The
+  hook (§7) already parses those.
+- **Requirement changes after issues exist.** A reopened REQUIREMENTS.md gate
+  must list the issues and open PRs citing each changed `R` number, and send
+  them back to `factory:queued`.
+- **Cost and time budget.** Nothing caps an unattended run. Decide on a limit
+  per issue (fix cycles already cap at 3) or per run.
+- **Apps without a web UI.** QA assumes a browser. A CLI, desktop, or mobile
+  app needs a different driver (omp `computer` for desktop). The answer
+  belongs in R1, driven by STACK.md.
+- **`implementation-plan` conflict** (§6). Its "manual and UI testing stay
+  with the user" rule must be overridden in `factory-planner`, or the planner
+  writes plans with no QA step.
 
 ### 14.3 omp behaviour to confirm by running it (needs your permission)
 
