@@ -497,6 +497,102 @@ should archive it"). The factory then:
    §4.6. `factory-qa-author` rewrites the holdout scenarios for every changed
    `R`.
 
+### 4.9 Features and their explanations — `factory-features`
+
+Two commands, for reading a project, not for building it. Neither is a
+stage: run them at any time, mid-run included, or in a repo the factory has
+never touched. Neither needs a gate. The skill is left visible (no
+`disable-model-invocation`), so asking in plain words ("what features does
+this project have?", "explain archiving a task") runs it too.
+
+**`/skill:factory-features`** lists the features the code has, and nothing
+else, in chat:
+
+| # | Feature | What it does |
+| --- | --- | --- |
+| 1 | name | one line, from the user's side |
+
+- A feature is something a user can do: a screen, route, CLI command, or
+  scheduled job, grouped by what it does for the user. One `scout` per
+  top-level source directory finds them in the code.
+- Names come from GLOSSARY.md, else REQUIREMENTS.md, when `docs/factory/`
+  exists, else from the code.
+- Only what is in the code is listed. No requirements, issues, status,
+  modules, or file paths.
+- Read-only; nothing is saved.
+
+**`/skill:factory-features explain <feature>`** writes one document that
+explains a feature through its code. `<feature>` is a name, or the number
+from the list just shown. A name that matches no feature, or more than one,
+prints the list and asks which one; nothing is written.
+
+- **Written by GPT.** The `factory-explainer` agent runs on `@slow`
+  (GPT-6.1 Sol · high), with `anthropic/claude-opus-5-5:high` after it for
+  when the ChatGPT quota is out (§8 item 9). One explanation is one GPT run.
+  The agent is read-only. It returns the document; the main session saves
+  it.
+- **What it reads:** every file on the feature's path from entry point to
+  storage, its tests, and the written reasons: ADRs, ARCHITECTURE.md,
+  CONSTRAINTS.md, the `R` the code serves, and the commits and PRs that
+  added it (`git log -L` / `git blame`, then `read pr://<N>`).
+- **Saved to** `docs/features/<feature>.md` in the target repo, stamped with
+  the commit it explains. It is not committed; run `commit` to keep it. A
+  second run overwrites it. The chat gets one line:
+  `Saved docs/features/<feature>.md (explains commit <sha>). Not committed.`
+- **Each snippet is checked before saving.** Every snippet names
+  `path:start-end`, and the main session compares it with those lines at
+  the stamped commit. A mismatch goes back to the agent once; a second one
+  stops with the mismatch shown, and nothing is saved.
+
+The document follows `skills/factory-features/template.md`:
+
+````markdown
+# <Feature>
+
+Explains commit <sha> · <date> · written by <model>
+
+## What it does
+
+<Two to four sentences, from the user's side.>
+
+## The path through the code
+
+```mermaid
+flowchart TD
+  <one node per file, in the order the code runs>
+```
+
+## Step by step
+
+### <n>. <What this step does> — `<path>:<start>-<end>`
+
+```<language>
+<the lines start–end, verbatim>
+```
+
+**What it does.**
+
+- **Line <n>:** <in detail; line by line where a line is not obvious>
+
+**Why it is written this way.**
+
+- <reason> [<source: ADR NNNN, ARCHITECTURE.md, R<n>, PR #<n>, or commit <sha>>]
+- <reason no written source gives> *(inferred)*
+
+## Tests
+
+### <Test name> — `<path>:<start>-<end>`
+
+```<language>
+<the test, verbatim>
+```
+
+<One line on what it proves.>
+````
+
+Line numbers in "What it does" are the file's own, so they match the range in
+the heading.
+
 ## 5. Per-issue pipeline (stage 7) — `factory-build`
 
 ### 5.1 Order
@@ -1041,6 +1137,7 @@ move `factory-designer` to Astra too.
 | Budget per issue | §11 Q7 and §5.3 |
 | Gate behaviour | §4.3 and `skills/factory-gate/` |
 | The simplicity round | §4.2 and `skills/factory-grill/` |
+| The feature list, or the explanation document and its model | §4.9, `skills/factory-features/`, and `omp/agents/factory-explainer.md` |
 | The Simpler check | `factory-spec-review` (§5.2) |
 | Coverage or mutation numbers | the app repo's `CONSTRAINTS.md`, agreed at the architecture gate |
 | Per-issue order | §5.1 and `skills/factory-build/` |
@@ -1080,9 +1177,11 @@ skills/
   factory-bootstrap/       issue #0 (§4.7): walking skeleton or missing-harness checklist
   factory-build/           stage 7–8; pipeline, loop rules, questionnaire relay, PR template
   factory-land/            stage 9 (§5.7): PR comments, post-merge close / unblock / restack / docs
+  factory-features/        /skill:factory-features (§4.9): list the features; `explain <feature>` writes docs/features/<feature>.md
+    template.md            the explanation document (§4.9)
   factory-review/          shared rubric + verdict formats (autoloaded by reviewer agents)
 omp/
-  agents/                  → ~/.omp/agent/agents/   factory-builder-check (§4.3), factory-design-director (§4.5) + the custom agents in §5.2
+  agents/                  → ~/.omp/agent/agents/   factory-builder-check (§4.3), factory-design-director (§4.5), factory-explainer (§4.9) + the custom agents in §5.2
   hooks/pre/factory-guard.ts → ~/.omp/agent/hooks/pre/
   extensions/factory-stage-guard.ts → ~/.omp/agent/extensions/   session_stop + compaction pointer (§5.6)
 ```
@@ -1224,7 +1323,8 @@ covers the irreversible actions.
 Each step is usable before the next one exists.
 
 1. `factory-grill` + `factory-gate` (with the builder check): the two
-   primitives. Try them by hand on any document.
+   primitives. Try them by hand on any document. `factory-features` (§4.9)
+   depends on nothing else, so it can be built at any point.
 2. `factory-requirements` → `factory-stack` → `factory-architecture`: the
    human-in-the-loop half ends here with three approved docs.
 3. `factory-issues` with its `board` script: publishes the board with issue #0
