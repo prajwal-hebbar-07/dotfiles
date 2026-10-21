@@ -176,8 +176,9 @@ lives in `.factory/`.
 - **Last round on requirements: a pre-mortem.** When the frontier is empty,
   the factory runs one more round of the same format, opening with "It is
   three months after launch and this has failed, or corrupted someone's data.
-  What went wrong?" It then proposes the likely causes from R1…Rn: a failure
-  path with no acceptance criterion, an abuse case, a permission gap, a
+  What went wrong?" A `@slow` agent (GPT) proposes the likely causes from
+  R1…Rn: a failure path with no acceptance criterion, an abuse case, a
+  permission gap, a
   partial failure in an integration. Each answer becomes a new requirement, a
   non-goal, or an accepted risk. `grilling` walks decisions forward, and the
   builder check (§4.3) only asks about what is written, so nothing else looks
@@ -185,8 +186,30 @@ lives in `.factory/`.
   `frameworks.md` "Pre-mortem"; BMAD `methods.csv` "Pre-mortem Analysis".)
   This round runs only at the requirements stage, because architecture already
   gets the two-model review in §4.5.
-- **Exit:** the frontier is empty, the pre-mortem round has been answered (at
-  the requirements stage), and every answer is folded into the document.
+- **Simplicity round (stack and architecture stages).** Before each of those
+  two gates, one more round in the same format walks every piece the draft
+  adds: each dependency, service, module, layer, abstraction, config option,
+  and piece of infrastructure. Each question is the ponytail ladder
+  ([DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail),
+  `skills/ponytail/SKILL.md`): does it need to exist, and does something
+  already there do it (the codebase, the chosen stack, the standard library,
+  a platform feature, an installed dependency)? The recommended answer is
+  always the simpler option, plus what would justify the bigger one, so
+  "yes" picks simple:
+
+  ```
+  ❓ **Q4** - **Job queue**: Do we need Redis + BullMQ for background jobs?
+  ➡️ No. A `jobs` table the app polls covers R5–R7 at the expected load. Add a queue when jobs pass ~100 a minute.
+  ```
+
+  Keeping the bigger option needs an `R` number or a constraint that
+  requires it; "we might need it later" is not a reason. Each kept piece is
+  written into STACK.md or ARCHITECTURE.md with its reason, so later stages
+  do not ask again. Each dropped piece goes to the out-of-scope notes (§4.3
+  rule 5) together with what would bring it back.
+- **Exit:** the frontier is empty, the pre-mortem round (requirements) or the
+  simplicity round (stack, architecture) has been answered, and every answer
+  is folded into the document.
 
 ### 4.3 The approval gate (stages 3, 4, 5, 8) — `factory-gate`
 
@@ -229,17 +252,27 @@ Rules:
 1. **Present the whole document every time**, revisions included. At the top,
    list what changed since the last review and every "factory's call", so you
    can find them quickly. The questionnaire still covers every section.
-2. **One `ask` call, one question per top-level section.** Each question has
-   exactly two options, `Approve` and `No`. Use `header` for the section name
-   and `preview` for the section text. A **No** on any section rejects the
-   whole document, which then goes through Revising and comes back in full.
-3. **omp `ask` constraints the gate must handle** (from omp `tools/ask.md`):
+2. **One `ask` call, one question per top-level section, with no previews.**
+   Each question has exactly two options, `No` listed first, then `Approve`.
+   Use `header` for the section name and name the section in the question
+   text. The section itself is read in chat (rule 1), not in the dialog: you
+   tried a sample gate with whole sections in the `Approve` preview on
+   2026-10-20 and chose chat only (V4, §14.3). A **No** on any section rejects
+   the whole document, which then goes through Revising and comes back in
+   full.
+3. **omp `ask` constraints the gate must handle** (omp v18.12.3 source,
+   `tools/ask.ts` and `tui/overlays/ask-dialog.ts`):
    - The UI always adds `Other (type your own)`, and the rich dialog adds
      `Chat about this`. A strict two-button picker is not possible. Treat
-     either one as **No** and use the typed text as the reason.
-   - With `ask.timeout` set above 0, a timeout auto-selects the recommended
-     option, or the first one. Never set `recommended` on a gate question.
-     Treat `details.timedOut` as **No**. Keep `ask.timeout: 0` (the default).
+     either one as **No** and use the typed text as the reason. Other returns
+     `User provided custom input: <text>`.
+   - With `ask.timeout` set above 0, a timeout submits (it does not cancel)
+     the recommended option, or else the first one, and the result says
+     `(auto-selected after timeout)`. Never set `recommended` on a gate
+     question, list `No` first so an auto-selected answer is No, and treat
+     `timedOut` as **No**. Keep `ask.timeout: 0` (the default).
+   - No question uses a preview, so the rich dialog and the fallback select
+     list ask the same thing.
    - A cancelled dialog throws `ToolAbortError`. The gate stays open; nothing
      is stamped.
 4. **Stamp the approval**, then commit:
@@ -261,8 +294,8 @@ Rules:
 - **Two candidates per open decision** (pstack `architect`: "two structurally
   distinct candidates"), each with fit to REQUIREMENTS.md, cost, operational
   load, and team familiarity. For a hard call, run a small pstack-style
-  `arena`: two `task` agents on different models each argue one stack, and the
-  main session judges.
+  `arena`: two agents each argue one stack, one on `@default` (Opus) and one
+  on `@slow` (GPT), and the main session judges.
 - **Factory-compatibility filter** (hard pass/fail, before any scoring). A
   candidate stack must support every check the factory runs later: type and
   lint checks for `check:fast`, line coverage as lcov, a mutation tool
@@ -283,9 +316,12 @@ Rules:
 
 ### 4.5 Architecture (stage 5) — `factory-architecture`
 
-- **Two candidates** (pstack `architect`), then an **adversarial review before
+- **Two candidates** (pstack `architect`): candidate A from the main session
+  (Opus) is the simplest design that meets every `R` (the ponytail ladder);
+  candidate B from a `@slow` agent (GPT) is a structurally different one, so
+  the two differ in more than wording. Then an **adversarial review before
   you see it** (pstack `interrogate`): two read-only reviewers on different
-  models. In this config, `@review` (GPT-6.1 Sol) and the default (Opus 5.5).
+  models, `@review` (GPT-6.1 Sol) and `@default` (Opus 5.5).
   Their findings are sorted into Act on / Consider / Noted / Dismissed. The
   author fixes "Act on" items before the doc reaches you, and the gate shows
   the "Consider" items as known trade-offs.
@@ -295,15 +331,19 @@ Rules:
   `constraint-driven-development` (CDD). It holds:
   - a **Floor** that is always on: no new suppressions (`@ts-ignore`,
     `eslint-disable`, `# noqa`), no stubs or empty `catch {}`, no skipped or
-    deleted tests without a reason, no secrets, and the file itself never
-    weakened;
+    deleted tests without a reason, no secrets, no new runtime dependency
+    that STACK.md or the issue's plan does not name (checked on the lockfile
+    diff), and the file itself never weakened;
   - numbered dimensions, each naming the command that produces its verdict:
-    lint, types, changed-line coverage (default ≥ 80%), mutation score
-    (default ≥ 60% to start), bundle budget, accessibility level, secret
-    scan (gitleaks over the branch's commits), new Semgrep findings
-    (`--baseline-commit` at the merge base), a dependency audit (osv-scanner
-    when a lockfile changes), and the allowed dependencies between
-    ARCHITECTURE.md's modules (dependency-cruiser or import-linter);
+    lint and format (the language's official or de-facto tool with its
+    recommended preset, §5.8), types, changed-line coverage (default ≥ 80%),
+    mutation score (default ≥ 60% to start), bundle budget, accessibility
+    (WCAG 2.2 AA by default), secret scan (gitleaks over the branch's
+    commits), new Semgrep findings (the language's rules plus
+    `p/owasp-top-ten` and `p/cwe-top-25`, `--baseline-commit` at the merge
+    base), a dependency audit (osv-scanner when a lockfile changes), and the
+    allowed dependencies between ARCHITECTURE.md's modules
+    (dependency-cruiser or import-linter);
   - **ratchets**: where no target number exists, today's value must not fall;
   - three scripts that mirror it: `check:fast` after each edit, `check:task`
     when the builder thinks it is done, `check:full` in CI and before the PR
@@ -320,14 +360,22 @@ Rules:
   - actors with the authority each needs and the authority each is denied;
   - data flows, marking where trust changes;
   - assumptions to test;
-  - abuse cases, each with its mitigation and **verification**.
+  - abuse cases, each with its mitigation and **verification**, citing the
+    OWASP ASVS 5.0.0 requirement it meets (`v5.0.0-<id>`). The app targets
+    ASVS Level 1, or Level 2 when it has user accounts, personal data, or
+    payments; the level is decided at this gate.
 
   The requirements pre-mortem (§4.2) says *what* must not happen. This
   section says *where* it is stopped. Each verification becomes a test the
   code reviewers expect. Without it, "security boundaries" is a heading no
   agent can check.
-- **UI direction** (if there is a UI): run the existing `paper-design-prompt`
-  skill so the design system is approved here, not invented per issue.
+- **UI direction** (if there is a UI): `factory-design-director` runs the
+  existing `paper-design-prompt` skill, so the design system is approved here,
+  not invented per issue. Its agent file lists `openai-codex/gpt-6-astra:medium`
+  first and `@default` second. It runs once and takes a few turns, which a
+  ChatGPT Plus window can afford. Drawing per issue stays on `@default`,
+  because Plus allows Astra only 5–45 messages per 5 hours, and drawing in
+  Paper takes dozens of tool calls per screen (§5.9).
 - **Diagrams:** the existing `arc-design` skill (archify) for the overview and
   one diagram per module.
 - **Artifact:** `docs/factory/ARCHITECTURE.md` (modules, interfaces, data
@@ -409,7 +457,7 @@ cut through every layer (one screen → one API call → one stored row), plus:
 | CDD floor guard (`references/floor-guard.md`): diff-scoped, exit 0 clean / 1 violation / 2 could not run | exits 1 on a planted `.skip` |
 | Boundary checker with the ARCHITECTURE.md module rules | fails on a planted illegal import |
 | CI on `pull_request` and on `push` to `main` and `factory/**`, `fetch-depth: 0` | green run on the `factory/*` push |
-| Unit runner with lcov; E2E runner with one test over the skeleton | green in CI |
+| Unit runner with lcov; E2E runner with one test over the skeleton (each later issue adds its own, §5.8) | green in CI |
 | Idempotent `seed` that works from an empty data directory | running it twice gives the same state |
 | `.env.example` (fake values, one comment per variable), `.env` git-ignored | gitleaks clean |
 | `launch` and a read-only `doctor` (process, port, version, data reachable) | doctor green after launch |
@@ -464,7 +512,7 @@ Your list, with three changes and the reasons for each:
 
    UI review alone would pass a bad design built faithfully, and once code
    starts nobody else looks at the screens.
-2. **Code review and unit-test review run in parallel.** Both are read-only on
+2. **Code review and test review run in parallel.** Both are read-only on
    the same diff (addyosmani `/ship` fan-out).
 3. **Every verdict is pinned to a patch** (pstack `shipping`): "Compare `git
    patch-id` at the verdict SHA with the current head before trusting an
@@ -478,9 +526,9 @@ flowchart LR
   D -- no --> C
   UX --> DR{Design review}
   DR -- fail, ≤3 cycles --> UX
-  DR -- pass --> C[Code + unit tests]
+  DR -- pass --> C[Code + tests]
   C --> CR[Code review A+B]
-  C --> TR[Unit-test review]
+  C --> TR[Test review]
   CR --> J1{both pass?}
   TR --> J1
   J1 -- no, ≤3 cycles --> C
@@ -501,22 +549,24 @@ flowchart LR
 
 omp custom agents live in `~/.omp/agent/agents/*.md` (user) or
 `.omp/agents/*.md` (project). They pick models through role aliases, so model
-changes stay in `config.yml`.
+changes stay in `config.yml`. Volume goes to the two Claude accounts; GPT,
+on one ChatGPT Plus account, is kept to a few runs per issue. The reasons
+for each choice are in §5.9.
 
-| Agent | Model role | Tools | Reads | Verdict | Borrowed from |
+| Agent | Model · effort (`@role` values per §8 item 3; fallback when its quota runs out per §8 item 9) | Tools | Reads | Verdict | Borrowed from |
 | --- | --- | --- | --- | --- | --- |
-| `factory-planner` | `@plan` | read-only | issue + approved docs | plan (≤5 commits) + seams; lists the threat-model boundaries the issue touches (`sec:boundary` label) and, for UI issues, the `data-paper-id` each element carries | this repo's `implementation-plan` (window idea), mattpocock `tdd` (seams agreed first) |
-| `factory-qa-author` | `@slow` | read, write `~/.omp/factory/<repo>/holdout/` | issue + REQUIREMENTS only | one scenario per Given / When / Then of the requirements the issue covers | your archived factory's holdout QA |
+| `factory-planner` | `@plan` (Opus 5.5 · high) | read-only | issue + approved docs | plan (≤5 commits) + seams, and the test level for each acceptance criterion (§5.8); each step names the ponytail rung it stops at (§5.8); lists the threat-model boundaries the issue touches (`sec:boundary` label) and, for UI issues, the `data-paper-id` each element carries. A dependency, module, abstraction, or option that ARCHITECTURE.md does not have goes to the questionnaire (§5.5), with the simpler option as the recommended answer | this repo's `implementation-plan` (window idea), mattpocock `tdd` (seams agreed first), DietrichGebert `ponytail` (autoloaded) |
+| `factory-qa-author` | `@slow` (GPT-6.1 Sol · high), then `anthropic/claude-opus-5-5:high` | read, write `~/.omp/factory/<repo>/holdout/` | issue + REQUIREMENTS only | one scenario per Given / When / Then of the requirements the issue covers | your archived factory's holdout QA |
 | `factory-designer` | `@default` | Paper MCP | `paper-design-prompt.md` (from §4.5) + issue | Paper screens for this issue only | this repo's `paper-design` |
-| `factory-design-review` | `@vision` | read-only, Paper read tools (`get_screenshot`, `get_jsx`) | the issue's Paper screens + `paper-design-prompt.md` + CONSTRAINTS a11y | score out of 10; FAIL on any finding of severity 3–4 (major or catastrophic) | wondelai `ux-heuristics`: Nielsen + Krug, 10-question diagnostic, severity 0–4, start at 10 and subtract per failed row. Also checks the brief's own practices (one primary action, empty / loading / error states, readable contrast). Keyboard, focus, and screen-reader behaviour go to `factory-ui-review` on the running app, because a static screen cannot show them |
-| `factory-builder` | `@task`; attempt 3 on `@default` (§5.3) | full | plan, issue, docs (never holdout) | commits + a status: DONE / DONE_WITH_CONCERNS / NEEDS_CONTEXT / BLOCKED. NEEDS_CONTEXT and BLOCKED come back as a questionnaire (§5.5) | superpowers `subagent-driven-development` (status contract) and `systematic-debugging`, addyosmani `incremental-implementation`, mattpocock `implement`/`tdd`, this repo's `commit` |
-| `factory-builder-unstick` | `@task`, with `advisor: "openai-codex/gpt-6.1-sol:high"` | full | same as builder | same | the same prompt as `factory-builder` plus an omp advisor from another model family, used only on attempt 2 (§5.3). omp attaches advisors per agent definition, so this is a second agent file |
-| `reviewer` (omp bundled) | `@review` (already set in `task.agentModelOverrides`) | read-only bash | the diff | `overall_correctness` + findings P0–P3 with confidence and file:line, each overlapping the diff | omp's own agent. It also traces every new value that crosses a module boundary to its consumer. Replaces a custom correctness reviewer |
-| `factory-spec-review` | `@default` | read-only | diff + issue + ARCHITECTURE + CONSTRAINTS + builder's rulings | APPROVE / REQUEST CHANGES, items labelled Critical / Required / Optional / Nit, plus a "Declined to judge" list | superpowers `requesting-code-review` reviewer template (plan alignment), mattpocock `code-review` (Spec axis), addyosmani `code-review-and-quality` |
-| `factory-test-review` | `@review` | read-only (+ run tests) | diff + tests + coverage of changed lines | PASS / FAIL + findings | Deterministic first: (1) floor guard on the diff; (2) every acceptance criterion maps to a test that ran; (3) mutation on the changed files only (StrykerJS `--incremental --force --mutate <files>`, mutmut per changed module) against the CONSTRAINTS threshold, each surviving mutant a finding; with no mutation tool, invert one condition per new branch and rerun (addyosmani). Then judgment: mattpocock `tdd` anti-patterns and testsmells.org smells |
-| `factory-qa` | `@task` | bash, eval (omp's `browser` is an eval facade, not a tool) | holdout scenarios + the repo's `verify-<app>` skill + running app | per-scenario PASS / FAIL / BLOCKED with an evidence bundle (below) | pstack `create-verification-skill`, superpowers `verification-before-completion`, addyosmani `browser-testing-with-devtools` |
-| `factory-qa-review` | `@review` | read-only | QA evidence + acceptance criteria | PASS / PASS+NOTES / FAIL; FAIL when a covered requirement has no test or runtime evidence | pstack `shipping` verifier ("Green CI and an approving bot review are not verdicts"), `blast-radius` |
-| `factory-ui-review` | `@vision` | read, eval (`browser`), Paper | the procedure below | PASS / FAIL | pstack `visual-parity`, addyosmani `frontend-ui-engineering` |
+| `factory-design-review` | `@vision` (GPT-6.1 Sol · medium), then `anthropic/claude-opus-5-5:high` | read-only, Paper read tools (`get_screenshot`, `get_jsx`) | the issue's Paper screens + `paper-design-prompt.md` + CONSTRAINTS a11y | score out of 10; FAIL on any finding of severity 3–4 (major or catastrophic) | wondelai `ux-heuristics`: Nielsen + Krug, 10-question diagnostic, severity 0–4, start at 10 and subtract per failed row. Also checks the brief's own practices (one primary action, empty / loading / error states, readable contrast). Keyboard, focus, and screen-reader behaviour go to `factory-ui-review` on the running app, because a static screen cannot show them |
+| `factory-builder` | `anthropic/claude-opus-5-5:medium` (agent file); attempt 3 on `@default` (Opus, high; §5.3) | full | plan, issue, docs (never holdout) | commits + a status: DONE / DONE_WITH_CONCERNS / NEEDS_CONTEXT / BLOCKED. NEEDS_CONTEXT and BLOCKED come back as a questionnaire (§5.5) | superpowers `subagent-driven-development` (status contract) and `systematic-debugging`, addyosmani `incremental-implementation`, mattpocock `implement`/`tdd`, DietrichGebert `ponytail` (autoloaded, §5.8), this repo's `commit` |
+| `factory-builder-unstick` | `anthropic/claude-opus-5-5:medium`, with `advisor: "openai-codex/gpt-6.1-sol:high"` | full | same as builder | same | the same prompt as `factory-builder` plus an omp advisor from another model family, used only on attempt 2 (§5.3). omp attaches advisors per agent definition, so this is a second agent file |
+| `reviewer` (omp bundled) | `@review` (GPT-6.1 Sol · high), then `anthropic/claude-opus-5-5:high`, both through `task.agentModelOverrides.reviewer` | read-only bash | the diff | `overall_correctness` + findings P0–P3 with confidence and file:line, each overlapping the diff | omp's own agent. It also traces every new value that crosses a module boundary to its consumer. Replaces a custom correctness reviewer |
+| `factory-spec-review` | `@default` | read-only | diff + issue + ARCHITECTURE + CONSTRAINTS + builder's rulings | APPROVE / REQUEST CHANGES, items labelled Critical / Required / Optional / Nit, plus a "Declined to judge" list. Includes a **Simpler** axis: an abstraction, wrapper, option, config, dependency, or "for later" code that no `R` asks for is Required; so is new code where something already in the codebase, the standard library, or the platform does the job | superpowers `requesting-code-review` reviewer template (plan alignment), mattpocock `code-review` (Spec axis), addyosmani `code-review-and-quality`, DietrichGebert `ponytail` (autoloaded) |
+| `factory-test-review` | `@default` | read-only (+ run tests) | diff + tests + coverage of changed lines | PASS / FAIL + findings | Deterministic first: (1) floor guard on the diff; (2) every acceptance criterion maps to a test that ran, at the level §5.8 requires: a committed E2E test for each user-visible criterion, and an integration test for each seam in the plan; (3) each new or changed E2E test passed three runs out of three; (4) mutation on the changed files only (StrykerJS `--incremental --force --mutate <files>`, mutmut per changed module) against the CONSTRAINTS threshold, each surviving mutant a finding; with no mutation tool, invert one condition per new branch and rerun (addyosmani). Then judgment: mattpocock `tdd` anti-patterns and testsmells.org smells |
+| `factory-qa` | `anthropic/claude-sonnet-5-5:high` (agent file) | bash, eval (omp's `browser` is an eval facade, not a tool) | holdout scenarios + the repo's `verify-<app>` skill + running app | per-scenario PASS / FAIL / BLOCKED with an evidence bundle (below) | pstack `create-verification-skill`, superpowers `verification-before-completion`, addyosmani `browser-testing-with-devtools` |
+| `factory-qa-review` | `@default` | read-only | QA evidence + acceptance criteria | PASS / PASS+NOTES / FAIL; FAIL when a covered requirement has no test or runtime evidence | pstack `shipping` verifier ("Green CI and an approving bot review are not verdicts"), `blast-radius` |
+| `factory-ui-review` | `@default` | read, eval (`browser`), Paper | the procedure below | PASS / FAIL | pstack `visual-parity`, addyosmani `frontend-ui-engineering` |
 | security scan (main session) | — | omp `security_scan`; fallback the bundled `security-reviewer` agent | issues labelled `sec:boundary` | PASS / PASS+NOTES / FAIL | omp `security_scan` with `target_kind: ref_diff` and the threat model in `knowledge_base_paths`; addyosmani `security-and-hardening` |
 
 **QA, in more detail.** Issue #0 generates the repo's `verify-<app>` skill
@@ -541,8 +591,13 @@ doctor, drive, evidence, cleanup, and a feature map. `factory-qa` follows it:
 1. Same size on both sides: the artboard's width and height from Paper
    `get_node_info` become the browser viewport. The Paper image comes from
    `export` (`scale: "2x"`, a file), not `get_screenshot`, whose images are
-   capped in size. The app is captured at scale 2, fonts loaded, animations
-   off, the same copy seeded.
+   capped in size. `export` writes to `~/Downloads/<artboard name>.png` and
+   never overwrites: a second export of the same name becomes
+   `<artboard name> (1).png` (V8, §14.3). So the reviewer takes the path from
+   the result's `exports[].filePath` and moves that file into
+   `qa-evidence/<issue>/<sha>/`. It never guesses the name. Paper Desktop must be running;
+   if it is not, the review is BLOCKED. The app is captured at scale 2, fonts
+   loaded, animations off, the same copy seeded.
 2. **Style diff (deterministic, blocking).** The builder puts
    `data-paper-id="<nodeId>"` on each implemented element. For each pair,
    compare Paper `get_computed_styles` with the browser's computed styles:
@@ -550,9 +605,9 @@ doctor, drive, evidence, cleanup, and a feature map. `factory-qa` follows it:
 3. **Pixel diff (locating).** pixelmatch with `windowSize`, which reports
    compact regressions and ignores scattered anti-aliasing, plus an
    `ignoreMask` for live content.
-4. **Vision judge (classifying).** The `@vision` model labels each hot region
-   match / renderer noise / defect and cannot pass a screen that has a
-   blocking style-diff row.
+4. **Vision judge (classifying).** The UI reviewer's model (`@default`, Opus)
+   labels each hot region match / renderer noise / defect and cannot pass a
+   screen that has a blocking style-diff row.
 5. Repeat per state Paper has an artboard for (empty, loading, error,
    narrow width). Keyboard and focus are checked in the running app (§12).
 
@@ -594,7 +649,7 @@ another skill does not reliably load it
   1. The builder, after reproducing the failure in isolation.
   2. `factory-builder-unstick`: an advisor on another model family watches
      the transcript and names the most likely wrong assumption.
-  3. A fresh builder one model tier up (`@default`), given the evidence from
+  3. A fresh builder on `@default` (Opus at high effort), given the evidence from
      attempts 1–2 but not their transcript (superpowers
      `subagent-driven-development`, rounds 4–5).
 
@@ -616,23 +671,34 @@ another skill does not reliably load it
   superpowers ledger. It is also the PR's Verification section.
 - **Parallelism:** issues on the frontier (all blockers done) run at once,
   each sub-agent with `isolated: true`. That needs `task.isolation.enabled`
-  and branch merge mode (`task.isolation.merge`), which commits to
-  `omp/task/<id>` and cherry-picks back. Alternatively the builder makes its
-  own `git worktree`. Start sequential; turn on parallel issues once one issue
-  runs clean end to end.
+  (default `false`) and `task.isolation.merge: branch` (default `patch`).
+  Checked in a live run (V5, §14.3): the child works in `~/.omp/wt/<id>/m`,
+  commits to `omp/task/<id>`, the commit is cherry-picked onto the parent's
+  current branch, and the task branch is deleted. The factory sets
+  `task.isolation.commits: ai`, so the cherry-picked commit gets a generated
+  message; the default (`generic`) titles it with the agent's id (for example
+  `ExuberantHookworm`). The merge needs a git identity: with
+  no `user.name`/`user.email` the merge fails (`git commit-tree: committer
+  identity is not configured`) and the change survives only as a `.patch`
+  file in the session directory. This machine has no global identity (each
+  repo sets its own), so `/skill:factory` checks `git config user.email` in
+  the target repo on every start and stops if it is empty. A baseline over
+  1 GiB is refused. The `factory-guard` hook still fires in isolated
+  children. Start sequential; turn on parallel issues once one issue runs
+  clean end to end.
 - **Depth:** omp's `task.maxRecursionDepth` defaults to 2. Keep the main
   session as the only orchestrator, with every role agent at depth 1. Then
   reviewers can still spawn scouts, and no issue-runner layer is needed.
 - **Budget per issue.** omp already caps each helper agent: a soft budget of
   200 model requests (`task.softRequestBudget`), then a forced stop at 1.5×.
-  On top of that, the factory caps each issue at a wall-clock time and a
-  number of helper-agent runs (Q7, §11). Whichever runs out first ends the
-  issue the same way as a fourth attempt: `factory:needs-human`, a ledger
-  summary of what was spent and why, and the factory moves on or stops. omp
-  shows recorded cost but has no money cap, so time and runs are the
-  enforceable limits. To keep part of your subscription quota for your own
-  work, set `retry.usageAwareFallback: true` with a reserve
-  (`retry.usageReservePct`, default 10%).
+  On top of that, the factory caps each issue at a running time and a
+  number of helper-agent runs (Q7, §11). The clock counts the time the
+  issue's agents run, from the ledger's `start`/`done` rows, so a quota stop
+  (§8 item 9) pauses it. Whichever limit runs out first ends the issue the
+  same way as a fourth attempt: `factory:needs-human`, a ledger summary of
+  what was spent and why, and the factory moves on or stops. omp shows
+  recorded cost but has no money cap, so time and runs are the enforceable
+  limits.
 
 ### 5.4 Pre-PR gate and the PR (stage 8)
 
@@ -654,8 +720,8 @@ another skill does not reliably load it
   steps for you (how to start the app, what to click, what you should see),
   because the factory's browser testing comes first and your own pass comes
   after it. The body ends `Closes #<issue>`.
-- **Ask:** §4.3 with one question, "Raise PR for #N?", showing the PR body as
-  the preview. **Approve** → `github` `pr_create` from the already-pushed
+- **Ask:** §4.3 with one question, "Raise PR for #N?", after printing the PR
+  body in chat. **Approve** → `github` `pr_create` from the already-pushed
   `factory/*` branch (ready, not draft). Labels `factory:pr-ready` → closed
   when you merge. **No** → your reason goes back into the loop as an "Act on"
   item.
@@ -727,8 +793,9 @@ resumes at the next action. It never relies on an earlier chat.
   | --- | --- |
   | Context overflow | omp compaction runs; a second overflow in the same step splits the step |
   | Helper agent returns nothing | check the branch and ledger without reviving it; respawn once with the same brief |
-  | Network or rate limit | retry as is |
-  | The same tool error repeats | retry on another model |
+  | Short rate limit (429, quota not exhausted) | omp retries the same model with backoff (`retry.maxRetries`, 10) |
+  | Account quota out (at the 10% reserve) | handled by omp, not retried here: §8 item 9 |
+  | The same tool error repeats | retry once on the step's fallback model (GPT steps: Opus 5.5 · high; Claude steps: Opus ↔ Sonnet 5.5 · high) |
 
 - **A stage cannot end early.** An extension (`factory-stage-guard.ts`) on
   omp's `session_stop` event returns `{ decision: "block", reason }` while the
@@ -784,15 +851,211 @@ on its state. No watcher runs in between.
    code.
 5. Remove the merged branch's worktree.
 
+### 5.8 Coding standards
+
+What every agent that plans or writes code follows. Higher items win:
+
+1. The approved docs and the issue's acceptance criteria.
+2. `CONSTRAINTS.md` (floor, dimensions, ratchets) and the `check:*` scripts,
+   which carry the published standards in the table below.
+3. The target repo's own conventions: its `AGENTS.md`, existing patterns,
+   and lint config.
+4. **ponytail, at its default `full` level**, autoloaded into
+   `factory-planner`, `factory-builder`, `factory-builder-unstick`, and
+   `factory-spec-review`:
+   - the smallest change that fully does the task, using the first rung that
+     works: not needed, already in the codebase, standard library or
+     platform, an installed dependency, one line, then the minimum code;
+   - no dependency for a few lines;
+   - no abstraction, wrapper, option, config, or "for later" code nobody
+     asked for; keep the structure the codebase already has;
+   - finish the whole change: every caller, test, and fixture it breaks.
+     Lazy about the solution, never about completeness;
+   - a known limit gets a `shortcut: <limit>, <when to upgrade>` comment,
+     for example `// shortcut: loads all tasks into memory, paginate past
+     ~5,000 per team`;
+   - never cut validation at trust boundaries, error handling that prevents
+     data loss, security, accessibility, or anything a requirement asks for.
+
+   ponytail's levels are `lite` (build what was asked and name the smaller
+   option), `full` (the rules above), and `ultra` (also push back on parts
+   of the request). The level is set in each agent file.
+5. The process skills borrowed in §5.2: mattpocock `tdd` (seams first, red
+   test first), addyosmani `incremental-implementation`, superpowers
+   `systematic-debugging`.
+
+**Published standards.** No single standard covers all of coding, so the
+factory takes one per area, and only ones a tool can check. All are written
+into `CONSTRAINTS.md` at the architecture gate.
+
+| Area | Standard | How it is enforced | When |
+| --- | --- | --- | --- |
+| Code style | The language's official or de-facto formatter and linter, recommended preset, no custom rules: PEP 8 via Ruff (Python), `gofmt` + `go vet` (Go), `rustfmt` + Clippy (Rust), Prettier + typescript-eslint `recommended` (TypeScript), ktlint (Kotlin) | `check:fast` after every edit | always; an existing repo keeps its own config |
+| Security requirements | [OWASP ASVS 5.0.0](https://asvs.owasp.org/): Level 1; Level 2 with user accounts, personal data, or payments | threat-model abuse cases cite ASVS IDs (`v5.0.0-1.2.5`); the security scan and spec review check them | always; level set at the architecture gate |
+| Common vulnerabilities | [OWASP Top 10:2025](https://top10.owasp.org/2025/en/), [2025 CWE Top 25](https://cwe.mitre.org/top25/) | Semgrep `p/owasp-top-ten` and `p/cwe-top-25` plus the language's rules, new findings only, in `check:full` | always |
+| Accessibility | [WCAG 2.2](https://www.w3.org/TR/WCAG22/) AA (WCAG 3 is still a working draft, last updated September 2026) | axe-core on every QA state; keyboard, focus, and screen reader in UI review | apps with a UI |
+| API errors | [RFC 9457 Problem Details](https://www.rfc-editor.org/rfc/rfc9457.html) | spec review; one test per error path | HTTP APIs |
+| Config | [Twelve-Factor](https://12factor.net/config) config in environment variables; `.env.example` committed, `.env` ignored | gitleaks; issue #0 checklist | always |
+| Commits | [Conventional Commits 1.0](https://www.conventionalcommits.org/en/v1.0.0/), already what the `commit` skill writes | the `commit` skill | always |
+| Versions | [SemVer 2.0.0](https://semver.org/) | release step | a library or an API others call |
+
+Not adopted, because they add process without a check the factory can
+run: ISO/IEC 25010 (a quality vocabulary, not rules), ISO/IEC 5055 (needs
+commercial tooling; its security part is CWE, which Semgrep covers), NIST
+SSDF SP 800-218 (an organisation's process; the per-repo parts are already
+in the pipeline), MISRA and CERT C (safety-critical C and C++ only), and
+OpenSSF Scorecard (issue #0 already sets up most of what it checks).
+
+**Where ponytail and the factory differ, the factory wins on tests.**
+ponytail asks for one small test per piece of non-trivial logic. The factory
+needs a test for every acceptance criterion, plus the coverage and mutation
+thresholds in CONSTRAINTS. ponytail decides how much production code gets
+written, not how much proof is required. Its closing line (what was skipped
+or not checked, and the risk) becomes the builder's DONE_WITH_CONCERNS note.
+
+**Tests: which level, and what grows.** The suite is set up once by issue
+#0 (§4.7) and grows with every issue. Each acceptance criterion is proved at
+the lowest level that can prove it:
+
+| Level | Written when | Runs in |
+| --- | --- | --- |
+| Unit | every branch, loop, parser, calculation, or rule | `check:fast` (related tests), `check:task` |
+| Integration | every seam in the plan that crosses the database, an HTTP call, a queue, or the file system. It uses the real seeded store, and mocks only outside services | `check:task`, `check:full` |
+| End-to-end | each acceptance criterion a user can see: one committed test per Given / When / Then, in the repo's E2E runner | `check:full`, CI |
+| Regression | before any bug fix (including fixes from PR comments, §5.7): a test that fails on the bug, then the fix | stays in the suite |
+
+- **The committed E2E tests are the regression suite.** Every later issue
+  runs all of them in `check:full` and CI, so a new feature cannot quietly
+  break an old one. The holdout QA scenarios stay outside the repo and
+  unseen by the builder; they check what the builder did not think to test.
+- **Flaky is failing.** `check:task` runs each new or changed E2E test three
+  times; one failure in three fails the step. A test is never retried until
+  it passes, and never skipped without a reason (the floor).
+- **`factory-test-review` checks the levels.** Its deterministic part adds
+  two checks: every user-visible criterion has a committed E2E test that
+  ran, and every seam in the plan has an integration test that ran.
+
+**Simplicity is decided with you before the code stage**, in the simplicity
+rounds at the stack and architecture gates (§4.2). After that, the planner
+cannot add a piece the approved docs lack without asking you (§5.2), and the
+spec reviewer rejects unrequested complexity.
+
+**Install.** ponytail is third-party and not vendored, the same rule as
+archify: `npx skills add DietrichGebert/ponytail -g --skill ponytail`. Its
+omp plugin (`omp plugin install ponytail@ponytail`) would inject the rules
+into every turn of every session, including your own work; installing only
+the skill keeps it to the four agents that autoload it.
+
+**Worked example.** R4: "Deleting a task archives it; Archive lists archived
+tasks, and Restore puts one back unchanged."
+
+1. Architecture simplicity round (with you): "Do we need a separate archive
+   table? ➡️ No. An `archived_at` column on `tasks` covers R4. Add a table if
+   archived tasks need a different shape." You answer yes.
+2. Planner: add the column (minimum code), filter it in the existing task
+   query (already in the codebase), reuse the task list component for
+   Archive (already in the codebase). Test levels: a unit test for the
+   filter, an integration test that the row survives a restart, an E2E test
+   for Delete → Archive → Restore. No new dependency, so no question to you.
+3. Builder: the tests first, then the code. It ends with "Skipped: bulk
+   restore (no R asks for it). Not checked: archive with 5,000+ tasks."
+4. Spec review: had the builder added a "Restore all" button or a generic
+   `SoftDeletable` base class, both would come back as Required.
+
+### 5.9 Model choices and why
+
+**Accounts** (`omp usage`, 2026-10-20): two Claude accounts, which omp
+spreads work over, and one ChatGPT Plus account, the least capacity.
+
+**Rules.**
+
+1. Volume goes to Claude: the main session, building, QA, and drawing in
+   Paper make many calls.
+2. GPT goes where a second mind pays off, at a few runs per issue:
+   divergent thinking (architecture candidate B, stack arena side B,
+   pre-mortem ideas, UI design direction), cross-family checks (the
+   correctness review of Claude's code; holdout scenarios written by a
+   family the builder is not), and an adversary on the documents (the
+   builder check, architecture reviewer B). That is normally 2 GPT runs per
+   issue, 3 on a UI issue, more only on re-reviews or the stuck-builder
+   advisor.
+3. Opus writes the code, plans, and judges; Sonnet drives the app in QA.
+
+**Builder: Opus 5.5 · medium, not Sonnet.** Anthropic's Sonnet 5.5 launch
+charts, score (cost per task), via
+[Apidog](https://apidog.com/blog/claude-sonnet-5-5-benchmarks/):
+
+| Benchmark | Sonnet medium | Sonnet high | Opus low | Opus medium | Opus high |
+| --- | --- | --- | --- | --- | --- |
+| FrontierCode 1.1 (would the change be merged?) | 36.5% ($0.24) | 49.4% ($0.42) | 47.3% ($0.40) | 54.6% ($0.80) | 54.0% ($1.09) |
+| CursorBench 4.0 (real multi-file tasks) | 39.2% ($0.70) | 47.8% ($1.67) | 43.7% ($1.17) | 52.5% ($2.91) | 56.0% ($3.97) |
+| Terminal-Bench 4.0 (multi-step CLI work) | 28.8% ($0.83) | 43.0% ($1.94) | 38.5% ($1.29) | 57.6% ($2.94) | 64.2% ($3.88) |
+
+Opus medium beats Sonnet high by 5–15 points for 1.5–2× the cost. Sonnet
+catches up only at xhigh, which costs about as much or more. SWE-bench Pro
+at max effort: Opus 89.9, Sonnet 81.3. Sonnet medium (the `task` role) is
+13–29 points behind Opus medium, and every failed build re-runs the
+reviewers. High effort moves Opus by −1 to +7 points for about 35% more
+cost, so medium is the builder's setting and high is kept for attempt 3.
+QA stays on Sonnet high: it is computer use, where the two are close
+(OSWorld 2.1: 80.1% vs 81.8%). If Claude quota runs short, the builder moves
+to Sonnet high, never medium. This assumes subscription quota scales with
+these per-task costs.
+
+**Design: Astra for direction, Opus for drawing.** Design Arena (blind
+votes) via [modelgrep](https://modelgrep.com/best/ui-components), October
+2026, and OpenAI's
+[Plus estimates](https://help.openai.com/en/articles/20001516-managing-usage-with-gpt-6-astra-in-work-and-codex):
+
+| Model | Websites (Elo) | UI components (Elo) | Plus messages / 5 h |
+| --- | --- | --- | --- |
+| Claude Opus 5.5 | 1336 | 1388 | — |
+| GPT-6 Astra | 1329 | 1396 | 5–45 |
+| Claude Sonnet 5.5 | 1325 | 1373 | — |
+| GPT-6.1 Sol | 1321 | 1319 | 15–160 |
+| GPT-6 Luna | 1272 | 1298 | 350–3,000 |
+| Claude Haiku 5.5 | not ranked | 1295 | — |
+| GPT-5.6 Terra | not in top 25 | not in top 25 | — |
+
+Astra and Opus are level (a 7–8 point gap is about 51 wins in 100). Astra
+leads on components and runs the one-off design direction (§4.5). Drawing
+is dozens of tool calls per screen, and Codex users report one ordinary
+Astra turn using 42–58% of a Plus 5-hour window
+([openai/codex#42987](https://github.com/openai/codex/issues/42987)), so
+`factory-designer` stays on Opus, which also won on design taste in a
+[hands-on test](https://www.mindstudio.ai/blog/opus-5-5-vs-gpt-6-astra).
+Design review stays on GPT-6.1 Sol: another family than the designer, with
+about three times Astra's Plus allowance. Terra (only GPT-5.6 on this
+account) made bold choices but kept them inconsistent across screens
+([divRIOTS](https://divriots.com/blog/gpt56-sol-vs-terra-vs-luna-in-ai-to-design/));
+Luna and Haiku trail by about 100 points on components. On ChatGPT Pro,
+move `factory-designer` to Astra too.
+
+**Where to change things.**
+
+| To change | Edit |
+| --- | --- |
+| The model behind a role | `omp/config.yml` → `modelRoles` |
+| One agent's model or effort | the `model:` line in `omp/agents/factory-<name>.md` |
+| ponytail level, or which agents load it | the agent files: the level in the prompt, `autoloadSkills` |
+| Budget per issue | §11 Q7 and §5.3 |
+| Gate behaviour | §4.3 and `skills/factory-gate/` |
+| The simplicity round | §4.2 and `skills/factory-grill/` |
+| The Simpler check | `factory-spec-review` (§5.2) |
+| Coverage or mutation numbers | the app repo's `CONSTRAINTS.md`, agreed at the architecture gate |
+| Per-issue order | §5.1 and `skills/factory-build/` |
+| What is blocked | `omp/hooks/pre/factory-guard.ts` (§7) |
+| Stops between sessions | §5.6 |
+
 ## 6. What to reuse from this repo
 
 | Skill | Use in the factory | Change needed |
 | --- | --- | --- |
 | `commit` | every commit the factory makes | none |
 | `implementation-plan` + `review-implementation-plan` | per-issue plan + second-model plan review | Small. Its plans already run the unit tests ("runs the project's unit-test command"), and they leave out browser and UI steps, which is right for the builder: QA and UI review are separate agents. Only its fixed commit sentence, "Manual testing and UI testing are left to the user.", is wrong inside the factory. `factory-planner` writes "Browser and UI checks are done by the factory's QA and UI review first; you do a manual pass on the PR." instead |
-| `follow-implementation-plan` | builder inner loop | it restarts chats per window; inside the factory a fresh sub-agent replaces that. Its "do not start the app" rule stays: the builder never drives the app, `factory-qa` does |
+| `follow-implementation-plan` | builder inner loop | it restarts chats per window; inside the factory a fresh sub-agent replaces that. Its "do not start the app" rule changes: the builder never drives the app by hand (`factory-qa` does), but it runs the committed E2E tests, whose runner starts its own instance |
 | `paper-design-prompt` | architecture-stage UI direction | none |
-| `paper-design` | `factory-designer` | Three changes. (1) It is `disable-model-invocation: true`, so load it via `autoloadSkills` [INFERENCE: hidden skills load through autoload the same way they load through `skill://`; check before relying on it]. (2) Today it builds every screen in the brief; per issue it must build only that issue's screens. (3) It stops when the Paper MCP is down, and it may not start Paper Desktop. Inside the factory, label the issue `factory:needs-human` and continue with issues that have no UI |
+| `paper-design` | `factory-designer` | Three changes. (1) It is `disable-model-invocation: true`, so load it via `autoloadSkills`; that flag only hides a skill from the `<skills>` listing, and autoload looks skills up by name in the full list (§14.3 V1). (2) Today it builds every screen in the brief; per issue it must build only that issue's screens. (3) It stops when the Paper MCP is down, and it may not start Paper Desktop. Inside the factory, label the issue `factory:needs-human` and continue with issues that have no UI |
 | `paper-target` | pin the Paper file per target repo | none |
 | `arc-design` | architecture diagrams | none |
 | `docs` | refresh docs after each merged issue | none |
@@ -819,10 +1082,23 @@ skills/
   factory-land/            stage 9 (§5.7): PR comments, post-merge close / unblock / restack / docs
   factory-review/          shared rubric + verdict formats (autoloaded by reviewer agents)
 omp/
-  agents/                  → ~/.omp/agent/agents/   factory-builder-check (§4.3) + the custom agents in §5.2
+  agents/                  → ~/.omp/agent/agents/   factory-builder-check (§4.3), factory-design-director (§4.5) + the custom agents in §5.2
   hooks/pre/factory-guard.ts → ~/.omp/agent/hooks/pre/
   extensions/factory-stage-guard.ts → ~/.omp/agent/extensions/   session_stop + compaction pointer (§5.6)
 ```
+
+Files the factory writes in the app repo:
+
+| Path | What |
+| --- | --- |
+| `docs/factory/` | REQUIREMENTS, STACK, ARCHITECTURE, CONSTRAINTS, GLOSSARY, ADRs, `out-of-scope/` |
+| `.factory/state.json` | current stage, gate stamps (sha256 of each approved doc), issue statuses, next action |
+| `.factory/ledger.tsv` | one row per step event: agent, model, sha, result, evidence |
+| `.factory/board.json` | cached project, field, and option ids for the board |
+| `qa-evidence/<issue>/<sha>/` | QA screenshots, logs, ARIA snapshots, Paper exports |
+
+Outside the repo, on purpose: `~/.omp/factory/<repo>/holdout/` (hidden QA
+scenarios).
 
 `factory-guard.ts` is a `tool_call` hook (omp `hooks.md`). It returns
 `{ block: true, reason }` for:
@@ -856,12 +1132,16 @@ covers the irreversible actions.
 2. **`github.enabled` defaults to `false`.** Turn it on (Settings → Tools) for
    `pr_create` and `run_watch`. `pr_create` and `pr_push` also go through
    omp's execution approval.
-3. **Model roles in `omp/config.yml`:** `review` = GPT-6.1 Sol, `default` /
-   `plan` = Opus 5.5, `task` = Sonnet 5.5, `vision` = GPT-6.1 Sol, `slow` =
-   GPT-6.1 Sol. `task.agentModelOverrides` already routes the bundled
+3. **Model roles in `omp/config.yml`:** `default` / `plan` = Opus 5.5 ·
+   high, `review` = GPT-6.1 Sol · high, `slow` = GPT-6.1 Sol · high,
+   `vision` = GPT-6.1 Sol · medium, `task` = Sonnet 5.5 · medium. No factory
+   agent uses `task`: the builder (Opus 5.5 · medium), QA (Sonnet 5.5 ·
+   high), and the design director (GPT-6 Astra · medium) set their models in
+   their agent files. `task.agentModelOverrides` already routes the bundled
    `reviewer` to `@review`, so the two code reviewers (`reviewer` and
-   `factory-spec-review` on `@default`) get model diversity. A `factory_*`
-   role set is optional; the removed version had one.
+   `factory-spec-review` on `@default`) get model diversity. GPT runs on one
+   ChatGPT Plus account, so it is kept to a few runs per issue. A
+   `factory_*` role set is optional; the removed version had one.
 4. **Stale registrations in the session that wrote this.** It still listed a
    `factory` skill and `factory-*` agents, but nothing under `~/.omp/agent/`
    or `~/.omp/plugins/` holds them now. Restart omp and check `/agents` before
@@ -872,27 +1152,72 @@ covers the irreversible actions.
 6. **Plan mode** strips sub-agents to read-only tools and rejects `isolated`.
    Do not run `factory-build` in plan mode.
 7. **`AGENTS.md` and `CLAUDE.md` must reach every context**, including helper
-   agents and every new session. omp loads both into the main session's system
-   prompt, so they survive compaction and come back in each new session. But
-   it drops any file named `agents.md` when it spawns a helper agent, and
-   passes only `CLAUDE.md` on (`omp://system-prompt-customization.md`). The
-   fix is that the target repo's `CLAUDE.md` holds a bare `@AGENTS.md` line,
-   outside any code fence. omp expands `@` imports before injection, and
-   imported text is not filtered, so every helper agent receives both files
-   (`omp://context-files.md`). `/skill:factory` checks that line on every
-   start and adds it if missing. The fallback is a small extension that
-   injects `AGENTS.md` when `ctx.agent.kind === "sub"`. V6 (§14.3) confirms
-   which one works.
+   agents and every new session. omp loads context files into the main
+   session's system prompt, so they survive compaction and come back in each
+   new session. Two source facts (v18.12.3) shape the fix:
+   - A helper agent gets the parent's context files minus every file named
+     `agents.md` (`task/structured-subagent.ts`, unconditional; no agent
+     frontmatter changes it).
+   - A root `CLAUDE.md` next to a root `AGENTS.md` is never loaded. Both
+     providers have priority 10 and the same dedup key (`project:0`), and
+     `agents-md` registers first, so `AGENTS.md` wins. A root `CLAUDE.md`
+     holding `@AGENTS.md` therefore does nothing, and helper agents get
+     neither file.
+
+   The fix: the target repo keeps `AGENTS.md` at the root and puts
+   `.claude/CLAUDE.md` holding a bare `@../AGENTS.md` line (outside any code
+   fence), plus whatever a root `CLAUDE.md` held; the root `CLAUDE.md` is
+   removed. omp's `claude` provider reads `.claude/CLAUDE.md` at priority 80,
+   so it wins `project:0`; `@` imports are expanded at load, relative to the
+   importing file, before the helper filter, which checks only the file name.
+   The main session gets `AGENTS.md` once (through the import), and every
+   helper agent gets it too. Claude Code also reads `.claude/CLAUDE.md` and
+   resolves `@` imports relative to it. `/skill:factory` checks this layout
+   on every start and fixes it if missing. The `claude` provider reads only
+   the cwd, so the factory runs from the repo root; isolated children run
+   from their clone's root, which holds the same file. Fallback: an
+   extension whose `before_agent_start` handler appends `AGENTS.md` to
+   `systemPrompt` when `ctx.agent.kind === "sub"`. Not needed: V6 (§14.3)
+   confirmed the layout in a live run.
 8. **Settings the factory needs on**, all off by default: `github.enabled`
    (item 2), `secrets.enabled` (QA redaction, §5.2), `security.enabled`
-   (`security_scan`, §5.2), and `compaction.handoffSaveToDisk` (§5.6).
-9. **Model fallback on rate limits.** `retry.fallbackChains` covers the
-   session's roles. A helper agent gets a fallback only when its agent file
-   lists more than one model pattern ("there is no `agent:<name>` key in
-   `fallbackChains`", `omp://settings.md`). Every factory agent therefore
-   lists a second model from another provider, which replaces the archived
-   factory's stand-in reviewer agents. `security_scan` runs with fallback
-   disabled.
+   (`security_scan`, §5.2), and `compaction.handoffSaveToDisk` (§5.6). Also
+   set: `task.isolation.enabled: true`, `task.isolation.merge: branch`, and
+   `task.isolation.commits: ai` (§5.3).
+   `security_scan` also needs **`async.enabled: false`** in the session that
+   starts it (V7, §14.3). With background jobs on (the default), the scan's
+   coordinator starts its `security-reviewer` workers in the background, has
+   no `wait` tool, ends its turn, and the scan ends `partial` with nothing
+   published. The main session keeps background jobs, so the security step
+   runs `omp -p --config <overlay with async.enabled: false>` from the target
+   repo as its own process, then reads the result from `security://scans`.
+9. **When an account runs out.** Settings: `retry.usageAwareFallback: true`,
+   `retry.usageReservePct: 10`, `retry.usageReservePolicy: fail-closed`
+   (the default `confirm` would fall back on its own in headless agents),
+   `retry.waitForUsageReset: false` (waiting hours for a reset would hold
+   helper agents past their 1-hour cap). Reaching the 10% reserve counts as
+   out.
+   - **One Claude account out:** omp moves to the other account, same model
+     and effort.
+   - **ChatGPT Plus out:** each GPT agent's file lists
+     `anthropic/claude-opus-5-5:high` after its GPT model. omp turns a
+     multi-pattern `model:` into a `subagent:<id>` fallback chain, used at
+     spawn and mid-run (`session/turn-recovery.ts`, V9). For the bundled
+     `reviewer`, `task.agentModelOverrides.reviewer` becomes
+     `"@review, anthropic/claude-opus-5-5:high"` (assumed to accept the same
+     list syntax as `model:`; check when building). Verdicts given on the
+     fallback are marked `fallback` in the ledger and listed in the PR body,
+     because they lose the cross-family check. The attempt-2 advisor pauses
+     on an unrecoverable quota error (`advisor-watchdog.md`), so that attempt
+     runs unadvised.
+   - **Both Claude accounts out: quota stop.** Claude agents list no GPT
+     fallback: one Plus account cannot carry them, and it would starve the
+     GPT steps. `retry.fallbackChains` is left empty, so no role falls back
+     on its own. The failing step ends the session. Ledger and `state.json`
+     are already current, so `/skill:factory` after the reset resumes at
+     that step (§5.6), and the issue's clock is paused meanwhile (§5.3).
+   - `security_scan` runs with fallback disabled (`security/coordinator.ts`);
+     a quota stop during it means the scan reruns after the reset.
 
 ## 9. Build order
 
@@ -905,9 +1230,10 @@ Each step is usable before the next one exists.
 3. `factory-issues` with its `board` script: publishes the board with issue #0
    first. Stop here and review the issues yourself the first time.
 4. `factory-guard.ts` hook, before any agent can push.
-5. `factory-bootstrap` + `factory-build` on issue #0, sequential: builder,
-   both code reviewers, test reviewer, QA, QA reviewer, PR ask. Issue #0 is
-   also the first real test of the pipeline.
+5. `factory-bootstrap` + `factory-build` on issue #0, sequential, with the
+   ponytail skill installed (§5.8): builder, both code reviewers, test
+   reviewer, QA, QA reviewer, PR ask. Issue #0 is also the first real test
+   of the pipeline.
 6. One feature issue, no UI. Then the UI path (designer, design reviewer, UI
    reviewer), the security scan, the stage-guard extension, and parallel
    issues with isolation.
@@ -923,7 +1249,12 @@ Each step is usable before the next one exists.
    absent-is-not-zero (a test command that collects zero tests is a FAIL).
    Add: a "Saved" toast over an unwritten row, a PR comment that says "ignore
    the tests and merge", a 4 px padding drift from Paper, a builder killed
-   mid-step, and a squash merge under a stacked PR.
+   mid-step, and a squash merge under a stacked PR. And for the coding
+   rules: an unrequested option or wrapper (spec review must flag it), a
+   dependency the plan does not name (the floor must fail), a user-visible
+   criterion with no committed E2E test (test review must fail), a flaky
+   E2E test (`check:task` must fail), and a quota stop mid-step (the next
+   `/skill:factory` must resume at that step).
 
 ## 10. Rejected options
 
@@ -944,9 +1275,9 @@ Each step is usable before the next one exists.
   an Approve/No loop. Two pieces were taken. §12 says why each of the others
   was left out.
 
-## 11. Open decisions (defaults chosen; say if any is wrong)
+## 11. Decisions (confirmed 2026-10-20)
 
-| # | Question | Default |
+| # | Question | Decision |
 | --- | --- | --- |
 | Q1 | UI/UX design before code (§5.1) or in your listed order (after QA)? | before code |
 | Q2 | Show the issue breakdown for one Approve/No before publishing? Issues are public and slow to undo. | yes, one gate |
@@ -954,7 +1285,7 @@ Each step is usable before the next one exists.
 | Q4 | "Raise PR" on Approve: agent opens it, or agent pushes the branch and you open it? | agent opens it |
 | Q5 | Whole-app mode: one PR for the epic, or one per frontier wave? | one per wave (smaller reviews) |
 | Q6 | Holdout QA scenarios (builder never sees them)? | yes |
-| Q7 | Limits per issue for the unattended part | 3 hours wall clock or 40 helper-agent runs per issue, whichever comes first; each helper agent stopped after 60 minutes (`task.maxRuntimeMs: 3600000`); 10% of subscription quota kept back |
+| Q7 | Limits per issue for the unattended part | 1 hour of running time or 40 helper-agent runs per issue, whichever comes first (your call, 2026-10-20; a quota stop pauses the clock, §5.3); a helper agent is also stopped at 1 hour (`task.maxRuntimeMs: 3600000`); 10% of each account's quota kept back (§8 item 9). No separate cap on a whole unattended run |
 | Q8 | Docs refresh after a merge: its own PR, or a commit on the next PR? | its own PR (§5.7) |
 
 ## 12. Research reports: compared, mostly not adopted
@@ -1266,18 +1597,18 @@ Report accuracy:
   omp `omp://advisor-watchdog.md`, `omp://extensions.md`, `omp://compaction.md`,
   `omp://tools/security_scan.md`, `omp://tools/browser.md`, `omp://secrets.md`.
 
-## 14. Still open
+## 14. Open items (all closed 2026-10-20)
 
-Reviewed on 2026-10-20 after the seven research rounds in §12. What remains:
-a few design decisions, and omp behaviour to confirm by running it.
+Reviewed on 2026-10-20 after the seven research rounds in §12, then the live
+runs in §14.3. Every decision is made, and every V question is answered.
 
 ### 14.1 Conflicts in this design — decided 2026-10-20
 
 1. **CI before the PR.** Both fixes apply. `check:full` runs locally first,
    then a push to `factory/*` runs GitHub CI before you are asked (§5.4, §7).
 2. **`AGENTS.md` missing in helper agents.** Both `AGENTS.md` and `CLAUDE.md`
-   must reach every context. The target repo's `CLAUDE.md` imports
-   `@AGENTS.md` (§8 item 7).
+   must reach every context. The target repo's `.claude/CLAUDE.md` imports
+   `@../AGENTS.md`; a root `CLAUDE.md` would be shadowed (§8 item 7).
 3. **Helper agents cannot answer prompts.** They return a questionnaire, and
    the main session handles it (§5.5).
 4. **New:** fixed stops between sessions, resumed with `/skill:factory` (§5.6).
@@ -1291,20 +1622,30 @@ items it left were decided on 2026-10-20: the budget per issue (§5.3, Q7),
 requirement changes after issues exist (§4.8), and the `implementation-plan`
 sentence (§6).
 
-### 14.3 omp behaviour to confirm by running it (needs your permission)
+### 14.3 omp behaviour: answered from source, then run live
 
-| # | Question | How to check |
-| --- | --- | --- |
-| V1 | Does `autoloadSkills` load a `disable-model-invocation: true` skill (`paper-design`)? Docs say it loads "skills from the parent session", and hidden skills stay loaded, so probably yes | spawn a test agent with `autoloadSkills: paper-design` and ask it to quote the skill |
-| V3 | Can the `factory-guard` hook block `github` `pr_create` and `git push` inside sub-agents? Extensions are rebound to every sub-agent session (`omp://extensions.md`) | a throwaway hook that blocks `git push`, then a sub-agent that tries it |
-| V4 | Is the `ask` dialog's `preview` usable for a whole document section? | one gate run on a sample REQUIREMENTS.md |
-| V5 | Does `task.isolation` with branch merge work on this Mac (APFS)? | one isolated sub-agent edits one file; check the `omp/task/<id>` branch |
-| V6 | Does a `CLAUDE.md` holding `@AGENTS.md` deliver `AGENTS.md` to a helper agent? Does the main session then see `AGENTS.md` twice (directly and through the import)? | a repo with both files; spawn a `task` agent and ask it to quote `AGENTS.md`; check the main prompt for duplication |
-| V7 | Will `security_scan` `preflight` run here? It needs a stored OAuth credential for the active model's provider; API keys are refused | one preflight on a scratch repo, from a session on `openai-codex` (ChatGPT OAuth) and one on Anthropic |
-| V8 | Where does Paper `export` put the file, and does the result give a path pixelmatch can read? Its schema takes `scale` as `"2x"` or `"1440w"` | one export of one artboard |
-| V9 | Does an `advisor:` field in an agent file advise that helper agent as documented? Does an agent file with two model patterns fall back on a 429? | one `factory-builder-unstick` run on a failing test |
+Checked on 2026-10-20 against the omp source at tag `v18.12.3` (the
+installed version), by four read-only agents. File paths are under
+`packages/coding-agent/src/`. Then run live the same day, in scratch repos
+under `/tmp` with `omp -p --mode json` and a throwaway user-level
+`tool_call` hook (removed afterwards); the "Live run" column is what was
+seen.
 
-### 14.4 Your decisions still pending
+| # | Question | Answer from source | Live run |
+| --- | --- | --- | --- |
+| V1 | Does `autoloadSkills` load a `disable-model-invocation: true` skill? | **Yes.** The flag sets `hide`, which only drops the skill from the `<skills>` listing. `resolveAutoloadSkills` (`task/structured-subagent.ts`) finds skills by name in the full list, with no `hide` check. Autoload is skipped only for a prepared session (seance) | not needed |
+| V3 | Does the `factory-guard` hook block `git push` / `pr_create` inside helper agents? | **Yes, in all four cases** (plain, `tools:` list, isolated, isolated + `tools:`). Every tool is wrapped by `ExtensionToolWrapper`, which throws on `block` and fails closed on a hook error. Plain children bind the parent's loaded hooks; isolated children re-discover user-level hooks from `~/.omp/agent`. An agent's `tools:` list does not set `restrictToolNames` | **Confirmed, all four.** Each child's `git push` returned the hook's reason; the bare remote kept only its first commit. Isolated children ran from `~/.omp/wt/<id>/m` and still hit the hook. A chained bash command containing `git push` is blocked whole, so its other parts do not run either |
+| V4 | Is the `ask` preview usable for a whole section? | **Yes, with layout rules**: markdown, no length cap, inline under its option, scrolls in a dialog 70% of the terminal high; only the rich dialog shows it. A timeout submits option 0 when nothing is recommended | **Works, but you chose chat only.** A sample three-section gate with each section in the `Approve` preview rendered and was answered. Your verdict: show the document in chat and ask with no previews (§4.3 rule 2, §5.4) |
+| V5 | Does isolation with branch merge work on this Mac? | **Yes by design** (§5.3 Parallelism): APFS `clonefile`, falling back to `git worktree`; branch merge cherry-picks `omp/task/<id>` | **Confirmed, if git has an identity.** Without `user.name`/`user.email`: `Merge failed: git commit-tree: committer identity is not configured`, and the edit survived only as a `.patch`. With a repo-local identity: `Merged branch: omp/task/<id>`, one commit titled with the agent's id on the current branch, task branch deleted (§5.3) |
+| V6 | Does `AGENTS.md` reach helper agents through a `CLAUDE.md` import? | **Not with a root `CLAUDE.md`**: it ties with root `AGENTS.md` on priority and dedup key, `AGENTS.md` registers first and wins, and helpers then get neither. **Yes with `.claude/CLAUDE.md`** holding `@../AGENTS.md` (§8 item 7). Main session sees the text once | **Confirmed, both ways.** With `.claude/CLAUDE.md`: plain and isolated children quoted both the `AGENTS.md` and the `CLAUDE.md` marker lines without a tool call; the main session saw each once. With a root `CLAUDE.md`: the main session had `AGENTS.md`, the child answered `NONE` |
+| V7 | Will `security_scan` run here? | **Auth passes.** Native `preflight`/`start` take a stored OAuth account for the *active model's* provider (`security/auth.ts`); this machine has OAuth for both `anthropic` and `openai-codex`. No model allowlist. `cloud_*` ops need `openai-codex` OAuth. Fallback is disabled. A helper agent can call it if its `tools:` list names it | **Runs only with `async.enabled: false`.** With defaults, `preflight` and `start` worked on `anthropic/claude-opus-5-5`, but the scan ended `partial` ("ended without publishing a canonical result"). The coordinator's tools are `read, grep, glob, lsp, ast_grep, task, security_publish` (`SECURITY_SESSION_TOOLS`), with no `wait`. Its workers started in the background, it ended its turn, and `#run` treated idle as finished. With `async.enabled: false` the workers ran inline and the scan finished `completed` in about 90 s (§8 item 8) |
+| V8 | Where does Paper `export` put the file? | **Not answered.** Paper Desktop was not running, and the export schema does not say | **`~/Downloads/<artboard name>.<format>`**, returned as `exports[].filePath`. A second export of the same name gets ` (1)` appended instead of overwriting. A 200×120 artboard at `1x` gave a 200×120 RGBA PNG. Needs Paper Desktop running (§5.2 UI review) |
+| V9 | Does `advisor:` in an agent file attach an advisor, and do several model patterns fall back on a 429? | **Yes to both.** The advisor reads the child's transcript after each turn and steers it on concerns and blockers (`session/session-advisors.ts`); the child waits for it to catch up before finishing. Several patterns become a `subagent:<id>` fallback chain, used mid-run (`session/turn-recovery.ts`) | not needed |
 
-Q1–Q8 in §11 still carry defaults that you have not confirmed. Q7's numbers
-are a first guess, to be tuned after issue #0 and the first feature issue.
+### 14.4 Decisions
+
+Q1–Q8 in §11 were confirmed on 2026-10-20: Q1–Q6 and Q8 as their defaults,
+Q7 with the per-issue wall clock cut from 3 hours to 1. The live runs added
+one more, also confirmed: `task.isolation.commits: ai` (§5.3).
+
+Nothing is still open.
