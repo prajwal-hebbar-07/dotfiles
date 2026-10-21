@@ -31,6 +31,9 @@ Skills live under `skills/<name>/SKILL.md`, linked into `~/.cursor/skills/`,
   `lyik_docs/docs/lyik_enterprise/design/architecture/`. No checks, no commit.
 - `pdocs` — `docs` renamed for Claude Code; only `SKILL.md` is its own, the
   rest are relative links into `skills/docs/`.
+- `factory-features` — omp only, linked into `~/.omp/agent/skills/`. Lists
+  a project's features; `explain <feature>` has the `factory-explainer`
+  agent (GPT) write `docs/features/<feature>.md`. Not committed.
 
 `archify` (third-party, tt-a1i/archify) is **not** vendored here. Install it
 with `npx skills add tt-a1i/archify -g`; it lands in `~/.agents/skills/archify`
@@ -49,6 +52,8 @@ history). List new skills here.
 - `config.yml` → `~/.omp/agent/config.yml` — settings and model roles; omp also
   writes this file.
 - `mcp.json` → `~/.omp/agent/mcp.json` — MCP servers (`paper`).
+- `agents/factory-explainer.md` → `~/.omp/agent/agents/factory-explainer.md`
+  — read-only agent on `@slow` that writes `factory-features` explanations.
 
 The account-wide rule `rules/explicit-runtime-permission.md` (no launching
 apps, servers, or tests without an explicit request) was removed on

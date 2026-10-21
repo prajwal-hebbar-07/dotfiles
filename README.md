@@ -70,13 +70,26 @@ symlinked to where omp reads it:
 | --- | --- | --- |
 | `omp/config.yml` | `~/.omp/agent/config.yml` | Settings: model roles, per-agent model overrides, theme, symbol preset |
 | `omp/mcp.json` | `~/.omp/agent/mcp.json` | MCP servers: `paper`, started from the binary inside `/Applications/Paper.app` |
+| `omp/agents/factory-explainer.md` | `~/.omp/agent/agents/factory-explainer.md` | Read-only agent on `@slow` (GPT) that writes a feature explanation for `factory-features` |
+| `skills/factory-features/` | `~/.omp/agent/skills/factory-features` | The one factory skill built so far (below) |
 
 `config.yml` is also written by omp itself (settings UI, `/model`, saved
 settings). Edits made there land in the repo file through the link; if a save
 ever replaces the link with a plain file, copy it back over `omp/config.yml`
 and re-link.
 
-omp has no skills or commands of its own right now.
+omp reads skills from `~/.omp/agent/skills/`, not `~/.claude/skills/`, so the
+other skills in `skills/` are not visible to it.
+
+**`factory-features` skill** — run in any repo. `/skill:factory-features`
+(or "what features does this project have?") prints a numbered table of
+the features in the code, and nothing else.
+`/skill:factory-features explain <name or number>` has `factory-explainer`
+write `docs/features/<feature>.md`: each code snippet on the feature's path
+in the order it runs, what it does line by line, and why it is written that
+way, with sources. `scripts/check-snippets.py` compares every snippet with
+the file before the document is saved. The document is not committed.
+Design: `SOFTWARE-FACTORY.md` §4.9.
 
 ### Cursor
 
@@ -366,9 +379,10 @@ dotfiles/
 ├── ghostty/    # terminal config
 │   ├── config
 │   └── themes/pale-knight
-├── omp/        # Oh My Pi settings, MCP servers
+├── omp/        # Oh My Pi settings, MCP servers, agents
 │   ├── config.yml
-│   └── mcp.json
+│   ├── mcp.json
+│   └── agents/factory-explainer.md
 ├── skills/     # Agent Skills, linked into Cursor, Gemini, and Claude Code
 │   ├── commit/SKILL.md
 │   ├── docs/SKILL.md
@@ -381,7 +395,8 @@ dotfiles/
 │   ├── paper-design-prompt/SKILL.md
 │   ├── paper-design/SKILL.md
 │   ├── sync-lyik-docs/SKILL.md
-│   └── pdocs/SKILL.md
+│   ├── pdocs/SKILL.md
+│   └── factory-features/SKILL.md   # omp only
 ├── cursor/     # editor settings, keybindings, extension list
 ├── zsh/        # zshrc, and bin/pk-preview for the fzf preview pane
 ├── tmux/       # tmux.conf, Pale Knight theme and keys
@@ -462,9 +477,11 @@ ln -sfn "$PWD/skills/docs-verify" ~/.gemini/config/skills/docs-verify
 ln -sfn "$PWD/skills/follow-implementation-plan" ~/.gemini/config/skills/follow-implementation-plan
 ln -sfn "$PWD/skills/repo-docs" ~/.gemini/config/skills/repo-docs
 
-mkdir -p ~/.omp/agent
+mkdir -p ~/.omp/agent/skills ~/.omp/agent/agents
 ln -sfn "$PWD/omp/config.yml"  ~/.omp/agent/config.yml
 ln -sfn "$PWD/omp/mcp.json"    ~/.omp/agent/mcp.json
+ln -sfn "$PWD/skills/factory-features" ~/.omp/agent/skills/factory-features
+ln -sfn "$PWD/omp/agents/factory-explainer.md" ~/.omp/agent/agents/factory-explainer.md
 
 mkdir -p ~/.claude/skills
 for s in arc-design commit follow-implementation-plan follow-plan-with-review \

@@ -5,8 +5,8 @@ one extension on Oh My Pi (omp). It draws on three skill repositories, the
 research reports in `docs/research/` (requirements, grilling, architecture,
 architecture grilling, design, design grilling, and the general round on
 R1–R12; each checked against primary sources in §12), the skills already in
-this repo, and omp's runtime. Nothing here is built yet. Research date:
-2026-10-20.
+this repo, and omp's runtime. Only `factory-features` (§4.9) is built.
+Research date: 2026-10-20.
 
 Sources studied:
 
@@ -536,13 +536,14 @@ prints the list and asks which one; nothing is written.
   CONSTRAINTS.md, the `R` the code serves, and the commits and PRs that
   added it (`git log -L` / `git blame`, then `read pr://<N>`).
 - **Saved to** `docs/features/<feature>.md` in the target repo, stamped with
-  the commit it explains. It is not committed; run `commit` to keep it. A
-  second run overwrites it. The chat gets one line:
+  the commit it explains (plus "uncommitted changes" when the working tree
+  is dirty). It is not committed; run `commit` to keep it. A second run
+  overwrites it. The chat gets one line:
   `Saved docs/features/<feature>.md (explains commit <sha>). Not committed.`
 - **Each snippet is checked before saving.** Every snippet names
-  `path:start-end`, and the main session compares it with those lines at
-  the stamped commit. A mismatch goes back to the agent once; a second one
-  stops with the mismatch shown, and nothing is saved.
+  `path:start-end`, and `scripts/check-snippets.py` compares it with those
+  lines in the working tree. A mismatch goes back to the agent once; a
+  second one stops with the mismatch shown, and nothing is saved.
 
 The document follows `skills/factory-features/template.md`:
 
@@ -1159,7 +1160,10 @@ move `factory-designer` to Astra too.
 
 ## 7. Proposed inventory
 
-All new files in this repo, linked the same way the current skills are.
+All new files in this repo. Skills are linked into `~/.omp/agent/skills/`
+and agents into `~/.omp/agent/agents/`. omp does not read
+`~/.claude/skills/` unless `enabledProviders` turns the Claude user source
+on, so the links the other skills use do not reach it.
 
 ```text
 skills/
@@ -1179,6 +1183,7 @@ skills/
   factory-land/            stage 9 (§5.7): PR comments, post-merge close / unblock / restack / docs
   factory-features/        /skill:factory-features (§4.9): list the features; `explain <feature>` writes docs/features/<feature>.md
     template.md            the explanation document (§4.9)
+    scripts/check-snippets.py  compares each quoted snippet with the file
   factory-review/          shared rubric + verdict formats (autoloaded by reviewer agents)
 omp/
   agents/                  → ~/.omp/agent/agents/   factory-builder-check (§4.3), factory-design-director (§4.5), factory-explainer (§4.9) + the custom agents in §5.2
