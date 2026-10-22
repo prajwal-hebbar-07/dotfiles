@@ -35,6 +35,41 @@ Skills live under `skills/<name>/SKILL.md`, linked into `~/.cursor/skills/`,
   a project's features; `explain <feature>` has the `factory-explainer`
   agent (GPT) write `docs/features/<feature>.md`. Not committed.
 
+Factory skills — omp only, each linked into `~/.omp/agent/skills/<name>`.
+Design: `SOFTWARE-FACTORY.md` (full factory) and `FEATURE-FACTORY.md`
+(feature factory). Only `factory` and `factory-feature` are run by the user;
+the rest set `disable-model-invocation: true` and are read through
+`skill://` by those two:
+
+- `factory` — `/skill:factory`: entry and router for the full factory;
+  preflight, resume from `.factory/state.json`, `status`, `change <text>`.
+  `scripts/factory-state` is the run-state and ledger tool every factory skill
+  calls.
+- `factory-feature` — `/skill:factory-feature`: one feature in an existing
+  app, from scout to PR, with two gates (brief, PR).
+- `factory-grill` — grilling rounds, including the pre-mortem and simplicity
+  rounds.
+- `factory-gate` — the Approve/No questionnaire, builder check, sha stamp,
+  and the PR gate.
+- `factory-requirements`, `factory-stack`, `factory-architecture` — stages
+  1–5, each ending at an approved doc under `docs/factory/`.
+- `factory-issues` — splits the app into GitHub issues on a board;
+  `scripts/board` is the only path for issue and Project writes.
+- `factory-bootstrap` — issue #0: CI, check scripts, floor guard, test
+  harness, `verify-<app>` skill.
+- `factory-build` — the per-issue pipeline, GO/NO-GO, and PR.
+- `factory-land` — PR comments and post-merge work; never merges.
+- `factory-review` — shared rubric and verdict formats for reviewer agents.
+
+The factory reuses `commit`, `paper-design-prompt`, `paper-design`,
+`paper-target`, `arc-design`, and `docs` (also linked into omp). It never uses
+`implementation-plan`, `review-implementation-plan`,
+`follow-implementation-plan`, or `follow-plan-with-review`. `ponytail`
+(third-party, DietrichGebert/ponytail) is installed like `archify`
+(`npx skills add DietrichGebert/ponytail -g --skill ponytail`) and linked
+from `~/.agents/skills/ponytail` into `~/.omp/agent/skills/`; do not vendor
+it.
+
 `archify` (third-party, tt-a1i/archify) is **not** vendored here. Install it
 with `npx skills add tt-a1i/archify -g`; it lands in `~/.agents/skills/archify`
 and is symlinked into the Cursor, Gemini, and Claude Code skill dirs. Do not copy its Node
@@ -52,20 +87,28 @@ history). List new skills here.
 - `config.yml` → `~/.omp/agent/config.yml` — settings and model roles; omp also
   writes this file.
 - `mcp.json` → `~/.omp/agent/mcp.json` — MCP servers (`paper`).
-- `agents/factory-explainer.md` → `~/.omp/agent/agents/factory-explainer.md`
-  — read-only agent on `@slow` that writes `factory-features` explanations.
+- `agents/factory-*.md` → `~/.omp/agent/agents/` (one link per file) — the
+  factory's helper agents; each file's `model:` line carries its model
+  (`SOFTWARE-FACTORY.md` §5.2). `factory-explainer` writes
+  `factory-features` explanations.
+- `hooks/pre/factory-guard.ts` → `~/.omp/agent/hooks/pre/` — blocks merges,
+  pushes outside `factory/*`/`feature/*`, unapproved PRs, edits to approved
+  docs, and holdout reads, only in repos with an active `.factory/state.json`.
+  Tests: `node --test omp/hooks/tests omp/extensions/tests`.
+- `extensions/factory-stage-guard.ts` → `~/.omp/agent/extensions/` — keeps
+  an unattended run from ending before its exit predicate is met.
+- `factory-evals/` — not linked. `python3 omp/factory-evals/run structural`
+  checks every factory skill, agent, link, and scenario offline.
 
 The account-wide rule `rules/explicit-runtime-permission.md` (no launching
 apps, servers, or tests without an explicit request) was removed on
 2026-10-20 at the user's request; it is in git history.
 
-The software factory (`omp/factory/` plugin, `factory_*` model aliases,
-`SOFTWARE-FACTORY.md`) was removed on 2026-10-20 to be rebuilt from scratch as
-multiple skills. The removed version is archived at
-`~/.local/share/ohmypi/factory-archive-20261020-084936/` (also in git history).
-The rebuild design — which skills to borrow from pstack,
-addyosmani/agent-skills, and mattpocock/skills, and how they map onto omp —
-is `SOFTWARE-FACTORY.md` at the repo root.
+The first software factory (`omp/factory/` plugin, `factory_*` model
+aliases) was removed on 2026-10-20 and is archived at
+`~/.local/share/ohmypi/factory-archive-20261020-084936/` (also in git
+history). The current one was rebuilt from `SOFTWARE-FACTORY.md` on
+2026-10-22 as the skills, agents, hook, and extension listed above.
 
 ## Cursor skills
 

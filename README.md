@@ -68,18 +68,49 @@ symlinked to where omp reads it:
 
 | Repo file | Live path | What it is |
 | --- | --- | --- |
-| `omp/config.yml` | `~/.omp/agent/config.yml` | Settings: model roles, per-agent model overrides, theme, symbol preset |
+| `omp/config.yml` | `~/.omp/agent/config.yml` | Settings: model roles, per-agent model overrides, theme, symbol preset, and the settings the factory needs (GitHub, secrets, security scan, task isolation, usage-aware fallback, 1-hour helper cap) |
 | `omp/mcp.json` | `~/.omp/agent/mcp.json` | MCP servers: `paper`, started from the binary inside `/Applications/Paper.app` |
-| `omp/agents/factory-explainer.md` | `~/.omp/agent/agents/factory-explainer.md` | Read-only agent on `@slow` (GPT) that writes a feature explanation for `factory-features` |
-| `skills/factory-features/` | `~/.omp/agent/skills/factory-features` | The one factory skill built so far (below) |
+| `omp/agents/factory-*.md` | `~/.omp/agent/agents/` (one link per file) | The factory's helper agents: planner, builder, reviewers, QA, designer, explainer |
+| `omp/hooks/pre/factory-guard.ts` | `~/.omp/agent/hooks/pre/factory-guard.ts` | Blocks merges, pushes outside `factory/*` / `feature/*`, PRs you have not approved, edits to approved docs, and holdout reads |
+| `omp/extensions/factory-stage-guard.ts` | `~/.omp/agent/extensions/factory-stage-guard.ts` | Keeps an unattended factory run from ending early; points compaction at the run state |
+| `skills/factory*/` | `~/.omp/agent/skills/<name>` | The factory skills (below) |
+| `skills/commit`, `paper-design-prompt`, `paper-design`, `paper-target`, `arc-design`, `docs` | `~/.omp/agent/skills/<name>` | Existing skills the factory reuses |
 
 `config.yml` is also written by omp itself (settings UI, `/model`, saved
 settings). Edits made there land in the repo file through the link; if a save
 ever replaces the link with a plain file, copy it back over `omp/config.yml`
 and re-link.
 
-omp reads skills from `~/.omp/agent/skills/`, not `~/.claude/skills/`, so the
-other skills in `skills/` are not visible to it.
+omp reads skills from `~/.omp/agent/skills/`, not `~/.claude/skills/`, so
+only the skills linked there are visible to it. Two third-party skills are
+linked from `~/.agents/skills/`: `ponytail` (the simplicity rules four factory
+agents load) and `archify` (used by `arc-design`).
+
+**Software factory** — `/skill:factory` in an app repo. Builds a whole
+application: requirements, tech stack, and architecture, each grilled and
+approved by you; then GitHub issues on a board (issue #0 sets up CI and the
+checks); then each issue through plan, build, reviews, QA, and UI review
+without you; then it asks "Raise PR?". It stops at fixed points (S1–S5);
+start a new session and run `/skill:factory` again to resume.
+`/skill:factory status` shows where a run is; `/skill:factory change <text>`
+changes a requirement mid-run. Run state lives in the app repo's `.factory/`
+(kept out of git). Design: `SOFTWARE-FACTORY.md`.
+
+**Feature factory** — `/skill:factory-feature <description>` (or `#<issue>`)
+in an existing app repo. One feature, fitted into the current architecture:
+scout, a short interview, one solution sketch with a simplicity round, your
+Approve on the brief, then plan, build, two reviews, and QA without you, then
+your Approve on the PR. It stops instead of designing a new module, service,
+datastore, or runtime, or past 10 commits. Run it with no arguments to resume.
+Design: `FEATURE-FACTORY.md`.
+
+Both need `gh` logged in (`gh auth refresh -s project` for the board),
+`git config user.email` set in the app repo, and an `AGENTS.md` at its root.
+
+**Evals** — `python3 omp/factory-evals/run structural` checks every factory
+skill and agent file, link, and scenario offline in seconds.
+`run routing` and `run gate-hold` drive real `omp -p` runs against fixture
+repos and grade them with a judge model (see `omp/factory-evals/README.md`).
 
 **`factory-features` skill** — run in any repo. `/skill:factory-features`
 (or "what features does this project have?") prints a numbered table of
@@ -477,11 +508,19 @@ ln -sfn "$PWD/skills/docs-verify" ~/.gemini/config/skills/docs-verify
 ln -sfn "$PWD/skills/follow-implementation-plan" ~/.gemini/config/skills/follow-implementation-plan
 ln -sfn "$PWD/skills/repo-docs" ~/.gemini/config/skills/repo-docs
 
-mkdir -p ~/.omp/agent/skills ~/.omp/agent/agents
+mkdir -p ~/.omp/agent/skills ~/.omp/agent/agents ~/.omp/agent/hooks/pre ~/.omp/agent/extensions
 ln -sfn "$PWD/omp/config.yml"  ~/.omp/agent/config.yml
 ln -sfn "$PWD/omp/mcp.json"    ~/.omp/agent/mcp.json
-ln -sfn "$PWD/skills/factory-features" ~/.omp/agent/skills/factory-features
-ln -sfn "$PWD/omp/agents/factory-explainer.md" ~/.omp/agent/agents/factory-explainer.md
+for s in skills/factory skills/factory-* skills/commit skills/paper-design-prompt \
+         skills/paper-design skills/paper-target skills/arc-design skills/docs; do
+  ln -sfn "$PWD/$s" ~/.omp/agent/skills/$(basename "$s")
+done
+for a in omp/agents/*.md; do ln -sfn "$PWD/$a" ~/.omp/agent/agents/$(basename "$a"); done
+ln -sfn "$PWD/omp/hooks/pre/factory-guard.ts" ~/.omp/agent/hooks/pre/factory-guard.ts
+ln -sfn "$PWD/omp/extensions/factory-stage-guard.ts" ~/.omp/agent/extensions/factory-stage-guard.ts
+npx skills add DietrichGebert/ponytail -g --skill ponytail
+ln -sfn ~/.agents/skills/ponytail ~/.omp/agent/skills/ponytail
+ln -sfn ~/.agents/skills/archify  ~/.omp/agent/skills/archify
 
 mkdir -p ~/.claude/skills
 for s in arc-design commit follow-implementation-plan follow-plan-with-review \

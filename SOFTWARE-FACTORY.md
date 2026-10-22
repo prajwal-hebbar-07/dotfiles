@@ -5,8 +5,13 @@ one extension on Oh My Pi (omp). It draws on three skill repositories, the
 research reports in `docs/research/` (requirements, grilling, architecture,
 architecture grilling, design, design grilling, and the general round on
 R1–R12; each checked against primary sources in §12), the skills already in
-this repo, and omp's runtime. Only `factory-features` (§4.9) is built.
-Research date: 2026-10-20.
+this repo, and omp's runtime. Built on 2026-10-22 (§15). Research date:
+2026-10-20.
+
+For one feature in an app that already exists, use the smaller feature
+factory instead: `FEATURE-FACTORY.md` at the repo root. It reuses this
+design's grilling and gate primitives, planner, builder, and reviewers, and
+drops the stages a feature does not need.
 
 Sources studied:
 
@@ -652,7 +657,7 @@ for each choice are in §5.9.
 
 | Agent | Model · effort (`@role` values per §8 item 3; fallback when its quota runs out per §8 item 9) | Tools | Reads | Verdict | Borrowed from |
 | --- | --- | --- | --- | --- | --- |
-| `factory-planner` | `@plan` (Opus 5.5 · high) | read-only | issue + approved docs | plan (≤5 commits) + seams, and the test level for each acceptance criterion (§5.8); each step names the ponytail rung it stops at (§5.8); lists the threat-model boundaries the issue touches (`sec:boundary` label) and, for UI issues, the `data-paper-id` each element carries. A dependency, module, abstraction, or option that ARCHITECTURE.md does not have goes to the questionnaire (§5.5), with the simpler option as the recommended answer | this repo's `implementation-plan` (window idea), mattpocock `tdd` (seams agreed first), DietrichGebert `ponytail` (autoloaded) |
+| `factory-planner` | `@plan` (Opus 5.5 · high) | read-only | issue + approved docs | plan (≤5 commits, each task S or M; an L or XL task is split) + seams, and the test level for each acceptance criterion (§5.8); each step names the ponytail rung it stops at (§5.8); lists the threat-model boundaries the issue touches (`sec:boundary` label) and, for UI issues, the `data-paper-id` each element carries. A dependency, module, abstraction, or option that ARCHITECTURE.md does not have goes to the questionnaire (§5.5), with the simpler option as the recommended answer | addyosmani `planning-and-task-breakdown` (task format with acceptance criteria and verification, XS–XL sizing), mattpocock `tdd` (seams agreed first), DietrichGebert `ponytail` (autoloaded) |
 | `factory-qa-author` | `@slow` (GPT-6.1 Sol · high), then `anthropic/claude-opus-5-5:high` | read, write `~/.omp/factory/<repo>/holdout/` | issue + REQUIREMENTS only | one scenario per Given / When / Then of the requirements the issue covers | your archived factory's holdout QA |
 | `factory-designer` | `@default` | Paper MCP | `paper-design-prompt.md` (from §4.5) + issue | Paper screens for this issue only | this repo's `paper-design` |
 | `factory-design-review` | `@vision` (GPT-6.1 Sol · medium), then `anthropic/claude-opus-5-5:high` | read-only, Paper read tools (`get_screenshot`, `get_jsx`) | the issue's Paper screens + `paper-design-prompt.md` + CONSTRAINTS a11y | score out of 10; FAIL on any finding of severity 3–4 (major or catastrophic) | wondelai `ux-heuristics`: Nielsen + Krug, 10-question diagnostic, severity 0–4, start at 10 and subtract per failed row. Also checks the brief's own practices (one primary action, empty / loading / error states, readable contrast). Keyboard, focus, and screen-reader behaviour go to `factory-ui-review` on the running app, because a static screen cannot show them |
@@ -1150,13 +1155,19 @@ move `factory-designer` to Astra too.
 | Skill | Use in the factory | Change needed |
 | --- | --- | --- |
 | `commit` | every commit the factory makes | none |
-| `implementation-plan` + `review-implementation-plan` | per-issue plan + second-model plan review | Small. Its plans already run the unit tests ("runs the project's unit-test command"), and they leave out browser and UI steps, which is right for the builder: QA and UI review are separate agents. Only its fixed commit sentence, "Manual testing and UI testing are left to the user.", is wrong inside the factory. `factory-planner` writes "Browser and UI checks are done by the factory's QA and UI review first; you do a manual pass on the PR." instead |
-| `follow-implementation-plan` | builder inner loop | it restarts chats per window; inside the factory a fresh sub-agent replaces that. Its "do not start the app" rule changes: the builder never drives the app by hand (`factory-qa` does), but it runs the committed E2E tests, whose runner starts its own instance |
 | `paper-design-prompt` | architecture-stage UI direction | none |
 | `paper-design` | `factory-designer` | Three changes. (1) It is `disable-model-invocation: true`, so load it via `autoloadSkills`; that flag only hides a skill from the `<skills>` listing, and autoload looks skills up by name in the full list (§14.3 V1). (2) Today it builds every screen in the brief; per issue it must build only that issue's screens. (3) It stops when the Paper MCP is down, and it may not start Paper Desktop. Inside the factory, label the issue `factory:needs-human` and continue with issues that have no UI |
 | `paper-target` | pin the Paper file per target repo | none |
 | `arc-design` | architecture diagrams | none |
 | `docs` | refresh docs after each merged issue | none |
+
+The factory does not use `implementation-plan`, `review-implementation-plan`,
+`follow-implementation-plan`, or `follow-plan-with-review` (your call,
+2026-10-21). They serve the manual chat flow: they plan only from decisions
+finalized in the current chat, restart a chat per five-commit window, and
+leave manual and UI testing to you. The planner borrows addyosmani
+`planning-and-task-breakdown`; the builder borrows mattpocock
+`implement`/`tdd` and addyosmani `incremental-implementation` (§5.2).
 
 ## 7. Proposed inventory
 
@@ -1722,10 +1733,11 @@ runs in §14.3. Every decision is made, and every V question is answered.
 
 The general research (§12) settled every stage that had no design: QA,
 builder, recovery, tech stack, both reviews, UI review, issues and board,
-per-issue security, evals, bootstrap (issue #0), and stage 9. The three
-items it left were decided on 2026-10-20: the budget per issue (§5.3, Q7),
-requirement changes after issues exist (§4.8), and the `implementation-plan`
-sentence (§6).
+per-issue security, evals, bootstrap (issue #0), and stage 9. It left three
+items. Two were decided on 2026-10-20: the budget per issue (§5.3, Q7) and
+requirement changes after issues exist (§4.8). The third, the
+`implementation-plan` testing sentence, went away on 2026-10-21 when the
+factory stopped using that skill (§6).
 
 ### 14.3 omp behaviour: answered from source, then run live
 
@@ -1754,3 +1766,29 @@ Q7 with the per-issue wall clock cut from 3 hours to 1. The live runs added
 one more, also confirmed: `task.isolation.commits: ai` (§5.3).
 
 Nothing is still open.
+
+## 15. Built (2026-10-22)
+
+Everything in §7 is built and linked, with the settings in §8 item 8 and
+item 9 set in `omp/config.yml` and `ponytail` installed. Run it with
+`/skill:factory` in an app repo. Checks run on the build:
+`node --test omp/hooks/tests omp/extensions/tests` (51 pass);
+`python3 omp/factory-evals/run structural` (0 failed); a live `omp -p` run in
+a throwaway guarded repo, where the hook blocked `git push origin main` and
+an edit of a stamped doc, `skill://factory-feature` resolved, all 14
+`factory-*` agents were discovered, and the stage guard held the session
+open until the agent marked itself blocked on the user.
+
+Decisions made while building, which this document did not settle:
+
+| Topic | Decision |
+| --- | --- |
+| Stage guard scope (§5.6) | It holds a session open only while `state.unattended` is true: `factory-build` and the feature factory's steps 5–9. Interactive stages (interview, grilling, gates) leave it false, so turns end normally while you answer. Set by `factory-state unattended on` / `off`; `stop` and `done` clear it |
+| Run-state tool | `skills/factory/scripts/factory-state` holds every state, gate, ledger, budget, and stop write (schema: `skills/factory/state.md`) |
+| Issue breakdown gate (Q2) | The breakdown is written to `docs/factory/ISSUES.md` and approved like the other docs before anything is published |
+| Whole-app waves (Q5) | One branch per wave, `factory/<epic>-w<k>`, each off the previous wave; a wave PR whose base is not `main` says `Refs #N`, and `factory-land` closes the issue once its code reaches `main` |
+| Branch protection (§4.7) | Issue #0 writes `docs/factory/branch-protection.json`; `factory-land` applies it after the #0 PR merges and CI has run on `main`, with one Approve/No from you |
+| `board` script | Adds `list`, `edit`, and `close` for the requirement-change flow (§4.8) |
+| Reviewer `BLOCKED` | Every reviewer may return `BLOCKED` (a prerequisite is missing); it is never a pass |
+| Bundled `reviewer` fallback (§8 item 9) | `task.agentModelOverrides.reviewer` is `"@review, anthropic/claude-opus-5-5:high"`; omp splits the value on commas into a fallback list |
+| Evals (§9 step 8) | `omp/factory-evals/`: `run structural` (offline), `run routing`, and `run gate-hold` with 18 scenarios. Print mode has no `ask` and does not expand `/skill:`, so the harness rewrites the prompt and counts a gate that ends in chat as No |
