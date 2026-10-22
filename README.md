@@ -107,6 +107,17 @@ Design: `FEATURE-FACTORY.md`.
 Both need `gh` logged in (`gh auth refresh -s project` for the board),
 `git config user.email` set in the app repo, and an `AGENTS.md` at its root.
 
+**Moving a run to a new chat.** Press Escape to stop the running turn, then
+run `/skill:feature pause` (or `/skill:factory pause`) in that same chat. It
+stops the helper agents and writes `.factory/handoff.md` with everything only
+that chat knows: decisions not yet in the brief, open review findings,
+questions waiting on you, what was in progress. Open a new chat in the repo
+and run `/skill:feature` (or `/skill:factory`) with no arguments: it reads the
+handoff, checks its claims against the branch and ledger, and carries on.
+If you already quit with Ctrl+C twice or Ctrl+D, reopen the chat with
+`omp --resume` and pause from there; or start a new chat directly, which
+resumes from the brief, ledger, and commits but without the chat-only context.
+
 **Evals** — `python3 omp/factory-evals/run structural` checks every factory
 skill and agent file, link, and scenario offline in seconds.
 `run routing` and `run gate-hold` drive real `omp -p` runs against fixture

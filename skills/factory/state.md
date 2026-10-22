@@ -33,7 +33,7 @@ exit 0 ok, 1 check failed, 2 usage/environment error).
 | `stage` | `requirements`, `stack`, `architecture`, `issues`, `build`, `land`, `feature` |
 | `feature` | feature slug, feature mode only |
 | `gates` | one stamp per approved doc: file, sha256 at approval, time. Names: `requirements`, `stack`, `architecture`, `issues`, `brief`. The guard blocks edits to a stamped file; `reopen` removes the stamp |
-| `stop` | `S1`..`S5` while parked at a stop, else null |
+| `stop` | `S1`..`S5` while parked at a stop, `PAUSED` after `factory-state pause` (with `pausedUnattended` recording whether to re-arm), else null; `resume` clears `PAUSED` |
 | `nextAction` | one sentence: what `/skill:factory` does next |
 | `blockedOnUser` | true while waiting for the user; lets the session end |
 | `unattended` | true only during unattended runs (`factory-build`, feature steps 5–9), set by `factory-state unattended on "<reason>"`. The stage guard blocks ending the session only while this is true; interactive stages leave it false so turns end normally while the user answers. `stop` and `done` clear it |
@@ -79,14 +79,56 @@ finds its own comment, commit, or PR and never creates a second.
 At a stop: commit the stage's artifacts through `commit`, write state
 (`factory-state stop S<n> "<next action>"`), end with the printed stop line.
 
+## Pause (hand off to a new chat)
+
+`/skill:feature pause` or `/skill:factory pause`, in the chat that is running
+the factory. Interrupt the running turn with **Escape** first (Ctrl+C twice or
+Ctrl+D exits omp and loses the chat; reopen it with `omp --resume` and pause
+from there). In this chat, in order:
+
+1. Stop helper agents: `read proc://`; for each running factory agent, read
+   its last progress (`read proc://<id>` or `agent://<id>`), keep anything
+   useful for the handoff, then `write proc://<id>/kill`.
+2. Do not commit, stash, push, or change any doc. Leave the working tree as
+   it is; the next chat decides with the resume protocol.
+3. Write `.factory/handoff.md` from `skill://factory/handoff-template.md`,
+   from this chat's context and the facts (`git status --short`,
+   `git log --oneline <base>..HEAD`, `factory-state ledger open`, the brief's
+   Tasks and Status, open PRs). Everything only this chat knows goes in it:
+   answers and decisions not yet written to the brief or docs, open review
+   findings, questions waiting on the user, partial agent output. Facts the
+   repo already holds are pointed to, not copied.
+4. `factory-state pause "<next action>"`: closes running steps as `paused`,
+   releases the stage guard, sets `stop=PAUSED`. Print the line it returns
+   and end the turn.
+
 ## Resume protocol
 
-Find the last `done` and any open `start` in the ledger. Uncommitted changes
-from the interrupted step are kept if that step's test now passes, else
-stashed to `wip/<issue>/<step>` and the step restarts clean from its brief,
-not from memory. Re-check the last `done` claim once before continuing.
-Every step first checks whether it is already done (branch at the expected
-SHA, PR open, comment marker present).
+Applies to any new session: after a pause, after the last one was killed
+(Ctrl+C twice, Ctrl+D, a crash, a quota stop), or after a planned stop.
+
+1. `factory-state resume`: prints each step that was still running
+   (`INTERRUPTED` rows), closes it with a `done` row `result=interrupted`
+   stamped at the last ledger activity (so the time the factory was closed
+   does not count against the budget), and clears `blockedOnUser` and a
+   `PAUSED` stop.
+2. If it printed `HANDOFF`, read `.factory/handoff.md` before anything else.
+   Check each "Done" item against the branch, ledger, and GitHub before
+   trusting it. A "Decided in this chat" item that changes an approved doc
+   or the approved brief reopens that gate; ask the user, never apply it
+   silently. Then archive the file
+   (`mv .factory/handoff.md .factory/handoff-<UTC timestamp>.md`).
+3. Uncommitted changes from the interrupted step are kept if that step's test
+   now passes, else stashed to `wip/<issue>/<step>` and the step restarts
+   clean from its brief, not from memory. Re-check the last `done` claim once.
+4. If `resume` reports the run was unattended, run
+   `factory-state unattended on "<reason>"` from this session. The stage guard
+   holds only the session that armed it, so a stale `unattended: true` never
+   traps an unrelated chat in the repo.
+5. Every step first checks whether it is already done (branch at the expected
+   SHA, PR open, comment marker present). Helper agents of the old session
+   are gone; respawn them with the same brief. A gate interrupted mid-dialog
+   is asked again in full; nothing was stamped.
 
 ## Retry by failure mode
 

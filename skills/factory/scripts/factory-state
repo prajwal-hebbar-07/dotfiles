@@ -275,17 +275,9 @@ def cmd_ledger(a):
     if not os.path.exists(p.ledger):
         atomic_write(p.ledger, LEDGER_HEADER + "\n")
     if a.action == "open":
-        last_start, last_done = {}, {}
         rows = read_ledger(p)
-        for i, r in enumerate(rows):
-            k = (r["issue"], r["stage"], r["step"])
-            if r["event"] == "start":
-                last_start[k] = i
-            elif r["event"] == "done":
-                last_done[k] = i
-        for k, i in sorted(last_start.items(), key=lambda kv: kv[1]):
-            if last_done.get(k, -1) < i:
-                print("\t".join(rows[i][c] for c in FIELDS))
+        for i in open_rows(rows):
+            print("\t".join(rows[i][c] for c in FIELDS))
         return 0
     if not (a.issue and a.stage and a.step):
         raise Fail("ledger %s needs --issue, --stage and --step" % a.action)
@@ -293,6 +285,86 @@ def cmd_ledger(a):
             a.sha, a.result, a.evidence]
     with open(p.ledger, "a") as f:
         f.write("\t".join(clean(v) for v in vals) + "\n")
+    return 0
+
+
+def open_rows(rows):
+    """Indexes of start rows that have no later done row (same issue, stage, step)."""
+    last_start, last_done = {}, {}
+    for i, r in enumerate(rows):
+        k = (r["issue"], r["stage"], r["step"])
+        if r["event"] == "start":
+            last_start[k] = i
+        elif r["event"] == "done":
+            last_done[k] = i
+    return [i for k, i in sorted(last_start.items(), key=lambda kv: kv[1])
+            if last_done.get(k, -1) < i]
+
+
+def close_open_steps(p, rows, label, why):
+    """Close every running step with a done row `result=<why>` stamped at the
+    last ledger activity at or after its start, so time the factory is closed
+    does not count against the per-issue budget. Prints each closed step."""
+    idx = open_rows(rows)
+    if not idx:
+        print("no running steps")
+    with open(p.ledger, "a") as f:
+        for i in idx:
+            r = rows[i]
+            print(label + "\t" + "\t".join(r[c] for c in FIELDS))
+            last = r["ts"]
+            for later in rows[i:]:
+                if later["ts"] > last:
+                    last = later["ts"]
+            vals = [last, r["issue"], r["stage"], r["step"], "done", r["agent"], r["model"],
+                    "", why, "closed by factory-state %s at %s" % (why, now())]
+            f.write("\t".join(clean(v) for v in vals) + "\n")
+
+
+def cmd_resume(a):
+    """After an interrupted or paused session (pause, Ctrl+C twice, Ctrl+D,
+    crash, quota stop): close the steps that were running, report the run's
+    flags and any handoff file. The caller then applies the resume protocol."""
+    p = Paths()
+    st = load(p)
+    close_open_steps(p, read_ledger(p), "INTERRUPTED", "interrupted")
+    print("stage=%s stop=%s unattended=%s blockedOnUser=%s" % (
+        st.get("stage"), st.get("stop"), str(bool(st.get("unattended"))).lower(),
+        str(bool(st.get("blockedOnUser"))).lower()))
+    handoff = os.path.join(p.dir, "handoff.md")
+    if os.path.exists(handoff):
+        print("HANDOFF .factory/handoff.md: read it before anything else, then archive it "
+              "(mv .factory/handoff.md .factory/handoff-<UTC timestamp>.md).")
+    if st.get("unattended") or st.get("pausedUnattended"):
+        print("The run was unattended: re-arm it from this session with "
+              "`factory-state unattended on \"<reason>\"` before continuing unattended steps.")
+    st["blockedOnUser"] = False
+    st.pop("pausedUnattended", None)
+    if st.get("stop") == "PAUSED":
+        st["stop"] = None
+    save(p, st)
+    return 0
+
+
+def cmd_pause(a):
+    """Run in the chat being paused, after the handoff file is written:
+    close running steps, release the stage guard, and print the line that
+    tells the user how to continue in a new chat."""
+    p = Paths()
+    st = load(p)
+    if not os.path.exists(os.path.join(p.dir, "handoff.md")):
+        raise Fail("write .factory/handoff.md first (skill://factory/handoff-template.md)")
+    close_open_steps(p, read_ledger(p), "PAUSED", "paused")
+    was_unattended = bool(st.get("unattended"))
+    st["stop"] = "PAUSED"
+    st["nextAction"] = a.next_action
+    st["unattended"] = False
+    st["blockedOnUser"] = False
+    st["pausedUnattended"] = was_unattended
+    save(p, st)
+    skill = "feature" if st.get("mode") == "feature" else "factory"
+    print("Paused. Context is in .factory/handoff.md. Start a new omp chat in this repo "
+          "and run /skill:%s (no arguments) to continue." % skill)
     return 0
 
 
@@ -423,6 +495,9 @@ def build_parser():
     s.add_argument("--sha", default="")
     s.add_argument("--result", default="")
     s.add_argument("--evidence", default="")
+    s = add("pause", cmd_pause, "after writing .factory/handoff.md: close running steps, release the stage guard, set stop=PAUSED + nextAction, print how to continue in a new chat")
+    s.add_argument("next_action", metavar="NEXT_ACTION")
+    add("resume", cmd_resume, "after an interrupted session: print the steps that were running, close them as interrupted (downtime does not count against the budget), report whether the run was unattended")
     s = add("budget", cmd_budget, "print running seconds and helper-agent runs for an issue; exit 1 if >= 3600 s or >= 40 runs")
     s.add_argument("issue")
     s = add("stop", cmd_stop, "set stop + nextAction; print the stop line")

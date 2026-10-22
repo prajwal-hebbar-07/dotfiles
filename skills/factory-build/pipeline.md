@@ -11,8 +11,10 @@ and reviewers). Feature-mode briefs are the feature factory's, not this file.
 
 ## Resume
 
-1. `FS ledger open` lists starts with no done. For each, read the branch and
-   `git status`.
+1. `FS resume` lists the steps that were running and closes them as
+   `interrupted` (downtime does not count against the budget). For each, read
+   the branch and `git status`. If it said the run was unattended, run
+   `FS unattended on "<reason>"` from this session before continuing.
 2. Uncommitted changes from the interrupted step stay if that step's test now
    passes; otherwise `git stash push -m wip/<N>/<s>`, restart the step from the
    brief.

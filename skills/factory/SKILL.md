@@ -8,7 +8,7 @@ description: >
   the run is. Use when the user invokes /skill:factory to start or resume
   building a whole app. For one feature in an existing app use
   /skill:feature instead.
-argument-hint: "[status | change <text>]"
+argument-hint: "[status | change <text> | pause]"
 disable-model-invocation: true
 ---
 
@@ -53,8 +53,10 @@ Steps 1–2 failing stops the run. Steps 3–5: stop until fixed, except in
 - `$FS verify`. Each `REOPEN <gate> <file>` line means an approved doc
   changed after approval. Tell the user, `$FS reopen <gate>`, and route to
   that gate's stage (the earliest reopened one) to approve it again.
-- `$FS ledger open`: unfinished steps. Apply the resume protocol in
-  `state.md` when routing to `build` or `land`.
+- `$FS resume` (skip it for `pause` and `status`): lists steps a killed or paused session
+  left running and closes them so downtime does not count against the
+  budget. If it prints `HANDOFF`, read `.factory/handoff.md` first. Apply the
+  resume protocol in `state.md` (handoff, working tree, re-arm) before routing.
 - `$FS get`: read `stage`, `stop`, `nextAction`, `issues`.
 
 ## 3. Arguments
@@ -64,6 +66,7 @@ Steps 1–2 failing stops the run. Steps 3–5: stop until fixed, except in
 | none | **resume**: route (section 4) |
 | `status` | print stage, each gate (approved or open, file, approvedAt), `stop`, `nextAction`, open ledger rows, and each issue's status from `issues` (and its label via `gh issue list --label factory:...` if GitHub is reachable). Change nothing. |
 | `change <text>` | requirement change (section 5) |
+| `pause` | in the chat running the factory, after interrupting the turn with Escape: follow "Pause" in `state.md` (stop helpers, write `.factory/handoff.md` from `skill://factory/handoff-template.md`, `$FS pause "<next action>"`), print its line, end. Skip preflight steps 3–5 and section 4 |
 
 ## 4. Route
 

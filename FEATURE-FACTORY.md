@@ -150,3 +150,9 @@ Decisions made while building:
 - **Unattended guard.** After Gate 1 (unless you asked for step-by-step) the
   run sets `unattended`, so the stage guard keeps the session from ending
   before the PR gate.
+- **Moving to a new chat.** `/skill:feature pause` in the chat being left
+  (after Escape) writes `.factory/handoff.md`: decisions made in chat but not
+  yet in the brief, open review findings, questions waiting on you, work in
+  progress, and the next action. `/skill:feature` in a new chat reads it,
+  checks it against the branch and ledger, and sends a decision that changes
+  the approved brief back through Gate 1.

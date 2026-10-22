@@ -8,7 +8,7 @@ description: >
   two parallel reviews, QA through what the repo already has, PR gate. Use
   when the user invokes /skill:feature or asks to add one feature to
   an existing project.
-argument-hint: "[<feature description> | #<issue> | resume]"
+argument-hint: "[<feature description> | #<issue> | resume | pause]"
 disable-model-invocation: true
 ---
 
@@ -35,7 +35,11 @@ models. Briefs and results follow the helper-agent contract in
 4. The `github` tool is usable (`github.enabled`; see `omp://tools/github.md`). Else stop and say so.
 5. `~/.omp/agent/skills/factory/scripts/factory-state init --mode feature --slug <slug>` (called `FS` below). `<slug>`: lowercase, non-alphanumerics to `-`, from the description or issue title.
 
-**Input.** Chat text, or `#N` via `read issue://N` (title, body, comments). **Resume:** no arguments, and an unfinished `.factory/feature/*.md` exists: read its Status, `git log` on `feature/<slug>`, and `FS ledger open`; continue at that step. Each step first checks whether it is already done (task marked `done <sha>`, PR open); never redo a commit or PR. Several unfinished briefs: ask which.
+**Input.** Chat text, or `#N` via `read issue://N` (title, body, comments).
+
+**Pause** (`/skill:feature pause`, in the chat running the feature, after interrupting the turn with Escape): skip preflight step 5 and follow "Pause" in `skill://factory/state.md`: stop helper agents, write `.factory/handoff.md` from `skill://factory/handoff-template.md` (it must hold everything only this chat knows: answers and decisions not yet in the brief, open review findings, questions waiting on the user, partial agent output), then `FS pause "<next action>"`. Print its line and end. Nothing is committed, stashed, or pushed.
+
+**Resume** (a new chat after a pause, Ctrl+C twice, Ctrl+D, a crash, or a quota stop): no arguments or `resume`, and an unfinished `.factory/feature/*.md` exists (several: ask which). Follow "Resume protocol" in `skill://factory/state.md`: `FS resume`; read and archive `.factory/handoff.md` if it printed `HANDOFF` (a handoff decision that changes the approved brief goes back through Gate 1); keep or stash uncommitted work; if `gates.brief` is still stamped and Tasks or Status must be written, record its sha256 and `FS reopen brief` (as step 4 does); re-arm with `FS unattended on "<reason>"` if it says the run was unattended. Then read Status and `git log` on `feature/<slug>` and continue at that step. Each step first checks whether it is already done (task marked `done <sha>`, branch pushed, PR open: `gh pr list --head feature/<slug>`); never redo a commit, push, or PR. An interrupted Gate 1 or PR gate is asked again in full.
 
 Ledger: around every agent run, `FS ledger start|done|verdict --issue <slug> --stage feature --step <step> --agent <name> --result <verdict>`. Keep Status in the brief current after each step.
 

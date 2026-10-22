@@ -1772,7 +1772,7 @@ Nothing is still open.
 Everything in §7 is built and linked, with the settings in §8 item 8 and
 item 9 set in `omp/config.yml` and `ponytail` installed. Run it with
 `/skill:factory` in an app repo. Checks run on the build:
-`node --test omp/hooks/tests omp/extensions/tests` (51 pass);
+`node --test omp/hooks/tests omp/extensions/tests` (54 pass);
 `python3 omp/factory-evals/run structural` (0 failed); a live `omp -p` run in
 a throwaway guarded repo, where the hook blocked `git push origin main` and
 an edit of a stamped doc, the feature factory skill resolved, all 14
@@ -1784,6 +1784,8 @@ Decisions made while building, which this document did not settle:
 | Topic | Decision |
 | --- | --- |
 | Stage guard scope (§5.6) | It holds a session open only while `state.unattended` is true **and** that session armed the run itself (ran `factory-state unattended on`): `factory-build` and the feature factory's steps 5–9. Interactive stages leave it false, so turns end normally while you answer, and a stale flag left by a killed session never traps a new chat in the repo. `stop` and `done` clear it |
+| Interrupt and resume (§5.6) | Ctrl+C twice, Ctrl+D, a crash, or a quota stop kills the session and its helper agents; files, commits, `.factory/` state and the ledger stay. A new chat runs `/skill:factory` or `/skill:feature` with no arguments: `factory-state resume` closes the steps that were running as `interrupted` at their last activity (downtime does not count against the 1-hour budget), the resume protocol keeps or stashes uncommitted work, the run re-arms the stage guard from the new session, and each step checks it is not already done before acting |
+| Pause and handoff (§5.6) | `/skill:feature pause` or `/skill:factory pause`, run in the chat being left (after Escape), stops the helper agents, writes `.factory/handoff.md` from `skill://factory/handoff-template.md` with what only that chat knows, and runs `factory-state pause` (`stop=PAUSED`, steps closed, guard released). The next chat's resume reads the handoff first, re-checks every claim against branch, ledger and GitHub, sends any decision that changes an approved doc back through its gate, then archives the file as `handoff-<timestamp>.md` |
 | Run-state tool | `skills/factory/scripts/factory-state` holds every state, gate, ledger, budget, and stop write (schema: `skills/factory/state.md`) |
 | Issue breakdown gate (Q2) | The breakdown is written to `docs/factory/ISSUES.md` and approved like the other docs before anything is published |
 | Whole-app waves (Q5) | One branch per wave, `factory/<epic>-w<k>`, each off the previous wave; a wave PR whose base is not `main` says `Refs #N`, and `factory-land` closes the issue once its code reaches `main` |
