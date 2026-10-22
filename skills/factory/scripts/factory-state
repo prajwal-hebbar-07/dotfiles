@@ -1,0 +1,460 @@
+#!/usr/bin/env python3
+"""factory-state: run state, gate stamps and ledger for the software factory.
+
+Run from inside the target repo. State lives in <repo>/.factory/state.json and
+<repo>/.factory/ledger.tsv. Exit codes: 0 ok, 1 check failed, 2 usage or
+environment error. Schema: skills/factory/state.md.
+"""
+import argparse
+import hashlib
+import json
+import os
+import subprocess
+import sys
+import tempfile
+from datetime import datetime, timezone
+
+LEDGER_HEADER = "ts\tissue\tstage\tstep\tevent\tagent\tmodel\tsha\tresult\tevidence"
+FIELDS = LEDGER_HEADER.split("\t")
+MAX_SECONDS = 3600
+MAX_RUNS = 40
+STOPS = ("S1", "S2", "S3", "S4", "S5")
+EXCLUDE_LINES = (".factory/", "qa-evidence/")
+
+
+class Fail(Exception):
+    def __init__(self, msg, code=2):
+        Exception.__init__(self, msg)
+        self.msg = msg
+        self.code = code
+
+
+def now():
+    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def parse_ts(s):
+    return datetime.strptime(s, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+
+
+def git(*args):
+    try:
+        r = subprocess.run(["git"] + list(args), stdout=subprocess.PIPE,
+                           stderr=subprocess.PIPE, universal_newlines=True)
+    except OSError as e:
+        raise Fail("git not available: %s" % e)
+    if r.returncode != 0:
+        raise Fail("not inside a git repository (git %s failed)" % " ".join(args))
+    return r.stdout.strip()
+
+
+class Paths(object):
+    def __init__(self):
+        self.root = git("rev-parse", "--show-toplevel")
+        self.dir = os.path.join(self.root, ".factory")
+        self.state = os.path.join(self.dir, "state.json")
+        self.ledger = os.path.join(self.dir, "ledger.tsv")
+
+
+def atomic_write(path, text):
+    d = os.path.dirname(path)
+    os.makedirs(d, exist_ok=True)
+    fd, tmp = tempfile.mkstemp(dir=d, prefix=".tmp-")
+    try:
+        with os.fdopen(fd, "w") as f:
+            f.write(text)
+        os.replace(tmp, path)
+    except BaseException:
+        if os.path.exists(tmp):
+            os.unlink(tmp)
+        raise
+
+
+def default_state(mode, slug):
+    return {
+        "version": 1,
+        "mode": mode,
+        "guard": True,
+        "stage": "feature" if mode == "feature" else "requirements",
+        "feature": slug,
+        "gates": {},
+        "stop": None,
+        "nextAction": ("Start the feature interview." if mode == "feature"
+                       else "Start requirements gathering."),
+        "blockedOnUser": False,
+        "unattended": False,
+        "guardStage": {"exitMet": False, "reason": ""},
+        "issues": {},
+        "prApprovals": {},
+        "boardMode": None,
+    }
+
+
+def load(p):
+    if not os.path.exists(p.state):
+        raise Fail("no %s; run `factory-state init` first" % p.state)
+    try:
+        with open(p.state) as f:
+            return json.load(f)
+    except ValueError as e:
+        raise Fail("%s is not valid JSON: %s" % (p.state, e))
+
+
+def save(p, st):
+    atomic_write(p.state, json.dumps(st, indent=2) + "\n")
+
+
+def parse_json(text):
+    try:
+        return json.loads(text)
+    except ValueError as e:
+        raise Fail("value is not valid JSON: %s (quote strings: '\"text\"')" % e)
+
+
+def set_key(st, dotted, value):
+    parts = dotted.split(".")
+    cur = st
+    for i, k in enumerate(parts[:-1]):
+        if isinstance(cur, list):
+            cur = cur[int(k)]
+            continue
+        nxt = cur.get(k)
+        if not isinstance(nxt, (dict, list)):
+            nxt = {}
+            cur[k] = nxt
+        cur = nxt
+    last = parts[-1]
+    if isinstance(cur, list):
+        cur[int(last)] = value
+    else:
+        cur[last] = value
+
+
+def get_key(st, dotted):
+    cur = st
+    for k in dotted.split("."):
+        if isinstance(cur, dict) and k in cur:
+            cur = cur[k]
+        elif isinstance(cur, list) and k.isdigit() and int(k) < len(cur):
+            cur = cur[int(k)]
+        else:
+            return None
+    return cur
+
+
+def sha256_file(path):
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(65536), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+# ---------------------------------------------------------------- commands
+
+def cmd_init(a):
+    p = Paths()
+    os.makedirs(p.dir, exist_ok=True)
+    if os.path.exists(p.state):
+        st = load(p)
+        if a.mode and a.mode != st.get("mode"):
+            st["mode"] = a.mode
+            st["stage"] = "feature" if a.mode == "feature" else "requirements"
+        if a.slug:
+            st["feature"] = a.slug
+        st["guard"] = True
+        save(p, st)
+        created = False
+    else:
+        save(p, default_state(a.mode or "app", a.slug))
+        created = True
+    if not os.path.exists(p.ledger):
+        atomic_write(p.ledger, LEDGER_HEADER + "\n")
+    excl = git("rev-parse", "--git-path", "info/exclude")
+    if not os.path.isabs(excl):
+        excl = os.path.join(p.root, excl)
+    existing = ""
+    if os.path.exists(excl):
+        with open(excl) as f:
+            existing = f.read()
+    have = set(l.strip() for l in existing.splitlines())
+    missing = [l for l in EXCLUDE_LINES if l not in have]
+    if missing:
+        os.makedirs(os.path.dirname(excl), exist_ok=True)
+        with open(excl, "a") as f:
+            if existing and not existing.endswith("\n"):
+                f.write("\n")
+            f.write("\n".join(missing) + "\n")
+    print("%s %s" % ("initialised" if created else "updated", p.state))
+    return 0
+
+
+def cmd_get(a):
+    st = load(Paths())
+    val = st if not a.key else get_key(st, a.key)
+    print(json.dumps(val, indent=2))
+    return 0
+
+
+def cmd_set(a):
+    p = Paths()
+    st = load(p)
+    try:
+        set_key(st, a.key, parse_json(a.value))
+    except (IndexError, ValueError) as e:
+        raise Fail("cannot set %s: %s" % (a.key, e))
+    save(p, st)
+    return 0
+
+
+def cmd_stamp(a):
+    p = Paths()
+    st = load(p)
+    path = os.path.join(p.root, a.file)
+    if not os.path.isfile(path):
+        raise Fail("no such file: %s" % a.file)
+    st.setdefault("gates", {})[a.gate] = {
+        "file": os.path.relpath(path, p.root),
+        "sha256": sha256_file(path),
+        "approvedAt": now(),
+    }
+    save(p, st)
+    print("stamped %s %s" % (a.gate, st["gates"][a.gate]["file"]))
+    return 0
+
+
+def cmd_verify(a):
+    p = Paths()
+    st = load(p)
+    gates = st.get("gates", {})
+    names = a.gates or list(gates.keys())
+    bad = 0
+    for g in names:
+        s = gates.get(g)
+        if not s:
+            continue
+        path = os.path.join(p.root, s["file"])
+        if not os.path.isfile(path) or sha256_file(path) != s["sha256"]:
+            print("REOPEN %s %s" % (g, s["file"]))
+            bad += 1
+    return 1 if bad else 0
+
+
+def cmd_reopen(a):
+    p = Paths()
+    st = load(p)
+    if st.get("gates", {}).pop(a.gate, None) is None:
+        print("gate %s was not stamped" % a.gate)
+    else:
+        print("reopened %s" % a.gate)
+    save(p, st)
+    return 0
+
+
+def clean(v):
+    return "" if v is None else str(v).replace("\t", " ").replace("\r", " ").replace("\n", " ")
+
+
+def read_ledger(p):
+    rows = []
+    if not os.path.exists(p.ledger):
+        return rows
+    with open(p.ledger) as f:
+        for line in f.read().splitlines()[1:]:
+            if not line.strip():
+                continue
+            cols = line.split("\t")
+            cols += [""] * (len(FIELDS) - len(cols))
+            rows.append(dict(zip(FIELDS, cols)))
+    return rows
+
+
+def cmd_ledger(a):
+    p = Paths()
+    os.makedirs(p.dir, exist_ok=True)
+    if not os.path.exists(p.ledger):
+        atomic_write(p.ledger, LEDGER_HEADER + "\n")
+    if a.action == "open":
+        last_start, last_done = {}, {}
+        rows = read_ledger(p)
+        for i, r in enumerate(rows):
+            k = (r["issue"], r["stage"], r["step"])
+            if r["event"] == "start":
+                last_start[k] = i
+            elif r["event"] == "done":
+                last_done[k] = i
+        for k, i in sorted(last_start.items(), key=lambda kv: kv[1]):
+            if last_done.get(k, -1) < i:
+                print("\t".join(rows[i][c] for c in FIELDS))
+        return 0
+    if not (a.issue and a.stage and a.step):
+        raise Fail("ledger %s needs --issue, --stage and --step" % a.action)
+    vals = [now(), a.issue, a.stage, a.step, a.action, a.agent, a.model,
+            a.sha, a.result, a.evidence]
+    with open(p.ledger, "a") as f:
+        f.write("\t".join(clean(v) for v in vals) + "\n")
+    return 0
+
+
+def cmd_budget(a):
+    p = Paths()
+    rows = [r for r in read_ledger(p) if r["issue"] == a.issue]
+    pending = {}
+    total = 0.0
+    runs = 0
+    t_now = datetime.now(timezone.utc)
+    for r in rows:
+        try:
+            t = parse_ts(r["ts"])
+        except ValueError:
+            continue
+        k = (r["stage"], r["step"])
+        if r["event"] == "start":
+            pending.setdefault(k, []).append(t)
+            if r["agent"]:
+                runs += 1
+        elif r["event"] == "done" and pending.get(k):
+            total += (t - pending[k].pop(0)).total_seconds()
+    for starts in pending.values():
+        for t in starts:
+            total += (t_now - t).total_seconds()
+    secs = int(total)
+    over = secs >= MAX_SECONDS or runs >= MAX_RUNS
+    print("issue=%s running_seconds=%d agent_runs=%d limit_seconds=%d limit_runs=%d %s" % (
+        a.issue, secs, runs, MAX_SECONDS, MAX_RUNS, "EXHAUSTED" if over else "ok"))
+    return 1 if over else 0
+
+
+def cmd_stop(a):
+    if a.stop not in STOPS:
+        raise Fail("stop must be one of %s" % ", ".join(STOPS))
+    p = Paths()
+    st = load(p)
+    st["stop"] = a.stop
+    st["nextAction"] = a.next_action
+    st["unattended"] = False
+    save(p, st)
+    skill = "factory-feature" if st.get("mode") == "feature" else "factory"
+    print("Stop %s. Start a new omp session in this repo and run /skill:%s." % (a.stop, skill))
+    return 0
+
+
+def cmd_exit(a):
+    p = Paths()
+    st = load(p)
+    st["guardStage"] = {"exitMet": a.state == "met", "reason": a.reason}
+    save(p, st)
+    return 0
+
+
+def cmd_blocked(a):
+    p = Paths()
+    st = load(p)
+    st["blockedOnUser"] = a.state == "on"
+    save(p, st)
+    return 0
+
+
+def cmd_unattended(a):
+    p = Paths()
+    st = load(p)
+    st["unattended"] = a.state == "on"
+    if st["unattended"]:
+        st["stop"] = None
+        st["blockedOnUser"] = False
+        st["guardStage"] = {"exitMet": False, "reason": a.reason or ""}
+    save(p, st)
+    return 0
+
+
+def cmd_pr_approve(a):
+    p = Paths()
+    st = load(p)
+    st.setdefault("prApprovals", {})[a.branch] = a.sha
+    save(p, st)
+    return 0
+
+
+def cmd_done(a):
+    p = Paths()
+    st = load(p)
+    st["guard"] = False
+    st["stop"] = None
+    st["unattended"] = False
+    save(p, st)
+    return 0
+
+
+def build_parser():
+    ap = argparse.ArgumentParser(
+        prog="factory-state",
+        description="Run state, gate stamps and ledger for the software factory. "
+                    "Run from the target repo. Exit 0 ok, 1 check failed, 2 usage/env error.")
+    sub = ap.add_subparsers(dest="cmd", metavar="<command>")
+    sub.required = True
+
+    def add(name, fn, help_):
+        s = sub.add_parser(name, help=help_, description=help_)
+        s.set_defaults(fn=fn)
+        return s
+
+    s = add("init", cmd_init, "create .factory/, state.json (if missing), ledger header, exclude lines; sets guard=true")
+    s.add_argument("--mode", choices=["app", "feature"])
+    s.add_argument("--slug", help="feature slug (feature mode)")
+    s = add("get", cmd_get, "print state as JSON (whole, or one dotted key)")
+    s.add_argument("key", nargs="?")
+    s = add("set", cmd_set, "set a dotted key; value is parsed as JSON")
+    s.add_argument("key")
+    s.add_argument("value")
+    s = add("stamp", cmd_stamp, "gates.<gate> = {file, sha256, approvedAt}")
+    s.add_argument("gate")
+    s.add_argument("file")
+    s = add("verify", cmd_verify, "exit 0 if every (named or all) stamped gate's file still hashes the same; else print 'REOPEN <gate> <file>' lines, exit 1")
+    s.add_argument("gates", nargs="*")
+    s = add("reopen", cmd_reopen, "remove a gate's stamp (doc becomes editable)")
+    s.add_argument("gate")
+    s = add("ledger", cmd_ledger, "ledger start|done|verdict --issue --stage --step ...; ledger open lists unfinished starts")
+    s.add_argument("action", choices=["start", "done", "verdict", "open"])
+    s.add_argument("--issue")
+    s.add_argument("--stage")
+    s.add_argument("--step")
+    s.add_argument("--agent", default="")
+    s.add_argument("--model", default="")
+    s.add_argument("--sha", default="")
+    s.add_argument("--result", default="")
+    s.add_argument("--evidence", default="")
+    s = add("budget", cmd_budget, "print running seconds and helper-agent runs for an issue; exit 1 if >= 3600 s or >= 40 runs")
+    s.add_argument("issue")
+    s = add("stop", cmd_stop, "set stop + nextAction; print the stop line")
+    s.add_argument("stop", metavar="S1..S5")
+    s.add_argument("next_action", metavar="next-action")
+    s = add("exit", cmd_exit, "set guardStage.exitMet (met|unmet) with a reason")
+    s.add_argument("state", choices=["met", "unmet"])
+    s.add_argument("reason")
+    s = add("blocked-on-user", cmd_blocked, "set blockedOnUser (on|off)")
+    s.add_argument("state", choices=["on", "off"])
+    s = add("unattended", cmd_unattended, "set unattended (on|off); on = the stage guard holds the turn open until exit met, a stop, or blocked-on-user")
+    s.add_argument("state", choices=["on", "off"])
+    s.add_argument("reason", nargs="?", default="", help="exit predicate still unmet (with on)")
+    s = add("pr-approve", cmd_pr_approve, "prApprovals[branch] = sha (the hook then allows pr_create)")
+    s.add_argument("branch")
+    s.add_argument("sha")
+    s = add("done", cmd_done, "run finished: guard=false, stop=null")
+    return ap
+
+
+def main(argv):
+    ap = build_parser()
+    try:
+        a = ap.parse_args(argv)
+    except SystemExit as e:
+        return 0 if e.code in (0, None) else 2
+    try:
+        return a.fn(a)
+    except Fail as e:
+        sys.stderr.write("factory-state: %s\n" % e.msg)
+        return e.code
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))
