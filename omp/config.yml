@@ -29,5 +29,25 @@ task:
     task: "@task"
     sonic: "@smol"
     scout: "@scout"
-    reviewer: "@review"
+    reviewer: "@review, anthropic/claude-opus-5-5:high"
     security-reviewer: "@review"
+  maxRuntimeMs: 3600000
+  isolation:
+    enabled: true
+    merge: branch
+    commits: ai
+github:
+  enabled: true
+secrets:
+  enabled: true
+security:
+  enabled: true
+compaction:
+  handoffSaveToDisk: true
+retry:
+  usageAwareFallback: true
+  usageReservePct: 10
+  usageReservePolicy: fail-closed
+  waitForUsageReset: false
+claudeResets:
+  autoRedeem: "yes"
