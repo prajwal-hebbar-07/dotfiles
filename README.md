@@ -73,7 +73,7 @@ symlinked to where omp reads it:
 | `omp/agents/factory-*.md` | `~/.omp/agent/agents/` (one link per file) | The factory's helper agents: planner, builder, reviewers, QA, designer, explainer |
 | `omp/hooks/pre/factory-guard.ts` | `~/.omp/agent/hooks/pre/factory-guard.ts` | Blocks merges, pushes outside `factory/*` / `feature/*`, PRs you have not approved, edits to approved docs, and holdout reads |
 | `omp/extensions/factory-stage-guard.ts` | `~/.omp/agent/extensions/factory-stage-guard.ts` | Keeps an unattended factory run from ending early; points compaction at the run state |
-| `skills/factory*/` | `~/.omp/agent/skills/<name>` | The factory skills (below) |
+| `skills/factory*/`, `skills/tour/` | `~/.omp/agent/skills/<name>` | The factory skills and the feature tour (below) |
 | `skills/commit`, `paper-design-prompt`, `paper-design`, `paper-target`, `arc-design`, `docs` | `~/.omp/agent/skills/<name>` | Existing skills the factory reuses |
 
 `config.yml` is also written by omp itself (settings UI, `/model`, saved
@@ -112,10 +112,10 @@ skill and agent file, link, and scenario offline in seconds.
 `run routing` and `run gate-hold` drive real `omp -p` runs against fixture
 repos and grade them with a judge model (see `omp/factory-evals/README.md`).
 
-**`factory-features` skill** — run in any repo. `/skill:factory-features`
+**`tour` skill** — run in any repo. `/skill:tour`
 (or "what features does this project have?") prints a numbered table of
 the features in the code, and nothing else.
-`/skill:factory-features explain <name or number>` has `factory-explainer`
+`/skill:tour explain <name or number>` has `factory-explainer`
 write `docs/features/<feature>.md`: each code snippet on the feature's path
 in the order it runs, what it does line by line, and why it is written that
 way, with sources. `scripts/check-snippets.py` compares every snippet with
@@ -427,6 +427,7 @@ dotfiles/
 │   ├── paper-design/SKILL.md
 │   ├── sync-lyik-docs/SKILL.md
 │   ├── pdocs/SKILL.md
+│   ├── tour/SKILL.md               # omp only
 │   └── factory-features/SKILL.md   # omp only
 ├── cursor/     # editor settings, keybindings, extension list
 ├── zsh/        # zshrc, and bin/pk-preview for the fzf preview pane
@@ -511,7 +512,7 @@ ln -sfn "$PWD/skills/repo-docs" ~/.gemini/config/skills/repo-docs
 mkdir -p ~/.omp/agent/skills ~/.omp/agent/agents ~/.omp/agent/hooks/pre ~/.omp/agent/extensions
 ln -sfn "$PWD/omp/config.yml"  ~/.omp/agent/config.yml
 ln -sfn "$PWD/omp/mcp.json"    ~/.omp/agent/mcp.json
-for s in skills/factory skills/factory-* skills/commit skills/paper-design-prompt \
+for s in skills/factory skills/factory-* skills/tour skills/commit skills/paper-design-prompt \
          skills/paper-design skills/paper-target skills/arc-design skills/docs; do
   ln -sfn "$PWD/$s" ~/.omp/agent/skills/$(basename "$s")
 done

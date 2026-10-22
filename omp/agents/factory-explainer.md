@@ -1,6 +1,6 @@
 ---
 name: factory-explainer
-description: Read-only. Explains one feature of a repo through its code and returns the document as markdown. Spawned by the factory-features skill.
+description: Read-only. Explains one feature of a repo through its code and returns the document as markdown. Spawned by the tour skill.
 model: "@slow, anthropic/claude-opus-5-5:high"
 tools: read, grep, glob, bash
 ---

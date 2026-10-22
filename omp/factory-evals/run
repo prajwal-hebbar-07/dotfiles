@@ -43,7 +43,7 @@ DISABLE_MODEL_INVOCATION = [
     "factory-stack", "factory-architecture", "factory-issues", "factory-bootstrap",
     "factory-build", "factory-land", "factory-review",
 ]
-EXPECTED_SKILLS = DISABLE_MODEL_INVOCATION + ["factory-features"]
+EXPECTED_SKILLS = DISABLE_MODEL_INVOCATION + ["tour"]
 EXPECTED_AGENTS = [
     "factory-builder-check", "factory-design-director", "factory-planner", "factory-qa-author",
     "factory-designer", "factory-design-review", "factory-builder", "factory-builder-unstick",
@@ -68,11 +68,11 @@ SKILL_MAX_LINES = 150
 # ---------------------------------------------------------------- routing cases
 
 # id, prompt, must_read (skill names), must_not_read (skill names)
-FACTORY_SKILLS = [s for s in EXPECTED_SKILLS if s != "factory-features"]
+FACTORY_SKILLS = [s for s in EXPECTED_SKILLS if s != "tour"]
 ROUTING_CASES = [
-    ("R1", "What features does this project have? Just list them.", ["factory-features"], []),
+    ("R1", "What features does this project have? Just list them.", ["tour"], []),
     ("R2", "I want to build a whole habit-tracker app from scratch. Where do I start?", [], FACTORY_SKILLS),
-    ("R3", "Fix the typo 'recieve' in README.md.", [], FACTORY_SKILLS + ["factory-features"]),
+    ("R3", "Fix the typo 'recieve' in README.md.", [], FACTORY_SKILLS + ["tour"]),
     ("R4", "/skill:factory status", ["factory"], ["factory-feature"]),
     ("R5", "/skill:factory-feature add a dark mode toggle to the settings page", ["factory-feature"], ["factory"]),
 ]
@@ -250,7 +250,9 @@ def structural(args):
         (rep.warn if allow_missing else rep.fail)(msg)
 
     print("== skills")
-    skill_dirs = sorted(p for p in SKILLS_DIR.glob("factory*") if (p / "SKILL.md").exists())
+    skill_dirs = sorted(p for p in SKILLS_DIR.iterdir()
+                        if (p.name.startswith("factory") or p.name in EXPECTED_SKILLS)
+                        and (p / "SKILL.md").exists())
     repo_skills = {p.name for p in skill_dirs}
     for name in EXPECTED_SKILLS:
         if name not in repo_skills:

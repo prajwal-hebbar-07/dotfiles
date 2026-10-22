@@ -31,7 +31,7 @@ Skills live under `skills/<name>/SKILL.md`, linked into `~/.cursor/skills/`,
   `lyik_docs/docs/lyik_enterprise/design/architecture/`. No checks, no commit.
 - `pdocs` — `docs` renamed for Claude Code; only `SKILL.md` is its own, the
   rest are relative links into `skills/docs/`.
-- `factory-features` — omp only, linked into `~/.omp/agent/skills/`. Lists
+- `tour` — omp only, linked into `~/.omp/agent/skills/`. Lists
   a project's features; `explain <feature>` has the `factory-explainer`
   agent (GPT) write `docs/features/<feature>.md`. Not committed.
 
@@ -90,7 +90,7 @@ history). List new skills here.
 - `agents/factory-*.md` → `~/.omp/agent/agents/` (one link per file) — the
   factory's helper agents; each file's `model:` line carries its model
   (`SOFTWARE-FACTORY.md` §5.2). `factory-explainer` writes
-  `factory-features` explanations.
+  `tour` explanations.
 - `hooks/pre/factory-guard.ts` → `~/.omp/agent/hooks/pre/` — blocks merges,
   pushes outside `factory/*`/`feature/*`, unapproved PRs, edits to approved
   docs, and holdout reads, only in repos with an active `.factory/state.json`.

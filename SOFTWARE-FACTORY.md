@@ -502,7 +502,7 @@ should archive it"). The factory then:
    §4.6. `factory-qa-author` rewrites the holdout scenarios for every changed
    `R`.
 
-### 4.9 Features and their explanations — `factory-features`
+### 4.9 Features and their explanations — `tour`
 
 Two commands, for reading a project, not for building it. Neither is a
 stage: run them at any time, mid-run included, or in a repo the factory has
@@ -510,7 +510,7 @@ never touched. Neither needs a gate. The skill is left visible (no
 `disable-model-invocation`), so asking in plain words ("what features does
 this project have?", "explain archiving a task") runs it too.
 
-**`/skill:factory-features`** lists the features the code has, and nothing
+**`/skill:tour`** lists the features the code has, and nothing
 else, in chat:
 
 | # | Feature | What it does |
@@ -526,7 +526,7 @@ else, in chat:
   modules, or file paths.
 - Read-only; nothing is saved.
 
-**`/skill:factory-features explain <feature>`** writes one document that
+**`/skill:tour explain <feature>`** writes one document that
 explains a feature through its code. `<feature>` is a name, or the number
 from the list just shown. A name that matches no feature, or more than one,
 prints the list and asks which one; nothing is written.
@@ -550,7 +550,7 @@ prints the list and asks which one; nothing is written.
   lines in the working tree. A mismatch goes back to the agent once; a
   second one stops with the mismatch shown, and nothing is saved.
 
-The document follows `skills/factory-features/template.md`:
+The document follows `skills/tour/template.md`:
 
 ````markdown
 # <Feature>
@@ -1143,7 +1143,7 @@ move `factory-designer` to Astra too.
 | Budget per issue | §11 Q7 and §5.3 |
 | Gate behaviour | §4.3 and `skills/factory-gate/` |
 | The simplicity round | §4.2 and `skills/factory-grill/` |
-| The feature list, or the explanation document and its model | §4.9, `skills/factory-features/`, and `omp/agents/factory-explainer.md` |
+| The feature list, or the explanation document and its model | §4.9, `skills/tour/`, and `omp/agents/factory-explainer.md` |
 | The Simpler check | `factory-spec-review` (§5.2) |
 | Coverage or mutation numbers | the app repo's `CONSTRAINTS.md`, agreed at the architecture gate |
 | Per-issue order | §5.1 and `skills/factory-build/` |
@@ -1192,7 +1192,7 @@ skills/
   factory-bootstrap/       issue #0 (§4.7): walking skeleton or missing-harness checklist
   factory-build/           stage 7–8; pipeline, loop rules, questionnaire relay, PR template
   factory-land/            stage 9 (§5.7): PR comments, post-merge close / unblock / restack / docs
-  factory-features/        /skill:factory-features (§4.9): list the features; `explain <feature>` writes docs/features/<feature>.md
+  tour/                    /skill:tour (§4.9): list the features; `explain <feature>` writes docs/features/<feature>.md
     template.md            the explanation document (§4.9)
     scripts/check-snippets.py  compares each quoted snippet with the file
   factory-review/          shared rubric + verdict formats (autoloaded by reviewer agents)
@@ -1339,7 +1339,7 @@ covers the irreversible actions.
 Each step is usable before the next one exists.
 
 1. `factory-grill` + `factory-gate` (with the builder check): the two
-   primitives. Try them by hand on any document. `factory-features` (§4.9)
+   primitives. Try them by hand on any document. `tour` (§4.9)
    depends on nothing else, so it can be built at any point.
 2. `factory-requirements` → `factory-stack` → `factory-architecture`: the
    human-in-the-loop half ends here with three approved docs.

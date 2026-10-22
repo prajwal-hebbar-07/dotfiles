@@ -1,16 +1,16 @@
 ---
-name: factory-features
+name: tour
 description: >
   Lists the features a project's code has (number, name, one line each) and
   nothing else. With `explain <feature>`, has the factory-explainer agent
   (GPT) write docs/features/<feature>.md: every code snippet on the
   feature's path, what each does line by line, and why it is written that
   way. Use when the user asks what features a project has, asks to explain
-  a feature, or invokes /skill:factory-features.
+  a feature, or invokes /skill:tour.
 argument-hint: "[explain <feature name or number>]"
 ---
 
-# factory-features
+# tour
 
 Two modes, picked from the arguments:
 
@@ -77,13 +77,13 @@ dotfiles repo.
 3. **Spawn `factory-explainer`** (one `task` item, `agent:
    factory-explainer`). Its task gives: the feature name and its one line,
    its entry points (`path:line` each), the repo root, the stamp, the date,
-   and the template path `skill://factory-features/template.md`. Its result
+   and the template path `skill://tour/template.md`. Its result
    is the whole document as markdown.
-4. **Check it.** Write the result to `$TMPDIR/factory-features-<slug>.md`,
+4. **Check it.** Write the result to `$TMPDIR/tour-<slug>.md`,
    then run, from the repo root:
 
    ```sh
-   python3 <skill dir>/scripts/check-snippets.py "$TMPDIR/factory-features-<slug>.md" --root .
+   python3 <skill dir>/scripts/check-snippets.py "$TMPDIR/tour-<slug>.md" --root .
    ```
 
    - Exit 0: go to step 5.
