@@ -33,9 +33,43 @@ function loadState(cwd: string): State | undefined {
 	return state && state.guard === true ? state : undefined;
 }
 
+// Sessions that armed the run themselves (`factory-state unattended on` in
+// their own bash call). A stale `unattended: true` left by a killed session
+// (Ctrl+C twice, Ctrl+D, crash) must not trap a new, unrelated chat in the
+// same repo; a resumed factory run re-arms by running the command again.
+const ARM = /factory-state\b[^\n;&|]*\bunattended\s+on\b/;
+const DISARM = /factory-state\b[^\n;&|]*\bunattended\s+off\b/;
+const armed = new Set<string>();
+
+type SessionCtx = {
+	sessionManager?: { getSessionFile?: () => string | undefined };
+	agent?: { id?: string; kind?: string };
+};
+
+// One key per session: the session file, so `/new` in the same process is a
+// different session. Fakes in tests may omit both fields.
+function sessionKey(ctx: SessionCtx): string {
+	return ctx.sessionManager?.getSessionFile?.() ?? ctx.agent?.id ?? "main";
+}
+
 export default function factoryStageGuard(pi: ExtensionAPI): void {
-	pi.on("session_stop", async (_event, ctx) => {
+	pi.on("tool_call", async (event, ctx: SessionCtx) => {
 		try {
+			if (event.toolName !== "bash") return undefined;
+			if (ctx.agent?.kind === "sub") return undefined;
+			const command = event.input?.command;
+			const cmd = typeof command === "string" ? command : "";
+			if (ARM.test(cmd)) armed.add(sessionKey(ctx));
+			else if (DISARM.test(cmd)) armed.delete(sessionKey(ctx));
+		} catch (err) {
+			pi.logger?.warn?.(`factory-stage-guard: ${String(err)}`);
+		}
+		return undefined;
+	});
+
+	pi.on("session_stop", async (_event, ctx: SessionCtx & { cwd?: string }) => {
+		try {
+			if (!armed.has(sessionKey(ctx))) return undefined;
 			const state = loadState(ctx.cwd || process.cwd());
 			if (!state) return undefined;
 			if (state.unattended !== true) return undefined;

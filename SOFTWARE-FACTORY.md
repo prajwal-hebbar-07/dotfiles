@@ -1783,7 +1783,7 @@ Decisions made while building, which this document did not settle:
 
 | Topic | Decision |
 | --- | --- |
-| Stage guard scope (§5.6) | It holds a session open only while `state.unattended` is true: `factory-build` and the feature factory's steps 5–9. Interactive stages (interview, grilling, gates) leave it false, so turns end normally while you answer. Set by `factory-state unattended on` / `off`; `stop` and `done` clear it |
+| Stage guard scope (§5.6) | It holds a session open only while `state.unattended` is true **and** that session armed the run itself (ran `factory-state unattended on`): `factory-build` and the feature factory's steps 5–9. Interactive stages leave it false, so turns end normally while you answer, and a stale flag left by a killed session never traps a new chat in the repo. `stop` and `done` clear it |
 | Run-state tool | `skills/factory/scripts/factory-state` holds every state, gate, ledger, budget, and stop write (schema: `skills/factory/state.md`) |
 | Issue breakdown gate (Q2) | The breakdown is written to `docs/factory/ISSUES.md` and approved like the other docs before anything is published |
 | Whole-app waves (Q5) | One branch per wave, `factory/<epic>-w<k>`, each off the previous wave; a wave PR whose base is not `main` says `Refs #N`, and `factory-land` closes the issue once its code reaches `main` |
