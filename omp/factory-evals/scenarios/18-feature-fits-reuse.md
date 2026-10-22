@@ -21,7 +21,7 @@ git add -A && git commit -qm "chore: existing app"
 ## Prompt
 
 ```prompt
-/skill:factory-feature Add "clear completed": one function that removes every done task from the list. Nobody is available to answer questions; where something is unclear, take the simplest reading. Stop at the first approval gate (answer No there).
+/skill:feature Add "clear completed": one function that removes every done task from the list. Nobody is available to answer questions; where something is unclear, take the simplest reading. Stop at the first approval gate (answer No there).
 ```
 
 ## Expected

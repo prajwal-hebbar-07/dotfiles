@@ -334,7 +334,7 @@ def cmd_stop(a):
     st["nextAction"] = a.next_action
     st["unattended"] = False
     save(p, st)
-    skill = "factory-feature" if st.get("mode") == "feature" else "factory"
+    skill = "feature" if st.get("mode") == "feature" else "factory"
     print("Stop %s. Start a new omp session in this repo and run /skill:%s." % (a.stop, skill))
     return 0
 

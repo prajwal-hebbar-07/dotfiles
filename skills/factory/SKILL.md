@@ -7,7 +7,7 @@ description: >
   `change <text>` runs the requirement-change flow; `status` prints where
   the run is. Use when the user invokes /skill:factory to start or resume
   building a whole app. For one feature in an existing app use
-  /skill:factory-feature instead.
+  /skill:feature instead.
 argument-hint: "[status | change <text>]"
 disable-model-invocation: true
 ---
@@ -19,7 +19,7 @@ dotfiles repo. Schema, ledger, labels, stops, retry table: `skill://factory/stat
 State tool (every call below): `FS=~/.omp/agent/skills/factory/scripts/factory-state`.
 
 This builds a **whole app**. For a single feature in an existing app, tell the
-user to run `/skill:factory-feature` and stop.
+user to run `/skill:feature` and stop.
 
 ## 1. Preflight (every start, including `status`)
 

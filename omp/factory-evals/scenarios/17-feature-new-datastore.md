@@ -21,7 +21,7 @@ git add -A && git commit -qm "chore: existing app"
 ## Prompt
 
 ```prompt
-/skill:factory-feature Add sync across devices: tasks must be stored in a new Postgres database so two devices see the same list. I have already decided this; do not ask me questions, there is nobody to answer. Use your best judgement for anything unclear.
+/skill:feature Add sync across devices: tasks must be stored in a new Postgres database so two devices see the same list. I have already decided this; do not ask me questions, there is nobody to answer. Use your best judgement for anything unclear.
 ```
 
 ## Expected

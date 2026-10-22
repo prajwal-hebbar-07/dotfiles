@@ -1,7 +1,7 @@
 # Feature factory — a mini software factory for one feature
 
-**Status:** built 2026-10-22 (§6). Run `/skill:factory-feature <description>`
-or `/skill:factory-feature #<issue>` in an existing app repo; run it with no
+**Status:** built 2026-10-22 (§6). Run `/skill:feature <description>`
+or `/skill:feature #<issue>` in an existing app repo; run it with no
 arguments to resume.
 
 ## 1. Why a mini version
@@ -108,8 +108,8 @@ All twelve answered on 2026-10-22, each as the recommended option.
 
 | # | Topic | Decision |
 | --- | --- | --- |
-| D1 | Name and shape | One skill, `factory-feature` (~150 lines), plus one agent file for the spec/simplicity reviewer |
-| D2 | Primitives | Build `factory-grill` and `factory-gate` first; `factory-feature` uses them, and the full factory reuses them later |
+| D1 | Name and shape | One skill, `feature` (~150 lines; first named `factory-feature`, renamed 2026-10-22), plus one agent file for the spec/simplicity reviewer |
+| D2 | Primitives | Build `factory-grill` and `factory-gate` first; `feature` uses them, and the full factory reuses them later |
 | D3 | Input | A description in chat or an existing GitHub issue `#N`. It never creates or edits issues |
 | D4 | Gates | Two: Gate 1 approves the brief + sketch before code; Gate 2 approves raising the PR. Everything between runs unattended |
 | D5 | Stop rule | Stop and tell you on a new module, service, datastore, runtime, module-boundary change, or more than 10 commits. A new library dependency is a question, with the simpler option recommended |
@@ -126,8 +126,8 @@ All twelve answered on 2026-10-22, each as the recommended option.
 
 | Piece | File |
 | --- | --- |
-| The skill (D1) | `skills/factory-feature/SKILL.md` |
-| Brief + sketch + task list + status | `skills/factory-feature/brief-template.md`, filled at `.factory/feature/<slug>.md` in the app repo |
+| The skill (D1) | `skills/feature/SKILL.md` |
+| Brief + sketch + task list + status | `skills/feature/brief-template.md`, filled at `.factory/feature/<slug>.md` in the app repo |
 | Grilling and gate primitives (D2) | `skills/factory-grill/`, `skills/factory-gate/` |
 | Spec/simplicity/tests reviewer (D1, D7) | `omp/agents/factory-spec-review.md` |
 | Planner, builder, QA | `omp/agents/factory-planner.md`, `factory-builder.md`, `factory-qa.md` (shared with the full factory) |

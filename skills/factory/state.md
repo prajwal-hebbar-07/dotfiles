@@ -28,7 +28,7 @@ exit 0 ok, 1 check failed, 2 usage/environment error).
 
 | Key | Meaning |
 | --- | --- |
-| `mode` | `app` (full factory) or `feature` (`/skill:factory-feature`) |
+| `mode` | `app` (full factory) or `feature` (`/skill:feature`) |
 | `guard` | hooks enforce only while true; `factory-state done` sets it false |
 | `stage` | `requirements`, `stack`, `architecture`, `issues`, `build`, `land`, `feature` |
 | `feature` | feature slug, feature mode only |

@@ -39,7 +39,7 @@ DEFAULT_JUDGE_FOR_GPT = "anthropic/claude-opus-5-5:high"
 
 # Skills that must set disable-model-invocation: true (factory-contract.md).
 DISABLE_MODEL_INVOCATION = [
-    "factory", "factory-feature", "factory-grill", "factory-gate", "factory-requirements",
+    "factory", "feature", "factory-grill", "factory-gate", "factory-requirements",
     "factory-stack", "factory-architecture", "factory-issues", "factory-bootstrap",
     "factory-build", "factory-land", "factory-review",
 ]
@@ -73,8 +73,8 @@ ROUTING_CASES = [
     ("R1", "What features does this project have? Just list them.", ["tour"], []),
     ("R2", "I want to build a whole habit-tracker app from scratch. Where do I start?", [], FACTORY_SKILLS),
     ("R3", "Fix the typo 'recieve' in README.md.", [], FACTORY_SKILLS + ["tour"]),
-    ("R4", "/skill:factory status", ["factory"], ["factory-feature"]),
-    ("R5", "/skill:factory-feature add a dark mode toggle to the settings page", ["factory-feature"], ["factory"]),
+    ("R4", "/skill:factory status", ["factory"], ["feature"]),
+    ("R5", "/skill:feature add a dark mode toggle to the settings page", ["feature"], ["factory"]),
 ]
 
 # ---------------------------------------------------------------- gh stub

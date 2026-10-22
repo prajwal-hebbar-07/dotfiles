@@ -73,7 +73,7 @@ symlinked to where omp reads it:
 | `omp/agents/factory-*.md` | `~/.omp/agent/agents/` (one link per file) | The factory's helper agents: planner, builder, reviewers, QA, designer, explainer |
 | `omp/hooks/pre/factory-guard.ts` | `~/.omp/agent/hooks/pre/factory-guard.ts` | Blocks merges, pushes outside `factory/*` / `feature/*`, PRs you have not approved, edits to approved docs, and holdout reads |
 | `omp/extensions/factory-stage-guard.ts` | `~/.omp/agent/extensions/factory-stage-guard.ts` | Keeps an unattended factory run from ending early; points compaction at the run state |
-| `skills/factory*/`, `skills/tour/` | `~/.omp/agent/skills/<name>` | The factory skills and the feature tour (below) |
+| `skills/factory*/`, `skills/feature/`, `skills/tour/` | `~/.omp/agent/skills/<name>` | The factory skills, the feature factory, and the feature tour (below) |
 | `skills/commit`, `paper-design-prompt`, `paper-design`, `paper-target`, `arc-design`, `docs` | `~/.omp/agent/skills/<name>` | Existing skills the factory reuses |
 
 `config.yml` is also written by omp itself (settings UI, `/model`, saved
@@ -96,7 +96,7 @@ start a new session and run `/skill:factory` again to resume.
 changes a requirement mid-run. Run state lives in the app repo's `.factory/`
 (kept out of git). Design: `SOFTWARE-FACTORY.md`.
 
-**Feature factory** — `/skill:factory-feature <description>` (or `#<issue>`)
+**Feature factory** — `/skill:feature <description>` (or `#<issue>`)
 in an existing app repo. One feature, fitted into the current architecture:
 scout, a short interview, one solution sketch with a simplicity round, your
 Approve on the brief, then plan, build, two reviews, and QA without you, then
@@ -428,7 +428,8 @@ dotfiles/
 │   ├── sync-lyik-docs/SKILL.md
 │   ├── pdocs/SKILL.md
 │   ├── tour/SKILL.md               # omp only
-│   └── factory-features/SKILL.md   # omp only
+│   ├── feature/SKILL.md            # omp only
+│   └── factory*/SKILL.md           # omp only
 ├── cursor/     # editor settings, keybindings, extension list
 ├── zsh/        # zshrc, and bin/pk-preview for the fzf preview pane
 ├── tmux/       # tmux.conf, Pale Knight theme and keys
@@ -512,7 +513,7 @@ ln -sfn "$PWD/skills/repo-docs" ~/.gemini/config/skills/repo-docs
 mkdir -p ~/.omp/agent/skills ~/.omp/agent/agents ~/.omp/agent/hooks/pre ~/.omp/agent/extensions
 ln -sfn "$PWD/omp/config.yml"  ~/.omp/agent/config.yml
 ln -sfn "$PWD/omp/mcp.json"    ~/.omp/agent/mcp.json
-for s in skills/factory skills/factory-* skills/tour skills/commit skills/paper-design-prompt \
+for s in skills/factory skills/factory-* skills/feature skills/tour skills/commit skills/paper-design-prompt \
          skills/paper-design skills/paper-target skills/arc-design skills/docs; do
   ln -sfn "$PWD/$s" ~/.omp/agent/skills/$(basename "$s")
 done

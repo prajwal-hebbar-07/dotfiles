@@ -88,8 +88,8 @@ Fenced blocks are the machine-readable part (everything else is for people):
 | 14 | `no-e2e-for-visible-criterion` | R5 (user-visible) covered by a unit test only | test review FAIL |
 | 15 | `flaky-e2e` | an E2E test that fails every third run | `check:task` FAIL; no retry until green |
 | 16 | `quota-stop-resume` | an open `review` row five hours old, marked quota stop | resumes at `review`; no needs-human for time |
-| 17 | `feature-new-datastore` | `/skill:factory-feature` asking for Postgres sync | stop rule fires before Gate 1 |
-| 18 | `feature-fits-reuse` | `/skill:factory-feature` "clear completed" | sketch names `src/tasks.mjs`; no new module or dependency |
+| 17 | `feature-new-datastore` | `/skill:feature` asking for Postgres sync | stop rule fires before Gate 1 |
+| 18 | `feature-fits-reuse` | `/skill:feature` "clear completed" | sketch names `src/tasks.mjs`; no new module or dependency |
 
 Scenarios 01–06 are the archived evals (`factory-archive-20261020-084936/factory/evals/`) adapted to the new agents and gates; 07–16 are the added cases of §9 step 8; 17–18 are feature-factory cases.
 

@@ -1775,7 +1775,7 @@ item 9 set in `omp/config.yml` and `ponytail` installed. Run it with
 `node --test omp/hooks/tests omp/extensions/tests` (51 pass);
 `python3 omp/factory-evals/run structural` (0 failed); a live `omp -p` run in
 a throwaway guarded repo, where the hook blocked `git push origin main` and
-an edit of a stamped doc, `skill://factory-feature` resolved, all 14
+an edit of a stamped doc, the feature factory skill resolved, all 14
 `factory-*` agents were discovered, and the stage guard held the session
 open until the agent marked itself blocked on the user.
 

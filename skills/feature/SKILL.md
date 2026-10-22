@@ -1,18 +1,18 @@
 ---
-name: factory-feature
+name: feature
 description: >
   The feature factory: takes one feature for an existing app, fits it into
   the current architecture with the smallest change that fully does the job,
   and delivers it as a reviewed PR. Scout, short interview, one solution
   sketch with a simplicity round, one brief gate, plan, unattended build,
   two parallel reviews, QA through what the repo already has, PR gate. Use
-  when the user invokes /skill:factory-feature or asks to add one feature to
+  when the user invokes /skill:feature or asks to add one feature to
   an existing project.
 argument-hint: "[<feature description> | #<issue> | resume]"
 disable-model-invocation: true
 ---
 
-# factory-feature
+# feature
 
 Design: `FEATURE-FACTORY.md` in the dotfiles repo (decisions D1-D12). Run from
 the target repo's root. Agents are spawned by name; their files carry the
@@ -41,7 +41,7 @@ Ledger: around every agent run, `FS ledger start|done|verdict --issue <slug> --s
 
 ## Steps
 
-1. **Scout.** One `scout` (`task`) maps where the feature lands: architecture docs, `AGENTS.md`, nearby code, tests, and the repo's lint, type, test, and E2E commands (and any `verify-<app>` skill). Ask it for `path:line` facts only. Start the brief from `skill://factory-feature/brief-template.md` at `.factory/feature/<slug>.md`; fill Repo checks. Never ask the user what the repo answers.
+1. **Scout.** One `scout` (`task`) maps where the feature lands: architecture docs, `AGENTS.md`, nearby code, tests, and the repo's lint, type, test, and E2E commands (and any `verify-<app>` skill). Ask it for `path:line` facts only. Start the brief from `skill://feature/brief-template.md` at `.factory/feature/<slug>.md`; fill Repo checks. Never ask the user what the repo answers.
 2. **Interview.** `read skill://factory-grill`. Fix the outcome, acceptance criteria numbered AC1.. as Given / When / Then, and out of scope. Short: stop when the next three answers can be predicted.
 3. **Sketch.** Write one design into the brief: **Reuses** (modules, files, patterns, each with a path) and **New pieces** (every new file, dependency, table, abstraction, config option). A sketch whose Reuses names nothing is rejected and redone before the user sees it. Then the simplicity round, in the grill's question format: one question per new piece, ponytail ladder (does it need to exist; does the codebase, standard library, platform, or an installed dependency already do it), the simpler option recommended; "we might need it later" is not a reason. Fold answers in. **Stop rule (D5):** a new module, service, datastore, or runtime, a module-boundary change, or more than 10 commits: `FS stop S5 "split the feature, or run /skill:factory"`, tell the user why, suggest splitting or the full factory, end. A new library dependency is a question with the simpler option recommended, not a stop. UI features reuse the app's existing components (D9).
 4. **Gate 1.** `read skill://factory-gate`, feature variant, gate `brief`, file `.factory/feature/<slug>.md`: whole brief in chat, one `ask`, Approve stamps (`FS stamp brief …`). Not committed. The same file later gets the Tasks table and Status updates, which the guard blocks while the stamp stands, so right after the Approve record the approved sha256 in the ledger (`ledger verdict --step gate-brief --result approved --evidence <sha256>`) and run `FS reopen brief`. No: grill on the reasons, back to step 2 or 3.

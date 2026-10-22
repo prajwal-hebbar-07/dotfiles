@@ -37,7 +37,7 @@ Skills live under `skills/<name>/SKILL.md`, linked into `~/.cursor/skills/`,
 
 Factory skills — omp only, each linked into `~/.omp/agent/skills/<name>`.
 Design: `SOFTWARE-FACTORY.md` (full factory) and `FEATURE-FACTORY.md`
-(feature factory). Only `factory` and `factory-feature` are run by the user;
+(feature factory). Only `factory` and `feature` are run by the user;
 the rest set `disable-model-invocation: true` and are read through
 `skill://` by those two:
 
@@ -45,7 +45,7 @@ the rest set `disable-model-invocation: true` and are read through
   preflight, resume from `.factory/state.json`, `status`, `change <text>`.
   `scripts/factory-state` is the run-state and ledger tool every factory skill
   calls.
-- `factory-feature` — `/skill:factory-feature`: one feature in an existing
+- `feature` — `/skill:feature`: one feature in an existing
   app, from scout to PR, with two gates (brief, PR).
 - `factory-grill` — grilling rounds, including the pre-mortem and simplicity
   rounds.
