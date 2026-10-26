@@ -21,6 +21,17 @@ do now. Source: chat text, or issue #N (read only).>
 
 - <Thing a reader might assume is included, and is not.>
 
+## Terms
+
+<!-- Terms the grill settled (`factory-grill` Language), in the
+     glossary-template format: **Term**: definition, _Avoid_: synonyms. Only
+     terms new to this feature or sharpened by it; the repo's glossary file is
+     not edited. Write "none" only if true. -->
+
+**<Term>**:
+<One or two sentence definition.>
+_Avoid_: <synonym>
+
 ## Repo checks
 
 <!-- Found by the scout. Exact commands. These are the checks (no CONSTRAINTS.md). -->

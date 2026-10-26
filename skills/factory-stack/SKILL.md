@@ -95,8 +95,8 @@ rule), so it is checked, not only recorded. List them in STACK.md.
 ## 6. Gate
 
 `read skill://factory-gate`; run it with gate `stack`, doc
-`docs/factory/STACK.md`, builder check **ON**, extra files: the ADRs and
-`out-of-scope/` notes.
+`docs/factory/STACK.md`, builder check **ON**, extra files: the ADRs,
+`out-of-scope/` notes, and `GLOSSARY.md` when the grill changed it.
 
 ## 7. Stop
 

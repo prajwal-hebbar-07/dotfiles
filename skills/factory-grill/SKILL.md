@@ -2,7 +2,8 @@
 name: factory-grill
 description: >
   The factory's grilling primitive. Works a design tree in rounds of numbered
-  questions, each with a recommended answer, until the frontier is empty.
+  questions, each with a recommended answer, until the frontier is empty, and
+  sharpens the product's vocabulary into GLOSSARY.md as terms settle.
   Also runs two named special rounds: pre-mortem (requirements) and
   simplicity (stack, architecture, feature sketch). Use when a factory stage
   skill or factory-gate says to grill, or when invoked as /skill:factory-grill.
@@ -14,8 +15,9 @@ disable-model-invocation: true
 
 Read by the stage skills (`skill://factory-grill`). The caller says the topic,
 the document being built, and which special round (if any) to run. Design:
-`SOFTWARE-FACTORY.md` §4.2. Based on mattpocock `grilling` and addyosmani
-`interview-me`; each borrowed rule is credited inline.
+`SOFTWARE-FACTORY.md` §4.2. Based on mattpocock `grilling` + `domain-modeling`
+(together his `grill-with-docs`) and addyosmani `interview-me`; each borrowed
+rule is credited inline.
 
 ## Never
 
@@ -58,7 +60,8 @@ that hang off it. Work it in **rounds**.
    Word each question so "yes" accepts the recommendation. Then stop and wait.
 4. **Read the answers.** "yes" (or "yes to all", "Q1 yes, Q2 no: <text>")
    accepts the recommendation. Fold each settled answer into the caller's
-   document. Recompute the frontier; settled decisions unblock later ones.
+   document, and each settled term into the glossary (Language, below).
+   Recompute the frontier; settled decisions unblock later ones.
    Next round.
 5. **Interview-me guard** (addyosmani `interview-me`). "Whatever you think",
    "sounds good", "sure, let's go" are not answers: they are delegation or a
@@ -68,9 +71,49 @@ that hang off it. Work it in **rounds**.
    would you actually want?"
 6. **Exit.** The frontier is empty (every branch visited, nothing silently
    assumed), the special round the caller named has been answered, every
-   answer is folded into the document, and the user has confirmed shared
-   understanding. If after several rounds you cannot predict the user's
-   reactions, say so and ask whether to step back (`interview-me`).
+   answer is folded into the document, every term settled this session is in
+   the glossary, and the user has confirmed shared understanding. If after
+   several rounds you cannot predict the user's reactions, say so and ask
+   whether to step back (`interview-me`).
+
+## Language (mattpocock `domain-modeling`)
+
+Runs inside every round, special rounds included. The words are the product
+model: a term settled here is the name every later agent uses in code, tests,
+issues, and docs.
+
+**Glossary file.** App mode: `docs/factory/GLOSSARY.md`, format
+`skill://factory-architecture/glossary-template.md`. Create it when the first
+term is resolved, not before. Feature mode: read the repo's glossary if it has
+one (`docs/factory/GLOSSARY.md`, else `GLOSSARY.md` or `GLOSSARY-MAP.md` at
+the root) and do not edit it; settled terms go in the brief's **Terms**
+section, same format.
+
+Each of these is a frontier question in the round format above, with a
+recommended answer:
+
+1. **Challenge against the glossary.** The user uses a word that conflicts
+   with a defined term: "GLOSSARY.md defines *cancellation* as X, but you
+   seem to mean Y. Which is it?"
+2. **Sharpen fuzzy words.** A vague or overloaded word ("account", "item",
+   "status"): recommend one precise term, the others under `_Avoid_`. "By
+   *account*, do you mean the Customer or the User? Those are different."
+3. **Concrete scenarios.** Where two concepts meet, invent a specific edge
+   case that forces the boundary: "Ana cancels one of three items after it
+   shipped. Is the Order cancelled, partly cancelled, or neither?"
+4. **Cross-check the code** (existing repo). When the user states how
+   something works, a `scout` checks whether the code agrees. A contradiction
+   is a question: "The code cancels whole Orders, but you said partial
+   cancellation is possible. Which is right?"
+
+**Write terms as they settle**, in the step that folds the round's answers
+in; never batch them to the end. One or two sentences, what the term IS. The
+glossary holds no implementation details; it is not a spec or a scratch pad.
+
+**Approved docs.** Prefer the word an approved doc already uses. Renaming a
+term an approved doc uses changes that doc: reopen its gate
+(`factory-state reopen <gate>`) and fix the wording there. Adding a
+definition changes nothing.
 
 ## Round: pre-mortem (requirements stage only)
 

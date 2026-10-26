@@ -118,7 +118,8 @@ Struck scope goes to `docs/factory/out-of-scope/<concept>.md`.
 
 `read skill://factory-gate` and run it with: gate `requirements`, doc
 `docs/factory/REQUIREMENTS.md`, builder check **ON**, extra files: any
-`out-of-scope/` notes. It stamps and commits on approval.
+`out-of-scope/` notes and `GLOSSARY.md` (started by the grill). It stamps and
+commits on approval.
 
 ## 5. Stop
 

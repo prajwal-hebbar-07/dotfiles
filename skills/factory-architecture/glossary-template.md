@@ -8,8 +8,9 @@
 - Only terms specific to this project. No general programming concepts.
 - No implementation details: not a spec, not a scratch pad.
 - Group under subheadings when clusters appear; a flat list is fine otherwise.
-- Terms come from REQUIREMENTS.md and the grilling answers. Later agents
-  use these exact names in code, tests, issues, and docs.
+- Started in the requirements grill and sharpened in every later grill
+  (`factory-grill` Language), one term at a time as answers settle. Later
+  agents use these exact names in code, tests, issues, and docs.
 Delete this comment in the real file. -->
 
 ## Language

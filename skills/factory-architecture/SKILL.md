@@ -66,9 +66,12 @@ From the chosen candidate, write under `docs/factory/`:
   model, Decisions, Out of scope. Every piece cites its `R` numbers. Seams
   follow mattpocock `to-spec`: existing seams over new, highest seam, as few
   as possible.
-- `GLOSSARY.md` from `glossary-template.md` (mattpocock `domain-modeling`).
-  Challenge fuzzy or overloaded terms from REQUIREMENTS.md; one word per
-  concept, the rest under `_Avoid_`. No implementation details.
+- `GLOSSARY.md` (started in the requirements grill) from
+  `glossary-template.md` (mattpocock `domain-modeling`). Draft entries for the
+  terms the design adds and for fuzzy or overloaded terms left in
+  REQUIREMENTS.md; one word per concept, the rest under `_Avoid_`. No
+  implementation details. Drafts are proposals: each new or changed term is a
+  question in the §5 grill (`factory-grill` Language).
 - ADRs for hard-to-reverse structural choices (module style, event versus
   call, data ownership) per `skill://factory-stack/adr-template.md`, each
   with a **Confirmation** line naming its enforcing check.

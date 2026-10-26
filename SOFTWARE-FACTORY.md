@@ -218,9 +218,20 @@ lives in `.factory/`.
   written into STACK.md or ARCHITECTURE.md with its reason, so later stages
   do not ask again. Each dropped piece goes to the out-of-scope notes (§4.3
   rule 5) together with what would bring it back.
+- **Vocabulary while grilling (mattpocock `domain-modeling`).** Every round
+  also works on your words, because they are the product model: it challenges
+  a word that clashes with `GLOSSARY.md`, turns a fuzzy word into one precise
+  term (others under `_Avoid_`), invents concrete edge-case scenarios where
+  two concepts meet, and has a `scout` check what you say against the code.
+  Each is a numbered question with a recommendation. A settled term goes into
+  `docs/factory/GLOSSARY.md` the moment it settles; the file starts in the
+  requirements grill, not at architecture. Feature mode writes terms into the
+  brief instead of the repo's glossary. Renaming a term an approved doc uses
+  reopens that doc's gate. With `grilling`, this is mattpocock
+  `grill-with-docs`; ADRs stay with the stack and architecture stages.
 - **Exit:** the frontier is empty, the pre-mortem round (requirements) or the
-  simplicity round (stack, architecture) has been answered, and every answer
-  is folded into the document.
+  simplicity round (stack, architecture) has been answered, every answer is
+  folded into the document, and every settled term is in the glossary.
 
 ### 4.3 The approval gate (stages 3, 4, 5, 8) — `factory-gate`
 
@@ -336,8 +347,9 @@ Rules:
   Their findings are sorted into Act on / Consider / Noted / Dismissed. The
   author fixes "Act on" items before the doc reaches you, and the gate shows
   the "Consider" items as known trade-offs.
-- **Vocabulary:** `GLOSSARY.md` per mattpocock `domain-modeling`. Later agents
-  then use the same names for things.
+- **Vocabulary:** `GLOSSARY.md` per mattpocock `domain-modeling`, started in
+  the requirements grill (§4.2). The draft adds the design's terms as
+  proposals; the grill settles them with you. Later agents use the same names.
 - **Quality floor:** `CONSTRAINTS.md` per addyosmani
   `constraint-driven-development` (CDD). It holds:
   - a **Floor** that is always on: no new suppressions (`@ts-ignore`,
@@ -1519,10 +1531,10 @@ or adds something the workflow does not need.
 
 | Skill (report) | What it would add | Decision |
 | --- | --- | --- |
-| mattpocock `grilling`, `grill-me`, `grill-with-docs` (all three) | — | already used |
+| mattpocock `grilling`, `grill-me`, `grill-with-docs` (all three) | — | used: `grilling` rounds plus `domain-modeling`'s vocabulary work in every round (§4.2); ADRs in stack and architecture |
 | akillness/jeo-skills `grill-me` (Claude) | — | a copy of mattpocock `grilling` behind a wrapper |
 | Ghosteken `grilling` (GPT) | rationalisations table, self-check list | a rewritten mattpocock `grilling`; nothing the design lacks |
-| Future-CX `grill-me` (GPT) | — | same rules as `grilling`, but one question at a time; glossary and ADR are delegated, as here |
+| Future-CX `grill-me` (GPT) | — | same rules as `grilling`, but one question at a time; delegates glossary and ADR, which this design keeps inside the grill (§4.2) |
 | vvanagas `grill-me` (GPT) | restate the plan first; a worklist file; each branch closed as Answered / Dissolved / Deferred / Accepted | not adopted: the architecture draft is the restated plan, answers are folded into the doc each round, and the §4.3 gate already makes you sign off the whole doc |
 | Jeffallan `the-fool` (Claude) | five challenge modes picked by you (Socratic, dialectic, pre-mortem, red team, evidence audit) | not adopted: `interrogate` is the adversarial pass, and the requirements pre-mortem already exists |
 | PhotoStructure `replan` (Claude) | at least three critique-and-revise loops | not adopted: `architect` + `interrogate` give critique and alternatives; grilling's stop rule is stricter than a fixed count |
@@ -1800,3 +1812,4 @@ Decisions made while building, which this document did not settle:
 | Reviewer `BLOCKED` | Every reviewer may return `BLOCKED` (a prerequisite is missing); it is never a pass |
 | Bundled `reviewer` fallback (§8 item 9) | `task.agentModelOverrides.reviewer` is `"@review, anthropic/claude-opus-5-5:high"`; omp splits the value on commas into a fallback list |
 | Evals (§9 step 8) | `omp/factory-evals/`: `run structural` (offline), `run routing`, and `run gate-hold` with 18 scenarios. Print mode has no `ask` and does not expand `/skill:`, so the harness rewrites the prompt and counts a gate that ends in chat as No |
+| Vocabulary in the grill (§4.2, 2026-10-26) | `factory-grill` runs mattpocock `domain-modeling` inside every round: term challenges, fuzzy words, edge-case scenarios, code cross-checks, and inline `GLOSSARY.md` updates from the requirements grill on. Before this, the glossary was drafted alone at architecture and never put to you |
