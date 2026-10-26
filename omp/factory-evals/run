@@ -41,7 +41,7 @@ DEFAULT_JUDGE_FOR_GPT = "anthropic/claude-opus-5-5:high"
 DISABLE_MODEL_INVOCATION = [
     "factory", "feature", "factory-grill", "factory-gate", "factory-requirements",
     "factory-stack", "factory-architecture", "factory-issues", "factory-bootstrap",
-    "factory-build", "factory-land", "factory-review",
+    "factory-build", "factory-land", "factory-review", "factory-reset",
 ]
 EXPECTED_SKILLS = DISABLE_MODEL_INVOCATION + ["tour"]
 EXPECTED_AGENTS = [

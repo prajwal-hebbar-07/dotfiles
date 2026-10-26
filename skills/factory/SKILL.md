@@ -5,10 +5,11 @@ description: >
   .factory/state.json, the ledger and the issue labels, then resumes the
   right stage: requirements, stack, architecture, issues, build, land.
   `change <text>` runs the requirement-change flow; `status` prints where
-  the run is. Use when the user invokes /skill:factory to start or resume
+  the run is; `reset` wipes the run so a new prompt starts from scratch.
+  Use when the user invokes /skill:factory to start or resume
   building a whole app. For one feature in an existing app use
   /skill:feature instead.
-argument-hint: "[status | change <text> | pause]"
+argument-hint: "[status | change <text> | pause | reset]"
 disable-model-invocation: true
 ---
 
@@ -43,9 +44,9 @@ Report all failures at once, fix only what is listed as fixable.
    user to run `gh auth refresh -s project`.
 
 Steps 1–2 failing stops the run. Steps 3–5: stop until fixed, except in
-`status`, which only reports.
+`status`, which only reports. `reset` runs steps 1, 2 and 5 only.
 
-## 2. State
+## 2. State (skipped by `reset`)
 
 - No `.factory/state.json` and arguments are not `status`: `$FS init --mode app`.
   A new repo starts at **requirements**.
@@ -67,6 +68,7 @@ Steps 1–2 failing stops the run. Steps 3–5: stop until fixed, except in
 | `status` | print stage, each gate (approved or open, file, approvedAt), `stop`, `nextAction`, open ledger rows, and each issue's status from `issues` (and its label via `gh issue list --label factory:...` if GitHub is reachable). Change nothing. |
 | `change <text>` | requirement change (section 5) |
 | `pause` | in the chat running the factory, after interrupting the turn with Escape: follow "Pause" in `state.md` (stop helpers, write `.factory/handoff.md` from `skill://factory/handoff-template.md`, `$FS pause "<next action>"`), print its line, end. Skip preflight steps 3–5 and section 4 |
+| `reset` | read `skill://factory-reset` and follow it: inventory, one Approve/No, then wipe run state, holdouts, QA evidence, `docs/factory/`, factory branches and PRs, issue markers, and the board. Skip section 2 (no `init`) and section 4 |
 
 ## 4. Route
 

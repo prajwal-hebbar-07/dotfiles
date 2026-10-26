@@ -374,6 +374,40 @@ def cmd_close(a):
     print("closed #%s (%s)" % (a.issue, a.reason))
 
 
+MARKER_RE = re.compile(r"\n*<!-- factory:issue=\S+ -->[ \t]*")
+
+
+def cmd_reset(a):
+    """Unlink every factory issue and delete the factory Project, so a new run starts clean."""
+    issues = gh_json(["issue", "list", "--state", "all", "--limit", "1000",
+                      "--json", "number,state,body"])
+    hits = [i for i in sorted(issues, key=lambda x: x["number"])
+            if MARKER_RE.search(i.get("body") or "")]
+    note = DISCLAIMER + "\n\nClosed by `factory reset`: the factory run that opened this was wiped.\n"
+    for i in hits:
+        n = str(i["number"])
+        if i["state"].lower() == "open":
+            print("close #%s (not planned)" % n)
+            if not a.dry_run:
+                gh(["issue", "close", n, "--reason", "not planned", "--comment", note])
+        print("unlink #%s" % n)
+        if not a.dry_run:
+            body = MARKER_RE.sub("", i["body"]).rstrip("\n") + "\n"
+            gh(["issue", "edit", n, "--body-file", "-"], stdin=body)
+    cache = load_cache()
+    owner, number = cache.get("owner"), cache.get("projectNumber")
+    if number is None:
+        owner, repo = repo_info()
+        found = [p for p in list_projects(owner) if p["title"] == "%s factory" % repo]
+        number = found[0]["number"] if found else None
+    if number is None:
+        print("no factory project")
+        return
+    print("delete project #%s" % number)
+    if not a.dry_run:
+        gh(["project", "delete", str(number), "--owner", owner])
+
+
 def build_parser():
     ap = argparse.ArgumentParser(
         prog="board",
@@ -428,6 +462,10 @@ def build_parser():
     p.add_argument("issue")
     p.add_argument("--reason", choices=["completed", "not-planned"],
                    default="completed")
+    p = add("reset", cmd_reset,
+            "close open factory issues as not planned, strip every issue's key marker, "
+            "delete the factory Project")
+    p.add_argument("--dry-run", action="store_true", help="print the actions, change nothing")
     return ap
 
 

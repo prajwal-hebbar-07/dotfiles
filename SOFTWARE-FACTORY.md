@@ -1210,6 +1210,7 @@ skills/
   factory-bootstrap/       issue #0 (§4.7): walking skeleton or missing-harness checklist
   factory-build/           stage 7–8; pipeline, loop rules, questionnaire relay, PR template
   factory-land/            stage 9 (§5.7): PR comments, post-merge close / unblock / restack / docs
+  factory-reset/           `/skill:factory reset`: wipe a run so a new prompt starts from scratch (§15)
   tour/                    /skill:tour (§4.9): list the features; `explain <feature>` writes docs/features/<feature>.md
     template.md            the explanation document (§4.9)
     scripts/check-snippets.py  compares each quoted snippet with the file
@@ -1813,3 +1814,4 @@ Decisions made while building, which this document did not settle:
 | Bundled `reviewer` fallback (§8 item 9) | `task.agentModelOverrides.reviewer` is `"@review, anthropic/claude-opus-5-5:high"`; omp splits the value on commas into a fallback list |
 | Evals (§9 step 8) | `omp/factory-evals/`: `run structural` (offline), `run routing`, and `run gate-hold` with 18 scenarios. Print mode has no `ask` and does not expand `/skill:`, so the harness rewrites the prompt and counts a gate that ends in chat as No |
 | Vocabulary in the grill (§4.2, 2026-10-26) | `factory-grill` runs mattpocock `domain-modeling` inside every round: term challenges, fuzzy words, edge-case scenarios, code cross-checks, and inline `GLOSSARY.md` updates from the requirements grill on. Before this, the glossary was drafted alone at architecture and never put to you |
+| Reset (2026-10-26) | `/skill:factory reset` reads `skills/factory-reset/`: it lists what the run left, asks one Approve/No, then closes open factory PRs and deletes their branches (local and origin, `factory/*` plus the run's own `feature/<slug>`), runs `board reset` (open factory issues closed as not planned, the `factory:issue` marker stripped from every one so a new run's `board create` never reuses them, the Project deleted), removes `docs/factory/`, `paper-design-prompt.md` and the linked diagrams in one commit, and deletes `.factory/`, `qa-evidence/` and the holdouts. Product code, CI, labels, and branch protection stay; the user pushes the default branch |

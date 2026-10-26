@@ -4,10 +4,11 @@ description: >
   Entry and router for the software factory in Cursor. Checks the repo,
   reads .factory/state.json, and resumes requirements, stack, architecture,
   issues, build, or land. `change <text>` revises a requirement; `status`
-  prints where the run is. Use when the user invokes /factory or asks to
+  prints where the run is; `reset` wipes the run so a new prompt starts from
+  scratch. Use when the user invokes /factory or asks to
   start or resume building a whole app with the software factory. For one
   feature in an existing app, use /feature instead.
-argument-hint: "[status | change <text> | pause]"
+argument-hint: "[status | change <text> | pause | reset]"
 disable-model-invocation: true
 ---
 
@@ -45,9 +46,9 @@ Report every failure at once. Fix nothing that is not listed as fixable.
    scope. If it does not, tell the user to run `gh auth refresh -s project`.
 
 Steps 1–2 stop the run. Steps 3–4 stop until fixed, except `status`, which
-only reports.
+only reports. `reset` runs steps 1, 2 and 4 only.
 
-## 2. State
+## 2. State (skipped by `reset`)
 
 - No `.factory/state.json`, and the argument is not `status`:
   `"$FS" init --mode app`. A new repo starts at **requirements**.
@@ -67,6 +68,7 @@ only reports.
 | `status` | print stage, each gate, `stop`, `nextAction`, open ledger rows, and each issue's status. Change nothing. |
 | `change <text>` | section 5 |
 | `pause` | follow "Pause" in `state.md`, with the runtime's pause rule (no `proc://`). Write `.factory/handoff.md` from `skills/factory/handoff-template.md`, then `"$FS" pause "<next action>"`. Print its line and end. Skip preflight 3–4 and section 4. |
+| `reset` | read `$DOTFILES/skills/factory-reset/SKILL.md` and follow it under the runtime: `$FS` and `$BOARD` as resolved above, AskQuestion for its one `No`/`Approve` question, `~/.cursor/skills/commit/SKILL.md` for the commit. Skip section 2 (no `init`) and section 4. |
 
 Clear a stop with `"$FS" set stop null` once you act on it.
 

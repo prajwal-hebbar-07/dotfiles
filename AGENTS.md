@@ -62,6 +62,9 @@ two. Cursor runs the same procedures from `cursor/factory/` (`/factory`,
 - `factory-build` — the per-issue pipeline, GO/NO-GO, and PR.
 - `factory-land` — PR comments and post-merge work; never merges.
 - `factory-review` — shared rubric and verdict formats for reviewer agents.
+- `factory-reset` — `/skill:factory reset`: after one Approve, wipes a run
+  (state, holdouts, QA evidence, `docs/factory/`, factory branches and PRs,
+  issue markers, the board) so a new prompt starts from scratch; keeps code.
 
 The factory reuses `commit`, `paper-design-prompt`, `paper-design`,
 `paper-target`, `arc-design`, and `docs` (also linked into omp). It never uses
