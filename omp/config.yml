@@ -31,6 +31,9 @@ task:
     scout: "@scout"
     reviewer: "@review, anthropic/claude-opus-5-5:high"
     security-reviewer: "@review"
+    factory-builder: "anthropic/claude-opus-5-5:medium, openai-codex/gpt-6.1-sol:medium"
+    factory-spec-review: "@default, openai-codex/gpt-6.1-sol:high"
+    factory-qa: "anthropic/claude-sonnet-5-5:high, openai-codex/gpt-6.1-sol:high"
   maxRuntimeMs: 3600000
   isolation:
     enabled: true
@@ -49,5 +52,10 @@ retry:
   usageReservePct: 10
   usageReservePolicy: fail-closed
   waitForUsageReset: false
+  fallbackChains:
+    anthropic/claude-opus-5-5:
+      - openai-codex/gpt-6.1-sol
+    anthropic/claude-sonnet-5-5:
+      - openai-codex/gpt-6.1-sol
 claudeResets:
   autoRedeem: "yes"
