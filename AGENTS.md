@@ -2,8 +2,18 @@
 
 ## Skills
 
-Skills live under `skills/<name>/SKILL.md`, linked into `~/.cursor/skills/`,
-`~/.gemini/config/skills/`, and `~/.claude/skills/`:
+Skills live under `skills/<name>/SKILL.md`, linked into `~/.cursor/skills/`
+and `~/.gemini/config/skills/`. None of them are used by Claude Code.
+
+Claude Code skills live separately under `claude/skills/<name>/SKILL.md`,
+started from scratch on 2026-10-26 and empty until the user adds one.
+`claude/link-skills` links each into both accounts, `~/.claude/skills/`
+(`cc`) and `~/.claude-work/skills/` (`ccw`); rerun it after adding or
+removing one. List them here as they are added.
+
+- `commit` — stops if `user.name`/`user.email` is unset; commits what is
+  staged, or stages everything when nothing is; semantic subject plus two or
+  more bullets; never a co-author or attribution trailer.
 
 - `commit` — commits already-staged changes with a semantic message.
 - `paper-target` — pins the Paper file/page this repo's design work reads from.

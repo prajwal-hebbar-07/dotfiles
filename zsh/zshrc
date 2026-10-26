@@ -626,6 +626,12 @@ alias t=tmux
 alias ta='tmux attach -t'
 alias tl='tmux list-sessions'
 
+# Claude Code — one config directory per account, so the login, sessions,
+# skills, and MCP servers never cross. `cc` is hebbarprajwal72@gmail.com
+# (~/.claude). `ccw` is prajwal.chaos@gmail.com (~/.claude-work).
+alias cc='CLAUDE_CONFIG_DIR=$HOME/.claude command claude'
+alias ccw='CLAUDE_CONFIG_DIR=$HOME/.claude-work command claude'
+
 # tn [name] [path] — create or attach a named session rooted at a directory.
 # Name defaults to the directory's basename, path to $PWD. -A attaches to an
 # existing session of that name instead of failing; from inside tmux the new

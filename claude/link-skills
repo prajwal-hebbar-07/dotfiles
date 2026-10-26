@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# Links every claude/skills/<name> into both Claude Code accounts:
+# ~/.claude/skills (cc) and ~/.claude-work/skills (ccw). Run it again after
+# adding or removing a skill; links left pointing at a removed skill are
+# pruned. Each account's own skills/synced/ directory is left alone.
+set -euo pipefail
+
+src="$(cd "$(dirname "$0")" && pwd)/skills"
+
+for dir in "$HOME/.claude/skills" "$HOME/.claude-work/skills"; do
+  mkdir -p "$dir"
+  for link in "$dir"/*; do
+    if [[ -L $link && $(readlink "$link") == "$src"/* && ! -e $link ]]; then
+      rm "$link"
+    fi
+  done
+  for skill in "$src"/*/; do
+    [[ -f $skill/SKILL.md ]] || continue
+    ln -sfn "${skill%/}" "$dir/$(basename "$skill")"
+  done
+done

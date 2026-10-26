@@ -325,8 +325,20 @@ open after a render, so several files can be opened in a row; `q` closes it.
 ## Skills
 
 `skills/` holds plain Agent Skills packages — Markdown instructions, nothing
-host-specific — linked into Cursor (`~/.cursor/skills/`), Gemini
-(`~/.gemini/config/skills/`), and Claude Code (`~/.claude/skills/`).
+host-specific — linked into Cursor (`~/.cursor/skills/`) and Gemini
+(`~/.gemini/config/skills/`). None of them are linked into Claude Code.
+
+Claude Code has its own set, started from scratch on 2026-10-26:
+`claude/skills/<name>/SKILL.md`. `claude/link-skills` links each one into
+both accounts — `~/.claude/skills/` (`cc`) and `~/.claude-work/skills/`
+(`ccw`) — and prunes links to skills that were removed. Rerun it after adding
+or removing a skill. Each account's `skills/synced/` (skills synced from
+claude.ai) is left alone.
+
+- **`commit`** (`/commit`) — stops if `user.name` or `user.email` is not set.
+  Commits what is staged; when nothing is, it stages everything first. The
+  message is a semantic `type(scope): summary` with two or more bullets, and
+  never carries a `Co-Authored-By:` or any other attribution trailer.
 
 **`pdocs` skill** (`/pdocs`) — the `docs` skill under another name for Claude
 Code, whose account-synced skills already include a `docs`. Only `SKILL.md` is
@@ -440,7 +452,10 @@ dotfiles/
 │   ├── config.yml
 │   ├── mcp.json
 │   └── agents/factory-explainer.md
-├── skills/     # Agent Skills, linked into Cursor, Gemini, and Claude Code
+├── claude/     # Claude Code, both accounts (cc, ccw)
+│   ├── link-skills                 # links claude/skills/* into both
+│   └── skills/<name>/SKILL.md
+├── skills/     # Agent Skills, linked into Cursor, Gemini, and omp
 │   ├── commit/SKILL.md
 │   ├── docs/SKILL.md
 │   ├── implementation-plan/SKILL.md
@@ -562,12 +577,7 @@ npx skills add DietrichGebert/ponytail -g --skill ponytail
 ln -sfn ~/.agents/skills/ponytail ~/.omp/agent/skills/ponytail
 ln -sfn ~/.agents/skills/archify  ~/.omp/agent/skills/archify
 
-mkdir -p ~/.claude/skills
-for s in arc-design commit follow-implementation-plan follow-plan-with-review \
-         implementation-plan paper-design paper-design-prompt paper-target \
-         review-implementation-plan sync-lyik-docs pdocs; do
-  ln -sfn "$PWD/skills/$s" ~/.claude/skills/$s
-done
+./claude/link-skills
 ```
 
 ### Ubuntu server
