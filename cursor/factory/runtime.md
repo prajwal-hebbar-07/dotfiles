@@ -96,6 +96,31 @@ Use `gh`. There is no github tool.
 | `pr_create` | `gh pr create` (ready, not draft) after `pr-approve` |
 | `run_watch` | `gh run watch` |
 | `board status` | `"$BOARD" status …` |
+| `board reset` | `"$BOARD" reset` (and `reset --dry-run` for the inventory) |
+
+## Reset
+
+`/factory reset` and `/feature reset` read
+`$DOTFILES/skills/factory-reset/SKILL.md` and follow it with these
+substitutions. Show the inventory and get Approve before changing anything.
+
+- `"$FS"` and `"$BOARD"` are the paths resolved above, not the `~/.omp` paths
+  in that skill.
+- The confirm question is AskQuestion: id `reset`, header `Reset`, options
+  `No` then `Approve`. When `.factory/state.json` exists, run
+  `"$FS" blocked-on-user on` before the question and `"$FS" blocked-on-user off`
+  after a No. Ask it in the same turn as the inventory, so the stop hook does
+  not continue into the wipe.
+- The docs commit is `~/.cursor/skills/commit/SKILL.md`.
+- Remote deletes are `git push origin --delete <branch>` for `factory/*` and
+  for `feature/<slug>` the run created. The hook allows those. Do not delete
+  any other branch, and do not push the default branch.
+- `"$FS" done` turns the guard off before those deletes. The last wipe step
+  removes `.factory/`, which drops this chat's arm file.
+- The last line names the docs-removal commit and says the user pushes the
+  default branch. Then: a feature-mode run ends with *Run `/feature` with the
+  new prompt.*; any other run ends with *Run `/factory` with the new prompt
+  to start from requirements.*
 
 ## What Cursor does not do
 

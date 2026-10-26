@@ -68,7 +68,7 @@ only reports. `reset` runs steps 1, 2 and 4 only.
 | `status` | print stage, each gate, `stop`, `nextAction`, open ledger rows, and each issue's status. Change nothing. |
 | `change <text>` | section 5 |
 | `pause` | follow "Pause" in `state.md`, with the runtime's pause rule (no `proc://`). Write `.factory/handoff.md` from `skills/factory/handoff-template.md`, then `"$FS" pause "<next action>"`. Print its line and end. Skip preflight 3–4 and section 4. |
-| `reset` | read `$DOTFILES/skills/factory-reset/SKILL.md` and follow it under the runtime: `$FS` and `$BOARD` as resolved above, AskQuestion for its one `No`/`Approve` question, `~/.cursor/skills/commit/SKILL.md` for the commit. Skip section 2 (no `init`) and section 4. |
+| `reset` | read `$DOTFILES/skills/factory-reset/SKILL.md` and follow the runtime's Reset section. Skip section 2 (no `init`) and section 4. |
 
 Clear a stop with `"$FS" set stop null` once you act on it.
 
@@ -115,7 +115,10 @@ issue. A stop `S5` with open PRs routes to land first. Otherwise follow
 ## Never
 
 - Merge, open a PR, or push. The stage skills do that, and the hook blocks
-  it until the PR gate records approval.
+  it until the PR gate records approval. `reset` may
+  `git push origin --delete` a `factory/*` branch or the run's own
+  `feature/<slug>`, and may close the factory issues and PRs the reset
+  skill names. It does not push the default branch.
 - Edit product code from this skill.
 - Rely on an earlier chat. State, the ledger, and GitHub labels are the
   source of truth.
