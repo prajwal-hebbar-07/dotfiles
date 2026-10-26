@@ -5,10 +5,11 @@ description: >
   the current architecture with the smallest change that fully does the job,
   and delivers it as a reviewed PR. Scout, short interview, one solution
   sketch with a simplicity round, one brief gate, plan, unattended build,
-  two parallel reviews, QA through what the repo already has, PR gate. Use
+  two parallel reviews, QA through what the repo already has, PR gate.
+  `reset` wipes one feature run so a new prompt starts clean. Use
   when the user invokes /skill:feature or asks to add one feature to
   an existing project.
-argument-hint: "[<feature description> | #<issue> | resume | pause]"
+argument-hint: "[<feature description> | #<issue> | resume | pause | reset [<slug>]]"
 disable-model-invocation: true
 ---
 
@@ -36,6 +37,8 @@ models. Briefs and results follow the helper-agent contract in
 5. `~/.omp/agent/skills/factory/scripts/factory-state init --mode feature --slug <slug>` (called `FS` below). `<slug>`: lowercase, non-alphanumerics to `-`, from the description or issue title.
 
 **Input.** Chat text, or `#N` via `read issue://N` (title, body, comments).
+
+**Reset** (`/skill:feature reset [<slug>]`): skip preflight steps 3-5 (no `init`) and the steps below. `read skill://factory-reset` and follow its "Variant: feature run": one Approve/No over the inventory, then it deletes that feature's brief, branch (local and origin), open PR, and QA evidence. `docs/factory/`, issues, the board, and other runs are untouched.
 
 **Pause** (`/skill:feature pause`, in the chat running the feature, after interrupting the turn with Escape): skip preflight step 5 and follow "Pause" in `skill://factory/state.md`: stop helper agents, write `.factory/handoff.md` from `skill://factory/handoff-template.md` (it must hold everything only this chat knows: answers and decisions not yet in the brief, open review findings, questions waiting on the user, partial agent output), then `FS pause "<next action>"`. Print its line and end. Nothing is committed, stashed, or pushed.
 

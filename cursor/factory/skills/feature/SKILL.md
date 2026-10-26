@@ -5,10 +5,10 @@ description: >
   the current architecture with the smallest change that does the job, and
   delivered as a reviewed PR. Scout, short interview, one solution sketch,
   one brief gate, plan, build, two parallel reviews, QA through what the
-  repo already has, then a PR gate. `reset` wipes that run so a new prompt
-  starts clean. Use when the user invokes /feature or asks to add one
+  repo already has, then a PR gate. `reset` wipes one feature run so a new
+  prompt starts clean. Use when the user invokes /feature or asks to add one
   feature to an existing project.
-argument-hint: "[<feature description> | #<issue> | resume | pause | reset]"
+argument-hint: "[<feature description> | #<issue> | resume | pause | reset [<slug>]]"
 disable-model-invocation: true
 ---
 
@@ -30,10 +30,8 @@ FS="$DOTFILES/skills/factory/scripts/factory-state"
 ## Never
 
 - Create or edit GitHub issues. `#N` is read only (`gh issue view N --comments`).
-  `reset` follows `factory-reset`, which closes and unlinks the factory's issues.
 - Merge, force-push, or push any branch except `feature/<slug>`.
-  `reset` may `git push origin --delete` for `factory/*` and the run's own
-  `feature/<slug>`.
+  `reset` may `git push origin --delete feature/<slug>` for the run it wipes.
 - Open the PR before the Gate 2 Approve.
 - Write the feature's code yourself. `factory-builder` does, and every
   commit goes through the `commit` skill.
@@ -52,9 +50,10 @@ FS="$DOTFILES/skills/factory/scripts/factory-state"
 5. `"$FS" init --mode feature --slug <slug>`. `<slug>` is lowercase, with
    non-alphanumerics turned into `-`, from the description or the issue title.
 
-**Reset** (`/feature reset`): skip step 5 and the steps below. Read
-`$DOTFILES/skills/factory-reset/SKILL.md` and follow the runtime's Reset
-section. Do not `init`.
+**Reset** (`/feature reset [<slug>]`): skip step 5 and the steps below. Read
+`$DOTFILES/skills/factory-reset/SKILL.md` and follow its "Variant: feature
+run" under the runtime's Reset section. Do not `init`. It wipes that
+feature's brief, branch, PR, and QA evidence only.
 
 **Pause** (`/feature pause`, in this chat, after Stop): skip step 5. Follow
 "Pause" in `$DOTFILES/skills/factory/state.md` using the runtime's pause

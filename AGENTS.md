@@ -65,6 +65,8 @@ two. Cursor runs the same procedures from `cursor/factory/` (`/factory`,
 - `factory-reset` — `/skill:factory reset`: after one Approve, wipes a run
   (state, holdouts, QA evidence, `docs/factory/`, factory branches and PRs,
   issue markers, the board) so a new prompt starts from scratch; keeps code.
+  `/skill:feature reset [<slug>]` runs its feature variant: that feature's
+  brief, branch, PR, and QA evidence only.
 
 The factory reuses `commit`, `paper-design-prompt`, `paper-design`,
 `paper-target`, `arc-design`, and `docs` (also linked into omp). It never uses

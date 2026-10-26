@@ -100,9 +100,10 @@ Use `gh`. There is no github tool.
 
 ## Reset
 
-`/factory reset` and `/feature reset` read
-`$DOTFILES/skills/factory-reset/SKILL.md` and follow it with these
-substitutions. Show the inventory and get Approve before changing anything.
+`/factory reset` reads `$DOTFILES/skills/factory-reset/SKILL.md` and wipes
+the whole run; `/feature reset [<slug>]` follows that file's "Variant:
+feature run" and wipes one feature run only. Both use these substitutions.
+Show the inventory and get Approve before changing anything.
 
 - `"$FS"` and `"$BOARD"` are the paths resolved above, not the `~/.omp` paths
   in that skill.
@@ -112,15 +113,16 @@ substitutions. Show the inventory and get Approve before changing anything.
   after a No. Ask it in the same turn as the inventory, so the stop hook does
   not continue into the wipe.
 - The docs commit is `~/.cursor/skills/commit/SKILL.md`.
-- Remote deletes are `git push origin --delete <branch>` for `factory/*` and
-  for `feature/<slug>` the run created. The hook allows those. Do not delete
-  any other branch, and do not push the default branch.
-- `"$FS" done` turns the guard off before those deletes. The last wipe step
-  removes `.factory/`, which drops this chat's arm file.
-- The last line names the docs-removal commit and says the user pushes the
-  default branch. Then: a feature-mode run ends with *Run `/feature` with the
-  new prompt.*; any other run ends with *Run `/factory` with the new prompt
-  to start from requirements.*
+- Remote deletes are `git push origin --delete <branch>`: for `/factory
+  reset`, `factory/*` and each `feature/<slug>` the run created; for
+  `/feature reset`, only that run's `feature/<slug>`. The hook allows those.
+  Do not delete any other branch, and do not push the default branch.
+- `"$FS" done` turns the guard off before those deletes. Removing
+  `.factory/` drops this chat's arm file.
+- `/factory reset` ends by naming the docs-removal commit, saying the user
+  pushes the default branch, then *Run `/factory` with the new prompt to
+  start from requirements.* `/feature reset` commits nothing and ends with
+  *Run `/feature` with the new prompt.*
 
 ## What Cursor does not do
 

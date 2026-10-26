@@ -118,6 +118,12 @@ If you already quit with Ctrl+C twice or Ctrl+D, reopen the chat with
 `omp --resume` and pause from there; or start a new chat directly, which
 resumes from the brief, ledger, and commits but without the chat-only context.
 
+**Starting over.** `/skill:feature reset` wipes the current feature run (its
+brief, branch, open PR, QA evidence) so `/skill:feature <new prompt>` starts
+clean; name a slug to wipe an older one. `/skill:factory reset` wipes a whole
+factory run, `docs/factory/`, issues, and board included. Both list what
+they will remove and ask once first; neither touches product code.
+
 **Evals** — `python3 omp/factory-evals/run structural` checks every factory
 skill and agent file, link, and scenario offline in seconds.
 `run routing` and `run gate-hold` drive real `omp -p` runs against fixture

@@ -4,9 +4,11 @@ description: >
   Wipes every trace of a factory run (app or feature mode) from a repo so the
   next /skill:factory starts from requirements with a new prompt: run state
   and ledger, holdouts, QA evidence, the planning docs under docs/factory/,
-  factory branches and PRs, the issue markers, and the board. Shows the
-  inventory and asks once before changing anything. Use when /skill:factory
-  is invoked with `reset`, or when invoked as /skill:factory-reset.
+  factory branches and PRs, the issue markers, and the board. The feature
+  variant wipes one feature run only (brief, branch, PR, QA evidence). Shows
+  the inventory and asks once before changing anything. Use when
+  /skill:factory or /skill:feature is invoked with `reset`, or when invoked
+  as /skill:factory-reset.
 disable-model-invocation: true
 ---
 
@@ -99,3 +101,44 @@ Each must hold; print the evidence:
 End with: the docs-removal commit's short sha and subject, that the user
 pushes `<default>` themselves, and *Run `/skill:factory` with the new prompt
 to start from requirements.*
+
+## Variant: feature run (`/skill:feature reset [<slug>]`)
+
+Wipes one feature run so `/skill:feature` can start over with a new prompt.
+It never touches what the full factory owns: `docs/factory/`, issues, the
+board, holdouts, `factory/*` branches, or another feature's branch, brief, or
+evidence. Sections 1, 2 and 4 as above, with these changes.
+
+**Target.** The `<slug>` argument; else `state.feature` when `mode` is
+`feature`; else the only brief in `.factory/feature/`. Several briefs and no
+argument: list their slugs and stop; the user reruns `reset <slug>`. None:
+say "no feature run here" and stop.
+
+**Inventory.** The brief `.factory/feature/<slug>.md`; `.factory/handoff.md`
+when `state.feature` is `<slug>`; `qa-evidence/<slug>/`; branch
+`feature/<slug>` local and on origin, with its lost commits; its open PR
+(`gh pr list --state open --head feature/<slug>`). Then whether `.factory/`
+holds anything else: another brief, `board.json`, or a gate besides `brief`.
+The question is `Wipe feature run <slug> in <repo>?`.
+
+**Wipe, in this order:**
+
+1. `$FS done` only when `state.feature` is `<slug>` (else another run's guard
+   stays as it is).
+2. Close the open PR with the comment from section 3.
+3. `git push origin --delete feature/<slug>`.
+4. `git switch <default>` when on that branch, then
+   `git branch -D feature/<slug>`.
+5. `rm -rf qa-evidence/<slug>`.
+6. **Run state.** Nothing else in `.factory/`: `rm -rf .factory`. Otherwise
+   remove only the brief (and the handoff, when it is this run's), and when
+   `state.feature` is `<slug>`: `$FS reopen brief`, `$FS set feature null`,
+   `$FS set prApprovals.feature/<slug> null`. Ledger rows stay; a new run
+   with the same slug shares their 1-hour budget, so say so.
+
+**Verify:** the brief and `qa-evidence/<slug>/` are gone (or `.factory/`
+is); no `feature/<slug>` in `git branch --list` or on origin;
+`gh pr list --state open --head feature/<slug>` is empty; when `.factory/`
+stays, `$FS get gates` has no `brief` and `$FS get feature` is `null`.
+Nothing is committed. End with *Run `/skill:feature <new prompt>` to start
+again.*

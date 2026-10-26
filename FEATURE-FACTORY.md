@@ -156,3 +156,9 @@ Decisions made while building:
   progress, and the next action. `/skill:feature` in a new chat reads it,
   checks it against the branch and ledger, and sends a decision that changes
   the approved brief back through Gate 1.
+- **Starting over.** `/skill:feature reset [<slug>]` (Cursor: `/feature
+  reset`) shows what the run left and asks one Approve/No, then deletes that
+  feature's brief, `feature/<slug>` (local and origin), its open PR, and
+  `qa-evidence/<slug>/`. `.factory/` goes too when nothing else is in it.
+  `docs/factory/`, issues, the board, and other runs are untouched; merged
+  code stays. Procedure: `skills/factory-reset/` "Variant: feature run".
