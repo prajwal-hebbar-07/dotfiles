@@ -2,7 +2,7 @@
 
 **Status:** built 2026-10-22 (§6). Run `/skill:feature <description>`
 or `/skill:feature #<issue>` in an existing app repo; run it with no
-arguments to resume.
+arguments to resume. In Cursor, run `/feature` (host: `cursor/factory/`).
 
 ## 1. Why a mini version
 

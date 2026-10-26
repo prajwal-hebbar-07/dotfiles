@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "hooks": {
+    "beforeShellExecution": [
+      {
+        "command": "./hooks/factory-guard.py",
+        "timeout": 10
+      }
+    ],
+    "preToolUse": [
+      {
+        "command": "./hooks/factory-guard.py",
+        "timeout": 10,
+        "matcher": "Write|StrReplace|Delete|EditNotebook|Edit|write|delete|edit"
+      }
+    ],
+    "beforeReadFile": [
+      {
+        "command": "./hooks/factory-guard.py",
+        "timeout": 10
+      }
+    ],
+    "stop": [
+      {
+        "command": "./hooks/factory-stage.py",
+        "timeout": 10,
+        "loop_limit": null
+      }
+    ],
+    "preCompact": [
+      {
+        "command": "./hooks/factory-stage.py",
+        "timeout": 10
+      }
+    ]
+  }
+}

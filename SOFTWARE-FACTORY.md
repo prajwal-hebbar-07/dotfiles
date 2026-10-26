@@ -13,6 +13,12 @@ factory instead: `FEATURE-FACTORY.md` at the repo root. It reuses this
 design's grilling and gate primitives, planner, builder, and reviewers, and
 drops the stages a feature does not need.
 
+Cursor runs the same stages without Oh My Pi. The host is `cursor/factory/`:
+`/factory` and `/feature`, the subagents under `cursor/factory/agents/`, and
+the user hooks in `cursor/factory/hooks.json`. It reads the stage skills in
+`skills/` and applies `cursor/factory/runtime.md` wherever those skills name
+an omp tool. Poteto's pstack does not replace this host; the gaps are in §2.
+
 Sources studied:
 
 | Repo | What it is | Read at |

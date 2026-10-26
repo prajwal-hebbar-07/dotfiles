@@ -150,6 +150,15 @@ same in every host. The review
 skill is linked here for completeness; the intended use is to copy that
 `SKILL.md` plus the plan into another agent.
 
+**Software factory** — `/factory` in an app repo, `/feature` for one feature
+in an app that already exists. Same stages as the omp factory
+(`SOFTWARE-FACTORY.md`, `FEATURE-FACTORY.md`). The Cursor host is
+`cursor/factory/`: entry skills, subagents in `~/.cursor/agents/`, and user
+hooks that block merges, unapproved PRs, pushes outside `factory/*` and
+`feature/*`, and edits to an approved doc. Run state stays in the app repo's
+`.factory/`. `python3 cursor/factory/hooks/tests/test_guard.py` checks the
+hooks. Approval gates and the stop-before-PR rule live in this host.
+
 **Paper MCP** — comes from the `paper-desktop` plugin here rather than a hand
 written server: Cursor expands `${userHome}` in plugin manifests, so the
 manifest spawns correctly, and its tool schemas are cached
@@ -511,6 +520,18 @@ ln -sfn "$PWD/skills/follow-implementation-plan" ~/.cursor/skills/follow-impleme
 ln -sfn "$PWD/skills/report-arc" ~/.cursor/skills/report-arc
 ln -sfn "$PWD/skills/repo-docs" ~/.cursor/skills/repo-docs
 ln -sfn "$PWD/skills/twitter-campaign" ~/.cursor/skills/twitter-campaign
+ln -sfn "$PWD/cursor/factory/skills/factory" ~/.cursor/skills/factory
+ln -sfn "$PWD/cursor/factory/skills/feature" ~/.cursor/skills/feature
+mkdir -p ~/.cursor/agents ~/.cursor/hooks ~/.cursor/factory/bin
+for a in cursor/factory/agents/*.md; do
+  ln -sfn "$PWD/$a" ~/.cursor/agents/$(basename "$a")
+done
+chmod +x cursor/factory/hooks/factory_guard.py cursor/factory/hooks/factory_stage.py
+ln -sfn "$PWD/cursor/factory/hooks/factory_guard.py" ~/.cursor/hooks/factory-guard.py
+ln -sfn "$PWD/cursor/factory/hooks/factory_stage.py" ~/.cursor/hooks/factory-stage.py
+ln -sfn "$PWD/cursor/factory/hooks.json" ~/.cursor/hooks.json
+ln -sfn "$PWD/skills/factory/scripts/factory-state" ~/.cursor/factory/bin/factory-state
+ln -sfn "$PWD/skills/factory-issues/scripts/board" ~/.cursor/factory/bin/board
 
 mkdir -p ~/.gemini/config/skills
 ln -sfn "$PWD/skills/commit" ~/.gemini/config/skills/commit

@@ -35,11 +35,13 @@ Skills live under `skills/<name>/SKILL.md`, linked into `~/.cursor/skills/`,
   a project's features; `explain <feature>` has the `factory-explainer`
   agent (GPT) write `docs/features/<feature>.md`. Not committed.
 
-Factory skills — omp only, each linked into `~/.omp/agent/skills/<name>`.
-Design: `SOFTWARE-FACTORY.md` (full factory) and `FEATURE-FACTORY.md`
-(feature factory). Only `factory` and `feature` are run by the user;
-the rest set `disable-model-invocation: true` and are read through
-`skill://` by those two:
+Factory procedures live under `skills/factory*` and `skills/feature/`,
+linked into `~/.omp/agent/skills/<name>`. Design: `SOFTWARE-FACTORY.md`
+(full factory) and `FEATURE-FACTORY.md` (feature factory). Only `factory`
+and `feature` are run by the user; the rest set
+`disable-model-invocation: true` and are read through `skill://` by those
+two. Cursor runs the same procedures from `cursor/factory/` (`/factory`,
+`/feature`, subagents, hooks); `cursor/factory/runtime.md` is the tool map.
 
 - `factory` — `/skill:factory`: entry and router for the full factory;
   preflight, resume from `.factory/state.json`, `status`, `change <text>`.
