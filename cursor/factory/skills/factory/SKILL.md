@@ -72,7 +72,15 @@ Clear a stop with `"$FS" set stop null` once you act on it.
 
 ## 4. Route
 
-Read the stage skill and follow it under the runtime.
+Read the stage skill and follow it under the runtime. Grilling is
+`factory-grill`, including its Language section: every round challenges
+clashing words, sharpens fuzzy ones, and checks claims against the code
+(`explore`). Settled terms go into `docs/factory/GLOSSARY.md` as they
+settle, starting in the requirements grill. The requirements gate and, when
+the grill changed the file, the stack gate commit that glossary with the
+stage doc. Architecture adds draft terms as questions in that grill, not as
+a glossary written on its own. Renaming a term an approved doc already uses
+reopens that doc's gate.
 
 | `stage` | Read |
 | --- | --- |
@@ -96,7 +104,9 @@ issue. A stop `S5` with open PRs routes to land first. Otherwise follow
 2. `"$FS" reopen requirements`, set stage to `requirements`, then follow
    `factory-requirements` with the change text. Show the gate with a
    "what changed" header.
-3. Reopen STACK.md or ARCHITECTURE.md only if the change touches them.
+3. Reopen STACK.md or ARCHITECTURE.md when the change touches them, and
+   when it renames a term that doc already uses. Adding a definition leaves
+   the gate shut.
 4. After approval, follow `factory-issues` in update mode, as that skill
    describes.
 

@@ -38,7 +38,13 @@ are the same idea. Do not call an omp `skill://` URI.
 
 Grill in chat. Number the questions, attach the recommended answer, then
 wait. Do not use AskQuestion for grilling. "Whatever you think" and "sounds
-good" are not answers.
+good" are not answers. Follow `factory-grill`'s Language section in every
+round: challenge a word that clashes with the glossary, sharpen a fuzzy
+word, and when the user states how the code works, check it with `explore`.
+App mode writes each settled term into `docs/factory/GLOSSARY.md` as it
+settles. Feature mode reads the repo glossary and does not edit it; settled
+terms go in the brief's **Terms** section. Renaming a term an approved doc
+uses reopens that gate (`"$FS" reopen <gate>`). Adding a definition does not.
 
 Gates use the AskQuestion tool, once, for the whole document.
 
@@ -68,7 +74,7 @@ subagent again with the answers in the prompt.
 
 | Stage skill says | Cursor `subagent_type` |
 | --- | --- |
-| `scout` | `explore` (path:line facts only) |
+| `scout` | `explore` (path:line facts only; also the Language code cross-check) |
 | `reviewer` | `factory-reviewer` |
 | `factory-planner`, `factory-builder`, `factory-spec-review`, `factory-test-review`, `factory-qa`, `factory-qa-author`, `factory-qa-review`, `factory-ui-review`, `factory-designer`, `factory-design-director`, `factory-design-review`, `factory-builder-check`, `factory-builder-unstick`, `factory-explainer` | the same name |
 

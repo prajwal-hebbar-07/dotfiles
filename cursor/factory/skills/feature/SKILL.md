@@ -74,15 +74,21 @@ Ledger: around every subagent, `"$FS" ledger start|done|verdict` with
    at `.factory/feature/<slug>.md`. Fill Repo checks. Do not ask the user
    what the repo already answers.
 2. **Interview.** Read `$DOTFILES/skills/factory-grill/SKILL.md` and run it
-   under the runtime (chat, not AskQuestion). Fix the outcome, acceptance
-   criteria AC1.. as Given / When / Then, and out of scope. Stop when the
-   next three answers can be predicted.
+   under the runtime (chat, not AskQuestion), including its Language
+   section. Fix the outcome, acceptance criteria AC1.. as Given / When /
+   Then, and out of scope. Read the repo glossary if it has one
+   (`docs/factory/GLOSSARY.md`, else `GLOSSARY.md` or `GLOSSARY-MAP.md` at
+   the root) and leave that file alone. Write each settled term into the
+   brief's **Terms** section as it settles (`**Term**:` definition,
+   `_Avoid_:` synonyms). A code cross-check uses `explore`. Stop when the
+   next three answers can be predicted and every settled term is in Terms.
 3. **Sketch.** Write one design into the brief: **Reuses** (modules, files,
    patterns, each with a path) and **New pieces** (every new file,
    dependency, table, abstraction, config option). A sketch whose Reuses
    names nothing is redone before the user sees it. Then the simplicity
-   round from factory-grill: one question per new piece, the simpler option
-   recommended. **Stop rule:** a new module, service, datastore, or runtime,
+   round from factory-grill, Language included: one question per new piece,
+   the simpler option recommended, and any new term folded into **Terms**.
+   **Stop rule:** a new module, service, datastore, or runtime,
    a module-boundary change, or more than 10 commits:
    `"$FS" stop S5 "split the feature, or run /factory"`, tell the user why,
    and end. A new library dependency is a question, not a stop. UI features
