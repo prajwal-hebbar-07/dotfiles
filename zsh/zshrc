@@ -632,6 +632,9 @@ alias tl='tmux list-sessions'
 alias cc='CLAUDE_CONFIG_DIR=$HOME/.claude command claude'
 alias ccw='CLAUDE_CONFIG_DIR=$HOME/.claude-work command claude'
 
+# Codex — bypass approval prompts and sandboxing on every invocation.
+alias codex='command codex --dangerously-bypass-approvals-and-sandbox'
+
 # tn [name] [path] — create or attach a named session rooted at a directory.
 # Name defaults to the directory's basename, path to $PWD. -A attaches to an
 # existing session of that name instead of failing; from inside tmux the new
