@@ -2,7 +2,7 @@
 name: grill-requirements
 description: >
   Grills docs/requirements.md harshly, in rounds asked in chat. Every round,
-  answer and resulting change is logged to docs/grill/log.md, so a new chat
+  answer and resulting change is logged to docs/grill/requirements-log.md, so a new chat
   resumes exactly where the last one stopped. Continues until a defined exit
   check passes and the user confirms. Based on Matt Pocock's grilling and
   domain-modeling skills. Use when the user says "/grill-requirements" or
@@ -30,8 +30,8 @@ Files, all in the app repo (git root, else the current directory):
 | --- | --- |
 | `docs/requirements.md` | The requirements. The grill edits it; IDs never change |
 | `docs/project.md` | Tracker: stage status, **Next action**, log |
-| `docs/grill/log.md` | Every round, question, answer and resulting change |
-| `docs/grill/coverage.md` | Coverage categories and closing checks |
+| `docs/grill/requirements-log.md` | Every round, question, answer and resulting change |
+| `docs/grill/requirements-coverage.md` | Coverage categories and closing checks |
 | `docs/glossary.md` | Project vocabulary, nothing else |
 
 Templates and prompts in this skill's directory: `log-template.md`,
@@ -60,7 +60,7 @@ date +%F
 ```
 
 Read `docs/project.md`, `docs/requirements.md`, `docs/glossary.md`,
-`docs/grill/coverage.md` and `docs/grill/log.md` if they exist. A question
+`docs/grill/requirements-coverage.md` and `docs/grill/requirements-log.md` if they exist. A question
 is **open** when its `Answer:` in the log is blank or starts with `idk`.
 
 - No `requirements.md`: stop, say to run `/requirements` first.
@@ -68,7 +68,7 @@ is **open** when its `Answer:` in the log is blank or starts with `idk`.
   ("done") first.
 - Argument `status`: print the round number, open question count, coverage
   rows by status, closing checks, and **Next action**. Change nothing.
-- No log: create `log.md` and `coverage.md` from the templates, set
+- No log: create `requirements-log.md` and `requirements-coverage.md` from the templates, set
   `Status: grilling` in `requirements.md` and the tracker row, then Step 4.
 - Open questions in the log and the user's message does not answer them
   (a new chat, or `/grill-requirements` alone): say "Round N has <k> open
@@ -96,7 +96,7 @@ For each answer in the user's message, in the log under that question:
    (Step 3). If talking cannot settle it, write `idk (needs prototype)`; if
    only someone else knows, `idk (needs <who>)`. It blocks the exit until
    answered or deferred.
-5. Update `coverage.md`: a category becomes `covered` (list the IDs), `n/a`
+5. Update `requirements-coverage.md`: a category becomes `covered` (list the IDs), `n/a`
    (the user's own reason), or `deferred` (their reason).
 6. Under the question write `**Became:**` with each change by ID.
 
@@ -136,7 +136,7 @@ Number it `N`. Questions are `G<N>.<n>`. Take them from, in this order:
    word that clashes with `glossary.md`. Propose the one term.
 6. **Scenarios**: invent concrete ones, with names and numbers, where two
    items meet or an item meets a limit, and ask what must happen.
-7. **Coverage**: for each `open` category in `coverage.md`, at least one
+7. **Coverage**: for each `open` category in `requirements-coverage.md`, at least one
    question. Categories that clearly cannot apply to this app go in one
    batched question listing each with the reason you would give; the user
    confirms each as `n/a` in their own words.
@@ -153,7 +153,7 @@ Rules:
 - Harsh, not hostile: say what is missing, never pad, never accept a vague
   answer. A reply like "fast" or "secure" gets a follow-up for a number.
 
-First append `## Round N · <date>` and every new question to `log.md` with
+First append `## Round N · <date>` and every new question to `requirements-log.md` with
 `Answer:` blank (format in `log-template.md`). Then post the round in chat
 in this shape, carry-overs first:
 
@@ -187,14 +187,14 @@ When Step 4 finds no question from items 1–7, check these against the files,
 not memory:
 
 1. No open question in the log; no open `Q` in `requirements.md`.
-2. No `open` row in `coverage.md`.
+2. No `open` row in `requirements-coverage.md`.
 3. Every live `R` has an `Accept:` line.
 4. The **pre-mortem** has run: a round written from `probes.md` and
    answered.
 5. The **fresh-eyes check** has run on the current `requirements.md`: spawn a
    sub-agent with the fresh-eyes prompt in `probes.md` and only the paths of
    `requirements.md` and `glossary.md`, no chat. Its ranked questions become
-   a round. Record in `coverage.md`'s closing checks the result and
+   a round. Record in `requirements-coverage.md`'s closing checks the result and
    `shasum -a 256 docs/requirements.md | cut -c1-12`. It only counts if it
    returned "nothing important left" and the hash still matches the file.
    After any change to the file, run it again.
