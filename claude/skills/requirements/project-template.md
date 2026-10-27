@@ -17,6 +17,7 @@ run `/requirements` in a new chat.
 | Tech stack | not started | [stack.md](stack.md) | |
 | Architecture | not started | [architecture.md](architecture.md) | |
 | Design | not started | [design.md](design.md) | |
+| Issues | not started | [issues.md](issues.md) | |
 
 Requirements status moves `not started` → `capturing` → `captured` →
 `grilling` → `grilled` → `approved`. Tech stack status moves `not started` →
@@ -24,7 +25,9 @@ Requirements status moves `not started` → `capturing` → `captured` →
 status move the same way as the tech stack's. A stage is only `approved` when the user
 runs its `approve` command. A review (`/review-<stage>`) never changes a status;
 its report is in `docs/review/<stage>-review.md` and its verdict only moves
-**Next action**.
+**Next action**. Issues status moves `not started` → `proposed` → `approved` →
+`published` (there is no grill; `/issues approve` and `/issues publish` are
+the user's commands).
 
 ## Log
 

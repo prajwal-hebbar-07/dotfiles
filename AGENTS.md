@@ -112,6 +112,21 @@ self-contained on purpose; change one, change the other three.
 `review-design` share mechanics (report format, re-review, severity) and are
 each self-contained on purpose; change one, change the other three.
 
+- `issues` — `/issues`: after the stages are approved, cuts the whole app into
+  vertical-slice issues (issue 0 bootstraps the project) and writes the plan
+  to `docs/issues.md` (approach, build waves, coverage of every requirement,
+  module, flow, entity, screen and stack decision) with one self-contained
+  issue per file in `docs/issues/<key>.md`. Each issue copies in, word for
+  word, every item it needs (requirements, architecture, stack, design with
+  all screen states, glossary, ADRs), plus acceptance criteria with
+  falsifiers, required tests, out of scope, and assumptions, so the
+  implementer asks nothing. A sub-agent given only the issue files must find
+  nothing left to ask. `/issues approve` sets `approved`; `/issues publish`
+  creates them on GitHub with `gh` (an epic, sub-issues, native blocked-by
+  links, a hidden key marker so a re-run never duplicates); `/issues sync`
+  carries a later document change to open issues. Writes no code and edits no
+  other stage's file. Claude Code only.
+
 Every Claude Code skill above ends in an `## Advisor` section: where, if an
 advisor is on (`/advisor`), the skill consults it (the reviews before writing
 the verdict; the proposals before writing the document; the grills before the
