@@ -31,6 +31,13 @@ removing one. List them here as they are added.
   facts, each tied to R/N/C IDs) and applies the user's changes. Tracked in
   `docs/project.md`; `/stack approve` sets `approved`. Never edits the
   requirements.
+- `grill-stack` — `/grill-stack`: grills `docs/stack.md` the same way as
+  `grill-requirements` (chat rounds, logged to `docs/grill/stack-log.md`,
+  coverage list, simplicity sweep, pre-mortem, no-chat fresh-eyes check,
+  confirm). Settles each decision only on the user's yes, writes ADRs under
+  `docs/adr/` for hard-to-reverse choices, and logs requirement gaps instead
+  of editing the requirements.
+  The two grill skills share mechanics; change one, change the other.
 
 - `commit` — commits already-staged changes with a semantic message.
 - `paper-target` — pins the Paper file/page this repo's design work reads from.
