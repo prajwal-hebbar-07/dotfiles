@@ -7,7 +7,7 @@ description: >
   user says, numbered and in their own words; does not interview, design, or
   pick a stack. Use when the user says "/requirements", wants to note down
   what an app should do, or wants to resume that.
-argument-hint: "[requirements text | status]"
+argument-hint: "[requirements text | status | approve]"
 disable-model-invocation: true
 ---
 
@@ -76,9 +76,14 @@ Next: <Next action from project.md>
 Last: <last log line>
 ```
 
-If the argument is `status`, stop here and change nothing. If the argument
-holds requirement text, capture it (Step 4). Otherwise follow the Next
-action; for `capturing` that is "What else?".
+If the argument is `status`, stop here and change nothing. If it is
+`approve`: only when the status is `grilled`; otherwise say what is missing
+and stop. Set `Status: approved` in `requirements.md` and the tracker row,
+set **Next action** `Run /stack`, and log
+`Approved, requirements.md <shasum -a 256 docs/requirements.md | cut -c1-12>`.
+Typing the command is the user's approval. If the argument holds requirement
+text, capture it (Step 4). Otherwise follow the Next action; for `capturing`
+that is "What else?".
 
 ## Step 4 — capture
 

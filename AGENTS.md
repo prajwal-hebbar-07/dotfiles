@@ -18,6 +18,7 @@ removing one. List them here as they are added.
   into `docs/requirements.md` (numbered R/N/C/X/Q items, exact wording kept)
   and tracks the project in `docs/project.md` in the app repo, so a new chat
   resumes from the files. Does not interview, design, or commit.
+  `/requirements approve` sets `approved` once the grill has set `grilled`.
 - `grill-requirements` — `/grill-requirements`: grills `docs/requirements.md`
   in rounds asked in chat. Each round and answer is logged to
   `docs/grill/requirements-log.md` before the reply, so a new chat resumes

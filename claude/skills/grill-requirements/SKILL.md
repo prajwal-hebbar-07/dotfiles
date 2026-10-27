@@ -206,8 +206,8 @@ Run whichever is missing, in the order 4, 5, 6, each as a normal round
 (logged, then asked). Items 4 and 5 change the file, so after their answers
 are ingested, check again from item 1. When all six hold and the confirm
 round is `yes` with `none`: set `Status: grilled` in `requirements.md`, the
-tracker row to `grilled`, **Next action** `Review docs/requirements.md, then
-approve it and start the tech stack`, one log line. Tell the user the final
+tracker row to `grilled`, **Next action** `Review docs/requirements.md, run
+/requirements approve, then /stack`, one log line. Tell the user the final
 counts and that the files are uncommitted. Do not approve.
 
 This does not prove nothing is unknown. It ends the grill when the checklist
