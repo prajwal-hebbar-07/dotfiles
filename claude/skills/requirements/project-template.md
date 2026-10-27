@@ -22,7 +22,9 @@ Requirements status moves `not started` → `capturing` → `captured` →
 `grilling` → `grilled` → `approved`. Tech stack status moves `not started` →
 `proposed` → `grilling` → `grilled` → `approved`. Architecture and design
 status move the same way as the tech stack's. A stage is only `approved` when the user
-runs its `approve` command.
+runs its `approve` command. A review (`/review-<stage>`) never changes a status;
+its report is in `docs/review/<stage>-review.md` and its verdict only moves
+**Next action**.
 
 ## Log
 

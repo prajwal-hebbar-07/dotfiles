@@ -90,6 +90,25 @@ syntax, metadata and tool instructions. Claude's explicit-only skills use
 share mechanics (round format, log handling, exit loop) and are each
 self-contained on purpose; change one, change the other three.
 
+- `review-requirements`, `review-stack`, `review-architecture`,
+  `review-design` — `/review-<stage>`: an independent reviewer for a stage
+  document that another model built. Reads the document cold (and for design
+  the Paper boards, read-only), runs a stage checklist, re-checks sourced
+  facts, and appends ranked findings (blocker, major, minor, nit, each with
+  evidence and a confirmed or likely label) with a verdict (`blocked`,
+  `changes needed`, `approve-ready`) to `docs/review/<stage>-review.md`. Each
+  finding carries the `/requirements`, `/stack`, `/architecture` or `/design`
+  command that would fix it, and the report ends in a paste-ready fix list.
+  Running it again after the fixes marks each finding resolved, still open or
+  new. Never edits the document, never changes a `Status:`, never approves;
+  only `docs/project.md`'s **Next action** and log change. It does not
+  replace the grill. Claude Code only, like `requirements`, `stack` and
+  `architecture`.
+
+`review-requirements`, `review-stack`, `review-architecture` and
+`review-design` share mechanics (report format, re-review, severity) and are
+each self-contained on purpose; change one, change the other three.
+
 - `commit` — commits already-staged changes with a semantic message.
 - `paper-target` — pins the Paper file/page this repo's design work reads from.
 - `paper-design-prompt` — turns a design direction into one Paper prompt
