@@ -37,7 +37,6 @@ removing one. List them here as they are added.
   confirm). Settles each decision only on the user's yes, writes ADRs under
   `docs/adr/` for hard-to-reverse choices, and logs requirement gaps instead
   of editing the requirements.
-  The two grill skills share mechanics; change one, change the other.
 - `architecture` — `/architecture`: proposes the architecture from the
   requirements and the stack into `docs/architecture.md` (shape with a
   structurally different alternative, deep modules and their interfaces and
@@ -46,6 +45,16 @@ removing one. List them here as they are added.
   table) and applies the user's changes. Uses Matt Pocock's `codebase-design`
   vocabulary. `/architecture approve` sets `approved`. Never edits the
   requirements or the stack.
+- `grill-architecture` — `/grill-architecture`: grills `docs/architecture.md`
+  the same way (logged to `docs/grill/architecture-log.md`). Per-module
+  deletion test, per-entity lifecycle, per-flow failure attacks; checks the
+  module graph has no cycle and every entity one owner; adds settled domain
+  terms to the glossary and ADRs to `docs/adr/`; logs requirement and stack
+  gaps instead of editing them.
+
+`grill-requirements`, `grill-stack` and `grill-architecture` share mechanics
+(round format, log handling, exit loop) and are each self-contained on
+purpose; change one, change the other two.
 
 - `commit` — commits already-staged changes with a semantic message.
 - `paper-target` — pins the Paper file/page this repo's design work reads from.
