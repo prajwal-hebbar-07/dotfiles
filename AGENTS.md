@@ -14,6 +14,11 @@ removing one. List them here as they are added.
 - `commit` — stops if `user.name`/`user.email` is unset; commits what is
   staged, or stages everything when nothing is; semantic subject plus two or
   more bullets; never a co-author or attribution trailer.
+- `split-commit` — `/split-commit`: commits the changes as several focused
+  commits through `commit`, only where they separate cleanly (revert, pick
+  and one-sentence tests; code with its tests, docs and wiring); one commit
+  when they do not. Shows the plan and waits for a yes (`now` skips, `plan`
+  only prints), then checks the final tree equals the starting index.
 - `requirements` — `/requirements`: records what the user says about an app
   into `docs/requirements.md` (numbered R/N/C/X/Q items, exact wording kept)
   and tracks the project in `docs/project.md` in the app repo, so a new chat
