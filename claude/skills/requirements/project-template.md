@@ -16,11 +16,12 @@ run `/requirements` in a new chat.
 | Requirements | not started | [requirements.md](requirements.md) | |
 | Tech stack | not started | [stack.md](stack.md) | |
 | Architecture | not started | [architecture.md](architecture.md) | |
+| Design | not started | [design.md](design.md) | |
 
 Requirements status moves `not started` → `capturing` → `captured` →
 `grilling` → `grilled` → `approved`. Tech stack status moves `not started` →
-`proposed` → `grilling` → `grilled` → `approved`. Architecture status moves
-the same way as the tech stack's. A stage is only `approved` when the user
+`proposed` → `grilling` → `grilled` → `approved`. Architecture and design
+status move the same way as the tech stack's. A stage is only `approved` when the user
 runs its `approve` command.
 
 ## Log

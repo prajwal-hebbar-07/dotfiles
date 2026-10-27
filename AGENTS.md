@@ -57,9 +57,26 @@ removing one. List them here as they are added.
   terms to the glossary and ADRs to `docs/adr/`; logs requirement and stack
   gaps instead of editing them.
 
-`grill-requirements`, `grill-stack` and `grill-architecture` share mechanics
-(round format, log handling, exit loop) and are each self-contained on
-purpose; change one, change the other two.
+- `design` — `/design`: works out the design from the requirements,
+  architecture, stack, glossary and any brief the user adds
+  (`/design brief <text>`, kept verbatim as `BR` items) into
+  `docs/design.md` (idea with a structurally different alternative, moments of
+  use, journeys, screens with every state, shared patterns, a visual
+  direction, traceability), applies the user's changes, and `/design build`
+  draws it in Paper through the Paper MCP (design system board, then the
+  screens). `/design approve` needs `grilled` and every screen built. Never
+  edits the requirements, stack or architecture, and never writes app code.
+- `grill-design` — `/grill-design`: grills `docs/design.md` the same way
+  (chat rounds, logged to `docs/grill/design-log.md`) but to clear the idea,
+  not the look: say-it-back, the one thing, who and when, journeys, screens
+  and states, with feel words turned into checkable rules. Never asks about
+  colour, type or styling (those are reviewed in Paper). Fresh-eyes check is
+  a designer sub-agent; logs requirement, stack and architecture gaps instead
+  of editing them.
+
+`grill-requirements`, `grill-stack`, `grill-architecture` and `grill-design`
+share mechanics (round format, log handling, exit loop) and are each
+self-contained on purpose; change one, change the other three.
 
 - `commit` — commits already-staged changes with a semantic message.
 - `paper-target` — pins the Paper file/page this repo's design work reads from.
