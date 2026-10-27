@@ -26,6 +26,11 @@ removing one. List them here as they are added.
   pre-mortem, a no-chat fresh-eyes check and the user's confirm all pass; then
   sets `grilled`, never `approved`. Based on Matt Pocock's `grilling` and
   `domain-modeling`.
+- `stack` — `/stack`: proposes the tech stack from the grilled requirements
+  into `docs/stack.md` (one choice per decision, a real alternative, sourced
+  facts, each tied to R/N/C IDs) and applies the user's changes. Tracked in
+  `docs/project.md`; `/stack approve` sets `approved`. Never edits the
+  requirements.
 
 - `commit` — commits already-staged changes with a semantic message.
 - `paper-target` — pins the Paper file/page this repo's design work reads from.
