@@ -13,14 +13,14 @@ removing one. List them here as they are added.
 
 Codex counterparts live under `codex/skills/<name>/SKILL.md`:
 `commit`, `design`, `grill-design`, `review-requirements`,
-`review-stack`, `review-architecture`, `review-design`, `review-code`. Requirements, stack
+`review-stack`, `review-architecture`, `review-design`, `review-code`, `qa`. Requirements, stack
 and architecture authoring and grilling stay in Claude Code; Codex can review
 their output files.
 `codex/link-skills` links them into `~/.agents/skills/`, Codex's user skill
 directory; rerun it after adding or removing one. It prunes only its own
 broken links and refuses to replace another skill. Invoke with `$name`
 (for example `$commit plan` or `$design build`). The workflows below also
-describe these eight Codex versions. Keep both hosts in step when changing a
+describe these nine Codex versions. Keep both hosts in step when changing a
 shared workflow, including templates and probes; retain each host's invocation
 syntax, metadata and tool instructions. Claude's explicit-only skills use
 `policy.allow_implicit_invocation: false` in Codex's `agents/openai.yaml`.
@@ -179,8 +179,11 @@ each self-contained on purpose; change one, change the other three.
   its route: `issue`, a stage command, or `manual`. Items whose
   issues are not done are `not yet built`, so it doubles as a progress check.
   Never starts the app, a server or a browser (so screens and live requests
-  are `not judged`, with the manual check to do), never edits code. Same
-  mechanics as `review-code`; change one, change the other. Claude Code only.
+  are `not judged`, with the manual check to do), never edits code. Reports
+  from several models share one report (`Also found by`, `Disputed by`). Same
+  mechanics as `review-code`; change one, change the other. Available in both
+  Claude Code and Codex (`$qa`); Codex labels `/issues qa` and `/implement`
+  as Claude Code handoffs and files no issues.
 - `release` — `/release [version]`: the last gate, from files and GitHub only.
   Checks every issue done, everything in the coverage table built, `/qa`
   ready on the current default-branch commit, code reviews clear, stage

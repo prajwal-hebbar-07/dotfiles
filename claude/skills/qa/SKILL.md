@@ -24,7 +24,9 @@ what the app promises that no test would catch breaking. `/review-code` looks
 at one issue's branch; this looks at the whole app on the default branch, where
 the issues meet: the journeys that cross issues, the failure paths that cross
 modules, the numbers that only hold for the whole, and the tests that pass
-without proving anything.
+without proving anything. The same skill runs in Claude Code (`/qa`) and in
+Codex (`$qa`), so two different models can audit the same commit and their
+findings land in one report.
 
 It does not run the app. It does not start a server, a dev build, a simulator or
 a browser, so it cannot see a screen or a request in motion. What it can do is
@@ -46,8 +48,9 @@ Files, all in the app repo (git root, else the current directory):
 | `docs/review/qa-report.md` | The report: one `## Matrix`, then one `## QA N` per run, newest last. Not committed |
 | `docs/project.md` | Tracker: the QA row, **Next action**, log |
 
-Same mechanics as `/review-code` (severity, confidence, evidence, IDs); keep
-the two in step.
+Same mechanics as `/review-code` (severity, confidence, evidence, IDs, shared
+report); keep the two in step, and keep this skill and its Codex counterpart in
+step.
 
 ## Never
 
@@ -93,9 +96,12 @@ git rev-parse HEAD origin/$default
 - Argument `status`: print the last QA's number, verdict, head sha, findings
   by severity and status, and whether `origin/<default>` has moved since.
   Change nothing.
-- The last QA ran on this same head sha: say "QA N already covers this commit:
-  <verdict>, <k> open findings", and stop.
-- A different head sha: a **re-run** (Step 4). No report: QA 1.
+- The last QA by **this model** ran on this same head sha: say "QA N already
+  covers this commit: <verdict>, <k> open findings", and stop. A QA by a
+  different model on the same sha is not a repeat: it is the point; go on and
+  treat the earlier findings as in Step 4.
+- The head sha differs from the last QA's: a **re-run** (Step 4). No report:
+  QA 1.
 - Any other text is a **focus**: check that first and hardest. It never
   narrows the run.
 
@@ -223,8 +229,10 @@ current code and mark it `resolved (QA N)`, or leave it `open` with `Still:
 matched against the body's `<!-- issues:finding=QA<n> -->`) and record `Filed:
 #<n>` on it; a finding whose issue is closed but whose problem is still in the
 code stays open, with `Still:` saying so. A finding the user declined (`declined: <their reason>`)
-stays declined unless the code contradicts the reason. New findings take the
-next IDs and are marked `new in QA N`.
+stays declined unless the code contradicts the reason. A finding another model
+wrote that you also find gets `Also found by: <you>`; one you think is wrong
+gets `Disputed by <you>: <why, with evidence>`, and stays open for the user to
+decide. New findings take the next IDs and are marked `new in QA N`.
 
 Write `docs/review/qa-report.md` (create the folder and the file with the
 header if missing). Header, once:
@@ -241,12 +249,13 @@ blocker · major · minor · nit. Status: open · resolved (QA N) · declined
 Not committed.
 ```
 
-Then `## Matrix`, rewritten on every run (it is the state now, not history):
+Then `## Matrix`, rewritten on every run by whichever model ran last, from the
+code (it is the state now, not history):
 
 ```
 ## Matrix
 
-As of <head sha>, <date>. <d> of <m> issues done.
+As of <head sha>, <date>, by <model, host>. <d> of <m> issues done.
 
 | Item | Built by | Covered by | Result |
 | --- | --- | --- | --- |
@@ -316,8 +325,8 @@ except the report and the tracker, and nothing was started or pushed. Then:
 "Run `/issues qa` to file the findings as issues (the ones that are gaps in a
 document come out as needs-decision and go through a grill before anyone
 builds them), then `/implement` for the rest, and do the `manual` checks. Run
-`/qa` again after they merge. When every issue is done and the verdict is
-ready, run `/release`."
+`/qa` again after they merge, or run `$qa` in Codex for a second model's view.
+When every issue is done and the verdict is ready, run `/release`."
 
 ## Advisor
 
