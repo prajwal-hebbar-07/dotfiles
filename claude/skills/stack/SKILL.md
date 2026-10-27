@@ -53,7 +53,7 @@ Read `docs/project.md`, `docs/requirements.md`, `docs/glossary.md` and
   Change nothing.
 - Argument `approve`: only when the stack `Status:` is `grilled`; otherwise
   say what is missing and stop. Set `Status: approved` in `stack.md` and the
-  tracker row, **Next action** `Tech stack approved; architecture is next`,
+  tracker row, **Next action** `Tech stack approved; run /architecture`,
   and log `Approved, stack.md <shasum -a 256 docs/stack.md | cut -c1-12>`.
   Typing the command is the user's approval.
 - No `stack.md`: Step 2.
@@ -110,7 +110,8 @@ For "change S3 to Postgres", "drop S5", "add a cache", "use Fly.io":
 4. If the status was `grilling`, `grilled`, or `approved`, set it back to
    `proposed` and log `Reopened from <status>`; a fresh-eyes check recorded
    against an older file no longer counts. A decision whose choice changed
-   loses `settled`.
+   loses `settled`. If the Architecture row is past `not started`, say it
+   may need rechecking against the change; do not touch that row.
 5. Update the tracker (Updated, **Next action**, a log line).
 
 ## Step 4 — summary

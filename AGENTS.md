@@ -38,6 +38,14 @@ removing one. List them here as they are added.
   `docs/adr/` for hard-to-reverse choices, and logs requirement gaps instead
   of editing the requirements.
   The two grill skills share mechanics; change one, change the other.
+- `architecture` — `/architecture`: proposes the architecture from the
+  requirements and the stack into `docs/architecture.md` (shape with a
+  structurally different alternative, deep modules and their interfaces and
+  seams, data model, flows with failures, cross-cutting concerns, abuse cases
+  with verification, mermaid diagrams, a requirement-to-item traceability
+  table) and applies the user's changes. Uses Matt Pocock's `codebase-design`
+  vocabulary. `/architecture approve` sets `approved`. Never edits the
+  requirements or the stack.
 
 - `commit` — commits already-staged changes with a semantic message.
 - `paper-target` — pins the Paper file/page this repo's design work reads from.
