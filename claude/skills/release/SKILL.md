@@ -36,6 +36,7 @@ Files, all in the app repo (git root, else the current directory):
 | `docs/progress.md` | Per-issue state, written by `/implement`. Read only |
 | `docs/issues.md`, `docs/issues/<key>.md` | The plan: issue table, coverage, **Not built**, **Assumed**, **Open points**. Read only |
 | `docs/review/qa-report.md` | The last QA's matrix, verdict and head sha. Read only |
+| `docs/review/live-qa-report.md` | The last live QA's matrix, verdict and sha (Oh My Pi). Read only |
 | `docs/review/code/*-review.md` | Code review findings per issue. Read only |
 | `docs/review/*-review.md`, `docs/grill/*` | Stage reviews and unresolved grill questions. Read only |
 | `docs/requirements.md`, `docs/architecture.md`, `docs/stack.md`, `docs/design.md`, `docs/glossary.md` | Read only: statuses, hashes, open questions, and the words for the notes |
@@ -106,6 +107,13 @@ for each.
    `ready` and its head sha is `origin/<default>`. No QA, a QA on an older
    sha, or any open QA blocker or major finding is a blocker: run `/qa`. A
    QA row marked `not judged` is carried to Step 3.
+   **Live QA.** `docs/review/live-qa-report.md` (the app run by Oh My Pi): its
+   last run on this sha with verdict `ready` passes. An open blocker or major
+   finding in it is a blocker: run `/issues qa`, then `/implement`. No report,
+   or a run on an older sha, or verdict `incomplete`, is a warning ("the app
+   was never run end to end on this commit"), not a blocker; the live QA is
+   run later, by `/skill:live-qa` in Oh My Pi alone. Its `Not judged` rows
+   are carried to Step 3.
 4. **Code reviews clear.** For each issue with `docs/review/code/<key>-review.md`:
    no open blocker or major finding. An open one is a blocker, named. An issue
    with no review file is a warning ("merged without `/review-code`").

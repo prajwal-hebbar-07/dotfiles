@@ -320,8 +320,8 @@ disputed for the user. Do not edit anything else in the report. Then hand off
 (Step 7) and stop. In the hand-off list the findings by `Response:`: accepted,
 rebutted and intent.
 
-A `qa` issue's finding lives in `docs/review/qa-report.md`, named in the
-issue's **Raised by QA** section. If building it shows the finding is wrong,
+A `qa` issue's finding lives in `docs/review/qa-report.md` or
+`docs/review/live-qa-report.md`, named in the issue's **Raised by QA** section. If building it shows the finding is wrong,
 build nothing for it: write `Response: rebutted — <evidence>` (or `intent —
 <the question>`) under that finding there, say so in the hand-off, and stop.
 When the issue is built, write `Response: accepted — built in #<n>, <short

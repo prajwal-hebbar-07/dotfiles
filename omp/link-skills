@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# Links every omp/skills/<name> into Oh My Pi's skill directory,
+# ~/.omp/agent/skills. Run it again after adding or removing a skill; links
+# left pointing at a removed skill are pruned. Refuses to replace any other
+# skill of the same name.
+set -euo pipefail
+
+src="$(cd "$(dirname "$0")" && pwd)/skills"
+dest=${1:-"$HOME/.omp/agent/skills"}
+
+for skill in "$src"/*/; do
+  [[ -f $skill/SKILL.md ]] || continue
+  link="$dest/$(basename "$skill")"
+  if [[ -e $link || -L $link ]]; then
+    if [[ ! -L $link ]] || [[ $(readlink "$link") != "$src"/* ]]; then
+      echo "Refusing to replace existing skill: $link" >&2
+      exit 1
+    fi
+  fi
+done
+
+mkdir -p "$dest"
+for link in "$dest"/*; do
+  if [[ -L $link && $(readlink "$link") == "$src"/* && ! -e $link ]]; then
+    rm "$link"
+  fi
+done
+for skill in "$src"/*/; do
+  [[ -f $skill/SKILL.md ]] || continue
+  ln -sfn "${skill%/}" "$dest/$(basename "$skill")"
+done

@@ -199,6 +199,21 @@ section is the same in the four stage commands; change one, change the rest.
   mechanics as `review-code`; change one, change the other. Available in both
   Claude Code and Codex (`$qa`); Codex labels `/issues qa` and `/implement`
   as Claude Code handoffs and files no issues.
+- `live-qa` — `/skill:live-qa`, **Oh My Pi only** (`omp/skills/live-qa/`,
+  linked into `~/.omp/agent/skills/` by `omp/link-skills`; not in the Claude
+  Code or Codex skill directories, and `qa`/`$qa` tell those hosts never to run
+  the app). Starts the app on its own port and empty data, drives the
+  journeys, flows, failure paths and abuse cases in a browser it opens itself,
+  checks what was stored, console, network, keyboard and focus, and compares
+  every screen state with its Paper board through the Paper read tools (size,
+  tokens, computed styles, words, pixel diff, a look at the hot regions). Also
+  settles `/qa`'s `manual` and `not judged` rows. Appends ranked findings
+  (prefix `LQ`, routes as `qa`) to `docs/review/live-qa-report.md` with
+  evidence in `qa-evidence/<sha>/`; `/issues qa` files them and `/implement`
+  fixes them. Same dispute round as the reviews. Never edits code or the
+  design, and never touches production. Its steps name the browser, `eval`
+  and Paper tools as last known from the old factory agents, not re-checked
+  against the current Oh My Pi.
 - `release` — `/release [version]`: the last gate, from files and GitHub only.
   Checks every issue done, everything in the coverage table built, `/qa`
   ready on the current default-branch commit, code reviews clear, stage
@@ -259,6 +274,16 @@ sources into `skills/` — the installer owns updates.
 The skill directory was otherwise cleared on 2026-09-19 to start over; the old
 set is described in `SKILLS.md` at the repo root (also in git history). List
 new skills here.
+
+## Oh My Pi
+
+`omp/` was removed on 2026-10-27 with the software factory and restarted with
+one skill. `omp/skills/<name>/SKILL.md` are linked into
+`~/.omp/agent/skills/` by `omp/link-skills`; rerun it after adding or removing
+one. It prunes only its own broken links and refuses to replace another skill.
+Invoke with `/skill:<name>`. The skill needs the Paper MCP server in Oh My Pi's
+`mcp.json`; the old entry is in git history (`omp/mcp.json` before the
+removal commit).
 
 ## Cursor skills
 

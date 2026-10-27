@@ -19,6 +19,7 @@ run `/requirements` in a new chat.
 | Design | not started | [design.md](design.md) | |
 | Issues | not started | [issues.md](issues.md) | |
 | QA | not started | [review/qa-report.md](review/qa-report.md) | |
+| Live QA | not started | [review/live-qa-report.md](review/live-qa-report.md) | |
 | Release | not started | [release.md](release.md) | |
 
 Requirements status moves `not started` → `capturing` → `captured` →
@@ -29,8 +30,8 @@ runs its `approve` command. A review (`/review-<stage>`) never changes a status;
 its report is in `docs/review/<stage>-review.md` and its verdict only moves
 **Next action**. Issues status moves `not started` → `planned` →
 `published`; `/issues` has no grill and no approval, and goes straight through.
-`/qa` sets the QA row to `QA N: <verdict>` and `/release` sets the Release row
-to its verdict; neither changes a stage's status.
+`/qa` sets the QA row to `QA N: <verdict>`, `/skill:live-qa` (Oh My Pi) the Live
+QA row to `Live QA N: <verdict>`, and `/release` the Release row to its verdict; none changes a stage's status.
 
 ## Log
 

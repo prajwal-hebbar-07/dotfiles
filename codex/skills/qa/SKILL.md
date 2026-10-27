@@ -38,6 +38,8 @@ a browser, so it cannot see a screen or a request in motion. What it can do is
 read every test, run the project's own commands, and decide for every
 promise whether a test would fail if the promise broke. What needs eyes or a
 running system goes under **Not judged**, with the command the user would run.
+Running the app is the job of `/skill:live-qa` in Oh My Pi, and of nothing else:
+never do it here, and never ask another harness to.
 
 Run it at any point after the first issues are merged. Items whose issues are
 not yet done are listed as `not yet built`, not as findings, so it is also the

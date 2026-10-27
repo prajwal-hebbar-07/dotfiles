@@ -286,10 +286,13 @@ to fix.
 built, reviewed and merged by the same loop as every other issue. Run straight
 through; nothing waits for the user.
 
-1. **Select.** Read `docs/review/qa-report.md`; none: stop, run `/qa`. Take every
-   finding with status `open` and route `issue` or a stage command
+1. **Select.** Read `docs/review/qa-report.md` and `docs/review/live-qa-report.md`
+   (the app run by Oh My Pi; prefix `LQ`, `Live QA N`); neither: stop, run
+   `/qa`. Take every finding in either with status `open` and route `issue` or a
+   stage command
    (`/requirements`, `/stack`, `/architecture`, `/design`) that has no issue yet:
-   search the issue bodies for `<!-- issues:finding=QA<n> -->` as in Step 4.3.
+   search the issue bodies for `<!-- issues:finding=<ID> -->` (`QA3`, `LQ2`) as in
+   Step 4.3.
    Route `manual` is not filed; it stays in the report and in `/release`'s
    manual checks. Minor and nit findings are filed only if the user asks.
 2. **Cut.** One issue per finding, except findings with one cause and one fix
@@ -304,7 +307,7 @@ through; nothing waits for the user.
    ```
    ## Raised by QA
 
-   - Found by: QA <N>, <date>, finding <QA id>, severity <s>, <confirmed | likely>
+   - Found by: QA <N> or Live QA <N>, <date>, finding <ID>, severity <s>, <confirmed | likely>
    - Kind: <missing test | weak test | defect | flake | skipped test | document gap>
    - Where: <the item IDs and the file:line the finding cites>
    - In one line: <what is wrong, in the finding's words>
@@ -342,7 +345,7 @@ through; nothing waits for the user.
    for a decision issue), with the labels `qa` and, for a decision issue,
    `needs-decision` (and `ui` / `security` as the finding's item warrants), and
    two hidden lines at the end of the body: `<!-- issues:key=<key> -->` and
-   `<!-- issues:finding=QA<n> -->`. Add each as a sub-issue of the epic. No
+   `<!-- issues:finding=<ID> -->`. Add each as a sub-issue of the epic. No
    blocked-by edge. Record the GitHub number in the table after each create.
 5. **Record.** Add a **QA findings** section to `docs/issues.md` listing each
    finding ID against its issue key (so a reader sees which finding is filed
