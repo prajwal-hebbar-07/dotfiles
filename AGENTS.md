@@ -12,13 +12,15 @@ started from scratch on 2026-10-26 and empty until the user adds one.
 removing one. List them here as they are added.
 
 Codex counterparts live under `codex/skills/<name>/SKILL.md`:
-`commit`, `split-commit`, `design`, `grill-design`. Requirements, stack and
-architecture workflows stay in Claude Code; Codex reads their output files.
+`commit`, `split-commit`, `design`, `grill-design`, `review-requirements`,
+`review-stack`, `review-architecture`, `review-design`. Requirements, stack
+and architecture authoring and grilling stay in Claude Code; Codex can review
+their output files.
 `codex/link-skills` links them into `~/.agents/skills/`, Codex's user skill
 directory; rerun it after adding or removing one. It prunes only its own
 broken links and refuses to replace another skill. Invoke with `$name`
 (for example `$split-commit` or `$design build`). The workflows below also
-describe these four Codex versions. Keep both hosts in step when changing a
+describe these eight Codex versions. Keep both hosts in step when changing a
 shared workflow, including templates and probes; retain each host's invocation
 syntax, metadata and tool instructions. Claude's explicit-only skills use
 `policy.allow_implicit_invocation: false` in Codex's `agents/openai.yaml`.
@@ -102,8 +104,9 @@ self-contained on purpose; change one, change the other three.
   Running it again after the fixes marks each finding resolved, still open or
   new. Never edits the document, never changes a `Status:`, never approves;
   only `docs/project.md`'s **Next action** and log change. It does not
-  replace the grill. Claude Code only, like `requirements`, `stack` and
-  `architecture`.
+  replace the grill. Available in both Claude Code and Codex. Codex uses
+  `$review-<stage>` and `$design`; fix commands for requirements, stack and
+  architecture are labeled Claude Code handoffs in the report and reply.
 
 `review-requirements`, `review-stack`, `review-architecture` and
 `review-design` share mechanics (report format, re-review, severity) and are

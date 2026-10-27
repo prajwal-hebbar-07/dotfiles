@@ -336,9 +336,10 @@ or removing a skill. Each account's `skills/synced/` (skills synced from
 claude.ai) is left alone.
 
 Codex has counterparts under `codex/skills/`, adapted from the Claude Code
-set: `commit`, `split-commit`, `design`, `grill-design`. Requirements, stack
-and architecture workflows stay in Claude Code; Codex reads their output
-files.
+set: `commit`, `split-commit`, `design`, `grill-design`, `review-requirements`,
+`review-stack`, `review-architecture`, `review-design`. Requirements, stack
+and architecture authoring and grilling stay in Claude Code; Codex can
+review their output files.
 Run `codex/link-skills` to link them into `~/.agents/skills/` for use across
 repos. It can be rerun, prunes its own broken links, and refuses to overwrite
 another skill. The approval gates, templates and logged progress are the
@@ -352,6 +353,15 @@ the same way as their Claude counterparts; drawing needs a connected Paper
 MCP. Explicit-only invocation is preserved through `agents/openai.yaml`;
 `commit` remains available for automatic selection. If the skills do not
 appear, restart Codex. See the [official skill documentation](https://learn.chatgpt.com/docs/build-skills).
+
+Use `$review-requirements`, `$review-stack`, `$review-architecture`, or
+`$review-design` in an app repo for an independent review. They write ranked
+findings, a verdict and a paste-ready fix list to `docs/review/`, leaving the
+stage documents unchanged. Run the reviewer again after fixes to track what
+was resolved. Each accepts `status` or focus text; `$review-design no-paper`
+reviews only the document. Fix commands for requirements, stack and
+architecture are labeled for pasting into Claude Code; design fixes use
+`$design` in Codex. The Codex reviewers have no advisor step.
 
 - **`commit`** (`/commit`) — stops if `user.name` or `user.email` is not set.
   Commits what is staged; when nothing is, it stages everything first. The
