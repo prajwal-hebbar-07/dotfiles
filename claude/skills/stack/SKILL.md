@@ -120,3 +120,21 @@ Reply with one line for the whole stack, then a table of `S` ID, area,
 choice, and `State`, then the open `SQ` items in full, then: "Tell me what to
 change (for example `change S3 to Postgres`), or run /grill-stack." After a
 change, reply with only what changed and what it touched.
+
+## Advisor
+
+If an advisor is on (`/advisor`), consult it at these points:
+
+- In Step 2, after the decisions and facts are drafted and before
+  `stack.md` is written: ask it to find a choice that fails an `N` number,
+  two choices that do not work together, a fact that looks wrong or stale,
+  and a piece that could go. It adds to the sub-agent's counter-argument on
+  the hard-to-reverse decisions and does not replace it.
+- In Step 3, when a change from the user conflicts with an `R` / `N` / `C`
+  item or touches several decisions: ask what else it forces.
+
+Claude decides when the advisor is called, so name the point in the
+consultation. If the advisor is off, unavailable, or declines, say so in one
+line and carry on; this skill never stops on it. Its answer is advice: where
+a source or the files contradict a claim, follow them and say so. It never
+answers a question for the user or overrides a `Fixed by` choice.

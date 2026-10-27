@@ -139,3 +139,17 @@ git status --short
 
 At most five lines: short SHA and subject, how many files were committed,
 whether everything was staged by this skill, and anything left uncommitted.
+
+## Advisor
+
+An ordinary commit needs no advisor. If one is on (`/advisor`), consult it
+only in Step 3, when the staged diff spans unrelated work and no single
+`type` describes it honestly: ask which type and scope fit, or whether the
+work should be split (and tell the user so, since splitting is
+`/split-commit`). Do not consult after the commit.
+
+Claude decides when the advisor is called, so name the point in the
+consultation. If the advisor is off, unavailable, or declines, say so in one
+line and carry on; this skill never stops on it. Its answer is advice: where
+the diff contradicts a claim, follow the diff and say so. It never adds a
+trailer or a co-author.

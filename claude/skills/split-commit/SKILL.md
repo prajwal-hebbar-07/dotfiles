@@ -203,3 +203,17 @@ Report in at most eight lines:
 - one line on use: `git revert <sha>` undoes one, `git cherry-pick <sha>` takes
   one
 - that the commits were not built or tested individually, unless you did
+
+## Advisor
+
+If an advisor is on (`/advisor`), consult it once, in Step 4, before the plan
+is printed, and only when the plan has more than one commit or splits a file
+by hunk: ask whether any unit fails the revert, pick or one-sentence test, and
+whether a seam was missed. Skip it for a one-commit plan. Do not consult
+again during Step 5.
+
+Claude decides when the advisor is called, so name the point in the
+consultation. If the advisor is off, unavailable, or declines, say so in one
+line and carry on; this skill never stops on it. Its answer is advice: where
+the diff contradicts a claim, follow the diff and say so. It never writes a
+commit message.

@@ -109,6 +109,16 @@ self-contained on purpose; change one, change the other three.
 `review-design` share mechanics (report format, re-review, severity) and are
 each self-contained on purpose; change one, change the other three.
 
+Every Claude Code skill above ends in an `## Advisor` section: where, if an
+advisor is on (`/advisor`), the skill consults it (the reviews before writing
+the verdict; the proposals before writing the document; the grills before the
+first round and the confirm round; `commit` almost never). The advisor is set
+with `/advisor claude-opus-5-5` or `"advisorModel": "claude-opus-5-5"` in each
+account's `settings.json`, which this repo does not hold. It is picked by model
+only, so there is no advisor effort setting, and Claude decides when to call it:
+the skills can name the point but not force the call. The Codex counterparts
+have no advisor and need none.
+
 - `commit` — commits already-staged changes with a semantic message.
 - `paper-target` — pins the Paper file/page this repo's design work reads from.
 - `paper-design-prompt` — turns a design direction into one Paper prompt

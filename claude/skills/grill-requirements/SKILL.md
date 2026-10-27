@@ -213,3 +213,23 @@ counts and that the files are uncommitted. Do not approve.
 This does not prove nothing is unknown. It ends the grill when the checklist
 is clean, a fresh reader with no chat found nothing important, and the user
 says so.
+
+## Advisor
+
+If an advisor is on (`/advisor`), consult it at these points, with the full
+conversation already in front of it:
+
+- Before posting the first round (Step 4): ask whether the round misses a
+  question the requirements and the files make obvious, asks something the files
+  already answer, or leads the user to an answer.
+- Before the confirm round in Step 5: ask what is still weak in the requirements that
+  the checklist would not catch. It adds to the fresh-eyes check and never
+  replaces it: the advisor has seen the chat, so it is not fresh eyes.
+- When an answer contradicts a settled item and you cannot tell which is
+  right.
+
+Claude decides when the advisor is called, so name the point in the
+consultation. If the advisor is off, unavailable, or declines, say so in one
+line and carry on; this skill never stops on it. Its answer is advice: where
+the files or a source contradict a claim, follow them and say so. It never
+answers a question for the user, settles an item, or supplies a requirement.

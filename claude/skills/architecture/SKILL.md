@@ -156,3 +156,21 @@ Reply with the shape in one line, the module graph as mermaid, then tables of
 full, then: "Tell me what to change (for example `merge M2 and M3`), or run
 /grill-architecture." After a change, reply with only what changed and what
 it touched.
+
+## Advisor
+
+If an advisor is on (`/advisor`), consult it at these points:
+
+- In Step 2, after the shape and the modules are drafted and before
+  `architecture.md` is written: ask it to find a pass-through module, an
+  entity with two owners, a flow that skips a failure, a cycle, an `R` / `N`
+  nothing serves, and a part no number asks for. It adds to the sub-agent's
+  alternative shape and does not replace it.
+- In Step 3, when a change from the user conflicts with an `R` / `N` / `C`
+  item or the stack, or touches several modules: ask what else it forces.
+
+Claude decides when the advisor is called, so name the point in the
+consultation. If the advisor is off, unavailable, or declines, say so in one
+line and carry on; this skill never stops on it. Its answer is advice: where
+a source or the files contradict a claim, follow them and say so. It never
+answers a question for the user or overrides a `Fixed by` item.

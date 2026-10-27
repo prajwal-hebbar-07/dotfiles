@@ -196,3 +196,25 @@ Reply with the idea in two lines, the screen graph as mermaid, then tables of
 S3`), add to the brief with `/design brief <text>`, run `/grill-design` to
 sharpen the idea, or `/design build` to draw it in Paper." After a change,
 reply with only what changed and what it touched.
+
+## Advisor
+
+If an advisor is on (`/advisor`), consult it at these points:
+
+- In Step 2, after the idea, journeys and screens are drafted and before
+  `design.md` is written: ask it to find a `BR` item the design breaks or
+  ignores, a feel word with no rule, a screen with two primary actions or none,
+  a missing state, a dead end, an `R` no journey serves, and a part no number
+  asks for. It adds to the sub-agent's alternative idea and does not replace
+  it.
+- In `/design build`, after the design system board and before the screens:
+  ask whether the system as drawn carries the idea and the patterns, from the
+  screenshot.
+- In Step 3, when a change from the user conflicts with a `BR` item or an
+  architecture flow, or touches several screens: ask what else it forces.
+
+Claude decides when the advisor is called, so name the point in the
+consultation. If the advisor is off, unavailable, or declines, say so in one
+line and carry on; this skill never stops on it. Its answer is advice: where
+a source, the files or the brief contradict a claim, follow them and say so.
+It never answers a question for the user or overrides a `BR` item.

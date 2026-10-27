@@ -140,3 +140,17 @@ as they are; `/grill-requirements` picks up from the changed file, and a
 fresh-eyes check recorded against an older file no longer counts. If the stack or
 architecture row is past `not started`, say it may need rechecking against
 the change. Do not touch those rows yourself.
+
+## Advisor
+
+If an advisor is on (`/advisor`), consult it once, in Step 5 before setting
+`captured`: ask it to read `requirements.md` against what the user said in
+this chat and find anything invented, softened, merged, split wrongly,
+renumbered, or filed in the wrong section. Fix what it finds that the user's
+own words support. Do not consult on each message; capture stays quick.
+
+Claude decides when the advisor is called, so name the point in the
+consultation. If the advisor is off, unavailable, or declines, say so in one
+line and carry on; this skill never stops on it. Its answer is advice: where
+the files or the user's words contradict a claim, follow them and say so. It
+never answers a question for the user or supplies a requirement.
