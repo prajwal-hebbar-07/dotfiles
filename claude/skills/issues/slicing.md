@@ -65,6 +65,35 @@ works, not a list of files.
    all in earlier waves. Two issues that would edit the same module in the same
    wave are put in different waves, or merged, so they do not collide.
 
+## YAGNI sweep
+
+Run on the plan before the issues are written, and again after any change.
+The plan must pass the rules in `principles.md` as much as the code must.
+
+- For every issue, name the `R`, `N`, `C` or `BR` that needs it. None: drop it.
+- For every dependency edge, name what the later issue cannot start without.
+  None: drop the edge.
+- For every module, entity, concern, screen or pattern, build only the part the
+  issue's acceptance criteria use. Fields, states, roles and options the
+  documents list but no criterion exercises still get built where the
+  document says they are required; what the document marks as optional, or
+  leaves open, is not built and goes under **Not built**.
+- An issue that only wires, forwards or prepares for another is merged into it
+  (the deletion test, applied to issues).
+- A layer, adapter, queue, cache, setting, feature flag, admin tool or
+  generic mechanism the architecture does not name is not planned, whatever
+  the usual practice.
+- The bootstrap issue sets up only what the stack and architecture name.
+
+If the `ponytail` skill is installed (it is third-party and not copied
+here), read its SKILL.md and apply its ladder to each issue and each edge: does
+it need to exist; is it already in the codebase, the standard library or the
+platform; is it an installed dependency; can it be one line. An issue that
+fails the first rung is dropped. Without ponytail, the rules above are the
+whole sweep.
+
+The sweep removes work from the plan; it never adds to the documents.
+
 ## Self-sufficiency
 
 An issue passes only if an implementer who has nothing but that issue could
@@ -81,12 +110,17 @@ build it and tell whether it is done. For each issue, check:
 3. **Every state.** For an issue with UI: every screen has every state the
    design lists, with its words; a state the design omits and the screen needs
    is an open point, not a guess.
-4. **No stranger.** No term outside the glossary and no reference to "the
+4. **Build rules.** The text of `principles.md` is pasted in unchanged, and
+   nothing in the issue contradicts it (an option, layer or dependency no
+   number asks for).
+5. **No stranger.** No term outside the glossary and no reference to "the
    previous issue", "as above" or "the usual way".
-5. **No open question hides.** Every `Q`, `AQ`, `DQ`, `SQ` or accepted unknown
-   that touches the issue is in **Assumptions** with the value to build. A
-   question whose answer could change which issues exist stops the run.
-6. **Fresh reader.** A sub-agent that is given only the issue files (not the
+6. **No open question hides.** Every `Q`, `AQ`, `DQ`, `SQ` or accepted unknown
+   that touches the issue is in **Assumptions** with the value to build (the
+   simplest that serves the requirements' numbers). A question whose answer
+   could change which issues exist is built at its simplest case and the
+   larger one is recorded under **Not built**; it does not stop the run.
+7. **Fresh reader.** A sub-agent that is given only the issue files (not the
    documents, not the chat) answers: "What would you have to ask the author
    before you could build this and know it is done? Quote the line, or say
    what is missing." Run it in batches of up to five issues. Each gap it

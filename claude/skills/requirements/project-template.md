@@ -25,9 +25,8 @@ Requirements status moves `not started` → `capturing` → `captured` →
 status move the same way as the tech stack's. A stage is only `approved` when the user
 runs its `approve` command. A review (`/review-<stage>`) never changes a status;
 its report is in `docs/review/<stage>-review.md` and its verdict only moves
-**Next action**. Issues status moves `not started` → `proposed` → `approved` →
-`published` (there is no grill; `/issues approve` and `/issues publish` are
-the user's commands).
+**Next action**. Issues status moves `not started` → `planned` →
+`published`; `/issues` has no grill and no approval, and goes straight through.
 
 ## Log
 

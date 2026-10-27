@@ -1,6 +1,6 @@
 # Implementation issues: <project>
 
-Status: proposed · Last updated: <yyyy-mm-dd>
+Status: planned · Last updated: <yyyy-mm-dd>
 
 Tracker: [project.md](project.md)
 
@@ -41,7 +41,7 @@ in at publish.
 
 ## Coverage
 
-Every live item is built by at least one issue. A blank row blocks approval.
+Every live item is built by at least one issue. A blank row blocks publishing.
 
 | Item | Built by |
 | --- | --- |
@@ -69,5 +69,8 @@ Every live item is built by at least one issue. A blank row blocks approval.
 
 ## Open points
 
-- **IQ1** — <something only the user can answer before these issues are
-  published, and which issue waits on it>
+Gaps in an earlier stage found while planning. Nothing waits on them: each was
+built to the value under **Assumed**.
+
+- **IQ1** — <the gap, the issue it touches, and the command to run to settle
+  it (`/requirements`, `/stack`, `/architecture` or `/design`)>

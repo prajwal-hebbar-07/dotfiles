@@ -6,7 +6,7 @@ seen the chat, the other issues, or any document, and who must not need to
 ask anything. So everything the issue depends on is **copied in, word for
 word**, with its ID and its source; a bare "see architecture.md" or "per M2"
 is never enough. Omit a section that has nothing in it, except Acceptance
-criteria, Tests, Out of scope and Definition of done.
+criteria, Tests, How to build it, Out of scope and Definition of done.
 
 Cite stack decisions as `stack S3` and screens as `screen S3`: both documents
 use `S`.
@@ -98,6 +98,10 @@ here, from the bootstrap issue.>
 - Non-functional `N2`: <the check and the number it must meet>
 - How to run them: <the commands from the bootstrap issue>
 
+## How to build it
+
+<The text of `principles.md`, pasted word for word.>
+
 ## Out of scope
 
 - <Adjacent behaviour this issue must not add, each with the key of the issue
@@ -106,9 +110,9 @@ here, from the bootstrap issue.>
 ## Assumptions
 
 <Each open question (`AQ`, `DQ`, `SQ`, `Q`) or accepted unknown (`A`, `AA`,
-`DA`, `SA`) that touches this issue: the question, the value to assume, and
-the ID. Build to the assumed value. If it turns out wrong, the fix is a new
-issue, not a question here.>
+`DA`, `SA`) that touches this issue: the question, the value to assume (the simplest
+that serves the requirements' numbers), and the ID. Build to the assumed value.
+If it turns out wrong, the fix is a new issue, not a question here.>
 
 ## Blocked by
 
@@ -127,8 +131,11 @@ architecture fixes it.>
 - The required tests exist and pass on the stack's own test tooling, and add
   no failures elsewhere.
 - Nothing from **Out of scope** was built.
+- Nothing was added that **How to build it** rules out: no unrequested
+  option, layer, abstraction, dependency or dead code.
 - Docs that describe behaviour this issue changed are updated in the same PR.
-- The PR says `Closes #<number>` and lists any assumption it relied on.
+- The PR says `Closes #<number>` and lists under "Assumed" any choice it made
+  where this issue was silent.
 
 ## Sources
 
