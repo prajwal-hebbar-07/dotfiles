@@ -8,7 +8,7 @@ description: >
   in docs/architecture.md and docs/project.md, so a new chat resumes where
   the last stopped. Use when the user says "/architecture", wants an
   architecture proposed, or wants to change it.
-argument-hint: "[change text | status | approve]"
+argument-hint: "[change text | status | approve | respond]"
 disable-model-invocation: true
 ---
 
@@ -57,6 +57,7 @@ Read `docs/project.md`, `docs/requirements.md`, `docs/stack.md`,
 - The requirements `Status:` is not `grilled` or `approved`, or the stack's
   is not: stop and say which. If the user says to go ahead anyway, continue
   and put `Built on <file> that was <status>` in the header.
+- Argument `respond`: **Respond to a review**; do nothing else.
 - Argument `status`: print the architecture status, items by `State` per
   prefix, open `AQ` count, whether both recorded hashes still match, and
   **Next action**. Change nothing.
@@ -156,6 +157,34 @@ Reply with the shape in one line, the module graph as mermaid, then tables of
 full, then: "Tell me what to change (for example `merge M2 and M3`), or run
 /grill-architecture." After a change, reply with only what changed and what
 it touched.
+
+## Respond to a review
+
+`/architecture respond` answers the open findings in
+`docs/review/architecture-review.md`, which another model wrote, so that the
+two models settle what they can before the user is asked. A review is a claim,
+not a fact: check each finding against the file before answering.
+
+For each open finding, in ID order, write one `Response:` line under it in the
+report. That line is the only change this mode makes to the report; it never
+writes a `Rejoinder:`, changes a `Status:`, or edits a finding.
+
+- `accepted — <what changed>`: the finding is right and its fix needs nothing
+  the user has not already given. Apply it as Step 3 applies a change (same
+  status, `settled` and tracker rules), marking what it touches `State:
+  proposed (revised after <finding ID>)`. Then write the line.
+- `rebutted — <evidence>`: the finding is wrong. Quote the line, the ID or the
+  command output that shows it. "I meant it" and "it was deliberate" are not
+  evidence. A decision the user settled is left standing and answered with the
+  log line that shows they settled it.
+- `intent — <the question>`: it turns on something only the user can say: what
+  they meant, wanted or decided, or the fix needs a value, number or content
+  they have not given. Do not guess it.
+
+Never change a decision the user settled, a requirement, or the stack. Do not
+commit. Reply with the counts of accepted, rebutted and intent, and: "Run
+`/review-architecture` again; it checks the responses and leaves what is still
+disputed for you."
 
 ## Advisor
 

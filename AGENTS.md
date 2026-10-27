@@ -113,6 +113,21 @@ self-contained on purpose; change one, change the other three.
 `review-design` share mechanics (report format, re-review, severity) and are
 each self-contained on purpose; change one, change the other three.
 
+**Disputes.** The four stage reviews, `review-code` and `qa`, in both hosts,
+let the models settle a review in the report before the user is asked. The
+author answers a finding with one `Response:` line under it (`accepted`,
+`rebutted` with evidence, or `intent` with the question only the user can
+answer): `/requirements respond`, `/stack respond`, `/architecture respond`,
+`/design respond` (also `$design respond`), `/implement fix` for code, and
+`/implement` for a QA finding. The reviewer's next run checks each response
+against the file or code and writes a `Rejoinder:` (`conceded` or `maintained`
+with evidence). A dispute ends after one rebuttal and one rejoinder. What is
+still `contested`, and every `intent` finding, is listed under `### For you`
+at the top of the review; the user decides only those. The responding command
+writes nothing to the report but `Response:` lines. The `## Responses and
+disputes` section is the same in all twelve reviewer files and the `respond`
+section is the same in the four stage commands; change one, change the rest.
+
 - `issues` — `/issues`: runs straight from the decided stages to GitHub, with
   no approval or confirmation. Cuts the whole app into vertical-slice issues
   (issue 0 bootstraps the project) and writes the plan to `docs/issues.md`

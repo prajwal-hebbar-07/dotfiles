@@ -211,7 +211,7 @@ file with the header if missing). Header, once:
 Branch: <branch> · Base: origin/<default>
 
 IDs are permanent. A finding keeps its ID across reviews and reviewers.
-Prefix `CR`. Severity: blocker · major · minor · nit. Status: open · resolved
+Prefix `CR`. Severity: blocker · major · minor · nit. Status: open · accepted · conceded · contested · intent · resolved
 (review N) · declined (user's reason). Not committed to the branch.
 ```
 
@@ -256,6 +256,51 @@ Verdict: **blocked** with any open blocker; **changes needed** with any open
 major; otherwise **ready for PR**, which says the review found nothing that
 should stop the user from raising the PR, and does not replace reading the
 diff. Numbering: re-reviews continue the count.
+
+## Responses and disputes
+
+The models settle what they can in this report before the user is asked. The
+author answers a finding with a `Response:` line written under it; the
+reviewer answers that with a `Rejoinder:` line; whatever is still disputed
+then is marked for the user. A dispute ends after one rebuttal and one
+rejoinder: nobody argues twice. The statuses `accepted`, `conceded`,
+`contested` and `intent` are added to the report's Status list.
+
+At the start of any re-review, before the re-test in Step 4, read the
+`Response:` under each open finding (written by `/implement fix` in Claude Code) and handle it:
+
+| Response | What you do | Status |
+| --- | --- | --- |
+| `accepted — <what changed>` | Re-test the finding against the current code. Fixed: `resolved (review N)`. Not fixed: leave it `open` with `Still: <what remains>` | `resolved`, or `open` |
+| `rebutted — <evidence>` | Check the evidence in the code itself, not the author's word. It holds: write `Rejoinder: conceded — <what the evidence showed>`; status `conceded`, counted as resolved. It does not: write `Rejoinder: maintained — <evidence that answers the rebuttal>`; status `contested` | `conceded`, or `contested` |
+| `intent — <the question>` | Decide whether it is really something only the user can answer: what they meant, wanted or decided. If so keep the finding as `intent`. If the code already answers it, say where and treat it as a rebuttal | `intent` |
+
+Rules:
+
+- Evidence only. A rejoinder that repeats the finding, or a concession made
+  without looking, does not count. Concede when the evidence shows you wrong;
+  maintain when it does not. Do not concede to be agreeable or maintain to be
+  consistent, and do not weigh how confident the author sounds.
+- A `contested` or `intent` finding is not argued again. A later review
+  changes it only when the code changes so that it is settled, or the
+  user declines it.
+- For the verdict, `contested` and `intent` findings count as open.
+- A finding with no `Response:` is handled as before.
+
+Under the verdict line of a review that has any `contested` or `intent`
+finding, add:
+
+```
+### For you
+
+- **<ID> · <severity> · contested | intent** — <the finding, one line>
+  - Reviewer: <the evidence>
+  - Author: <the evidence, or the question only you can answer>
+  - Yours to decide: fix it with `/implement fix` in Claude Code, or settle the question, or `declined: <reason>`
+```
+
+Leave the block out when there is nothing in it. Lead the reply with the
+`For you` list, then the counts of findings accepted, conceded and still open.
 
 ## Step 5 — reply
 

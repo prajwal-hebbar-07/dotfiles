@@ -14,7 +14,7 @@ description: >
 
 # design
 
-Invoke as `$design [brief <text> | change text | status | build | approve]`.
+Invoke as `$design [brief <text> | change text | status | build | approve | respond]`.
 
 Turn what the project already knows into a proposed design in
 `docs/design.md` that the user can read and change, and draw it in Paper.
@@ -73,6 +73,7 @@ exist, and any `paper-target` block in `AGENTS.md` or `CLAUDE.md`.
   A file whose `Status:` is not `grilled` or `approved` is used as it is, with
   `Built on <file> that was <status>` in the header, and the summary says so.
 - If `project.md` has no Design row, add one (`not started`).
+- Argument `respond`: **Respond to a review**; do nothing else.
 - Argument `status`: print the design status, items by `State` per prefix,
   screens by `Paper:` state, open `DQ` count, whether the recorded hashes
   still match, and **Next action**. Change nothing.
@@ -197,6 +198,34 @@ Reply with the idea in two lines, the screen graph as mermaid, then tables of
 S3`), add to the brief with `$design brief <text>`, run `$grill-design` to
 sharpen the idea, or `$design build` to draw it in Paper." After a change,
 reply with only what changed and what it touched.
+
+## Respond to a review
+
+`$design respond` answers the open findings in `docs/review/design-review.md`,
+which another model wrote, so that the two models settle what they can before
+the user is asked. A review is a claim, not a fact: check each finding against
+the file before answering.
+
+For each open finding, in ID order, write one `Response:` line under it in the
+report. That line is the only change this mode makes to the report; it never
+writes a `Rejoinder:`, changes a `Status:`, or edits a finding.
+
+- `accepted — <what changed>`: the finding is right and its fix needs nothing
+  the user has not already given. Apply it as Step 3 applies a change (same
+  status, `settled`, Paper and tracker rules), marking what it touches `State:
+  proposed (revised after <finding ID>)`. Then write the line.
+- `rebutted — <evidence>`: the finding is wrong. Quote the line, the ID or the
+  command output that shows it. "I meant it" and "it was deliberate" are not
+  evidence. A decision the user settled is left standing and answered with the
+  log line that shows they settled it.
+- `intent — <the question>`: it turns on something only the user can say: what
+  they meant, wanted or decided, or the fix needs a value, number or content
+  they have not given. Do not guess it.
+
+Never change a decision the user settled, a requirement, the stack or the
+architecture. Do not commit. Reply with the counts of accepted, rebutted and
+intent, and: "Run `$review-design` again; it checks the responses and leaves
+what is still disputed for you."
 
 ## Codex sub-agents
 

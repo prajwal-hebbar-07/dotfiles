@@ -7,7 +7,7 @@ description: >
   user says, numbered and in their own words; does not interview, design, or
   pick a stack. Use when the user says "/requirements", wants to note down
   what an app should do, or wants to resume that.
-argument-hint: "[requirements text | status | approve]"
+argument-hint: "[requirements text | status | approve | respond]"
 disable-model-invocation: true
 ---
 
@@ -76,6 +76,7 @@ Next: <Next action from project.md>
 Last: <last log line>
 ```
 
+If the argument is `respond`, go to **Respond to a review** and stop.
 If the argument is `status`, stop here and change nothing. If it is
 `approve`: only when the status is `grilled`; otherwise say what is missing
 and stop. Set `Status: approved` in `requirements.md` and the tracker row,
@@ -140,6 +141,36 @@ as they are; `/grill-requirements` picks up from the changed file, and a
 fresh-eyes check recorded against an older file no longer counts. If the stack or
 architecture row is past `not started`, say it may need rechecking against
 the change. Do not touch those rows yourself.
+
+## Respond to a review
+
+`/requirements respond` answers the open findings in
+`docs/review/requirements-review.md`, which another model wrote, so that the
+two models settle what they can before the user is asked. A review is a claim,
+not a fact: check each finding against the file before answering.
+
+For each open finding, in ID order, write one `Response:` line under it in the
+report. That line is the only change this mode makes to the report; it never
+writes a `Rejoinder:`, changes a `Status:`, or edits a finding.
+
+- `accepted — <what changed>`: the finding is right and its fix needs nothing
+  the user has not already given. Apply it by editing the item in place without
+  changing the user's words, and keep every ID. Only changes that move or split
+  the user's own words without altering them are `accepted` (sorting, an ID, a
+  glossary entry, a lost removed-item line); anything that needs a number, a
+  criterion or a new requirement is `intent`. Then write the line.
+- `rebutted — <evidence>`: the finding is wrong. Quote the line, the ID or the
+  command output that shows it. "I meant it" and "it was deliberate" are not
+  evidence. A decision the user settled is left standing and answered with the
+  log line that shows they settled it.
+- `intent — <the question>`: it turns on something only the user can say: what
+  they meant, wanted or decided, or the fix needs a value, number or content
+  they have not given. Do not guess it.
+
+Never change a requirement's words, add a requirement, or answer for the user.
+Do not commit. Reply with the counts of accepted, rebutted and intent, and:
+"Run `/review-requirements` again; it checks the responses and leaves what is
+still disputed for you."
 
 ## Advisor
 

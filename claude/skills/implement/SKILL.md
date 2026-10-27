@@ -45,7 +45,7 @@ Files, all in the app repo (git root, else the current directory):
 | `docs/issues.md`, `docs/issues/<key>.md` | The plan and the issue files. Read only |
 | `docs/progress.md` | The tracker: every issue's state, branch and PR. Read first and written by this skill (format in Step 1). Local state: never staged, never committed here |
 | the GitHub issue | The issue body is the brief. Read with `gh issue view` |
-| `docs/review/code/<key>-review.md` | Review findings on the branch. Read; never edited here, never committed |
+| `docs/review/code/<key>-review.md` | Review findings on the branch. Read; the only thing written here is a `Response:` line under a finding (Step 6). Never committed |
 | `docs/requirements.md`, `docs/architecture.md`, `docs/stack.md`, `docs/design.md`, `docs/glossary.md` | Read only, to check an unclear point against its source. Never edited |
 
 ## Never
@@ -62,7 +62,8 @@ Files, all in the app repo (git root, else the current directory):
 - Edit `docs/` (except a document the issue's Definition of done names, and
   `docs/progress.md`), the issue files, or the review reports. Stage only the
   files this issue's work touches, by path; never `git add -A`, and never stage
-  `docs/review/**` or `docs/progress.md`.
+  `docs/review/**` or `docs/progress.md`. In a review report write only
+  `Response:` lines, never a `Rejoinder:`, a status or a finding.
 - Claim a test passes, or the work is done, without running it and seeing it.
   A test that could not run is said so in the hand-off.
 - Skip hooks (`--no-verify`) or weaken a test to make it pass.
@@ -296,16 +297,35 @@ Along the way:
 Read `docs/review/code/<key>-review.md`. For each open finding of severity
 blocker or major (and minor, if the user asked), newest review first:
 
-1. Check it against the code. If it is right, fix it with the least change,
-   with a test if it is a behaviour, and commit through `commit` (the commit
-   says which finding, for example `fixes CR2`). If it is wrong, or the issue
-   explicitly asks for what it calls a defect, do not change the code: note
-   the finding ID and the evidence in the hand-off for the user to decide.
-2. Findings by two reviewers about the same thing are fixed once.
+1. Check it against the code, not the reviewer's word. Then answer it with
+   exactly one `Response:` line under the finding in the report:
+   - **Right:** fix it with the least change, with a test if it is a
+     behaviour, and commit through `commit` (the commit says which finding,
+     for example `fixes CR2`). Write `Response: accepted — fixed in <short
+     sha>, <what changed>`.
+   - **Wrong**, or the issue explicitly asks for what it calls a defect: do
+     not change the code. Write `Response: rebutted — <evidence>`, the
+     `file:line`, the issue line or the command output that shows it.
+     "I built it that way" and "the issue allowed it" without the line that
+     allows it are not evidence.
+   - **Only the user can say** (what they meant, or a choice the issue leaves
+     open): do not guess. Write `Response: intent — <the question>`.
+2. Findings by two reviewers about the same thing are fixed once, and get one
+   `Response:`.
 3. Run Step 5.1 and 5.2 again on the result.
 
-Do not edit the report. The reviewer marks findings resolved on the next
-review. Then hand off (Step 7) and stop.
+The `Response:` lines are the only thing written to the report. The reviewer
+reads them on the next review, concedes or maintains, and marks what is still
+disputed for the user. Do not edit anything else in the report. Then hand off
+(Step 7) and stop. In the hand-off list the findings by `Response:`: accepted,
+rebutted and intent.
+
+A `qa` issue's finding lives in `docs/review/qa-report.md`, named in the
+issue's **Raised by QA** section. If building it shows the finding is wrong,
+build nothing for it: write `Response: rebutted — <evidence>` (or `intent —
+<the question>`) under that finding there, say so in the hand-off, and stop.
+When the issue is built, write `Response: accepted — built in #<n>, <short
+sha>` under the finding.
 
 ## Step 7 — hand-off
 
