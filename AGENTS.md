@@ -12,27 +12,28 @@ started from scratch on 2026-10-26 and empty until the user adds one.
 removing one. List them here as they are added.
 
 Codex counterparts live under `codex/skills/<name>/SKILL.md`:
-`commit`, `split-commit`, `design`, `grill-design`, `review-requirements`,
+`commit`, `design`, `grill-design`, `review-requirements`,
 `review-stack`, `review-architecture`, `review-design`. Requirements, stack
 and architecture authoring and grilling stay in Claude Code; Codex can review
 their output files.
 `codex/link-skills` links them into `~/.agents/skills/`, Codex's user skill
 directory; rerun it after adding or removing one. It prunes only its own
 broken links and refuses to replace another skill. Invoke with `$name`
-(for example `$split-commit` or `$design build`). The workflows below also
-describe these eight Codex versions. Keep both hosts in step when changing a
+(for example `$commit plan` or `$design build`). The workflows below also
+describe these seven Codex versions. Keep both hosts in step when changing a
 shared workflow, including templates and probes; retain each host's invocation
 syntax, metadata and tool instructions. Claude's explicit-only skills use
 `policy.allow_implicit_invocation: false` in Codex's `agents/openai.yaml`.
 
-- `commit` — stops if `user.name`/`user.email` is unset; commits what is
-  staged, or stages everything when nothing is; semantic subject plus two or
-  more bullets; never a co-author or attribution trailer.
-- `split-commit` — `/split-commit`: commits the changes as several focused
-  commits through `commit`, only where they separate cleanly (revert, pick
-  and one-sentence tests; code with its tests, docs and wiring); one commit
-  when they do not. Shows the plan and waits for a yes (`now` skips, `plan`
-  only prints), then checks the final tree equals the starting index.
+- `commit` — `/commit`: stops if `user.name`/`user.email` is unset; commits
+  what is staged, or stages everything when nothing is. One commit by
+  default; several focused commits only where the changes separate cleanly
+  (revert, pick and one-sentence tests; code with its tests, docs and
+  wiring). With several it shows the plan and waits for a yes (`now` skips,
+  `plan` only prints), then checks the final tree equals the starting index.
+  Each message is a semantic subject plus two or more bullets; never a
+  co-author or attribution trailer. This one skill replaced `commit` and
+  `split-commit` on 2026-10-27, in both Claude Code and Codex.
 - `requirements` — `/requirements`: records what the user says about an app
   into `docs/requirements.md` (numbered R/N/C/X/Q items, exact wording kept)
   and tracks the project in `docs/project.md` in the app repo, so a new chat
@@ -136,7 +137,7 @@ each self-contained on purpose; change one, change the other three.
 Every Claude Code skill above ends in an `## Advisor` section: where, if an
 advisor is on (`/advisor`), the skill consults it (the reviews before writing
 the verdict; the proposals before writing the document; the grills before the
-first round and the confirm round; `commit` almost never). The advisor is set
+first round and the confirm round; `commit` only when it splits). The advisor is set
 with `/advisor claude-opus-5-5` or `"advisorModel": "claude-opus-5-5"` in each
 account's `settings.json`, which this repo does not hold. It is picked by model
 only, so there is no advisor effort setting, and Claude decides when to call it:

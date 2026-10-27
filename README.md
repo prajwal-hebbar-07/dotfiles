@@ -336,7 +336,7 @@ or removing a skill. Each account's `skills/synced/` (skills synced from
 claude.ai) is left alone.
 
 Codex has counterparts under `codex/skills/`, adapted from the Claude Code
-set: `commit`, `split-commit`, `design`, `grill-design`, `review-requirements`,
+set: `commit`, `design`, `grill-design`, `review-requirements`,
 `review-stack`, `review-architecture`, `review-design`. Requirements, stack
 and architecture authoring and grilling stay in Claude Code; Codex can
 review their output files.
@@ -346,7 +346,7 @@ another skill. The approval gates, templates and logged progress are the
 same, so either host can resume from an app's `docs/` files. Keep the two
 sets in step when changing a workflow.
 
-Use `$split-commit` (`plan` to preview, `now` to skip the plan confirmation),
+Use `$commit` (`plan` to preview a split, `now` to skip its confirmation),
 `$design`, and `$grill-design` in Codex. `$design brief <text>`,
 `$design build`, and `$design approve` work
 the same way as their Claude counterparts; drawing needs a connected Paper
@@ -364,9 +364,12 @@ architecture are labeled for pasting into Claude Code; design fixes use
 `$design` in Codex. The Codex reviewers have no advisor step.
 
 - **`commit`** (`/commit`) — stops if `user.name` or `user.email` is not set.
-  Commits what is staged; when nothing is, it stages everything first. The
-  message is a semantic `type(scope): summary` with two or more bullets, and
-  never carries a `Co-Authored-By:` or any other attribution trailer.
+  Commits what is staged; when nothing is, it stages everything first. One
+  commit by default; several focused commits only where the changes separate
+  cleanly (`/commit plan` previews, `/commit now` skips the confirmation).
+  Each message is a semantic `type(scope): summary` with two or more bullets,
+  and never carries a `Co-Authored-By:` or any other attribution trailer.
+  Replaces the former `split-commit`.
 
 **`pdocs` skill** (`/pdocs`) — the `docs` skill under another name for Claude
 Code, whose account-synced skills already include a `docs`. Only `SKILL.md` is
