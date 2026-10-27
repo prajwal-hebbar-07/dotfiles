@@ -132,6 +132,13 @@ each self-contained on purpose; change one, change the other three.
   epic, sub-issues, native blocked-by links, a hidden key marker so a re-run
   never duplicates). Gaps are built to the simplest assumption and reported at
   the end. `/issues sync` carries a later document change to open issues.
+  `/issues qa` files the open `/qa` findings the same way (labels `qa`, and
+  `needs-decision` for a finding that is a gap in a document: a stub issue
+  that `/issues sync` completes once the stage is grilled). Every QA issue
+  opens with a **Raised by QA** section: the run, finding, kind (missing test,
+  weak test, defect, flake, skipped test, document gap), where, and whether to
+  build it or decide it first. `/issues` adds each issue's row to
+  `docs/progress.md`.
   Writes no code and edits no other stage's file. Claude Code only.
 
 - `implement` — `/implement`: builds the GitHub issues one at a time in plan
@@ -143,8 +150,15 @@ each self-contained on purpose; change one, change the other three.
   It never pushes, opens the PR, merges or starts the next issue: the user
   reviews, raises the PR and merges by hand, then runs `/implement` again.
   With review findings on the branch (`/implement fix`) it fixes them and
-  stops again. State is git and GitHub only; it writes no tracker file.
-  Claude Code only.
+  stops again. State is tracked in `docs/progress.md` (key, GitHub number,
+  kind, state, branch, PR), read first on every run: `done` rows are final and
+  cost no GitHub call; only in-flight rows are checked against git and GitHub,
+  since the user merges by hand; a lost file is rebuilt from them. Local
+  state, never staged. An issue labelled `needs-decision` (a QA finding that
+  is a gap in a document) is never built: when it comes up in plan order
+  `/implement` asks the user the questions itself, then hands over the
+  pre-filled `/<stage>` command with their answers, `/grill-<stage>`, and
+  `/issues sync`. Claude Code only.
 - `review-code` — `/review-code` (Claude Code) and `$review-code` (Codex):
   an independent review of an issue branch, by a different model from the one
   that wrote it. Checks the diff against the issue's acceptance criteria,
@@ -155,6 +169,28 @@ each self-contained on purpose; change one, change the other three.
   share one report, with `Also found by` and `Disputed by` lines. Never edits
   code, pushes or comments on a PR; `/implement` fixes the findings. Same
   mechanics as the stage reviews; change one, change the other four.
+- `qa` — `/qa`: a whole-app test audit on the merged default branch, after
+  some or all issues are done. Builds a coverage matrix (every `R`, `C`, `N`,
+  `F` failure step, `B`, `J` across issues, screen state, entity, concern and
+  assumption against the test that covers it, read for whether it could fail),
+  runs the project's own test command twice (flakes), lint, type check and
+  build, and appends ranked findings (prefix `QA`, same severities and
+  verdicts as `review-code`) to `docs/review/qa-report.md`. Each finding names
+  its route: `issue`, a stage command, or `manual`. Items whose
+  issues are not done are `not yet built`, so it doubles as a progress check.
+  Never starts the app, a server or a browser (so screens and live requests
+  are `not judged`, with the manual check to do), never edits code. Same
+  mechanics as `review-code`; change one, change the other. Claude Code only.
+- `release` — `/release [version]`: the last gate, from files and GitHub only.
+  Checks every issue done, everything in the coverage table built, `/qa`
+  ready on the current default-branch commit, code reviews clear, stage
+  documents settled and unstale, CI green on the commit, the suite, build and
+  audit passing, no secrets. Rewrites `docs/release.md` with the verdict
+  (`ready`, `ready with warnings`, `not ready`), what the user is accepting
+  (not built, assumed, open points, known limits), a manual-check list, the
+  deploy steps issue 0 recorded, draft release notes, and the tag and
+  `gh release` commands for the user to run. Never tags, pushes, deploys or
+  publishes. Claude Code only.
 
 Every Claude Code skill above ends in an `## Advisor` section: where, if an
 advisor is on (`/advisor`), the skill consults it (the reviews before writing

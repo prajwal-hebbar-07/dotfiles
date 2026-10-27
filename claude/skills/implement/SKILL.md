@@ -8,8 +8,12 @@ description: >
   raises the PR: the user reviews the branch (with /review-code or
   $review-code), raises the PR and merges it by hand, and runs /implement
   again for the next issue. With review findings on the branch, /implement
-  fixes them and stops again. Use when the user says "/implement", wants the
-  next issue built, or wants review findings fixed.
+  fixes them and stops again. An issue marked needs-decision (a QA finding that
+  is a gap in a document, not in the code) is not built: /implement asks the
+  user the questions, then hands over the stage command and grill to run. What
+  is done and what is next is tracked in docs/progress.md, checked before
+  GitHub. Use when the user says "/implement", wants the next issue built, or
+  wants review findings fixed.
 argument-hint: "[status | fix | <issue key or #number>]"
 disable-model-invocation: true
 ---
@@ -28,15 +32,18 @@ hand-off. It does not push, open a pull request, merge, or start the next
 issue. The user reviews with `/review-code` (here) or `$review-code` (Codex),
 raises the PR by hand, merges it, and runs `/implement` again.
 
-All state is in git and on GitHub, so a new chat resumes where the last
-stopped. The skill writes no tracker file: the issue branches and the issues'
-state are the record.
+State is tracked in `docs/progress.md`, so a run reads one file to know what
+is built and what is next, and asks git and GitHub only about the issues the
+file says are in flight. If the file is lost it is rebuilt from git and GitHub
+(Step 1), so a new chat, or another machine, still resumes where the last
+stopped.
 
 Files, all in the app repo (git root, else the current directory):
 
 | File | Role |
 | --- | --- |
 | `docs/issues.md`, `docs/issues/<key>.md` | The plan and the issue files. Read only |
+| `docs/progress.md` | The tracker: every issue's state, branch and PR. Read first and written by this skill (format in Step 1). Local state: never staged, never committed here |
 | the GitHub issue | The issue body is the brief. Read with `gh issue view` |
 | `docs/review/code/<key>-review.md` | Review findings on the branch. Read; never edited here, never committed |
 | `docs/requirements.md`, `docs/architecture.md`, `docs/stack.md`, `docs/design.md`, `docs/glossary.md` | Read only, to check an unclear point against its source. Never edited |
@@ -52,9 +59,10 @@ Files, all in the app repo (git root, else the current directory):
   bind every line: no unrequested option, layer, abstraction or dependency, no
   dead code. If the `ponytail` skill is available, work in its `full` mode.
 - Add a dependency the stack decisions in the issue do not name.
-- Edit `docs/` (except a document the issue's Definition of done names), the
-  issue files, or the review reports. Stage only the files this issue's work
-  touches, by path; never `git add -A`, and never stage `docs/review/**`.
+- Edit `docs/` (except a document the issue's Definition of done names, and
+  `docs/progress.md`), the issue files, or the review reports. Stage only the
+  files this issue's work touches, by path; never `git add -A`, and never stage
+  `docs/review/**` or `docs/progress.md`.
 - Claim a test passes, or the work is done, without running it and seeing it.
   A test that could not run is said so in the hand-off.
 - Skip hooks (`--no-verify`) or weaken a test to make it pass.
@@ -74,34 +82,84 @@ gh repo view --json nameWithOwner,defaultBranchRef -q '.nameWithOwner+" "+.defau
 git fetch origin
 ```
 
-Read `docs/issues.md` and its issue table (key, title, blocked by, wave, GitHub
-number).
+Read `docs/progress.md` (the tracker), then `docs/issues.md` and its issue
+table (key, title, blocked by, wave, GitHub number).
 
 - `user.name` / `user.email` empty, `gh` not logged in, no `docs/issues.md`, or
   an issue table with no GitHub numbers: stop and say what to fix (run
   `/issues` first for the last two). Do not set identity or log in.
-- Uncommitted changes other than under `docs/review/code/`: stop and list
-  them. The user commits or stashes; this skill does neither.
-- Argument `status`: print, per issue in plan order, its key, GitHub number,
-  state (done / awaiting review / in progress / blocked / ready) and branch, and
-  the issue the next run would pick. Change nothing.
+- Uncommitted changes other than under `docs/review/code/` and
+  `docs/progress.md`: stop and list them. The user commits or stashes; this
+  skill does neither.
+- Argument `status`: bring the tracker up to date (below), print it as the
+  table, the issue the next run would pick, and stop. Writing `progress.md` is
+  the only change.
 
-For each issue in plan order (wave, then key), decide its state:
+### The tracker
 
-- **done**: the GitHub issue is closed, or a pull request from its branch is
-  merged (`gh pr list --head <branch> --state merged --json number`), or its
-  branch is merged into the default branch.
-- **awaiting review**: its branch `issue/<n>-<slug>` exists with commits not in
-  the default branch, or an open pull request exists for it
-  (`gh pr list --head <branch> --state open --json number,url`).
-- **blocked**: any `blockedBy` issue is not done
-  (`gh issue view <n> --json state,blockedBy`).
-- **ready**: open, not blocked, no branch yet.
+`docs/progress.md` is the one place that says what is built and what is next.
+It is local state: it is never staged or committed by this skill, and the user
+should keep it out of commits (`docs/progress.md` in `.git/info/exclude`). Rows
+are in plan order (wave, then key).
 
-The **current issue** is the first one in plan order that is not done. Then:
+```
+# Progress: <project>
 
-- Argument `<issue key or #n>`: use that issue instead, if it is ready or
-  awaiting review. If it is blocked, stop and name the blockers.
+Plan: [issues.md](issues.md) · Tracker: [project.md](project.md)
+
+Next: <key> (#<n>), <what the next run does>
+
+| Key | GitHub | Kind | State | Blocked by | Branch | PR | Updated | Note |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| i01-sign-in | #12 | plan | done | i00-bootstrap | issue/12-sign-in | #31 | 2026-10-28 | |
+| q01-charge-retry | #40 | qa QA3 · missing test | awaiting review | none | issue/40-charge-retry | | 2026-10-29 | |
+```
+
+State is one of `not started`, `in progress`, `awaiting review`, `needs
+decision`, `done`, `dropped`. Kind is `plan`, or `qa <finding ID> · <kind>`
+for an issue raised by `/qa`. `/issues` adds the rows (and `needs decision`
+for a QA decision issue) when it publishes; this skill moves them.
+
+### Bring it up to date
+
+GitHub and git are asked only about rows that can have changed, because the
+user merges outside this skill. In this order:
+
+1. **No file.** Rebuild it. One `gh issue list --state all --json
+   number,state,labels`, one `gh pr list --state all --json
+   headRefName,state,number`, and the local and remote branches, then one row
+   per row of the issue table: **done** if the issue is closed, a PR from its
+   branch is merged, or its branch is merged into the default branch;
+   **awaiting review** if `issue/<n>-<slug>` exists with commits not in the
+   default branch or an open PR exists; **needs decision** if it is open and
+   labelled `needs-decision`; otherwise **not started**. `qa`-labelled issues
+   get their Kind from the `Raised by QA` section of the body.
+2. **A row in the issue table that the file lacks** (added by `/issues`, a sync
+   or `/issues qa` that did not write it): add it, `not started`, or `needs
+   decision` when its issue is labelled so (one `gh issue view <n> --json
+   labels`). A row `issues.md` marks `dropped` becomes `dropped`.
+3. **`done` and `dropped` rows are final.** No call is made for them.
+4. **`in progress` and `awaiting review` rows** are checked: issue closed, PR
+   merged, or branch merged into the default branch gives `done` (with the PR
+   number and today's date); a branch with commits and no merge stays
+   `awaiting review`; an `in progress` row whose last run stopped before its
+   hand-off stays `in progress` and is continued, not restarted.
+5. **`needs decision` rows**: one `gh issue view <n> --json labels`. The label
+   gone (a sync settled it) gives `not started`.
+6. **`not started` rows** need no call. One is **blocked** while any key in its
+   Blocked by column is not `done` in this file.
+
+Write the file with the new states and today's dates, and the `Next:` line,
+before doing anything else, so a stopped run leaves the tracker true.
+
+### Pick
+
+The **current issue** is the first row in plan order that is not `done` or
+`dropped`. Then:
+
+- Argument `<issue key or #n>`: use that issue instead, if it is not started,
+  in progress, awaiting review or needs decision. If it is blocked, stop and
+  name the blockers.
 - Current issue **blocked** (so something earlier is awaiting review): stop,
   and say which issue is waiting and what the user does next: review it,
   raise and merge the PR, run `/implement`. Never skip ahead.
@@ -111,8 +169,42 @@ The **current issue** is the first one in plan order that is not done. Then:
   If an open pull request exists, give its URL.
 - Current issue **awaiting review** and the review report has open blocker or
   major findings, or the argument is `fix`: Step 6.
-- Current issue **ready**: Step 2.
-- Every issue done: say the plan is complete.
+- Current issue **in progress**: continue on its branch from the first
+  acceptance criterion without a passing test (Step 3, then Step 4).
+- Current issue **not started**: Step 2.
+- Current issue **needs decision**: **Decision mode**, below. A user who wants
+  to build something else first names it by key.
+- Every row `done` or `dropped`: say the plan is complete.
+
+## Decision mode
+
+A needs-decision issue is a QA finding where the document, not the code, is
+wrong or unclear. Nothing is built. The user is asked here, in chat, and the
+answer goes back into the document through its own stage skill; this skill
+does not edit the document or the issue.
+
+1. **Read.** The issue body (**Raised by QA**, the finding, **Decision
+   needed** with the stage, the document, the item IDs and the question), the
+   cited items in that document, any matching entry in `docs/grill/*-log.md`,
+   and the code and tests the finding names.
+2. **Ask**, in rounds of at most four questions, the first round being the
+   issue's question. Each question is in plain words and carries: the item's
+   text with its ID, what the code and tests do today, two or three real
+   answers (your recommendation first), each with what it would change in the
+   document and what the code would then do, and "something else". Ask a
+   further round only on what the answers leave open. Stop when every question
+   has an answer from the user, or they say to take the simplest; record that
+   as their answer. Never answer for them, and never write a guess into the
+   code.
+3. **Hand off.** Reply with the issue (`#<n> <title>`), the answers in the
+   user's own words with the item IDs, and the steps, the first already filled
+   in so the user pastes it: (1) `/<stage> <the answers, verbatim, naming the
+   item IDs>`, which records them in the document (`/requirements`, `/stack`,
+   `/architecture` or `/design`); (2) `/grill-<stage>` until the document is
+   `grilled`; (3) `/issues sync`, which rewrites the issue from the settled
+   text and clears the label; then `/implement`. Set the row's Note to
+   `asked <date>: <one-line answer>`; its State stays `needs decision`. Change
+   no other file, and stop.
 
 ## Step 2 — branch
 
@@ -120,6 +212,9 @@ The **current issue** is the first one in plan order that is not done. Then:
 default=<default branch>
 git switch -c issue/<n>-<slug> origin/$default
 ```
+
+Then set the row to `in progress` with the branch and today's date in
+`docs/progress.md`, and the `Next:` line.
 
 `<slug>` is the key's slug (`i03-sign-in` gives `issue/12-sign-in`). The
 branch starts at `origin/<default>`. If any blocker issue's work is not in
@@ -214,7 +309,9 @@ review. Then hand off (Step 7) and stop.
 
 ## Step 7 — hand-off
 
-Reply in at most twenty lines, then stop:
+First set the issue's row in `docs/progress.md` to `awaiting review`, with
+today's date, and the `Next:` line (this issue waits for the user's review; then
+the next one). Then reply in at most twenty lines, and stop:
 
 - the issue (`#<n> <title>`), the branch, and the commits (short sha and
   subject);
