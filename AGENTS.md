@@ -11,6 +11,18 @@ started from scratch on 2026-10-26 and empty until the user adds one.
 (`cc`) and `~/.claude-work/skills/` (`ccw`); rerun it after adding or
 removing one. List them here as they are added.
 
+Codex counterparts live under `codex/skills/<name>/SKILL.md`:
+`commit`, `split-commit`, `design`, `grill-design`. Requirements, stack and
+architecture workflows stay in Claude Code; Codex reads their output files.
+`codex/link-skills` links them into `~/.agents/skills/`, Codex's user skill
+directory; rerun it after adding or removing one. It prunes only its own
+broken links and refuses to replace another skill. Invoke with `$name`
+(for example `$split-commit` or `$design build`). The workflows below also
+describe these four Codex versions. Keep both hosts in step when changing a
+shared workflow, including templates and probes; retain each host's invocation
+syntax, metadata and tool instructions. Claude's explicit-only skills use
+`policy.allow_implicit_invocation: false` in Codex's `agents/openai.yaml`.
+
 - `commit` — stops if `user.name`/`user.email` is unset; commits what is
   staged, or stages everything when nothing is; semantic subject plus two or
   more bullets; never a co-author or attribution trailer.

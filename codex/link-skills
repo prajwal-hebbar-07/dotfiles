@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# Link this repo's Codex skills into the user skill directory. An optional
+# destination argument supports installing elsewhere or checking in isolation.
+set -euo pipefail
+
+if (( $# > 1 )); then
+  echo "Usage: $0 [destination]" >&2
+  exit 1
+fi
+
+src="$(cd "$(dirname "$0")" && pwd)/skills"
+dest=${1:-"$HOME/.agents/skills"}
+
+# Check every destination before making changes; never replace another skill.
+for skill in "$src"/*/; do
+  [[ -f $skill/SKILL.md ]] || continue
+  link="$dest/$(basename "$skill")"
+  if [[ -e $link || -L $link ]]; then
+    if [[ ! -L $link ]] || [[ $(readlink "$link") != "$src"/* ]]; then
+      echo "Refusing to replace existing skill: $link" >&2
+      exit 1
+    fi
+  fi
+done
+
+mkdir -p "$dest"
+for link in "$dest"/*; do
+  if [[ -L $link && $(readlink "$link") == "$src"/* && ! -e $link ]]; then
+    rm "$link"
+  fi
+done
+for skill in "$src"/*/; do
+  [[ -f $skill/SKILL.md ]] || continue
+  ln -sfn "${skill%/}" "$dest/$(basename "$skill")"
+done

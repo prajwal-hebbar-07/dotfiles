@@ -335,6 +335,24 @@ both accounts — `~/.claude/skills/` (`cc`) and `~/.claude-work/skills/`
 or removing a skill. Each account's `skills/synced/` (skills synced from
 claude.ai) is left alone.
 
+Codex has counterparts under `codex/skills/`, adapted from the Claude Code
+set: `commit`, `split-commit`, `design`, `grill-design`. Requirements, stack
+and architecture workflows stay in Claude Code; Codex reads their output
+files.
+Run `codex/link-skills` to link them into `~/.agents/skills/` for use across
+repos. It can be rerun, prunes its own broken links, and refuses to overwrite
+another skill. The approval gates, templates and logged progress are the
+same, so either host can resume from an app's `docs/` files. Keep the two
+sets in step when changing a workflow.
+
+Use `$split-commit` (`plan` to preview, `now` to skip the plan confirmation),
+`$design`, and `$grill-design` in Codex. `$design brief <text>`,
+`$design build`, and `$design approve` work
+the same way as their Claude counterparts; drawing needs a connected Paper
+MCP. Explicit-only invocation is preserved through `agents/openai.yaml`;
+`commit` remains available for automatic selection. If the skills do not
+appear, restart Codex. See the [official skill documentation](https://learn.chatgpt.com/docs/build-skills).
+
 - **`commit`** (`/commit`) — stops if `user.name` or `user.email` is not set.
   Commits what is staged; when nothing is, it stages everything first. The
   message is a semantic `type(scope): summary` with two or more bullets, and
