@@ -9,7 +9,7 @@ description: >
   or a plain-english pin, both pinned per repo in docs/README.md. Stages
   its docs files and runs the commit skill. Use when the user says "docs",
   "generate the docs", "plain English docs only", "verify the docs", "are
-  the docs still true", or invokes /pdocs or /skill:pdocs.
+  the docs still true", or invokes /pdocs.
 argument-hint: "[generate | verify] [full | since <ref> | <NN> ...] [arch | no-arch] [plain | no-plain] [report | fix]"
 disable-model-invocation: true
 ---

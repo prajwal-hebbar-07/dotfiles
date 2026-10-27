@@ -418,8 +418,6 @@ step is not done: do not stamp `**Landed:**`.
 - Continue the next window in this same chat
 - Resume or self-fork this conversation into the next window
 - Pass this chat's history, diffs, or a finished window into the next chat
-- Use omp `planner` or `hand` for the chain
-- Spawn the next window `isolated` on omp
 - Finish a code step that changes behaviour with no code-level test for a
   sanity check and for that functionality
 - Open a browser, start the app, or do a manual or UI pass

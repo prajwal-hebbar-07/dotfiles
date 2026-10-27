@@ -9,13 +9,12 @@ Personal configuration for my daily development setup.
 
 ## What I use
 
-Seven tools make up my environment:
+Six tools make up my environment:
 
 | Tool | Role |
 | --- | --- |
 | [Brave](https://brave.com) | Browser |
 | [Ghostty](https://ghostty.org) | Terminal emulator |
-| Oh My Pi | Coding harness / agent environment |
 | [Cursor](https://cursor.com) | Code editor |
 | Gemini (Antigravity) | AI coding assistant / CLI |
 | [zsh](https://www.zsh.org) | Shell (macOS default) |
@@ -61,84 +60,6 @@ Two Ghostty parser details worth remembering when editing that file:
   `~/.config/ghostty/themes/pale-knight`. Check a theme is visible with
   `ghostty +list-themes`, and check a config with `ghostty +validate-config`.
 
-### Oh My Pi
-
-The coding harness (`omp`). `omp/` holds its settings and MCP servers, each
-symlinked to where omp reads it:
-
-| Repo file | Live path | What it is |
-| --- | --- | --- |
-| `omp/config.yml` | `~/.omp/agent/config.yml` | Settings: model roles, per-agent model overrides, theme, symbol preset, and the settings the factory needs (GitHub, secrets, security scan, task isolation, usage-aware fallback, 1-hour helper cap) |
-| `omp/mcp.json` | `~/.omp/agent/mcp.json` | MCP servers: `paper`, started from the binary inside `/Applications/Paper.app` |
-| `omp/agents/factory-*.md` | `~/.omp/agent/agents/` (one link per file) | The factory's helper agents: planner, builder, reviewers, QA, designer, explainer |
-| `omp/hooks/pre/factory-guard.ts` | `~/.omp/agent/hooks/pre/factory-guard.ts` | Blocks merges, pushes outside `factory/*` / `feature/*`, PRs you have not approved, edits to approved docs, and holdout reads |
-| `omp/extensions/factory-stage-guard.ts` | `~/.omp/agent/extensions/factory-stage-guard.ts` | Keeps an unattended factory run from ending early; points compaction at the run state |
-| `skills/factory*/`, `skills/feature/`, `skills/tour/` | `~/.omp/agent/skills/<name>` | The factory skills, the feature factory, and the feature tour (below) |
-| `skills/commit`, `paper-design-prompt`, `paper-design`, `paper-target`, `arc-design`, `docs` | `~/.omp/agent/skills/<name>` | Existing skills the factory reuses |
-
-`config.yml` is also written by omp itself (settings UI, `/model`, saved
-settings). Edits made there land in the repo file through the link; if a save
-ever replaces the link with a plain file, copy it back over `omp/config.yml`
-and re-link.
-
-omp reads skills from `~/.omp/agent/skills/`, not `~/.claude/skills/`, so
-only the skills linked there are visible to it. Two third-party skills are
-linked from `~/.agents/skills/`: `ponytail` (the simplicity rules four factory
-agents load) and `archify` (used by `arc-design`).
-
-**Software factory** — `/skill:factory` in an app repo. Builds a whole
-application: requirements, tech stack, and architecture, each grilled and
-approved by you; then GitHub issues on a board (issue #0 sets up CI and the
-checks); then each issue through plan, build, reviews, QA, and UI review
-without you; then it asks "Raise PR?". It stops at fixed points (S1–S5);
-start a new session and run `/skill:factory` again to resume.
-`/skill:factory status` shows where a run is; `/skill:factory change <text>`
-changes a requirement mid-run. Run state lives in the app repo's `.factory/`
-(kept out of git). Design: `SOFTWARE-FACTORY.md`.
-
-**Feature factory** — `/skill:feature <description>` (or `#<issue>`)
-in an existing app repo. One feature, fitted into the current architecture:
-scout, a short interview, one solution sketch with a simplicity round, your
-Approve on the brief, then plan, build, two reviews, and QA without you, then
-your Approve on the PR. It stops instead of designing a new module, service,
-datastore, or runtime, or past 10 commits. Run it with no arguments to resume.
-Design: `FEATURE-FACTORY.md`.
-
-Both need `gh` logged in (`gh auth refresh -s project` for the board),
-`git config user.email` set in the app repo, and an `AGENTS.md` at its root.
-
-**Moving a run to a new chat.** Press Escape to stop the running turn, then
-run `/skill:feature pause` (or `/skill:factory pause`) in that same chat. It
-stops the helper agents and writes `.factory/handoff.md` with everything only
-that chat knows: decisions not yet in the brief, open review findings,
-questions waiting on you, what was in progress. Open a new chat in the repo
-and run `/skill:feature` (or `/skill:factory`) with no arguments: it reads the
-handoff, checks its claims against the branch and ledger, and carries on.
-If you already quit with Ctrl+C twice or Ctrl+D, reopen the chat with
-`omp --resume` and pause from there; or start a new chat directly, which
-resumes from the brief, ledger, and commits but without the chat-only context.
-
-**Starting over.** `/skill:feature reset` wipes the current feature run (its
-brief, branch, open PR, QA evidence) so `/skill:feature <new prompt>` starts
-clean; name a slug to wipe an older one. `/skill:factory reset` wipes a whole
-factory run, `docs/factory/`, issues, and board included. Both list what
-they will remove and ask once first; neither touches product code.
-
-**Evals** — `python3 omp/factory-evals/run structural` checks every factory
-skill and agent file, link, and scenario offline in seconds.
-`run routing` and `run gate-hold` drive real `omp -p` runs against fixture
-repos and grade them with a judge model (see `omp/factory-evals/README.md`).
-
-**`tour` skill** — run in any repo. `/skill:tour`
-(or "what features does this project have?") prints a numbered table of
-the features in the code, and nothing else.
-`/skill:tour explain <name or number>` has `factory-explainer`
-write `docs/features/<feature>.md`: each code snippet on the feature's path
-in the order it runs, what it does line by line, and why it is written that
-way, with sources. `scripts/check-snippets.py` compares every snippet with
-the file before the document is saved. The document is not committed.
-Design: `SOFTWARE-FACTORY.md` §4.9.
-
 ### Cursor
 
 Editor for hands-on code work: an AI-native fork of VS Code, so VS Code
@@ -155,15 +76,6 @@ is linked in too — it is plain `git` over the staged index, so it behaves the
 same in every host. The review
 skill is linked here for completeness; the intended use is to copy that
 `SKILL.md` plus the plan into another agent.
-
-**Software factory** — `/factory` in an app repo, `/feature` for one feature
-in an app that already exists. Same stages as the omp factory
-(`SOFTWARE-FACTORY.md`, `FEATURE-FACTORY.md`). The Cursor host is
-`cursor/factory/`: entry skills, subagents in `~/.cursor/agents/`, and user
-hooks that block merges, unapproved PRs, pushes outside `factory/*` and
-`feature/*`, and edits to an approved doc. Run state stays in the app repo's
-`.factory/`. `python3 cursor/factory/hooks/tests/test_guard.py` checks the
-hooks. Approval gates and the stop-before-PR rule live in this host.
 
 **Paper MCP** — comes from the `paper-desktop` plugin here rather than a hand
 written server: Cursor expands `${userHome}` in plugin manifests, so the
@@ -487,14 +399,10 @@ dotfiles/
 ├── ghostty/    # terminal config
 │   ├── config
 │   └── themes/pale-knight
-├── omp/        # Oh My Pi settings, MCP servers, agents
-│   ├── config.yml
-│   ├── mcp.json
-│   └── agents/factory-explainer.md
 ├── claude/     # Claude Code, both accounts (cc, ccw)
 │   ├── link-skills                 # links claude/skills/* into both
 │   └── skills/<name>/SKILL.md
-├── skills/     # Agent Skills, linked into Cursor, Gemini, and omp
+├── skills/     # Agent Skills, linked into Cursor and Gemini
 │   ├── commit/SKILL.md
 │   ├── docs/SKILL.md
 │   ├── implementation-plan/SKILL.md
@@ -506,10 +414,7 @@ dotfiles/
 │   ├── paper-design-prompt/SKILL.md
 │   ├── paper-design/SKILL.md
 │   ├── sync-lyik-docs/SKILL.md
-│   ├── pdocs/SKILL.md
-│   ├── tour/SKILL.md               # omp only
-│   ├── feature/SKILL.md            # omp only
-│   └── factory*/SKILL.md           # omp only
+│   └── pdocs/SKILL.md
 ├── cursor/     # editor settings, keybindings, extension list
 ├── zsh/        # zshrc, and bin/pk-preview for the fzf preview pane
 ├── tmux/       # tmux.conf, Pale Knight theme and keys
@@ -580,18 +485,6 @@ ln -sfn "$PWD/skills/follow-implementation-plan" ~/.cursor/skills/follow-impleme
 ln -sfn "$PWD/skills/report-arc" ~/.cursor/skills/report-arc
 ln -sfn "$PWD/skills/repo-docs" ~/.cursor/skills/repo-docs
 ln -sfn "$PWD/skills/twitter-campaign" ~/.cursor/skills/twitter-campaign
-ln -sfn "$PWD/cursor/factory/skills/factory" ~/.cursor/skills/factory
-ln -sfn "$PWD/cursor/factory/skills/feature" ~/.cursor/skills/feature
-mkdir -p ~/.cursor/agents ~/.cursor/hooks ~/.cursor/factory/bin
-for a in cursor/factory/agents/*.md; do
-  ln -sfn "$PWD/$a" ~/.cursor/agents/$(basename "$a")
-done
-chmod +x cursor/factory/hooks/factory_guard.py cursor/factory/hooks/factory_stage.py
-ln -sfn "$PWD/cursor/factory/hooks/factory_guard.py" ~/.cursor/hooks/factory-guard.py
-ln -sfn "$PWD/cursor/factory/hooks/factory_stage.py" ~/.cursor/hooks/factory-stage.py
-ln -sfn "$PWD/cursor/factory/hooks.json" ~/.cursor/hooks.json
-ln -sfn "$PWD/skills/factory/scripts/factory-state" ~/.cursor/factory/bin/factory-state
-ln -sfn "$PWD/skills/factory-issues/scripts/board" ~/.cursor/factory/bin/board
 
 mkdir -p ~/.gemini/config/skills
 ln -sfn "$PWD/skills/commit" ~/.gemini/config/skills/commit
@@ -602,19 +495,7 @@ ln -sfn "$PWD/skills/docs-verify" ~/.gemini/config/skills/docs-verify
 ln -sfn "$PWD/skills/follow-implementation-plan" ~/.gemini/config/skills/follow-implementation-plan
 ln -sfn "$PWD/skills/repo-docs" ~/.gemini/config/skills/repo-docs
 
-mkdir -p ~/.omp/agent/skills ~/.omp/agent/agents ~/.omp/agent/hooks/pre ~/.omp/agent/extensions
-ln -sfn "$PWD/omp/config.yml"  ~/.omp/agent/config.yml
-ln -sfn "$PWD/omp/mcp.json"    ~/.omp/agent/mcp.json
-for s in skills/factory skills/factory-* skills/feature skills/tour skills/commit skills/paper-design-prompt \
-         skills/paper-design skills/paper-target skills/arc-design skills/docs; do
-  ln -sfn "$PWD/$s" ~/.omp/agent/skills/$(basename "$s")
-done
-for a in omp/agents/*.md; do ln -sfn "$PWD/$a" ~/.omp/agent/agents/$(basename "$a"); done
-ln -sfn "$PWD/omp/hooks/pre/factory-guard.ts" ~/.omp/agent/hooks/pre/factory-guard.ts
-ln -sfn "$PWD/omp/extensions/factory-stage-guard.ts" ~/.omp/agent/extensions/factory-stage-guard.ts
 npx skills add DietrichGebert/ponytail -g --skill ponytail
-ln -sfn ~/.agents/skills/ponytail ~/.omp/agent/skills/ponytail
-ln -sfn ~/.agents/skills/archify  ~/.omp/agent/skills/archify
 
 ./claude/link-skills
 ```
