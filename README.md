@@ -337,7 +337,7 @@ claude.ai) is left alone.
 
 Codex has counterparts under `codex/skills/`, adapted from the Claude Code
 set: `commit`, `design`, `grill-design`, `review-requirements`,
-`review-stack`, `review-architecture`, `review-design`. Requirements, stack
+`review-stack`, `review-architecture`, `review-design`, `review-code`. Requirements, stack
 and architecture authoring and grilling stay in Claude Code; Codex can
 review their output files.
 Run `codex/link-skills` to link them into `~/.agents/skills/` for use across
@@ -362,6 +362,14 @@ was resolved. Each accepts `status` or focus text; `$review-design no-paper`
 reviews only the document. Fix commands for requirements, stack and
 architecture are labeled for pasting into Claude Code; design fixes use
 `$design` in Codex. The Codex reviewers have no advisor step.
+
+Use `$review-code` (or `/review-code` in Claude Code) on an issue branch that
+`/implement` has built, to get a second model's view before raising the PR. It
+writes ranked findings to `docs/review/code/<key>-review.md`, shared between
+the two hosts, runs the issue's own tests, and changes no code. `/implement`
+(Claude Code only) builds the issues in plan order, one branch each, stops
+after each without pushing or opening a PR, and fixes review findings when
+run again.
 
 - **`commit`** (`/commit`) — stops if `user.name` or `user.email` is not set.
   Commits what is staged; when nothing is, it stages everything first. One

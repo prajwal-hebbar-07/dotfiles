@@ -13,14 +13,14 @@ removing one. List them here as they are added.
 
 Codex counterparts live under `codex/skills/<name>/SKILL.md`:
 `commit`, `design`, `grill-design`, `review-requirements`,
-`review-stack`, `review-architecture`, `review-design`. Requirements, stack
+`review-stack`, `review-architecture`, `review-design`, `review-code`. Requirements, stack
 and architecture authoring and grilling stay in Claude Code; Codex can review
 their output files.
 `codex/link-skills` links them into `~/.agents/skills/`, Codex's user skill
 directory; rerun it after adding or removing one. It prunes only its own
 broken links and refuses to replace another skill. Invoke with `$name`
 (for example `$commit plan` or `$design build`). The workflows below also
-describe these seven Codex versions. Keep both hosts in step when changing a
+describe these eight Codex versions. Keep both hosts in step when changing a
 shared workflow, including templates and probes; retain each host's invocation
 syntax, metadata and tool instructions. Claude's explicit-only skills use
 `policy.allow_implicit_invocation: false` in Codex's `agents/openai.yaml`.
@@ -133,6 +133,28 @@ each self-contained on purpose; change one, change the other three.
   never duplicates). Gaps are built to the simplest assumption and reported at
   the end. `/issues sync` carries a later document change to open issues.
   Writes no code and edits no other stage's file. Claude Code only.
+
+- `implement` — `/implement`: builds the GitHub issues one at a time in plan
+  order (`docs/issues.md`): picks the first open issue whose blockers are
+  done, branches `issue/<n>-<slug>` from `origin/<default>`, builds it test
+  first, criterion by criterion, in small commits through `commit`, runs the
+  tests, lint and build, checks its own diff against the issue (scope, YAGNI
+  rules, architecture), and stops with a hand-off and a ready PR description.
+  It never pushes, opens the PR, merges or starts the next issue: the user
+  reviews, raises the PR and merges by hand, then runs `/implement` again.
+  With review findings on the branch (`/implement fix`) it fixes them and
+  stops again. State is git and GitHub only; it writes no tracker file.
+  Claude Code only.
+- `review-code` — `/review-code` (Claude Code) and `$review-code` (Codex):
+  an independent review of an issue branch, by a different model from the one
+  that wrote it. Checks the diff against the issue's acceptance criteria,
+  scope, build rules, architecture, stack, design, tests, correctness and
+  security, runs the issue's own test, lint and build commands, and appends
+  ranked findings (same severities and verdicts as the stage reviews, prefix
+  `CR`) to `docs/review/code/<key>-review.md`. Reviews from several models
+  share one report, with `Also found by` and `Disputed by` lines. Never edits
+  code, pushes or comments on a PR; `/implement` fixes the findings. Same
+  mechanics as the stage reviews; change one, change the other four.
 
 Every Claude Code skill above ends in an `## Advisor` section: where, if an
 advisor is on (`/advisor`), the skill consults it (the reviews before writing
