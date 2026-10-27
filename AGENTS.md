@@ -14,6 +14,16 @@ removing one. List them here as they are added.
 - `commit` — stops if `user.name`/`user.email` is unset; commits what is
   staged, or stages everything when nothing is; semantic subject plus two or
   more bullets; never a co-author or attribution trailer.
+- `requirements` — `/requirements`: records what the user says about an app
+  into `docs/requirements.md` (numbered R/N/C/X/Q items, exact wording kept)
+  and tracks the project in `docs/project.md` in the app repo, so a new chat
+  resumes from the files. Does not interview, design, or commit.
+- `grill-requirements` — `/grill-requirements`: grills `docs/requirements.md`
+  in rounds asked in chat. Each round and answer is logged to
+  `docs/grill/log.md` before the reply, so a new chat resumes from the open
+  questions. Ends only when `coverage.md`, a pre-mortem, a no-chat fresh-eyes
+  check and the user's confirm all pass; then sets `grilled`, never
+  `approved`. Based on Matt Pocock's `grilling` and `domain-modeling`.
 
 - `commit` — commits already-staged changes with a semantic message.
 - `paper-target` — pins the Paper file/page this repo's design work reads from.
