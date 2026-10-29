@@ -249,9 +249,9 @@ claude.ai) is left alone.
 
 Codex has counterparts under `codex/skills/`, adapted from the Claude Code
 set: `commit`, `design`, `grill-design`, `review-requirements`,
-`review-stack`, `review-architecture`, `review-design`, `review-code`. Requirements, stack
-and architecture authoring and grilling stay in Claude Code; Codex can
-review their output files.
+`review-stack`, `review-architecture`, `review-design`, `review-feature`, `review-code`, `qa`.
+Requirements, stack, architecture and feature authoring and grilling stay in
+Claude Code; Codex can review their output files.
 Run `codex/link-skills` to link them into `~/.agents/skills/` for use across
 repos. It can be rerun, prunes its own broken links, and refuses to overwrite
 another skill. The approval gates, templates and logged progress are the
@@ -282,6 +282,20 @@ the two hosts, runs the issue's own tests, and changes no code. `/implement`
 (Claude Code only) builds the issues in plan order, one branch each, stops
 after each without pushing or opening a PR, and fixes review findings when
 run again.
+
+To build a feature in an existing repository, built with this pipeline or
+not, start from its GitHub issue: make a branch from it (**Create a branch** on
+the issue, or `gh issue develop <n> --checkout`) and run the same stages as a
+whole app, without the stack and issues stages, fitted into what the app
+already has: `/feature` (requirements), `/feature-architecture` (how it fits
+the existing architecture), `/feature-design` (how it fits the existing
+screens, drawn in Paper with `build`), each grilled with `/grill-feature
+<stage>`, reviewed with `/review-feature <stage>` or `$review-feature
+<stage>`, and approved with its own `approve`. State is kept in
+`docs/features/<n>-<slug>/`, out of git; the issue itself is never edited.
+`/implement` then builds from the approved stages on the same branch and
+stops, and you review with `/review-code` or `$review-code` and raise and
+merge the PR yourself.
 
 - **`commit`** (`/commit`) — stops if `user.name` or `user.email` is not set.
   Commits what is staged; when nothing is, it stages everything first. One

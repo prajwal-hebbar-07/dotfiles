@@ -13,14 +13,14 @@ removing one. List them here as they are added.
 
 Codex counterparts live under `codex/skills/<name>/SKILL.md`:
 `commit`, `design`, `grill-design`, `review-requirements`,
-`review-stack`, `review-architecture`, `review-design`, `review-code`, `qa`. Requirements, stack
-and architecture authoring and grilling stay in Claude Code; Codex can review
-their output files.
+`review-stack`, `review-architecture`, `review-design`, `review-feature`, `review-code`, `qa`.
+Requirements, stack, architecture and feature authoring and grilling stay in
+Claude Code; Codex can review their output files.
 `codex/link-skills` links them into `~/.agents/skills/`, Codex's user skill
 directory; rerun it after adding or removing one. It prunes only its own
 broken links and refuses to replace another skill. Invoke with `$name`
 (for example `$commit plan` or `$design build`). The workflows below also
-describe these nine Codex versions. Keep both hosts in step when changing a
+describe these ten Codex versions. Keep both hosts in step when changing a
 shared workflow, including templates and probes; retain each host's invocation
 syntax, metadata and tool instructions. Claude's explicit-only skills use
 `policy.allow_implicit_invocation: false` in Codex's `agents/openai.yaml`.
@@ -89,44 +89,112 @@ syntax, metadata and tool instructions. Claude's explicit-only skills use
   a designer sub-agent; logs requirement, stack and architecture gaps instead
   of editing them.
 
-`grill-requirements`, `grill-stack`, `grill-architecture` and `grill-design`
-share mechanics (round format, log handling, exit loop) and are each
-self-contained on purpose; change one, change the other three.
+**Feature flow.** For one feature in **any existing repository**, built with
+this pipeline or not, with or without `docs/`, starting from a GitHub issue
+someone else opened and the branch the user made from it (GitHub's **Create a
+branch**, or `gh issue develop <n> --checkout`). The same stages as the
+whole-app flow, without the stack and issues stages, and with the
+architecture and design fitted into what the app already has instead of
+built from nothing: `/feature` → `/grill-feature requirements` →
+`/feature approve` → `/feature-architecture` → `/grill-feature architecture`
+→ `/feature-architecture approve` → `/feature-design` → `/grill-feature
+design` → `/feature-design build` → `/feature-design approve` (or
+`/feature-design none <reason>` with no UI) → `/implement` on the branch → `/review-code` or `$review-code` → PR and merge by hand.
+`/review-feature <stage>` (or `$review-feature <stage>` in Codex) can run on
+any stage at any point. Every skill finds the feature from the branch's
+leading number or `#<n>`. State is in `docs/features/<n>-<slug>/`
+(`tracker.md`, `requirements.md`, `architecture.md`, `design.md`,
+`glossary.md`, `grill/`, `review/`), kept out of git through
+`.git/info/exclude`, so they are the only copy of the plan (remove the line
+and commit them to keep or share it). The issue is read, never written. `/issues`, `/qa` and
+`/release` are whole-app and not part of it.
+
+- `feature` — `/feature`: reads the issue and what the app does today (`T`
+  facts with sources), captures the issue and anything the user adds as
+  `R`/`N`/`C`/`X`/`Q` items in their words (the `/requirements` rules), owns
+  the tracker and `status` across every stage, and `approve`s the
+  requirements. Never writes to GitHub: no issue, comment, edit or branch,
+  and no code.
+- `feature-architecture` — `/feature-architecture`: reads the code the
+  feature lands in and writes it as **As is** (`AS` items with `path:line`,
+  the stack and commands, an as-is diagram), then proposes the feature's
+  architecture around it in `/architecture`'s form and vocabulary: a shape
+  with a structurally different alternative (sub-agent), modules (`M`) and
+  entities (`E`) each `new` with a reason or `extends AS<n>`, existing rows
+  and migration, flows with failures and the existing permission checks,
+  concerns through existing mechanisms, threats, risks to what exists (`RK`,
+  each caller with its test), to-be diagrams, traceability, and **Fit** (the
+  stop rule: a new deployable, datastore, runtime, boundary change, new
+  dependency or more than about ten commits is a split the user decides).
+  Re-reads the code when `origin/<default>` moves. Never redesigns what
+  exists.
+- `feature-design` — `/feature-design`: reads the app's screens, navigation,
+  components, tokens and copy where the feature lands (**Existing UI**, `EU`
+  items), then proposes in `/design`'s form where the feature sits (with an
+  alternative placement), moments, journeys from existing screens, new and
+  changed screens (`Change: changes EU<n>`) with every state in the app's
+  words, new patterns only where none exists, and the app's own look reused.
+  `/feature-design build` draws it in Paper on a `#<n> <title>` page: the
+  app's tokens, a `· today` board for each existing screen it changes, then
+  the feature's boards beside them. `approve` needs `grilled` and every
+  screen built; `none <reason>` marks a feature with nothing to see.
+- `grill-feature` — `/grill-feature <stage>`: grills one stage the same way as
+  the other grills (logged to the feature's `grill/<stage>-log.md`, coverage
+  in `grill/<stage>-coverage.md`), but looks up in the code whatever the code
+  can answer and re-checks every `T`, `AS` and `EU` fact. Per-stage attacks,
+  coverage and probes (requirements; architecture with the reuse, deletion,
+  callers, existing rows and undo tests; design with say-it-back and no
+  styling questions), then traceability, a simplicity sweep, a pre-mortem
+  about breaking what exists, a fresh-eyes sub-agent that may read the repo,
+  and the confirm round. Settled terms go in the feature's `glossary.md`.
+  Logs gaps in earlier stages instead of editing them. An approved stage is
+  grilled again only with `reopen`.
+
+`grill-requirements`, `grill-stack`, `grill-architecture`, `grill-design` and
+`grill-feature` share mechanics (round format, log handling, exit loop) and
+are each self-contained on purpose; change one, change the other four.
 
 - `review-requirements`, `review-stack`, `review-architecture`,
-  `review-design` — `/review-<stage>`: an independent reviewer for a stage
+  `review-design`, `review-feature` — `/review-<stage>` (`/review-feature
+  <stage>` for a feature's requirements, architecture or design): an independent reviewer for a stage
   document that another model built. Reads the document cold (and for design
-  the Paper boards, read-only), runs a stage checklist, re-checks sourced
-  facts, and appends ranked findings (blocker, major, minor, nit, each with
+  the Paper boards, read-only; for a feature also the code and the `· today`
+  boards against the changed ones), runs a
+  stage checklist, re-checks sourced facts, and appends ranked findings (blocker, major, minor, nit, each with
   evidence and a confirmed or likely label) with a verdict (`blocked`,
-  `changes needed`, `approve-ready`) to `docs/review/<stage>-review.md`. Each
-  finding carries the `/requirements`, `/stack`, `/architecture` or `/design`
-  command that would fix it, and the report ends in a paste-ready fix list.
+  `changes needed`, `approve-ready`) to `docs/review/<stage>-review.md` (a feature's to
+  its `review/<stage>-review.md`, prefixes `RR`, `AR`, `DR`). Each finding
+  carries the `/requirements`, `/stack`, `/architecture`, `/design`,
+  `/feature`, `/feature-architecture` or `/feature-design` command that would
+  fix it, and the report ends in a paste-ready fix list.
   Running it again after the fixes marks each finding resolved, still open or
   new. Never edits the document, never changes a `Status:`, never approves;
-  only `docs/project.md`'s **Next action** and log change. It does not
+  only `docs/project.md`'s **Next action** and log change (for a feature,
+  its `tracker.md`'s Review cell, **Next action** and log). It does not
   replace the grill. Available in both Claude Code and Codex. Codex uses
   `$review-<stage>` and `$design`; fix commands for requirements, stack and
   architecture are labeled Claude Code handoffs in the report and reply.
 
-`review-requirements`, `review-stack`, `review-architecture` and
-`review-design` share mechanics (report format, re-review, severity) and are
-each self-contained on purpose; change one, change the other three.
+`review-requirements`, `review-stack`, `review-architecture`, `review-design`
+and `review-feature` share mechanics (report format, re-review, severity) and
+are each self-contained on purpose; change one, change the other four.
 
-**Disputes.** The four stage reviews, `review-code` and `qa`, in both hosts,
+**Disputes.** The four stage reviews, `review-feature`, `review-code` and `qa`, in both hosts,
 let the models settle a review in the report before the user is asked. The
 author answers a finding with one `Response:` line under it (`accepted`,
 `rebutted` with evidence, or `intent` with the question only the user can
 answer): `/requirements respond`, `/stack respond`, `/architecture respond`,
-`/design respond` (also `$design respond`), `/implement fix` for code, and
+`/design respond` (also `$design respond`), `/feature respond`,
+`/feature-architecture respond`, `/feature-design respond`, `/implement fix` for code, and
 `/implement` for a QA finding. The reviewer's next run checks each response
 against the file or code and writes a `Rejoinder:` (`conceded` or `maintained`
 with evidence). A dispute ends after one rebuttal and one rejoinder. What is
 still `contested`, and every `intent` finding, is listed under `### For you`
 at the top of the review; the user decides only those. The responding command
 writes nothing to the report but `Response:` lines. The `## Responses and
-disputes` section is the same in all twelve reviewer files and the `respond`
-section is the same in the four stage commands; change one, change the rest.
+disputes` section is the same in all fourteen reviewer files and the `respond`
+section is the same in the four stage commands and the three feature stage
+commands (which also check the code); change one, change the rest.
 
 - `issues` — `/issues`: runs straight from the decided stages to GitHub, with
   no approval or confirmation. Cuts the whole app into vertical-slice issues
@@ -173,17 +241,27 @@ section is the same in the four stage commands; change one, change the rest.
   is a gap in a document) is never built: when it comes up in plan order
   `/implement` asks the user the questions itself, then hands over the
   pre-filled `/<stage>` command with their answers, `/grill-<stage>`, and
-  `/issues sync`. Claude Code only.
+  `/issues sync`. On the branch of an issue planned with `/feature` (its
+  `docs/features/<n>-*/` exists), or with that `#<n>`, it runs in feature
+  mode: only once the requirements and architecture are approved and the
+  design approved or `n/a`; builds from those stage files (acceptance
+  criteria from the `Accept:` lines, flow failures, abuse cases, risks,
+  numbers and screen states; rules from `principles.md`; commands from the
+  architecture) on the existing branch without switching, rebasing or
+  merging; no plan or `progress.md`; keeps the tracker's Build row and the
+  stage hashes it built from, and flags a stage that changed since. Claude
+  Code only.
 - `review-code` — `/review-code` (Claude Code) and `$review-code` (Codex):
   an independent review of an issue branch, by a different model from the one
   that wrote it. Checks the diff against the issue's acceptance criteria,
   scope, build rules, architecture, stack, design, tests, correctness and
   security, runs the issue's own test, lint and build commands, and appends
   ranked findings (same severities and verdicts as the stage reviews, prefix
-  `CR`) to `docs/review/code/<key>-review.md`. Reviews from several models
+  `CR`) to `docs/review/code/<key>-review.md`. Also finds a feature from a
+  `<n>-<slug>` branch and reviews it against its approved stage files. Reviews from several models
   share one report, with `Also found by` and `Disputed by` lines. Never edits
   code, pushes or comments on a PR; `/implement` fixes the findings. Same
-  mechanics as the stage reviews; change one, change the other four.
+  mechanics as the stage reviews; change one, change the other five.
 - `qa` — `/qa`: a whole-app test audit on the merged default branch, after
   some or all issues are done. Builds a coverage matrix (every `R`, `C`, `N`,
   `F` failure step, `B`, `J` across issues, screen state, entity, concern and

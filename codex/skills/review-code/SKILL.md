@@ -35,10 +35,12 @@ Files, all in the app repo (git root, else the current directory):
 | the branch's diff and files | Under review. Read only |
 | the GitHub issue (`gh issue view`), `docs/issues/<key>.md` | The brief the code must meet. The GitHub body wins if they differ |
 | `docs/requirements.md`, `docs/stack.md`, `docs/architecture.md`, `docs/design.md`, `docs/glossary.md`, `docs/adr/` | Read only, to check what the issue pasted against its source |
+| `docs/features/<key>/requirements.md`, `architecture.md`, `design.md` | For an issue planned with `/feature`: the brief the code must meet, in place of an issue file. Read only |
 | `docs/review/code/<key>-review.md` | The report. One `## Review N` per run, newest last. Not committed to the branch |
 
 Same mechanics as `$review-requirements`, `$review-stack`,
-`$review-architecture` and `$review-design`; keep the five in step.
+`$review-architecture`, `$review-design` and `$review-feature`; keep the six in
+step.
 
 ## Never
 
@@ -75,7 +77,17 @@ gh repo view --json defaultBranchRef -q .defaultBranchRef.name
 ```
 
 Find the issue: the first argument (`i03-sign-in`, `#12`, or a branch name); else
-the current branch `issue/<n>-<slug>`; else stop and ask which issue. Take the
+the current branch `issue/<n>-<slug>`, or `<n>-<slug>` (a branch made from the
+issue on GitHub or with `gh issue develop`); else stop and ask which issue. If
+`docs/features/<n>-*/` exists, the issue was planned with `/feature`: its key
+is that folder's name, it has no `docs/issues/<key>.md`, and the brief is the
+folder's approved `requirements.md`, `architecture.md` and `design.md` (the
+issue body is only the request). Its acceptance criteria are, in order, each
+`Accept:` line of a live `R`, the failure at each step of each `F`, each `B`
+verification, each `RK`, each `N` check, and each state of each live `S`; its
+commands, scope and rules are the architecture's **Stack and commands**, the
+`X` items with **Not needed** and **Not designed**, and the build rules in
+check 3. Take the
 base as `origin/<default>` and the head as the branch tip:
 
 ```sh

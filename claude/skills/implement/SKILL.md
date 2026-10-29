@@ -12,8 +12,11 @@ description: >
   is a gap in a document, not in the code) is not built: /implement asks the
   user the questions, then hands over the stage command and grill to run. What
   is done and what is next is tracked in docs/progress.md, checked before
-  GitHub. Use when the user says "/implement", wants the next issue built, or
-  wants review findings fixed.
+  GitHub. On the branch of an issue planned with /feature (any repository,
+  no plan needed), it builds that feature from its approved requirements,
+  architecture and design on that branch instead. Use when the
+  user says "/implement", wants the next issue built, wants a feature issue
+  built on its branch, or wants review findings fixed.
 argument-hint: "[status | fix | <issue key or #number>]"
 disable-model-invocation: true
 ---
@@ -47,6 +50,7 @@ Files, all in the app repo (git root, else the current directory):
 | the GitHub issue | The issue body is the brief. Read with `gh issue view` |
 | `docs/review/code/<key>-review.md` | Review findings on the branch. Read; the only thing written here is a `Response:` line under a finding (Step 6). Never committed |
 | `docs/requirements.md`, `docs/architecture.md`, `docs/stack.md`, `docs/design.md`, `docs/glossary.md` | Read only, to check an unclear point against its source. Never edited |
+| `docs/features/<key>/` | **Feature mode** only: the approved stage files (`requirements.md`, `architecture.md`, `design.md`), read only, which are the brief, and `tracker.md`, whose Build row, **Built from**, **Next action** and log this skill writes instead of `docs/progress.md` |
 
 ## Never
 
@@ -60,7 +64,8 @@ Files, all in the app repo (git root, else the current directory):
   dead code. If the `ponytail` skill is available, work in its `full` mode.
 - Add a dependency the stack decisions in the issue do not name.
 - Edit `docs/` (except a document the issue's Definition of done names, and
-  `docs/progress.md`), the issue files, or the review reports. Stage only the
+  `docs/progress.md`, or in feature mode the tracker), the issue files, or the
+  review reports. Stage only the
   files this issue's work touches, by path; never `git add -A`, and never stage
   `docs/review/**` or `docs/progress.md`. In a review report write only
   `Response:` lines, never a `Rejoinder:`, a status or a finding.
@@ -82,6 +87,12 @@ git branch --show-current
 gh repo view --json nameWithOwner,defaultBranchRef -q '.nameWithOwner+" "+.defaultBranchRef.name'
 git fetch origin
 ```
+
+**Feature mode first.** Take the issue number from the argument `#<n>`, else
+from the current branch (a leading number, `123-add-csv-export`, as GitHub's
+**Create a branch** and `gh issue develop` name it, or `issue/<n>-…`). If
+`docs/features/<n>-*/` exists, the feature was planned with `/feature`: go to
+**Feature mode** below, and none of the rest of this step applies.
 
 Read `docs/progress.md` (the tracker), then `docs/issues.md` and its issue
 table (key, title, blocked by, wave, GitHub number).
@@ -206,6 +217,81 @@ does not edit the document or the issue.
    text and clears the label; then `/implement`. Set the row's Note to
    `asked <date>: <one-line answer>`; its State stays `needs decision`. Change
    no other file, and stop.
+
+## Feature mode
+
+One issue, already on GitHub with its branch already made, planned with
+`/feature`, `/feature-architecture` and `/feature-design`. The issue says
+what was asked; the approved stage files in `docs/features/<key>/` (`<key>` is
+that folder's name) are the brief, and the issue body is not changed. There is
+no plan, no wave and no `docs/progress.md`: the state is the branch, the
+issue, and the feature's tracker. Everything else (build, check, fix, hand
+off) is Steps 4 to 7, unchanged except as listed here.
+
+1. **State.**
+   - `user.name` / `user.email` empty, or `gh` not logged in: stop and say what
+     to fix.
+   - The requirements and the architecture are not `approved`, or the design is
+     neither `approved` nor `n/a`: stop and name the `approve` command still to
+     run. Nothing is built from an unapproved stage.
+   - `gh issue view <n> --json title,state,url`, and `gh pr list --head
+     <branch> --state all --json number,state,url`. The issue is closed or a
+     PR from this branch is merged: say it is done, set the tracker's Build
+     row `done`, and stop.
+   - The current branch is the default branch, or carries another issue's
+     number: stop, and say to check out the issue's branch (the tracker's
+     **Branch**, or `gh issue develop --list <n>`). Do not create or switch
+     branches.
+   - Uncommitted changes other than under `docs/review/code/` and
+     `docs/features/`: stop and list them.
+   - The tracker's **Built from** hashes are set and a stage file's hash now
+     differs: the stage changed after building started. List the items that
+     changed (by ID) and treat their criteria as not yet passing; say so in the
+     hand-off.
+   - `git log --oneline origin/<default>..HEAD` and the review report
+     `docs/review/code/<key>-review.md` decide the step: open blocker or major
+     findings, or the argument `fix`: Step 6. Commits and the tracker's Build
+     row `awaiting review`, no open findings and no changed stage: stop with
+     "#<n> is on `<branch>`, <k> commits, waiting for your review and PR; run
+     `/review-code`, raise the PR, merge it". Commits otherwise: continue from
+     the first acceptance criterion without a passing test (step 3 below,
+     then Step 4). No commits: step 3 below.
+   - Argument `status`: print that state in at most five lines and stop.
+2. **The branch** stays as it is. If it is behind `origin/<default>`, say so in
+   the hand-off; do not merge, rebase or pull.
+3. **Read the brief** in place of Step 3: the issue's title and body (the
+   request), and all of `requirements.md`, `architecture.md`, `design.md`
+   (unless `n/a`) and the feature's `glossary.md`. They map to the sections
+   Steps 4 to 7 use:
+   - **Acceptance criteria**, in this order: each `Accept:` line of a live
+     `R`; the failure at each step of each `F`, with what the caller sees;
+     each `B` verification; each `RK` (existing behaviour unchanged, by the
+     test it names); each `N` check with its number; each state of each live
+     `S`, with its words.
+   - **Architecture to follow**: the `AS` items the `M`, `E`, `F` and `K`
+     items extend, and those items as written. **Stack to use** and the
+     commands: the architecture's **Stack and commands**.
+   - **Design**: the screens, states, `EU` components and Paper boards named
+     in the design file.
+   - **How to build it**: `principles.md` in the `issues` skill's directory
+     (`../issues/principles.md`).
+   - **Out of scope**: the `X` items, the architecture's **Not needed**, the
+     design's **Not designed**. **Assumptions**: the `A`, `AA` and `DA`
+     items. **Starting points**: the files the `AS` and `EU` items cite.
+   Then read the code they cite, and match the repository's conventions.
+   Record the three stage hashes in the tracker's **Built from** when
+   building starts.
+4. **Commands.** The test, lint, type-check and build commands are the
+   architecture's (there is no bootstrap issue). A command written `none` is
+   skipped and said so.
+5. **Tracker.** Where Steps 4 to 7 write a `docs/progress.md` row, write the
+   feature tracker's Build row instead (`in progress` when building starts,
+   `awaiting review` at the hand-off), with **Next action** and a log line.
+   Never create `docs/progress.md` in this mode.
+6. **Hand-off.** As Step 7, without a next issue: "Review it: `/review-code`
+   here, or `$review-code` in Codex. Raise the PR yourself when you are happy
+   (`Closes #<n>`), and merge it." The PR description is the same, and its
+   summary names the feature's stage files as the plan.
 
 ## Step 2 — branch
 

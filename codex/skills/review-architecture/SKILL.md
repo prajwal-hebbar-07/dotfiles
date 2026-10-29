@@ -39,7 +39,7 @@ Files, all in the app repo (git root, else the current directory):
 
 Words: **module**, **interface**, **depth**, **seam**, **adapter**, as in
 `/architecture`. Same mechanics as `$review-requirements`, `$review-stack` and
-`$review-design`; keep the four in step.
+`$review-design` and `$review-feature`; keep the five in step.
 
 ## Never
 

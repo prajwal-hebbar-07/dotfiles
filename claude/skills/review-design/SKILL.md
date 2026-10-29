@@ -33,9 +33,9 @@ Files, all in the app repo (git root, else the current directory):
 | `docs/project.md` | Tracker: only **Next action** and the log change |
 | `docs/review/design-review.md` | The report. One `## Review N` per run, newest last |
 
-Same mechanics as `/review-requirements`, `/review-stack` and
-`/review-architecture`; keep the four in step. The Paper MCP tools are named
-`mcp__paper__<tool>`; this file uses the short names. If they are deferred,
+Same mechanics as `/review-requirements`, `/review-stack`,
+`/review-architecture` and `/review-feature`; keep the five in step. The
+Paper MCP tools are named `mcp__paper__<tool>`; this file uses the short names. If they are deferred,
 load them with ToolSearch first.
 
 ## Never

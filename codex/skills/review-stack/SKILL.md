@@ -37,8 +37,8 @@ Files, all in the app repo (git root, else the current directory):
 | `docs/project.md` | Tracker: only **Next action** and the log change |
 | `docs/review/stack-review.md` | The report. One `## Review N` per run, newest last |
 
-Same mechanics as `$review-requirements`, `$review-architecture` and
-`$review-design`; keep the four in step.
+Same mechanics as `$review-requirements`, `$review-architecture`,
+`$review-design` and `$review-feature`; keep the five in step.
 
 ## Never
 

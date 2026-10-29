@@ -30,7 +30,7 @@ Built on `mattpocock/skills`: `grilling` (rounds of the whole frontier, a
 recommended answer per question, facts are yours and decisions are the
 user's) and `domain-modeling` (challenge terms, invent scenarios, a glossary).
 It ends on a checked list, not a feeling. Round format, log handling and exit
-loop match Claude Code's requirements, stack and architecture grills; keep
+loop match Claude Code's requirements, stack, architecture and feature grills; keep
 their shared mechanics in step.
 
 Files, all in the app repo (git root, else the current directory):

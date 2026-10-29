@@ -33,7 +33,7 @@ Files, all in the app repo (git root, else the current directory):
 | `docs/review/requirements-review.md` | The report. One `## Review N` per run, newest last |
 
 Same mechanics as `/review-stack`, `/review-architecture` and
-`/review-design`; keep the four in step.
+`/review-design` and `/review-feature`; keep the five in step.
 
 ## Never
 

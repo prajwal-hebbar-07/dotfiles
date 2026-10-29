@@ -39,9 +39,9 @@ Files, all in the app repo (git root, else the current directory):
 | `docs/project.md` | Tracker: only **Next action** and the log change |
 | `docs/review/design-review.md` | The report. One `## Review N` per run, newest last |
 
-Same mechanics as `$review-requirements`, `$review-stack` and
-`$review-architecture`; keep the four in step. Discover the available
-Paper MCP tools in Codex; this file uses their short names regardless of
+Same mechanics as `$review-requirements`, `$review-stack`,
+`$review-architecture` and `$review-feature`; keep the five in step. Discover
+the available Paper MCP tools in Codex; this file uses their short names regardless of
 the server prefix. Use the connected tools' actual schemas.
 
 ## Never
