@@ -34,6 +34,14 @@ syntax, metadata and tool instructions. Claude's explicit-only skills use
   Each message is a semantic subject plus two or more bullets; never a
   co-author or attribution trailer. This one skill replaced `commit` and
   `split-commit` on 2026-10-27, in both Claude Code and Codex.
+- `raise-pr` — `/raise-pr <target>`: opens a GitHub pull request from the
+  current branch into the named target branch with `gh`. Pushes the current
+  branch only when it is new or ahead (never forces or switches), stops if a
+  PR is already open, and writes the title and description from the branch's
+  commits and diff, with `Closes #<n>` when the branch starts with an open
+  issue's number. Neither mentions Claude, AI or any tool (no "Generated
+  with", robot emoji or co-author), checked before and after creating; commits
+  that carry such a trailer are reported, not rewritten. Claude Code only.
 - `requirements` — `/requirements`: records what the user says about an app
   into `docs/requirements.md` (numbered R/N/C/X/Q items, exact wording kept)
   and tracks the project in `docs/project.md` in the app repo, so a new chat
