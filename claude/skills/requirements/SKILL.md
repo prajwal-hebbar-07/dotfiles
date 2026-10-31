@@ -35,6 +35,9 @@ in this skill's directory.
 - Rely on earlier chat. Anything that matters is written to the files before
   you reply.
 - Edit any file other than `docs/project.md` and `docs/requirements.md`.
+- Add an extra. A feature, option or "nice to have" the user did not ask for
+  is not a requirement; record it as a `Q` ("Do you want X? It adds ...") and
+  leave the decision to the user.
 
 ## Step 1 — find the state
 

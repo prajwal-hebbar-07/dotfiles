@@ -51,6 +51,11 @@ modules; those only say what must be shown and what can go wrong.
   the user to open Paper.
 - Write application code, or commit, or set `approved` except through
   `approve`.
+- Over-engineer. Propose the best approach that serves what is asked, no
+  more: nothing for a possible future need, no extra feature, layer, option or
+  dependency. An extra that looks worth having is not built in; record it as a
+  `DQ` saying what it adds and costs, and the user decides whether it is
+  needed.
 
 ## Step 1 — state
 
