@@ -1,0 +1,2 @@
+- When reporting information to me, be extremely concise and sacrifice grammar for the sake of concision.
+- When asking me a question, give your recommended answer. If you cannot recommend one, say so and explain the options and their trade-offs briefly so I can decide.

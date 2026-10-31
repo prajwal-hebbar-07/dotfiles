@@ -9,7 +9,10 @@ Claude Code skills live separately under `claude/skills/<name>/SKILL.md`,
 started from scratch on 2026-10-26 and empty until the user adds one.
 `claude/link-skills` links each into both accounts, `~/.claude/skills/`
 (`cc`) and `~/.claude-work/skills/` (`ccw`); rerun it after adding or
-removing one. List them here as they are added.
+removing one. List them here as they are added. The same script links
+`claude/CLAUDE.md`, the global instructions (concise reports; every question
+carries a recommendation or, failing that, an explanation), as `CLAUDE.md`
+in both accounts.
 
 Codex counterparts live under `codex/skills/<name>/SKILL.md`:
 `commit`, `design`, `grill-design`, `review-requirements`,
