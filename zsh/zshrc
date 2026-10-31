@@ -687,3 +687,6 @@ alias agy='command agy --dangerously-skip-permissions'
 if [[ -r "$HOME/.local/share/leaf/completions/_leaf" ]]; then
   source "$HOME/.local/share/leaf/completions/_leaf"
 fi
+
+# Added by jcode installer
+export PATH="/Users/hebbar/.local/bin:$PATH"
