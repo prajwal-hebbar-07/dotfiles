@@ -24,8 +24,8 @@ The default answer is **one commit**. Split only where a clean seam exists.
 Never cut a change apart to make the count bigger.
 
 Argument: text is a hint on how to divide ("keep the docs with the skill");
-`plan` prints the plan and commits nothing; `now` commits a split plan without
-waiting for the go-ahead (Step 4).
+`plan` prints the plan and commits nothing; `now` is accepted and changes
+nothing, since a split plan is never waited on (Step 4).
 
 ## Never
 
@@ -134,8 +134,8 @@ then go to Step 5 with one group.
 
 ## Step 4 — plan
 
-With one unit, there is nothing to confirm: go to Step 5. With several, print
-the plan before any commit:
+With one unit, go to Step 5. With several, print the plan and go straight on;
+do not ask for a yes:
 
 ```
 Split into N commits, in this order:
@@ -151,10 +151,8 @@ with a file split by hunk says which hunks.
 - Argument `plan`: print it (also for one unit) and stop. Change nothing in
   the index. If `git add -A` ran in Step 2, unstage it again with the Step 5
   command and stop.
-- Argument `now`: go on.
-- Otherwise ask once, "Commit these N in this order? `yes`, or tell me what to
-  change." and wait. A change from the user rebuilds the plan; do not commit
-  until they say yes.
+- Otherwise (including `now`) go on to Step 5 without waiting. The user can
+  steer a split with a hint argument beforehand, not with a confirmation.
 
 ## Step 5 — commit each unit
 

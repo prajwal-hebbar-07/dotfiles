@@ -32,8 +32,8 @@ syntax, metadata and tool instructions. Claude's explicit-only skills use
   what is staged, or stages everything when nothing is. One commit by
   default; several focused commits only where the changes separate cleanly
   (revert, pick and one-sentence tests; code with its tests, docs and
-  wiring). With several it shows the plan and waits for a yes (`now` skips,
-  `plan` only prints), then checks the final tree equals the starting index.
+  wiring). With several it prints the plan and commits without asking
+  (`plan` only prints; `now` is a no-op), then checks the final tree equals the starting index.
   Each message is a semantic subject plus two or more bullets; never a
   co-author or attribution trailer. This one skill replaced `commit` and
   `split-commit` on 2026-10-27, in both Claude Code and Codex.
