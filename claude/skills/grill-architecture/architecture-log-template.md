@@ -1,9 +1,10 @@
 # Architecture grill log: <project>
 
-Each round is written here before it is asked in chat, and each answer is
-written here before Claude replies, in the user's words. A question is open
-while its `Answer:` is blank or starts with `idk`. A new chat continues from
-the open ones. Entries are never deleted.
+Each round is written here before it goes to the questions file, and each
+answer the user writes there (or gives in chat) is copied here, in their
+words, before Claude changes anything else. A question is open while its
+`Answer:` is blank or starts with `idk`. A new chat continues from the open
+ones. Entries are never deleted.
 
 Answer words: `yes` (accept the recommendation), any text, `idk`,
 `n/a: <reason>`, `defer: <reason>`.

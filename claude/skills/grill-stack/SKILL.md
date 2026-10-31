@@ -1,12 +1,13 @@
 ---
 name: grill-stack
 description: >
-  Grills the proposed tech stack in docs/stack.md harshly, in rounds asked in
-  chat, until every choice is settled. Every round, answer and resulting
-  change is logged to docs/grill/stack-log.md, so a new chat resumes where
-  the last stopped. Hard-to-reverse choices are recorded as ADRs. Based on
-  Matt Pocock's grilling and domain-modeling skills. Use when the user says
-  "/grill-stack" or wants to continue grilling the stack.
+  Grills the proposed tech stack in docs/stack.md harshly, in rounds written
+  to docs/grill/stack-questions.md (the user answers each question there and
+  runs the grill again), until every choice is settled. Every round, answer
+  and resulting change is logged to docs/grill/stack-log.md, so a new chat
+  resumes where the last stopped. Hard-to-reverse choices are recorded as
+  ADRs. Based on Matt Pocock's grilling and domain-modeling skills. Use when
+  the user says "/grill-stack" or wants to continue grilling the stack.
 argument-hint: "[status]"
 disable-model-invocation: true
 ---
@@ -15,9 +16,11 @@ disable-model-invocation: true
 
 Stress-test the proposed stack until each choice is needed, fits the numbers
 in the requirements, has a known cost and a known way out, and is settled by
-the user. Questions are asked in chat, in rounds. Each round is written to the
-log before it is asked, and each answer is written to the log before you
-reply, so the chat can end at any point and a new one continues from the log.
+the user. Questions go to a questions file, one round at a time: the user
+writes each answer under its question there, then runs `/grill-stack` again.
+Each round is written to the log before it goes to the questions file, and
+each answer is copied to the log before anything else changes, so the chat can
+end at any point and a new one continues from the files.
 
 Built on `mattpocock/skills`: `grilling` (rounds of the whole frontier, a
 recommended answer per question, facts are yours and decisions are the
@@ -33,6 +36,7 @@ Files, all in the app repo (git root, else the current directory):
 | `docs/requirements.md` | Read only. Never edited here |
 | `docs/project.md` | Tracker: stage status, **Next action**, log |
 | `docs/grill/stack-log.md` | Every round, question, answer and resulting change |
+| `docs/grill/stack-questions.md` | The current round, answered by the user in place; replaced each round |
 | `docs/grill/stack-coverage.md` | Coverage categories and closing checks |
 | `docs/adr/NNNN-slug.md` | One per qualifying decision (Step 2) |
 
@@ -41,11 +45,14 @@ Templates and prompts in this skill's directory: `stack-log-template.md`,
 
 ## Never
 
-- Answer for the user. A question the user has not answered in chat is open.
-  `yes` to a question, or "yes to all" for the round, is an answer because
-  they said it; silence is not.
-- Ask in chat a question that is not already in the log, or reply to an
-  answer before it is in the log. Log the user's words as given.
+- Answer for the user. A question the user has not answered, in the questions
+  file or in chat, is open. `yes` to a question, or `yes` on the file's `All:`
+  line for the round, is an answer because they wrote it; a blank is not.
+- Post a round's questions in chat. They go to the questions file; chat gets
+  only where the file is and what is in it.
+- Put a question in the questions file that is not already in the log, or
+  replace the questions file before every answer in it is in the log. Log the
+  user's words as given.
 - Ask what the repo, the docs, or the web can answer. Look it up and show it
   as **Known** with its source and date.
 - Settle a decision the user has not settled. `State: settled` needs their
@@ -77,16 +84,23 @@ question is **open** when its `Answer:` is blank or starts with `idk`.
   gaps, and **Next action**. Change nothing.
 - No log: create `stack-log.md` and `stack-coverage.md` from the templates,
   set `Status: grilling` in `stack.md` and the tracker row, then Step 4.
-- Open questions in the log and the user's message does not answer them
-  (a new chat, or `/grill-stack` alone): say "Round N has <k> open
-  questions" and post them again, as in Step 4, without writing a new round.
-- The user's message answers questions or adds anything about the stack:
-  Step 2.
+- Open questions in the log: read the questions file (missing → write it again
+  from the log's open questions, as in Step 4, without a new round). An answer
+  written in it, `yes` on its `All:` line, text under **Anything else**, or an
+  answer in the user's message: Step 2. None (a new chat, or `/grill-stack`
+  alone): say "Round N has <k> open questions in
+  `docs/grill/stack-questions.md`: write your answers there, then run
+  `/grill-stack`", and stop.
+- The user's message adds anything about the stack: Step 2.
 - No open questions: Step 3, then Step 4.
 
 ## Step 2 — record and ingest
 
-For each answer in the user's message, in the log under that question:
+Read the answers from the questions file: everything between a question's
+`Answer:` and the next `---` is the user's answer. `yes` on the `All:` line
+answers every question left blank with `yes`. An answer the user gives in chat
+counts the same, and wins where both answer one question. For each answer, in
+the log under that question:
 
 1. Write the user's words in `Answer:`. A bare `yes` is written as `yes`;
    the recommendation is the answer. Keep numbers, names and "must" /
@@ -117,9 +131,10 @@ For each answer in the user's message, in the log under that question:
 7. Under the question write `**Became:**` with each change by ID.
 
 Something the user volunteers that no question asked (a skill they have, a
-budget, a preference, a correction) goes in the log as
-`### Volunteered (round N)` with their words, and is filed in `stack.md`
-where it applies, sourced `(from user, round N)`.
+budget, a preference, a correction), in chat or under the questions file's
+**Anything else**, goes in the log as `### Volunteered (round N)` with their
+words, and is filed in `stack.md` where it applies, sourced `(from user, round
+N)`.
 
 Update `project.md` (**Next action**, one log line per round), then go on to
 Step 3 and 4 in the same turn. Say what changed in one or two lines first,
@@ -181,32 +196,55 @@ Rules:
   answer. "It scales" or "it's popular" gets a follow-up for a number.
 
 First append `## Round N · <date>` and every new question to `stack-log.md`
-with `Answer:` blank (format in `stack-log-template.md`). Then post the round
-in chat in this shape, carry-overs first:
+with `Answer:` blank (format in `stack-log-template.md`). Then, with every
+answer in the old file already in the log, replace
+`docs/grill/stack-questions.md` with the round, carry-overs first, in this
+shape:
 
 ```
-***Questions***
+# Stack grill · Round N · <date>
 
-Round N · <n> questions (<c> carried over, <h> held)
-Answer by number. `yes` accepts my recommendation. Also: `idk`,
-`n/a: <reason>`, `defer: <reason>`.
+<n> questions (<c> carried over, <h> held for the next round).
+Write your answer under each `Answer:`; everything down to the `---` is
+your answer. `yes` accepts my recommendation. Also: `idk`,
+`n/a: <reason>`, `defer: <reason>`. Leave one blank to answer it later.
+Then run `/grill-stack`.
 
-**<Theme>**
+All:
 
-❓ **T2.1** - **<title>** (touches S3, N1): <question>
+(Write `yes` after `All:` to accept every recommendation you leave blank.)
+
+## <Theme>
+
+### ❓ T2.1 · <title> · touches S3, N1
+
+<question>
 
 Known: <fact, source, date>
-➡️ <recommended answer>
+
+➡️ Recommended: <recommended answer>
+
+Earlier: <your `idk` answer from round <M>, for a carry-over. Omit if none>
+
+Answer:
 
 ---
+
+## Anything else
+
+(Anything that no question asked. Leave blank if none.)
 ```
 
-The post always starts with the `***Questions***` heading (bold italic), and
-every question starts with ❓. Do not drop either.
+Every question heading starts with ❓. Do not drop it.
 
-Update `project.md`: the Tech stack row `grilling` with today's date,
-**Next action** `Round N has <n> open questions: run /grill-stack to
-continue`, one log line. Then stop and wait for the answers.
+Then say in chat only: `Round N · <n> questions (<c> carried over, <h> held)
+in docs/grill/stack-questions.md`, the themes with how many questions each
+has, and "Write your answers there, then run `/grill-stack`." Do not post the
+questions.
+
+Update `project.md`: the Tech stack row `grilling` with today's date, **Next
+action** `Round N has <n> open questions in docs/grill/stack-questions.md:
+answer there, then run /grill-stack`, one log line. Then stop.
 
 ## Step 5 — exit check and closing rounds
 
@@ -236,12 +274,14 @@ not memory:
    "Do you confirm every choice in docs/stack.md?" (`yes`).
 
 Run whichever is missing, in the order 5, 6, 7, 8, each as a normal round
-(logged, then asked). Items 5 to 7 change the file, so after their answers
-are ingested, check again from item 1. When all eight hold and the confirm
-round is `yes` with `none`: set `Status: grilled` in `stack.md`, the tracker
-row to `grilled`, **Next action** `Review docs/stack.md, then run /stack
-approve`, one log line. Tell the user the final counts, which ADRs were
-written, and that the files are uncommitted. Do not approve.
+(logged, then written to the questions file). Items 5 to 7 change the file, so
+after their answers are ingested, check again from item 1. When all eight hold
+and the confirm round is `yes` with `none`: set `Status: grilled` in
+`stack.md`, the tracker row to `grilled`, replace the questions file with one
+line saying the grill is done and nothing is open, **Next action** `Review
+docs/stack.md, then run /stack approve`, one log line. Tell the user the final
+counts, which ADRs were written, and that the files are uncommitted. Do not
+approve.
 
 This does not prove nothing is unknown. It ends the grill when the checklist
 is clean, a fresh reader with no chat found nothing important, and the user
@@ -252,7 +292,7 @@ says so.
 If an advisor is on (`/advisor`), consult it at these points, with the full
 conversation already in front of it:
 
-- Before posting the first round (Step 4): ask whether the round misses a
+- Before writing the first round (Step 4): ask whether the round misses a
   question the stack and the files make obvious, asks something the files
   already answer, or leads the user to an answer.
 - Before the confirm round in Step 5: ask what is still weak in the stack that

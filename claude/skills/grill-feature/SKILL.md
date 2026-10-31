@@ -2,26 +2,30 @@
 name: grill-feature
 description: >
   Grills one stage of a feature (requirements, architecture or design, in
-  docs/features/<n>-<slug>/) harshly, in rounds asked in chat, checked against
-  the existing code: the requirements until each is testable, the
-  architecture until every part fits what the app already has and is settled,
-  the design until the idea and every screen state is clear. Every round,
-  answer and resulting change is logged to the feature's grill/<stage>-log.md,
-  so a new chat resumes exactly where the last one stopped. Continues until a
-  defined exit check passes and the user confirms. Based on Matt Pocock's
-  grilling, domain-modeling and codebase-design skills. Use when the user says
-  "/grill-feature" or wants to continue grilling a feature.
+  docs/features/<n>-<slug>/) harshly, in rounds written to the feature's
+  grill/<stage>-questions.md (the user answers each question there and runs
+  the grill again), checked against the existing code: the requirements until
+  each is testable, the architecture until every part fits what the app
+  already has and is settled, the design until the idea and every screen state
+  is clear. Every round, answer and resulting change is logged to the
+  feature's grill/<stage>-log.md, so a new chat resumes exactly where the last
+  one stopped. Continues until a defined exit check passes and the user
+  confirms. Based on Matt Pocock's grilling, domain-modeling and
+  codebase-design skills. Use when the user says "/grill-feature" or wants to
+  continue grilling a feature.
 argument-hint: "[#<issue>] [requirements | architecture | design] [status | reopen]"
 disable-model-invocation: true
 ---
 
 # grill-feature
 
-Stress-test one stage of a feature until every part of it is understood,
-fits the code that exists, and nothing important is left unsaid. Questions
-are asked in chat, in rounds. Each round is written to the log before it is
-asked, and each answer is written to the log before you reply, so the chat
-can end at any point and a new one continues from the log.
+Stress-test one stage of a feature until every part of it is understood, fits
+the code that exists, and nothing important is left unsaid. Questions go to a
+questions file, one round at a time: the user writes each answer under its
+question there, then runs `/grill-feature <stage>` again. Each round is
+written to the log before it goes to the questions file, and each answer is
+copied to the log before anything else changes, so the chat can end at any
+point and a new one continues from the files.
 
 Built on `mattpocock/skills`: `grilling` (rounds of the whole frontier, a
 recommended answer per question, facts are yours and decisions are the
@@ -48,6 +52,7 @@ Files, in the repo (git root, else the current directory), under
 | the other stage files | Read only. A gap in one is logged and reported with its command |
 | `tracker.md` | The stage's row, **Next action**, log |
 | `grill/<stage>-log.md` | Every round, question, answer and resulting change |
+| `grill/<stage>-questions.md` | The current round, answered by the user in place; replaced each round |
 | `grill/<stage>-coverage.md` | Coverage categories and closing checks |
 | `glossary.md` | The feature's terms. The grill adds settled ones. `docs/glossary.md`, if the repo has one, is read only and wins on a clash |
 | the repository's code, tests, docs, and its Paper file if pinned | Read only: the source for **Known** lines and for `T`, `AS` and `EU` facts |
@@ -58,11 +63,14 @@ Templates and prompts in this skill's directory: `log-template.md`,
 
 ## Never
 
-- Answer for the user. A question the user has not answered in chat is open.
-  `yes` to a question, or "yes to all" for the round, is an answer because
-  they said it; silence is not.
-- Ask in chat a question that is not already in the log, or reply to an
-  answer before it is in the log. Log the user's words as given.
+- Answer for the user. A question the user has not answered, in the questions
+  file or in chat, is open. `yes` to a question, or `yes` on the file's `All:`
+  line for the round, is an answer because they wrote it; a blank is not.
+- Post a round's questions in chat. They go to the questions file; chat gets
+  only where the file is and what is in it.
+- Put a question in the questions file that is not already in the log, or
+  replace the questions file before every answer in it is in the log. Log the
+  user's words as given.
 - Ask what the code, the repo's docs, the Paper file or the web can answer:
   what a function does, who writes a table, which tests exist, what a screen
   shows, what a library supports. Look it up and show it as **Known** with
@@ -117,15 +125,23 @@ stage's log and coverage if they exist. A question is **open** when its
 - No log: create `grill/<stage>-log.md` and `grill/<stage>-coverage.md` from
   the templates, set the file's `Status: grilling` and its tracker row, then
   Step 3 and Step 4.
-- Open questions in the log and the user's message does not answer them:
-  say "Round N has <k> open questions" and post them again, as in Step 4,
-  without writing a new round.
-- The user's message answers questions or adds anything: Step 2.
+- Open questions in the log: read the questions file (missing → write it again
+  from the log's open questions, as in Step 4, without a new round). An answer
+  written in it, `yes` on its `All:` line, text under **Anything else**, or an
+  answer in the user's message: Step 2. None (a new chat, or `/grill-feature
+  <stage>` alone): say "Round N has <k> open questions in
+  `docs/features/<key>/grill/<stage>-questions.md`: write your answers there,
+  then run `/grill-feature <stage>`", and stop.
+- The user's message adds anything: Step 2.
 - No open questions: Step 3, then Step 4.
 
 ## Step 2 — record and ingest
 
-For each answer in the user's message, in the log under that question:
+Read the answers from the questions file: everything between a question's
+`Answer:` and the next `---` is the user's answer. `yes` on the `All:` line
+answers every question left blank with `yes`. An answer the user gives in chat
+counts the same, and wins where both answer one question. For each answer, in
+the log under that question:
 
 1. Write the user's words in `Answer:`. A bare `yes` is written as `yes`;
    the recommendation is the answer. Keep numbers, names and "must" /
@@ -160,9 +176,10 @@ For each answer in the user's message, in the log under that question:
    `n/a` (the user's own reason), or `deferred` (their reason).
 7. Under the question write `**Became:**` with each change by ID.
 
-Something the user volunteers that no question asked goes in the log as
-`### Volunteered (round N)` with their words, and is filed in the stage file
-the way its command files it, sourced `(from user, round N)`.
+Something the user volunteers that no question asked, in chat or under the
+questions file's **Anything else**, goes in the log as `### Volunteered (round
+N)` with their words, and is filed in the stage file the way its command files
+it, sourced `(from user, round N)`.
 
 Update `tracker.md` (**Next action**, one log line per round), then go on to
 Step 3 and 4 in the same turn. Say what changed in one or two lines first,
@@ -247,32 +264,55 @@ Rules:
   exactly happens or is on the screen.
 
 First append `## Round N · <date>` and every new question to the log with
-`Answer:` blank (format in `log-template.md`). Then post the round in chat in
-this shape, carry-overs first:
+`Answer:` blank (format in `log-template.md`). Then, with every answer in the
+old file already in the log, replace `grill/<stage>-questions.md` with the
+round, carry-overs first, in this shape:
 
 ```
-***Questions***
+# #<n> <title> · <Stage> grill · Round N · <date>
 
-<Stage> · Round N · <n> questions (<c> carried over, <h> held)
-Answer by number. `yes` accepts my recommendation. Also: `idk`,
-`n/a: <reason>`, `defer: <reason>`.
+<n> questions (<c> carried over, <h> held for the next round).
+Write your answer under each `Answer:`; everything down to the `---` is
+your answer. `yes` accepts my recommendation. Also: `idk`,
+`n/a: <reason>`, `defer: <reason>`. Leave one blank to answer it later.
+Then run `/grill-feature <stage>`.
 
-**<Theme>**
+All:
 
-❓ **G2.1** - **<title>** (touches M1, AS3, R4): <question>
+(Write `yes` after `All:` to accept every recommendation you leave blank.)
+
+## <Theme>
+
+### ❓ G2.1 · <title> · touches M1, AS3, R4
+
+<question>
 
 Known: <fact and source, path:line for code>
-➡️ <recommended answer>
+
+➡️ Recommended: <recommended answer>
+
+Earlier: <your `idk` answer from round <M>, for a carry-over. Omit if none>
+
+Answer:
 
 ---
+
+## Anything else
+
+(Anything that no question asked. Leave blank if none.)
 ```
 
-The post always starts with the `***Questions***` heading (bold italic), and
-every question starts with ❓. Do not drop either.
+Every question heading starts with ❓. Do not drop it.
+
+Then say in chat only: `<Stage> · Round N · <n> questions (<c> carried over,
+<h> held) in docs/features/<key>/grill/<stage>-questions.md`, the themes with how many questions each has,
+and "Write your answers there, then run `/grill-feature <stage>`." Do not post
+the questions.
 
 Update `tracker.md`: the stage's row `grilling` with today's date, **Next
-action** `<Stage> round N has <n> open questions: run /grill-feature <stage>
-to continue`, one log line. Then stop and wait for the answers.
+action** `<Stage> round N has <n> open questions in
+grill/<stage>-questions.md: answer there, then run /grill-feature <stage>`,
+one log line. Then stop.
 
 ## Step 5 — exit check and closing rounds
 
@@ -320,13 +360,14 @@ and the code, not memory:
    in Paper").
 
 Run whichever is missing, in the order 5, 6, 7, 8, each as a normal round
-(logged, then asked). Items 5 to 7 change the file, so after their answers are
-ingested, check again from item 1. When all hold and the confirm round is
-`yes` with `none`: set the file's `Status: grilled`, the tracker row
-`grilled`, **Next action** from the stages table (`Review <stage>.md,
-optionally /review-feature <stage> or $review-feature <stage> in Codex, then
-run …`), one log line. Tell the user the final counts and any gap still open.
-Do not approve and do not draw.
+(logged, then written to the questions file). Items 5 to 7 change the file, so
+after their answers are ingested, check again from item 1. When all hold and
+the confirm round is `yes` with `none`: set the file's `Status: grilled`, the
+tracker row `grilled`, replace the questions file with one line saying the
+grill is done and nothing is open, **Next action** from the stages table
+(`Review <stage>.md, optionally /review-feature <stage> or $review-feature
+<stage> in Codex, then run …`), one log line. Tell the user the final counts
+and any gap still open. Do not approve and do not draw.
 
 This does not prove nothing is unknown. It ends the grill when the checklist
 is clean, a fresh reader with the code but no chat found nothing important,
@@ -337,7 +378,7 @@ and the user says so.
 If an advisor is on (`/advisor`), consult it at these points, with the full
 conversation already in front of it:
 
-- Before posting the first round of a stage (Step 4): ask whether the round
+- Before writing the first round of a stage (Step 4): ask whether the round
   misses a question the files and the code make obvious, asks something the
   code already answers, or leads the user to an answer.
 - Before the confirm round in Step 5: ask what is still weak in the stage

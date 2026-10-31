@@ -1,9 +1,11 @@
 ---
 name: grill-requirements
 description: >
-  Grills docs/requirements.md harshly, in rounds asked in chat. Every round,
-  answer and resulting change is logged to docs/grill/requirements-log.md, so a new chat
-  resumes exactly where the last one stopped. Continues until a defined exit
+  Grills docs/requirements.md harshly, in rounds written to
+  docs/grill/requirements-questions.md, where the user answers each question
+  in place and runs the grill again. Every round, answer and resulting change
+  is logged to docs/grill/requirements-log.md, so a new chat resumes exactly
+  where the last one stopped. Continues until a defined exit
   check passes and the user confirms. Based on Matt Pocock's grilling and
   domain-modeling skills. Use when the user says "/grill-requirements" or
   wants to continue the grilling.
@@ -14,10 +16,12 @@ disable-model-invocation: true
 # grill-requirements
 
 Stress-test the requirements until every one is understood and nothing
-important is left unsaid. Questions are asked in chat, in rounds. Each round
-is written to the log before it is asked, and each answer is written to the
-log before you reply, so the chat can end at any point and a new one
-continues from the log.
+important is left unsaid. Questions go to a questions file, one round at a
+time: the user writes each answer under its question there, then runs
+`/grill-requirements` again. Each round is written to the log before it goes
+to the questions file, and each answer is copied to the log before anything
+else changes, so the chat can end at any point and a new one continues from
+the files.
 
 Built on `mattpocock/skills`: `grilling` (rounds of the whole frontier, a
 recommended answer per question, facts are yours and decisions are the
@@ -31,6 +35,7 @@ Files, all in the app repo (git root, else the current directory):
 | `docs/requirements.md` | The requirements. The grill edits it; IDs never change |
 | `docs/project.md` | Tracker: stage status, **Next action**, log |
 | `docs/grill/requirements-log.md` | Every round, question, answer and resulting change |
+| `docs/grill/requirements-questions.md` | The current round, answered by the user in place; replaced each round |
 | `docs/grill/requirements-coverage.md` | Coverage categories and closing checks |
 | `docs/glossary.md` | Project vocabulary, nothing else |
 
@@ -39,11 +44,15 @@ Templates and prompts in this skill's directory: `log-template.md`,
 
 ## Never
 
-- Answer for the user. A question the user has not answered in chat is open.
-  `yes` to a question, or "yes to all" for the round, is an answer because
-  they said it; silence is not.
-- Ask in chat a question that is not already in the log, or reply to an
-  answer before it is in the log. Log the user's words as given.
+- Answer for the user. A question the user has not answered, in the
+  questions file or in chat, is open. `yes` to a question, or `yes` on the
+  file's `All:` line for the round, is an answer because they wrote it; a
+  blank is not.
+- Post a round's questions in chat. They go to the questions file; chat gets
+  only where the file is and what is in it.
+- Put a question in the questions file that is not already in the log, or
+  replace the questions file before every answer in it is in the log. Log the
+  user's words as given.
 - Ask what the repo, the docs, or the web can answer. Look it up and show it
   as **Known** with its source.
 - Add or change a requirement that no answer or user statement asked for.
@@ -70,16 +79,23 @@ is **open** when its `Answer:` in the log is blank or starts with `idk`.
   rows by status, closing checks, and **Next action**. Change nothing.
 - No log: create `requirements-log.md` and `requirements-coverage.md` from the templates, set
   `Status: grilling` in `requirements.md` and the tracker row, then Step 4.
-- Open questions in the log and the user's message does not answer them
-  (a new chat, or `/grill-requirements` alone): say "Round N has <k> open
-  questions" and post them again, as in Step 4, without writing a new round.
-- The user's message answers questions or adds anything about the app:
-  Step 2.
+- Open questions in the log: read `requirements-questions.md` (missing →
+  write it again from the log's open questions, as in Step 4, without a new
+  round). An answer written in it, `yes` on its `All:` line, text under
+  **Anything else**, or an answer in the user's message: Step 2. None (a new
+  chat, or `/grill-requirements` alone): say "Round N has <k> open questions
+  in `docs/grill/requirements-questions.md`: write your answers there, then
+  run `/grill-requirements`", and stop.
+- The user's message adds anything about the app: Step 2.
 - No open questions: Step 3, then Step 4.
 
 ## Step 2 — record and ingest
 
-For each answer in the user's message, in the log under that question:
+Read the answers from `requirements-questions.md`: everything between a
+question's `Answer:` and the next `---` is the user's answer. `yes` on the
+`All:` line answers every question left blank with `yes`. An answer the user
+gives in chat counts the same, and wins where both answer one question. For
+each answer, in the log under that question:
 
 1. Write the user's words in `Answer:`. A bare `yes` is written as `yes`;
    the recommendation is the answer. Keep numbers, names and "must" /
@@ -101,7 +117,8 @@ For each answer in the user's message, in the log under that question:
 6. Under the question write `**Became:**` with each change by ID.
 
 Something the user volunteers that no question asked (a new requirement, a
-change, a correction) goes in the log as `### Volunteered (round N)` with
+change, a correction), in chat or under the file's **Anything else**, goes in
+the log as `### Volunteered (round N)` with
 their words, and is filed in `requirements.md` the way `/requirements` files
 it, sourced `(from user, round N)`.
 
@@ -154,32 +171,55 @@ Rules:
   answer. A reply like "fast" or "secure" gets a follow-up for a number.
 
 First append `## Round N · <date>` and every new question to `requirements-log.md` with
-`Answer:` blank (format in `log-template.md`). Then post the round in chat
-in this shape, carry-overs first:
+`Answer:` blank (format in `log-template.md`). Then, with every answer in
+the old file already in the log, replace `docs/grill/requirements-questions.md`
+with the round, carry-overs first, in this shape:
 
 ```
-***Questions***
+# Requirements grill · Round N · <date>
 
-Round N · <n> questions (<c> carried over, <h> held)
-Answer by number. `yes` accepts my recommendation. Also: `idk`,
-`n/a: <reason>`, `defer: <reason>`.
+<n> questions (<c> carried over, <h> held for the next round).
+Write your answer under each `Answer:`; everything down to the `---` is
+your answer. `yes` accepts my recommendation. Also: `idk`,
+`n/a: <reason>`, `defer: <reason>`. Leave one blank to answer it later.
+Then run `/grill-requirements`.
 
-**<Theme>**
+All:
 
-❓ **G2.1** - **<title>** (touches R3, N1): <question>
+(Write `yes` after `All:` to accept every recommendation you leave blank.)
+
+## <Theme>
+
+### ❓ G2.1 · <title> · touches R3, N1
+
+<question>
 
 Known: <fact and source>
-➡️ <recommended answer>
+
+➡️ Recommended: <recommended answer>
+
+Earlier: <your `idk` answer from round <M>, for a carry-over. Omit if none>
+
+Answer:
 
 ---
+
+## Anything else
+
+(Anything about the app that no question asked. Leave blank if none.)
 ```
 
-The post always starts with the `***Questions***` heading (bold italic), and
-every question starts with ❓. Do not drop either.
+Every question heading starts with ❓. Do not drop it.
+
+Then say in chat only: `Round N · <n> questions (<c> carried over, <h> held)
+in docs/grill/requirements-questions.md`, the themes with how many questions
+each has, and "Write your answers there, then run `/grill-requirements`."
+Do not post the questions.
 
 Update `project.md`: the requirements row `grilling` with today's date,
-**Next action** `Round N has <n> open questions: run /grill-requirements to
-continue`, one log line. Then stop and wait for the answers.
+**Next action** `Round N has <n> open questions in
+docs/grill/requirements-questions.md: answer there, then run
+/grill-requirements`, one log line. Then stop.
 
 ## Step 5 — exit check and closing rounds
 
@@ -203,10 +243,11 @@ not memory:
    share one understanding of these requirements?" (`yes`).
 
 Run whichever is missing, in the order 4, 5, 6, each as a normal round
-(logged, then asked). Items 4 and 5 change the file, so after their answers
+(logged, then written to the questions file). Items 4 and 5 change the file, so after their answers
 are ingested, check again from item 1. When all six hold and the confirm
 round is `yes` with `none`: set `Status: grilled` in `requirements.md`, the
-tracker row to `grilled`, **Next action** `Review docs/requirements.md, run
+tracker row to `grilled`, replace `requirements-questions.md` with one line
+saying the grill is done and nothing is open, **Next action** `Review docs/requirements.md, run
 /requirements approve, then /stack`, one log line. Tell the user the final
 counts and that the files are uncommitted. Do not approve.
 
@@ -219,7 +260,7 @@ says so.
 If an advisor is on (`/advisor`), consult it at these points, with the full
 conversation already in front of it:
 
-- Before posting the first round (Step 4): ask whether the round misses a
+- Before writing the first round (Step 4): ask whether the round misses a
   question the requirements and the files make obvious, asks something the files
   already answer, or leads the user to an answer.
 - Before the confirm round in Step 5: ask what is still weak in the requirements that

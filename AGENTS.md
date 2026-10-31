@@ -48,9 +48,11 @@ syntax, metadata and tool instructions. Claude's explicit-only skills use
   resumes from the files. Does not interview, design, or commit.
   `/requirements approve` sets `approved` once the grill has set `grilled`.
 - `grill-requirements` — `/grill-requirements`: grills `docs/requirements.md`
-  in rounds asked in chat. Each round and answer is logged to
-  `docs/grill/requirements-log.md` before the reply, so a new chat resumes
-  from the open questions. Ends only when `requirements-coverage.md`, a
+  in rounds written to `docs/grill/requirements-questions.md`, where the user
+  answers each question in place and runs the grill again (chat gets only the
+  path and counts). Each round and answer is logged to
+  `docs/grill/requirements-log.md` first, so a new chat resumes from the open
+  questions. Ends only when `requirements-coverage.md`, a
   pre-mortem, a no-chat fresh-eyes check and the user's confirm all pass; then
   sets `grilled`, never `approved`. Based on Matt Pocock's `grilling` and
   `domain-modeling`.
@@ -60,7 +62,8 @@ syntax, metadata and tool instructions. Claude's explicit-only skills use
   `docs/project.md`; `/stack approve` sets `approved`. Never edits the
   requirements.
 - `grill-stack` — `/grill-stack`: grills `docs/stack.md` the same way as
-  `grill-requirements` (chat rounds, logged to `docs/grill/stack-log.md`,
+  `grill-requirements` (rounds answered in `docs/grill/stack-questions.md`,
+  logged to `docs/grill/stack-log.md`,
   coverage list, simplicity sweep, pre-mortem, no-chat fresh-eyes check,
   confirm). Settles each decision only on the user's yes, writes ADRs under
   `docs/adr/` for hard-to-reverse choices, and logs requirement gaps instead
@@ -74,7 +77,8 @@ syntax, metadata and tool instructions. Claude's explicit-only skills use
   vocabulary. `/architecture approve` sets `approved`. Never edits the
   requirements or the stack.
 - `grill-architecture` — `/grill-architecture`: grills `docs/architecture.md`
-  the same way (logged to `docs/grill/architecture-log.md`). Per-module
+  the same way (answered in `docs/grill/architecture-questions.md`, logged to
+  `docs/grill/architecture-log.md`). Per-module
   deletion test, per-entity lifecycle, per-flow failure attacks; checks the
   module graph has no cycle and every entity one owner; adds settled domain
   terms to the glossary and ADRs to `docs/adr/`; logs requirement and stack
@@ -90,7 +94,8 @@ syntax, metadata and tool instructions. Claude's explicit-only skills use
   screens). `/design approve` needs `grilled` and every screen built. Never
   edits the requirements, stack or architecture, and never writes app code.
 - `grill-design` — `/grill-design`: grills `docs/design.md` the same way
-  (chat rounds, logged to `docs/grill/design-log.md`) but to clear the idea,
+  (rounds answered in `docs/grill/design-questions.md`, logged to
+  `docs/grill/design-log.md`) but to clear the idea,
   not the look: say-it-back, the one thing, who and when, journeys, screens
   and states, with feel words turned into checkable rules. Never asks about
   colour, type or styling (those are reviewed in Paper). Fresh-eyes check is
@@ -147,7 +152,8 @@ and commit them to keep or share it). The issue is read, never written. `/issues
   the feature's boards beside them. `approve` needs `grilled` and every
   screen built; `none <reason>` marks a feature with nothing to see.
 - `grill-feature` — `/grill-feature <stage>`: grills one stage the same way as
-  the other grills (logged to the feature's `grill/<stage>-log.md`, coverage
+  the other grills (answered in the feature's `grill/<stage>-questions.md`,
+  logged to its `grill/<stage>-log.md`, coverage
   in `grill/<stage>-coverage.md`), but looks up in the code whatever the code
   can answer and re-checks every `T`, `AS` and `EU` fact. Per-stage attacks,
   coverage and probes (requirements; architecture with the reuse, deletion,
@@ -159,7 +165,8 @@ and commit them to keep or share it). The issue is read, never written. `/issues
   grilled again only with `reopen`.
 
 `grill-requirements`, `grill-stack`, `grill-architecture`, `grill-design` and
-`grill-feature` share mechanics (round format, log handling, exit loop) and
+`grill-feature` share mechanics (round format, the questions file the user
+answers in, log handling, exit loop) and
 are each self-contained on purpose; change one, change the other four.
 
 - `review-requirements`, `review-stack`, `review-architecture`,
