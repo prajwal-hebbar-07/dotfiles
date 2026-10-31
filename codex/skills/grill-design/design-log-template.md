@@ -6,8 +6,8 @@ words, before Codex changes anything else. A question is open while its
 `Answer:` is blank or starts with `idk`. A new chat continues from the open
 ones. Entries are never deleted.
 
-Answer words: `yes` (accept the recommendation), any text, `idk`,
-`n/a: <reason>`, `defer: <reason>`.
+Answer words: `yes` (accept the recommendation; a blank in the questions file
+is logged as `yes`), any text, `idk`, `n/a: <reason>`, `defer: <reason>`.
 
 ## Round <N> · <yyyy-mm-dd>
 

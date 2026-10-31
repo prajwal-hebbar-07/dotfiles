@@ -52,8 +52,8 @@ syntax, metadata and tool instructions. Claude's explicit-only skills use
   `/requirements approve` sets `approved` once the grill has set `grilled`.
 - `grill-requirements` — `/grill-requirements`: grills `docs/requirements.md`
   in rounds written to `docs/grill/requirements-questions.md`, where the user
-  answers each question in place and runs the grill again (chat gets only the
-  path and counts). Each round and answer is logged to
+  answers in place, leaving a question blank to take the recommendation, and
+  runs the grill again (chat gets only the path and counts). Each round and answer is logged to
   `docs/grill/requirements-log.md` first, so a new chat resumes from the open
   questions. Ends only when `requirements-coverage.md`, a
   pre-mortem, a no-chat fresh-eyes check and the user's confirm all pass; then
@@ -169,7 +169,8 @@ and commit them to keep or share it). The issue is read, never written. `/issues
 
 `grill-requirements`, `grill-stack`, `grill-architecture`, `grill-design` and
 `grill-feature` share mechanics (round format, the questions file the user
-answers in, log handling, exit loop) and
+answers in, where a blank answer takes the recommendation, log handling, exit
+loop) and
 are each self-contained on purpose; change one, change the other four.
 
 - `review-requirements`, `review-stack`, `review-architecture`,

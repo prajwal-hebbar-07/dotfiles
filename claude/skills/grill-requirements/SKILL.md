@@ -45,9 +45,9 @@ Templates and prompts in this skill's directory: `log-template.md`,
 ## Never
 
 - Answer for the user. A question the user has not answered, in the
-  questions file or in chat, is open. `yes` to a question, or `yes` on the
-  file's `All:` line for the round, is an answer because they wrote it; a
-  blank is not.
+  questions file or in chat, is open. When the user runs the grill again, a blank
+  `Answer:` in the questions file is their standing choice to take my recommendation (logged as
+  `yes`); anything written there is their answer. Chat needs an explicit answer.
 - Post a round's questions in chat. They go to the questions file; chat gets
   only where the file is and what is in it.
 - Put a question in the questions file that is not already in the log, or
@@ -60,6 +60,10 @@ Templates and prompts in this skill's directory: `log-template.md`,
 - Renumber or reuse an ID. Resolved and dropped items keep their line.
 - End early. The only ways out are Step 5 passing and the user saying yes.
 - Set the stage to `approved`, pick a stack, or commit.
+- Recommend over-engineering. A recommended answer is the best approach that
+  serves the requirement, no more. An extra nobody asked for becomes its own
+  question (needed or not, what it adds and costs), recommended `no` unless a
+  requirement needs it.
 
 ## Step 1 — state
 
@@ -80,20 +84,18 @@ is **open** when its `Answer:` in the log is blank or starts with `idk`.
 - No log: create `requirements-log.md` and `requirements-coverage.md` from the templates, set
   `Status: grilling` in `requirements.md` and the tracker row, then Step 4.
 - Open questions in the log: read `requirements-questions.md` (missing →
-  write it again from the log's open questions, as in Step 4, without a new
-  round). An answer written in it, `yes` on its `All:` line, text under
-  **Anything else**, or an answer in the user's message: Step 2. None (a new
-  chat, or `/grill-requirements` alone): say "Round N has <k> open questions
-  in `docs/grill/requirements-questions.md`: write your answers there, then
-  run `/grill-requirements`", and stop.
+  write it again from the log's open questions, as in Step 4, without a new round, then stop with the Step 4 chat
+  message). Otherwise Step 2: each question in it is answered, a blank `Answer:` taking my
+  recommendation, and text under **Anything else** or in the user's message
+  is volunteered. Running the grill again is the signal; never stop to ask for
+  answers.
 - The user's message adds anything about the app: Step 2.
 - No open questions: Step 3, then Step 4.
 
 ## Step 2 — record and ingest
 
 Read the answers from `requirements-questions.md`: everything between a
-question's `Answer:` and the next `---` is the user's answer. `yes` on the
-`All:` line answers every question left blank with `yes`. An answer the user
+question's `Answer:` and the next `---` is the user's answer. A blank `Answer:` takes my recommendation: log it as `yes`. An answer the user
 gives in chat counts the same, and wins where both answer one question. For
 each answer, in the log under that question:
 
@@ -179,14 +181,10 @@ with the round, carry-overs first, in this shape:
 # Requirements grill · Round N · <date>
 
 <n> questions (<c> carried over, <h> held for the next round).
-Write your answer under each `Answer:`; everything down to the `---` is
-your answer. `yes` accepts my recommendation. Also: `idk`,
-`n/a: <reason>`, `defer: <reason>`. Leave one blank to answer it later.
+Leave an `Answer:` blank to take my recommendation. Write under it only to
+change it; everything down to the `---` is your answer. Also: `idk`,
+`n/a: <reason>`, `defer: <reason>`.
 Then run `/grill-requirements`.
-
-All:
-
-(Write `yes` after `All:` to accept every recommendation you leave blank.)
 
 ## <Theme>
 
@@ -241,6 +239,9 @@ not memory:
 6. The **confirm round** is answered: "Is there anything you know about this
    app that this doesn't say?" (`none` or the thing) and "Do you confirm we
    share one understanding of these requirements?" (`yes`).
+
+A blank answer to the confirm round does not count: the grill ends only on a
+written `yes`.
 
 Run whichever is missing, in the order 4, 5, 6, each as a normal round
 (logged, then written to the questions file). Items 4 and 5 change the file, so after their answers
