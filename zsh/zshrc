@@ -538,7 +538,6 @@ if (( $+commands[eza] )); then
   _pk_eza=(eza --icons=auto --group-directories-first --color=auto
            --color-scale=size --hyperlink)
   alias ls="${_pk_eza[*]}"
-  alias l="${_pk_eza[*]} --long --header --git --no-user --time-style=relative"
   alias ll="${_pk_eza[*]} --long --header --git --time-style=long-iso"
   alias la="${_pk_eza[*]} --long --header --git --all --time-style=long-iso"
   alias lt="${_pk_eza[*]} --tree --level=2 --git-ignore"
@@ -548,7 +547,6 @@ if (( $+commands[eza] )); then
   unset _pk_eza
 else
   alias ls='ls -G'
-  alias l='ls -lh'
   alias ll='ls -lh'
   alias la='ls -lha'
 fi
@@ -687,6 +685,12 @@ alias agy='command agy --dangerously-skip-permissions'
 if [[ -r "$HOME/.local/share/leaf/completions/_leaf" ]]; then
   source "$HOME/.local/share/leaf/completions/_leaf"
 fi
+alias l=leaf
+# leaf reads these ahead of its config.toml: Ctrl+E opens nvim, and fenced
+# code blocks always show line numbers. Document line numbers have no config
+# key; they are the Shift+L toggle inside leaf.
+export LEAF_EDITOR=nvim
+export LEAF_CODE_LINE_NUMBERS=1
 
 # Added by jcode installer
 export PATH="/Users/hebbar/.local/bin:$PATH"
