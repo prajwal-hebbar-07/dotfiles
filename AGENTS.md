@@ -15,15 +15,17 @@ carries a recommendation or, failing that, an explanation), as `CLAUDE.md`
 in both accounts.
 
 Codex counterparts live under `codex/skills/<name>/SKILL.md`:
-`commit`, `design`, `grill-design`, `review-requirements`,
+`commit`, `design`, `grill-design`, `grill-feature`, `paper-target`, `review-requirements`,
 `review-stack`, `review-architecture`, `review-design`, `review-feature`, `review-code`, `qa`.
-Requirements, stack, architecture and feature authoring and grilling stay in
-Claude Code; Codex can review their output files.
+Codex is the fallback for when Claude Code's limits run out. Requirements,
+stack, architecture and feature authoring, the requirements, stack and
+architecture grills, and `/implement` stay in Claude Code; Codex can review
+their output files.
 `codex/link-skills` links them into `~/.agents/skills/`, Codex's user skill
 directory; rerun it after adding or removing one. It prunes only its own
 broken links and refuses to replace another skill. Invoke with `$name`
 (for example `$commit plan` or `$design build`). The workflows below also
-describe these ten Codex versions. Keep both hosts in step when changing a
+describe these twelve Codex versions. Keep both hosts in step when changing a
 shared workflow, including templates and probes; retain each host's invocation
 syntax, metadata and tool instructions. Claude's explicit-only skills use
 `policy.allow_implicit_invocation: false` in Codex's `agents/openai.yaml`.
@@ -122,8 +124,11 @@ leading number or `#<n>`. State is in `docs/features/<n>-<slug>/`
 (`tracker.md`, `requirements.md`, `architecture.md`, `design.md`,
 `glossary.md`, `grill/`, `review/`), kept out of git through
 `.git/info/exclude`, so they are the only copy of the plan (remove the line
-and commit them to keep or share it). The issue is read, never written. `/issues`, `/qa` and
-`/release` are whole-app and not part of it.
+and commit them to keep or share it). The issue is read, never written. `/issues` and
+`/release` are whole-app and not part of it. `/qa`, `$qa` and `/skill:live-qa`
+are the user's to run by hand once the feature is built: on the feature's branch
+they switch to a feature mode, and nothing in the flow starts or waits for them.
+There is no grill of the code; the review is enough.
 
 - `feature` — `/feature`: reads the issue and what the app does today (`T`
   facts with sources), captures the issue and anything the user adds as
@@ -154,7 +159,8 @@ and commit them to keep or share it). The issue is read, never written. `/issues
   app's tokens, a `· today` board for each existing screen it changes, then
   the feature's boards beside them. `approve` needs `grilled` and every
   screen built; `none <reason>` marks a feature with nothing to see.
-- `grill-feature` — `/grill-feature <stage>`: grills one stage the same way as
+- `grill-feature` — `/grill-feature <stage>` (Claude Code) and
+  `$grill-feature <stage>` (Codex): grills one stage the same way as
   the other grills (answered in the feature's `grill/<stage>-questions.md`,
   logged to its `grill/<stage>-log.md`, coverage
   in `grill/<stage>-coverage.md`), but looks up in the code whatever the code
@@ -187,7 +193,8 @@ are each self-contained on purpose; change one, change the other four.
   `/feature`, `/feature-architecture` or `/feature-design` command that would
   fix it, and the report ends in a paste-ready fix list.
   Running it again after the fixes marks each finding resolved, still open or
-  new. Never edits the document, never changes a `Status:`, never approves;
+  new; a different model may review the same version (`Also found by`,
+  `Disputed by`). Never edits the document, never changes a `Status:`, never approves;
   only `docs/project.md`'s **Next action** and log change (for a feature,
   its `tracker.md`'s Review cell, **Next action** and log). It does not
   replace the grill. Available in both Claude Code and Codex. Codex uses
@@ -277,7 +284,8 @@ commands (which also check the code); change one, change the rest.
   security, runs the issue's own test, lint and build commands, and appends
   ranked findings (same severities and verdicts as the stage reviews, prefix
   `CR`) to `docs/review/code/<key>-review.md`. Also finds a feature from a
-  `<n>-<slug>` branch and reviews it against its approved stage files. Reviews from several models
+  `<n>-<slug>` branch and reviews it against its approved stage files, writing
+  to its `review/code-review.md` and the tracker's Build row. Reviews from several models
   share one report, with `Also found by` and `Disputed by` lines. Never edits
   code, pushes or comments on a PR; `/implement` fixes the findings. Same
   mechanics as the stage reviews; change one, change the other five.
@@ -289,7 +297,10 @@ commands (which also check the code); change one, change the rest.
   build, and appends ranked findings (prefix `QA`, same severities and
   verdicts as `review-code`) to `docs/review/qa-report.md`. Each finding names
   its route: `issue`, a stage command, or `manual`. Items whose
-  issues are not done are `not yet built`, so it doubles as a progress check.
+  issues are not done are `not yet built`, so it doubles as a progress check. On
+  a `/feature` branch it audits that feature from its stage files, adding `RK`
+  and existing rows, into `docs/features/<key>/review/qa-report.md`; findings go
+  to `/implement fix`, not `/issues qa`.
   Never starts the app, a server or a browser (so screens and live requests
   are `not judged`, with the manual check to do), never edits code. Reports
   from several models share one report (`Also found by`, `Disputed by`). Same
@@ -307,7 +318,10 @@ commands (which also check the code); change one, change the rest.
   settles `/qa`'s `manual` and `not judged` rows. Appends ranked findings
   (prefix `LQ`, routes as `qa`) to `docs/review/live-qa-report.md` with
   evidence in `qa-evidence/<sha>/`; `/issues qa` files them and `/implement`
-  fixes them. Same dispute round as the reviews. Never edits code or the
+  fixes them. On a `/feature` branch it runs that feature from its stage files,
+  adds `RK`, data from before the feature and the `· today` boards, and writes to
+  `docs/features/<key>/review/`; findings go to `/implement fix`. Same dispute
+  round as the reviews. Never edits code or the
   design, and never touches production. Its steps name the browser, `eval`
   and Paper tools as last known from the old factory agents, not re-checked
   against the current Oh My Pi.
@@ -332,8 +346,18 @@ only, so there is no advisor effort setting, and Claude decides when to call it:
 the skills can name the point but not force the call. The Codex counterparts
 have no advisor and need none.
 
+`paper-target` — `/paper-target` (Claude Code) and `$paper-target` (Codex): pins
+the one Paper file and page a project uses, so several sessions or open tabs
+cannot pull design work onto the wrong file. Resolves them through the Paper MCP
+and writes a marked block into the repository's `AGENTS.md` / `CLAUDE.md`, read
+by `design`, `feature-design`, `review-design`, `review-feature` and `live-qa`,
+which pass both ids on their calls instead of following the focus. `show` and
+`clear`. Never draws or commits. It has no advisor section: nothing in it is a
+judgement. Oh My Pi has no copy; `live-qa` only reads the block.
+
 - `commit` — commits already-staged changes with a semantic message.
-- `paper-target` — pins the Paper file/page this repo's design work reads from.
+- `paper-target` — the older Cursor and Gemini copy: pins the Paper file/page this
+  repo's design work reads from, and commits it. Writes the same block.
 - `paper-design-prompt` — turns a design direction into one Paper prompt
   (a reference UI as the base, then the requested changes). Does not draw.
 - `paper-design` — builds that prompt (`paper-design-prompt.md`) in Paper:
@@ -378,9 +402,14 @@ new skills here.
 one skill. `omp/skills/<name>/SKILL.md` are linked into
 `~/.omp/agent/skills/` by `omp/link-skills`; rerun it after adding or removing
 one. It prunes only its own broken links and refuses to replace another skill.
-Invoke with `/skill:<name>`. The skill needs the Paper MCP server in Oh My Pi's
-`mcp.json`; the old entry is in git history (`omp/mcp.json` before the
-removal commit).
+Invoke with `/skill:<name>`.
+
+The Paper MCP server is configured in `omp/mcp.json` as a stdio server running
+`${HOME}/.paper/bin/paper mcp`; the same file is copied to
+`~/.omp/agent/mcp.json` so Oh My Pi discovers it at user scope. In an `omp`
+session run `/mcp list` and `/mcp test paper` to verify the connection.
+Paper Desktop must be running for the tools to do work; starting it is the
+user's step, never the skill's.
 
 ## Cursor skills
 
