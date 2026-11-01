@@ -71,8 +71,12 @@ stack cites, if they exist.
 - Argument `status`: print the last review's number, verdict, hashes, findings
   by severity and status, and whether either file has changed since. Change
   nothing.
-- The report exists and both hashes equal the last review's: say "Review N
+- The report exists and both hashes equal the last review by **this model**: say "Review N
   already covers this version: <verdict>, <k> open findings", and stop.
+- The same version was last reviewed by a different model: not a repeat. Go on
+  as a **re-review** (Step 4). A finding that model wrote that you also find
+  gets `Also found by: <you>`; one you think is wrong gets `Disputed by <you>:
+  <why, with evidence>` and stays open for the user.
 - The report exists and a hash differs: this is a **re-review** (Step 4).
 - No report: create it, Review 1.
 - Any other text is a **focus**: check that first and hardest, then
@@ -115,7 +119,7 @@ findings or a pass; record the pass count in the report.
 7. **Operations.** How it runs on a laptop in one command, how a release ships
    and rolls back, where secrets live, how data is backed up and a restore
    tried, who is told when it breaks at night. Missing is a finding when the
-   requirements ask for availability, data safety or a team.
+   requirements ask for availability or data safety.
 8. **Exit and lock-in.** For each hard-to-reverse choice (language, framework,
    data store, hosting, auth): what is locked in and what leaving costs; a
    vendor with no data export; a licence that bites at the plan's scale.
@@ -123,7 +127,7 @@ findings or a pass; record the pass count in the report.
    place. Whether the platform, the standard library or an already-chosen
    piece does the job. A piece kept "for later" is a finding.
 10. **Assumptions.** Each `Assumes:` points to an `SQ` that exists and is
-    open or answered; a fact about the user (team skills, budget, accounts)
+    open or answered; a fact about the user (budget, accounts)
     stated as known with no `SQ` is a finding.
 11. **Consistency.** An ID cited that does not exist or is dropped; a choice
     named two ways; the one-line summary disagreeing with the decisions; a

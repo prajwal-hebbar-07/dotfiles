@@ -79,9 +79,13 @@ and the `docs/adr/` files the architecture cites, if they exist.
 - Argument `status`: print the last review's number, verdict, hashes, findings
   by severity and status, and whether `architecture.md` has changed since
   (hash). Change nothing.
-- The report exists and the three hashes equal the last review's: say "Review
+- The report exists and the three hashes equal the last review by **this model**: say "Review
   N already covers this version: <verdict>, <k> open findings", and stop.
   Nothing new to check.
+- The same version was last reviewed by a different model: not a repeat. Go on
+  as a **re-review** (Step 4). A finding that model wrote that you also find
+  gets `Also found by: <you>`; one you think is wrong gets `Disputed by <you>:
+  <why, with evidence>` and stays open for the user.
 - The report exists and a hash differs: this is a **re-review** (Step 4).
 - No report: create it, Review 1.
 - Any other text is a **focus**: check that first and hardest, then everything

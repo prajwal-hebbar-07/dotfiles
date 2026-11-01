@@ -76,8 +76,12 @@ they exist.
 - Argument `status`: print the last review's number, verdict, hash, findings
   by severity and status, and whether `requirements.md` has changed since.
   Change nothing.
-- The report exists and the hash equals the last review's: say "Review N
+- The report exists and the hash equals the last review by **this model**: say "Review N
   already covers this version: <verdict>, <k> open findings", and stop.
+- The same version was last reviewed by a different model: not a repeat. Go on
+  as a **re-review** (Step 4). A finding that model wrote that you also find
+  gets `Also found by: <you>`; one you think is wrong gets `Disputed by <you>:
+  <why, with evidence>` and stays open for the user.
 - The report exists and the hash differs: this is a **re-review** (Step 4).
 - No report: create it, Review 1.
 - Any other text is a **focus**: check that first and hardest, then
@@ -96,7 +100,7 @@ pass; record the pass count in the report.
    "only". `Accept:` lines are added by the grill, never at capture; one on an
    `R` that was never grilled is a finding.
 2. **Sorting.** Each item is in the right section: what it does is `R`, how
-   well is `N`, a platform, budget, deadline or named technology is `C`, a
+   well is `N`, a platform, budget or named technology is `C`, a
    refusal is `X`. A solution hiding in an `R` ("uses a queue") is a design
    decision, not a requirement, unless the user fixed it, then it is a `C`.
 3. **One idea per item.** An item with "and" joining two testable things.

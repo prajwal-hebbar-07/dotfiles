@@ -108,8 +108,12 @@ exist.
   by severity and status, and whether anything recorded has changed since.
   Change nothing.
 - The report exists and every recorded hash and the code sha equal the last
-  review's: say "Review N already covers this version: <verdict>, <k> open
+  review by **this model**: say "Review N already covers this version: <verdict>, <k> open
   findings", and stop.
+- The same version was last reviewed by a different model: not a repeat. Go on
+  as a **re-review** (Step 5). A finding that model wrote that you also find
+  gets `Also found by: <you>`; one you think is wrong gets `Disputed by <you>:
+  <why, with evidence>` and stays open for the user.
 - The report exists and any of them differs: this is a **re-review** (Step 5).
 - No report: create it, Review 1.
 - `no-paper` (design only) skips Step 3. Any other text is a **focus**: check
@@ -130,7 +134,7 @@ yields findings or a pass; record the pass count in the report.
    "only", a statement from the issue that became no item. `Accept:` lines on
    an `R` never grilled.
 3. **Sorting and one idea.** What it does is `R`, how well is `N`, a
-   deadline, named technology or behaviour that must not change is `C`, a
+   named technology or behaviour that must not change is `C`, a
    refusal is `X`. A solution hiding in an `R` belongs to the architecture or
    design. An item with "and" joining two testable things.
 4. **Measurable.** A vague word with no number or test (fast, easy, secure,
@@ -264,8 +268,9 @@ has `Paper: built`, or the Paper MCP is unavailable (list each as **Not
 judged**).
 
 1. `get_guide` with topic `paper-mcp-instructions` once, before any other
-   Paper tool. Use the `Paper:` line in the header; call `get_basic_info` with
-   that `fileId` and confirm the file and page. If they disagree with the pin,
+   Paper tool. Use the `Paper:` line in the header, else the `paper-target`
+   block; call `get_basic_info` with that `fileId` and `pageId`, pass them on
+   every later call, and confirm the file and page. If they disagree with the pin,
    or nothing is pinned, say so under **Not judged**. Do not switch the user's
    file.
 2. `get_tree_summary` for the page; match artboards to screens by name

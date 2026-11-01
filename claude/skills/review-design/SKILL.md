@@ -87,9 +87,13 @@ or `CLAUDE.md`, if they exist.
 - Argument `status`: print the last review's number, verdict, hashes,
   findings by severity and status, and whether the design has changed since.
   Change nothing.
-- The report exists and every hash equals the last review's: say "Review N
+- The report exists and every hash equals the last review by **this model**: say "Review N
   already covers this version: <verdict>, <k> open findings", and stop. The
   boards may have changed without the file; if the user says so, run Step 3.
+- The same version was last reviewed by a different model: not a repeat. Go on
+  as a **re-review** (Step 5). A finding that model wrote that you also find
+  gets `Also found by: <you>`; one you think is wrong gets `Disputed by <you>:
+  <why, with evidence>` and stays open for the user.
 - The report exists and a hash differs: this is a **re-review** (Step 5).
 - No report: create it, Review 1.
 - Argument `no-paper`: skip Step 3 and list the boards under **Not judged**.
@@ -158,7 +162,8 @@ MCP is unavailable (list each as **Not judged**).
 
 1. `get_guide` with topic `paper-mcp-instructions` once, before any other
    Paper tool. Use the `Paper:` line in the header (file and page) or the
-   `paper-target` block; call `get_basic_info` with that `fileId` and confirm
+   `paper-target` block; call `get_basic_info` with that `fileId` and `pageId`, pass
+   them on every later call, and confirm
    the file and page name. If they disagree with the pin, or nothing is
    pinned, say so under **Not judged** and review the focused file only if
    the user confirms it. Do not switch the user's file.
