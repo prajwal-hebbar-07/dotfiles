@@ -44,7 +44,9 @@ syntax, metadata and tool instructions. Claude's explicit-only skills use
   copied from `template.html` (cards with a recommended option and a note,
   progress bar, Accept recommendations, Copy answers, answers saved in the
   page's `db` and read back with `ArtifactData`). Only the `META` and
-  `QUESTIONS` data change per page. Modelled on the architecture-questions
+  `QUESTIONS` data change per page. An existing question artifact (linked,
+  open in the chat, published earlier or connected) is updated in place,
+  never replaced by a new one. Modelled on the architecture-questions
   page of 2026-11-01. The grills still write their questions files; this is
   for questions asked in chat.
 - `raise-pr` — `/raise-pr <target>`: opens a GitHub pull request from the

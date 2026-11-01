@@ -24,6 +24,25 @@ this folder. The look, behaviour and answer storage never change; only the
 - Artifact tool missing or publishing refused: fall back to the chat or file
   the calling skill uses. Say so in one line.
 
+## Reuse first
+
+Before building anything, check for a question artifact already in play: one
+the user links or has open in this chat, one published earlier in this
+conversation, or one connected to this session (a watched artifact). If there
+is one, use it and do not create another.
+
+- Read it with the Artifact tool (`action: "read"`) and build on that version.
+- Put the new questions into it: change `QUESTIONS` (and `META` if the
+  heading or count changed) and republish to the same `url`. Pages not built
+  from `template.html` are rebuilt on it, keeping the url.
+- Keep unchanged questions with their `id`s, so saved answers stay. Use new
+  `id`s for new questions; drop a question only if it is withdrawn.
+- Several are in play and it is unclear which: use the most recently opened
+  or published, and say which in one line.
+- Only the user's own artifact can be updated. If it is shared view-only or
+  belongs to someone else, publish a new one and say why.
+- None found: build a new one below.
+
 ## Build
 
 1. Load `artifact-design` and `artifact-capabilities` first (the Artifact tool
@@ -33,7 +52,8 @@ this folder. The look, behaviour and answer storage never change; only the
    `QUESTIONS`. Do not touch the CSS, markup or the rest of the script.
 3. Publish with the Artifact tool, `capabilities: {"db": {}}`, an `icon`
    (`question`), and a one-sentence `description`. To update the same
-   questions, publish the same file path again; a new round is a new file.
+   questions, publish the same file path again; a new round of questions
+   goes into the existing artifact (see Reuse first), not a new file.
 4. Give the user the link and the count in chat, nothing else. The questions
    live on the page.
 
