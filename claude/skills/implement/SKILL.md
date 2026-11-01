@@ -50,7 +50,7 @@ Files, all in the app repo (git root, else the current directory):
 | the GitHub issue | The issue body is the brief. Read with `gh issue view` |
 | `docs/review/code/<key>-review.md` | Review findings on the branch. Read; the only thing written here is a `Response:` line under a finding (Step 6). Never committed |
 | `docs/requirements.md`, `docs/architecture.md`, `docs/stack.md`, `docs/design.md`, `docs/glossary.md` | Read only, to check an unclear point against its source. Never edited |
-| `docs/features/<key>/` | **Feature mode** only: the approved stage files (`requirements.md`, `architecture.md`, `design.md`), read only, which are the brief, and `tracker.md`, whose Build row, **Built from**, **Next action** and log this skill writes instead of `docs/progress.md` |
+| `docs/features/<key>/` | **Feature mode** only: the approved stage files (`requirements.md`, `architecture.md`, `design.md`), read only, which are the brief, and `tracker.md`, whose Build row, **Built from**, **Next action** and log this skill writes instead of `docs/progress.md`; and its `review/code-review.md`, `review/qa-report.md` and `review/live-qa-report.md`, `Response:` lines only |
 
 ## Never
 
@@ -245,15 +245,14 @@ off) is Steps 4 to 7, unchanged except as listed here.
      number: stop, and say to check out the issue's branch (the tracker's
      **Branch**, or `gh issue develop --list <n>`). Do not create or switch
      branches.
-   - Uncommitted changes other than under `docs/review/code/` and
-     `docs/features/`: stop and list them.
+   - Uncommitted changes other than under `docs/features/`: stop and list them.
    - The tracker's **Built from** hashes are set and a stage file's hash now
      differs: the stage changed after building started. List the items that
      changed (by ID) and treat their criteria as not yet passing; say so in the
      hand-off.
-   - `git log --oneline origin/<default>..HEAD` and the review report
-     `docs/review/code/<key>-review.md` decide the step: open blocker or major
-     findings, or the argument `fix`: Step 6. Commits and the tracker's Build
+   - `git log --oneline origin/<default>..HEAD` and the feature's reports (step
+     7 below) decide the step: open blocker or major findings, or the argument
+     `fix`: Step 6. Commits and the tracker's Build
      row `awaiting review`, no open findings and no changed stage: stop with
      "#<n> is on `<branch>`, <k> commits, waiting for your review and PR; run
      `/review-code`, raise the PR, merge it". Commits otherwise: continue from
@@ -292,9 +291,17 @@ off) is Steps 4 to 7, unchanged except as listed here.
    `awaiting review` at the hand-off), with **Next action** and a log line.
    Never create `docs/progress.md` in this mode.
 6. **Hand-off.** As Step 7, without a next issue: "Review it: `/review-code`
-   here, or `$review-code` in Codex. Raise the PR yourself when you are happy
-   (`Closes #<n>`), and merge it." The PR description is the same, and its
+   here, or `$review-code` in Codex. QA is yours to run when you choose, on this
+   branch: `/qa` or `$qa`, and `/skill:live-qa` in Oh My Pi. Raise the PR yourself
+   when you are happy (`Closes #<n>`), and merge it." The PR description is the same, and its
    summary names the feature's stage files as the plan.
+7. **Findings.** Step 6 reads whichever of the feature's reports exist, in
+   `docs/features/<key>/review/`, in place of `docs/review/code/<key>-review.md`:
+   `code-review.md`, `qa-report.md` and `live-qa-report.md`. `Response:` lines go
+   there, and a commit names its finding (`fixes QA2`). In the two QA reports it
+   takes route `fix`; a finding routed to a stage command is not built, and the
+   hand-off names that command. The last paragraph of Step 6 (a `qa` issue) does
+   not apply.
 
 ## Step 2 — branch
 

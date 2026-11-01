@@ -138,7 +138,7 @@ its review if they exist.
    can go to an `Explore` sub-agent; check what it reports against the files
    before writing it down. Write one `AS` item per fact the design will rest
    on, with `path:line`, the **Stack and commands** (each command with where
-   it was found), and the **As-is diagram**.
+   it was found, including how to start, seed and stop the app), and the **As-is diagram**.
 3. **Shape.** Write candidate A: the fit with the least new architecture that
    meets every `R`, `N` and `C`: extend what exists before adding, follow
    the patterns the `AS` items show. Have a sub-agent, given only the paths of

@@ -32,6 +32,7 @@ Files, all in the app repo (git root, else the current directory):
 | the GitHub issue (`gh issue view`), `docs/issues/<key>.md` | The brief the code must meet. The GitHub body wins if they differ |
 | `docs/requirements.md`, `docs/stack.md`, `docs/architecture.md`, `docs/design.md`, `docs/glossary.md`, `docs/adr/` | Read only, to check what the issue pasted against its source |
 | `docs/features/<key>/requirements.md`, `architecture.md`, `design.md` | For an issue planned with `/feature`: the brief the code must meet, in place of an issue file. Read only |
+| `docs/features/<key>/review/code-review.md`, `docs/features/<key>/tracker.md` | For that issue: the report, in place of the one below, and the tracker's Build row Review cell, **Next action** and log |
 | `docs/review/code/<key>-review.md` | The report. One `## Review N` per run, newest last. Not committed to the branch |
 
 Same mechanics as `/review-requirements`, `/review-stack`,
@@ -40,7 +41,8 @@ step.
 
 ## Never
 
-- Edit, create or delete any file except `docs/review/code/<key>-review.md`.
+- Edit, create or delete any file except `docs/review/code/<key>-review.md`
+  (for a feature, its `review/code-review.md` and the tracker cells above).
   The fix is `/implement`'s, or the user's.
 - Push, comment on or approve a pull request, merge, commit, stash, reset, or
   switch branches. Read the branch with `git diff`, `git log` and `git show
@@ -83,7 +85,11 @@ issue body is only the request). Its acceptance criteria are, in order, each
 verification, each `RK`, each `N` check, and each state of each live `S`; its
 commands, scope and rules are the architecture's **Stack and commands**, the
 `X` items with **Not needed** and **Not designed**, and the build rules in
-check 3. Take the
+check 3. Its report is `docs/features/<key>/review/code-review.md`, wherever this
+file says `docs/review/code/<key>-review.md`, so it stays out of git with the
+rest of the feature. A stage that is not `approved` (the design may be `n/a`),
+or a stage file whose hash differs from the tracker's **Built from**, is a
+major finding: the code was built from something else. Take the
 base as `origin/<default>` and the head as the branch tip:
 
 ```sh
@@ -266,6 +272,10 @@ Verdict: **blocked** with any open blocker; **changes needed** with any open
 major; otherwise **ready for PR**, which says the review found nothing that
 should stop the user from raising the PR, and does not replace reading the
 diff. Numbering: re-reviews continue the count.
+
+For a feature, update `tracker.md`: the Build row's Review cell (`Review N:
+<verdict>`), **Next action** (`Code review N: <verdict>, <k> open; run /implement
+fix`, or `raise the PR` when ready), and one log line. Change no status.
 
 ## Responses and disputes
 

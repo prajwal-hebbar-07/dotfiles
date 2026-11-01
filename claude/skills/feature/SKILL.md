@@ -31,10 +31,13 @@ and the screens the app already has.
 | Requirements | `/feature` (this skill) | `/grill-feature requirements`, `/review-feature requirements` |
 | Architecture | `/feature-architecture` | `/grill-feature architecture`, `/review-feature architecture` |
 | Design | `/feature-design` (and `build` in Paper) | `/grill-feature design`, `/review-feature design` |
-| Build | `/implement` on the branch | `/review-code` |
+| Build | `/implement` on the branch | `/review-code`, `$review-code` |
+| QA | `/qa` or `$qa`, by hand once built | none |
+| Live QA | `/skill:live-qa` in Oh My Pi, by hand once built | none |
 
-Each stage has its own `approve`. `$review-feature <stage>` is the Codex
-reviewer. This skill owns the requirements and the tracker. The issue is
+Requirements, architecture and design each have their own `approve`.
+`$grill-feature <stage>` and `$review-feature <stage>` are the Codex grill and
+reviewer. Nothing starts or waits for QA or Live QA. This skill owns the requirements and the tracker. The issue is
 read, never written: it stays as whoever opened it wrote it, and the approved
 stage files are what `/implement` builds from and `/review-code` reviews
 against.
@@ -53,6 +56,7 @@ skill's directory: `requirements-template.md`, `tracker-template.md`.
 | `docs/features/<key>/architecture.md`, `design.md` | Read only here, for `status` |
 | `docs/features/<key>/glossary.md` | The feature's terms, written by the grill. Read only here |
 | `docs/features/<key>/review/requirements-review.md` | Requirements review findings. Here only `Response:` lines (respond mode) |
+| `docs/features/<key>/review/code-review.md`, `qa-report.md`, `live-qa-report.md` | Read only here, for `status` |
 | the GitHub issue `#<n>` | The request. Read only |
 | the repository's code, docs, manifests | Read only |
 
@@ -163,7 +167,8 @@ tracker. Print at most nine lines:
 Requirements: <status> · R<n> N<n> C<n> X<n> · Q<n> open · review <verdict or none>
 Architecture: <status> · M<n> E<n> F<n> K<n> B<n> RK<n> · AQ<n> open · review <verdict or none>
 Design: <status> · J<n> S<n> (built <b>) P<n> · DQ<n> open · review <verdict or none>
-Build: <status>
+Build: <status> · review <verdict or none>
+QA: <verdict or not run> · Live QA: <verdict or not run>
 Next: <Next action from tracker.md>
 Last: <last log line>
 ```
@@ -179,7 +184,7 @@ The same rules as `/requirements` capture, into this feature's requirements:
    statements, and do not add one they did not make.
 2. **File** each under its section with the next free ID: `R` what the
    feature does, `N` how well (speed, size, security), `C` a constraint (a
-   deadline, a named technology, compliance, existing behaviour that must not
+   named technology, compliance, existing behaviour that must not
    change), `X` out of scope. Who it is for goes in **Users**; why it exists
    goes in **Outcome**.
 3. **Keep the words.** An item with a number, limit, name, or a "must" /
