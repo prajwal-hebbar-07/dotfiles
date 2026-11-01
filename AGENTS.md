@@ -11,8 +11,8 @@ started from scratch on 2026-10-26 and empty until the user adds one.
 (`cc`) and `~/.claude-work/skills/` (`ccw`); rerun it after adding or
 removing one. List them here as they are added. The same script links
 `claude/CLAUDE.md`, the global instructions (concise reports; every question
-carries a recommendation or, failing that, an explanation), as `CLAUDE.md`
-in both accounts.
+carries a recommendation or, failing that, an explanation; two or more
+questions go in a question artifact), as `CLAUDE.md` in both accounts.
 
 Codex counterparts live under `codex/skills/<name>/SKILL.md`:
 `commit`, `design`, `grill-design`, `grill-feature`, `paper-target`, `review-requirements`,
@@ -39,6 +39,14 @@ syntax, metadata and tool instructions. Claude's explicit-only skills use
   Each message is a semantic subject plus two or more bullets; never a
   co-author or attribution trailer. This one skill replaced `commit` and
   `split-commit` on 2026-10-27, in both Claude Code and Codex.
+- `question-artifact` — model-invoked, Claude Code only: any set of two or
+  more questions for the user is a published Artifact in one fixed layout,
+  copied from `template.html` (cards with a recommended option and a note,
+  progress bar, Accept recommendations, Copy answers, answers saved in the
+  page's `db` and read back with `ArtifactData`). Only the `META` and
+  `QUESTIONS` data change per page. Modelled on the architecture-questions
+  page of 2026-11-01. The grills still write their questions files; this is
+  for questions asked in chat.
 - `raise-pr` — `/raise-pr <target>`: opens a GitHub pull request from the
   current branch into the named target branch with `gh`. Pushes the current
   branch only when it is new or ahead (never forces or switches), stops if a

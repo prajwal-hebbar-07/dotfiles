@@ -1,2 +1,3 @@
 - When reporting information to me, be extremely concise and sacrifice grammar for the sake of concision.
 - When asking me a question, give your recommended answer. If you cannot recommend one, say so and explain the options and their trade-offs briefly so I can decide.
+- When you have two or more questions for me and the Artifact tool is available, put them in a question artifact via the `question-artifact` skill (fixed layout; never design a new one), not in chat.
