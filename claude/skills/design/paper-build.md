@@ -21,7 +21,11 @@ file except `docs/design.md` and `docs/project.md`.
 
 ## File and page
 
-Pass `fileId` on every Paper call once it is known.
+Pass `fileId` on every Paper call once it is known, and `pageId` on every
+page-scoped one: the focused file and page can change while you work, when the
+user or another session moves. A `Paper:` line and a `paper-target`
+block naming different files is a stop: ask which is right. With neither,
+`/paper-target` pins one.
 
 - `design.md` has a `Paper:` line, or `AGENTS.md` / `CLAUDE.md` has a
   `paper-target` block: `open_file` that file, then `get_basic_info` to
