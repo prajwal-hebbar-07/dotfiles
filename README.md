@@ -16,7 +16,7 @@ Six tools make up my environment:
 | [Brave](https://brave.com) | Browser |
 | [Ghostty](https://ghostty.org) | Terminal emulator |
 | [Cursor](https://cursor.com) | Code editor |
-| Gemini (Antigravity) | AI coding assistant / CLI |
+| [Oh My Pi](https://omp.sh) | Terminal-first coding agent |
 | [zsh](https://www.zsh.org) | Shell (macOS default) |
 | [tmux](https://github.com/tmux/tmux) | Terminal multiplexer |
 
@@ -81,6 +81,22 @@ skill is linked here for completeness; the intended use is to copy that
 written server: Cursor expands `${userHome}` in plugin manifests, so the
 manifest spawns correctly, and its tool schemas are cached
 per project under `~/.cursor/projects/<slug>/mcps/`.
+
+### Oh My Pi
+
+Terminal-first coding agent (`omp`). This is the host for the live end-to-end
+QA skill: it starts the app, drives it in a browser, and compares every screen
+state against its Paper board.
+
+**Skills** — `omp/skills/<name>/SKILL.md` are linked into
+`~/.omp/agent/skills/` by `omp/link-skills`; rerun it after adding or removing
+one. Only `live-qa` lives there today.
+
+**Paper MCP** — configured in `omp/mcp.json` as a stdio server running
+`${HOME}/.paper/bin/paper mcp`. It is also written to `~/.omp/agent/mcp.json`
+so Oh My Pi discovers it at user scope. `/mcp list` and `/mcp test paper`
+inside an `omp` session confirm it is connected; Paper Desktop must be running
+for the tools to do work.
 
 ### Gemini (Antigravity)
 
