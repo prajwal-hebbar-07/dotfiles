@@ -66,7 +66,7 @@ requirements' real numbers and names:
 ## Simplicity sweep
 
 Open the round with: "Every screen, control and pattern is one more thing the
-person has to learn and the team has to build and keep in step." Then walk each
+person has to learn and has to be built and kept in step." Then walk each
 screen and apply the deletion test: if it were deleted, would the person lose
 something, or could the journey skip it? Walk each control and pattern: does
 anything vary across it? The recommended answer is always the simpler design,

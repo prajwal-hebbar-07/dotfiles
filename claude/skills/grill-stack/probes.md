@@ -27,10 +27,7 @@ real numbers:
   cost, in days?
 - The database loses the last hour. What is restored, from where, how long
   does it take, and has anyone tried it?
-- The user is away for two weeks and something breaks at night. Who is told,
-  and what can they do without the user?
-- A new developer joins. Can they run the whole app from a clean machine in
-  one command?
+- A clean machine. Can the whole app run from it in one command?
 - A major version of the framework ships and the old one stops getting
   security fixes. What is the upgrade path?
 

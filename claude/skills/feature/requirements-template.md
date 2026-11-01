@@ -43,7 +43,7 @@ is built is the architecture's business.
 
 ## Constraints
 
-- **C1** — <deadline, a named technology, compliance, existing behaviour that
+- **C1** — <a named technology, compliance, existing behaviour that
   must not change>
 
 ## Out of scope

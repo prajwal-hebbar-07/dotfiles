@@ -101,7 +101,7 @@ question is **open** when its `Answer:` is blank or starts with `idk`.
 ## Step 2 — record and ingest
 
 Read the answers from the questions file: everything between a question's
-`Answer:` and the next `---` is the user's answer. A blank `Answer:` takes my recommendation: log it as `yes`. An answer the user gives in chat
+`Answer:` and the next `---` is the user's answer. A blank `Answer:` takes my recommendation: log it as `yes`. In the confirm round a blank stays open. An answer the user gives in chat
 counts the same, and wins where both answer one question. For each answer, in
 the log under that question:
 
@@ -273,7 +273,8 @@ not memory:
    "Do you confirm every choice in docs/stack.md?" (`yes`).
 
 A blank answer to the confirm round does not count: the grill ends only on a
-written `yes`.
+written `yes`. That round's questions file says so, in place of the line about
+leaving an `Answer:` blank.
 
 Run whichever is missing, in the order 5, 6, 7, 8, each as a normal round
 (logged, then written to the questions file). Items 5 to 7 change the file, so

@@ -21,12 +21,12 @@ Status: `open` → `covered` · `n/a` · `deferred`.
 | 12 | Notifications | Email, push, preferences, unsubscribe, who gets what | open | | |
 | 13 | Platforms and devices | Web, mobile, desktop, CLI, browsers, offline, installs | open | | |
 | 14 | Experience basics | Accessibility, languages, time zones, currency, empty / loading / error states | open | | |
-| 15 | Admin and operations | Who runs it, support tools, monitoring, audit trail, moderation | open | | |
+| 15 | Admin and operations | Support tools, monitoring, audit trail, moderation | open | | |
 | 16 | Success and measurement | How you will know it works, metrics, events to record | open | | |
-| 17 | Delivery constraints | Deadline, budget, team, hosting, existing systems, must-use tech | open | | |
+| 17 | Delivery constraints | Budget, hosting, existing systems, must-use tech | open | | |
 | 18 | What it replaces | The current way, existing data to bring over, switchover | open | | |
-| 19 | Content and copy | Text, templates, who writes and maintains it | open | | |
-| 20 | Version boundary | What is in the first version, what is explicitly not, what comes later | open | | |
+| 19 | Content and copy | Text, templates | open | | |
+| 20 | Version boundary | What is in this version; anything said to be for later moves to `docs/later.md` | open | | |
 | 21 | Launch and rollback | What "done" means, launch criteria, how to undo a bad release | open | | |
 
 ## Closing checks

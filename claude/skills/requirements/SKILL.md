@@ -34,7 +34,8 @@ in this skill's directory.
 - Stage, commit, or push. Tell the user the files are uncommitted when done.
 - Rely on earlier chat. Anything that matters is written to the files before
   you reply.
-- Edit any file other than `docs/project.md` and `docs/requirements.md`.
+- Edit any file other than `docs/project.md`, `docs/requirements.md` and
+  `docs/later.md`.
 - Add an extra. A feature, option or "nice to have" the user did not ask for
   is not a requirement; record it as a `Q` ("Do you want X? It adds ...") and
   leave the decision to the user.
@@ -97,7 +98,7 @@ For each thing the user says, in this order:
    not add one they did not make.
 2. **File** each item under its section, with the next free ID:
    `R` functional (what it does), `N` non-functional (speed, size, security,
-   availability), `C` constraint (platform, budget, deadline, a named
+   availability), `C` constraint (platform, budget, a named
    technology, compliance), `X` out of scope (said not to do). Who it is
    for goes in **Users**; why it exists goes in **Overview**.
 3. **Keep the words.** When an item holds a number, limit, name, or a
@@ -106,9 +107,20 @@ For each thing the user says, in this order:
 4. **Park doubt.** If a statement is ambiguous, conflicts with another, or
    leaves something obvious unsaid, record it as said and add a `Q` item
    saying what is unclear. Do not ask it now.
-5. **Change or remove.** "Change R3 to …" rewrites it in place. "Drop R5"
+5. **Not in this version.** "Later", "not for v1", "next version", "v2":
+   it is not an `X` (that means never) and it does not stay in
+   `requirements.md`. Append it to `docs/later.md` (create it if missing) as
+   the next `L<n>`, in the user's words, with `was <ID>` when it was already
+   filed; the old line becomes `dropped: moved to L<n>`. No other skill reads
+   `later.md`. When the user later says to build one, file it as a new item
+   with the next free ID and mark its `L` line `taken into <ID>`.
+6. **Change or remove.** "Change R3 to …" rewrites it in place. "Drop R5"
    replaces its text with `dropped <date>: <reason if given>`. Never delete
    the line.
+
+`later.md` is a bare list, `# Later: <project>`, a line saying nothing here is
+built or checked until taken into the requirements, then
+`- **L1** — <their words> (was R3)`.
 
 Write the file first, then update `project.md` in the same turn: the
 requirements row's `Updated`, **Next action**, and one log line (what was
@@ -121,6 +133,7 @@ say done.":
 Added R4 users can reset a password by email · N2 pages load in 2 s
 Changed R1 · Dropped R3
 Parked Q3: "fast" has no number
+Moved R3 to L1 (later)
 ```
 
 ## Step 5 — done

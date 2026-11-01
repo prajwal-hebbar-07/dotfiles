@@ -25,7 +25,7 @@ then questions it until every choice is settled. Files are in the app repo
   change to the requirements is said to the user, who runs `/requirements`.
 - Choose anything that no `R`, `N`, or `C` in the requirements asks for.
   "We might need it later" is not a reason.
-- Guess a fact only the user knows (team skills, budget, accounts, where
+- Guess a fact only the user knows (budget, accounts, where
   they host today). Record it as an open question, with the assumption.
 - State a version, price, limit, licence, or support date without its source
   and the date checked.

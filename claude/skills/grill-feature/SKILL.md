@@ -35,7 +35,7 @@ words in `../architecture/vocabulary.md`). Unlike the whole-app grills, the
 code is a source of facts: what the app does and how it is built today is
 looked up, never asked. Same mechanics as `/grill-requirements`,
 `/grill-stack`, `/grill-architecture` and `/grill-design`; keep the five in
-step.
+step, and this skill in step with its Codex counterpart, `$grill-feature`.
 
 | Stage | File | Written by | Item prefixes it settles | Next after `grilled` |
 | --- | --- | --- | --- | --- |
@@ -116,6 +116,9 @@ stage's log and coverage if they exist. A question is **open** when its
 - No stage file: stop, and name the command that writes it.
 - Requirements still `capturing`: stop, say to finish with `/feature done`.
 - Design `n/a`: say so and stop.
+- A hash in the stage file's `Based on:` line differs from that file now: stop,
+  say which file changed, and send the user to the stage's own command
+  (`/feature-architecture` or `/feature-design`) to re-check.
 - The stage is `approved`: the grill is closed. Without the argument
   `reopen`, say so, and that `/grill-feature <stage> reopen` grills it again
   (or a change through the stage's own command reopens it too); change
@@ -142,7 +145,7 @@ stage's log and coverage if they exist. A question is **open** when its
 ## Step 2 — record and ingest
 
 Read the answers from the questions file: everything between a question's
-`Answer:` and the next `---` is the user's answer. A blank `Answer:` takes my recommendation: log it as `yes`. An answer the user gives in chat
+`Answer:` and the next `---` is the user's answer. A blank `Answer:` takes my recommendation: log it as `yes`. In the confirm round a blank stays open. An answer the user gives in chat
 counts the same, and wins where both answer one question. For each answer, in
 the log under that question:
 
@@ -359,7 +362,8 @@ and the code, not memory:
    in Paper").
 
 A blank answer to the confirm round does not count: the grill ends only on a
-written `yes`.
+written `yes`. That round's questions file says so, in place of the line about
+leaving an `Answer:` blank.
 
 Run whichever is missing, in the order 5, 6, 7, 8, each as a normal round
 (logged, then written to the questions file). Items 5 to 7 change the file, so

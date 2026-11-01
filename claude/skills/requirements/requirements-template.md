@@ -26,7 +26,7 @@ IDs are permanent. A removed item keeps its line and ID, marked `dropped`.
 
 ## Constraints
 
-- **C1** — <platform, budget, deadline, named technology, compliance>
+- **C1** — <platform, budget, named technology, compliance>
 
 ## Out of scope
 

@@ -38,6 +38,7 @@ Files, all in the app repo (git root, else the current directory):
 | `docs/grill/requirements-questions.md` | The current round, answered by the user in place; replaced each round |
 | `docs/grill/requirements-coverage.md` | Coverage categories and closing checks |
 | `docs/glossary.md` | Project vocabulary, nothing else |
+| `docs/later.md` | Items said to be for a later version. Appended as `/requirements` does; no other skill reads it |
 
 Templates and prompts in this skill's directory: `log-template.md`,
 `coverage-template.md`, `probes.md`.
@@ -95,7 +96,7 @@ is **open** when its `Answer:` in the log is blank or starts with `idk`.
 ## Step 2 — record and ingest
 
 Read the answers from `requirements-questions.md`: everything between a
-question's `Answer:` and the next `---` is the user's answer. A blank `Answer:` takes my recommendation: log it as `yes`. An answer the user
+question's `Answer:` and the next `---` is the user's answer. A blank `Answer:` takes my recommendation: log it as `yes`. In the confirm round a blank stays open. An answer the user
 gives in chat counts the same, and wins where both answer one question. For
 each answer, in the log under that question:
 
@@ -105,7 +106,9 @@ each answer, in the log under that question:
    `Said:` line.
 2. Fold it into `requirements.md`: add or change `R` / `N` / `C` / `X`, set
    `Accept:` lines (Given / When / Then) under an `R`, mark a `Q`
-   `Resolved by G2.3`, move `defer:` answers to `A` (accepted unknowns). An
+   `Resolved by G2.3`, move `defer:` answers to `A` (accepted unknowns), move an item said
+   to be for a later version to `docs/later.md` as `/requirements` does (not
+   an `X`, not an `A`). An
    answer that contradicts an existing item is not folded in: it becomes a
    question in the next round quoting both.
 3. A settled term goes into `docs/glossary.md` at once: `**Term**:` then one
@@ -241,7 +244,8 @@ not memory:
    share one understanding of these requirements?" (`yes`).
 
 A blank answer to the confirm round does not count: the grill ends only on a
-written `yes`.
+written `yes`. That round's questions file says so, in place of the line about
+leaving an `Answer:` blank.
 
 Run whichever is missing, in the order 4, 5, 6, each as a normal round
 (logged, then written to the questions file). Items 4 and 5 change the file, so after their answers

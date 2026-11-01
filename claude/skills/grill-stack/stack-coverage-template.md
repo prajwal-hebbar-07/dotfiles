@@ -26,10 +26,9 @@ Status: `open` → `covered` · `n/a` · `deferred`.
 | 17 | Performance and scale fit | Each `N` number against each choice's limit | open | | |
 | 18 | Cost | Monthly at launch and at the numbers, and what grows | open | | |
 | 19 | Licence and vendor risk | Licence fit, price changes, shutdown, data export | open | | |
-| 20 | Team fit | What the user knows, learning time, who maintains it | open | | |
-| 21 | Dependency count | Each package or service earns its place | open | | |
-| 22 | Upgrade and exit paths | Major version upgrades, leaving each lock-in | open | | |
-| 23 | Compatibility between choices | Versions and hosts that must work together | open | | |
+| 20 | Dependency count | Each package or service earns its place | open | | |
+| 21 | Upgrade and exit paths | Major version upgrades, leaving each lock-in | open | | |
+| 22 | Compatibility between choices | Versions and hosts that must work together | open | | |
 
 ## Closing checks
 
