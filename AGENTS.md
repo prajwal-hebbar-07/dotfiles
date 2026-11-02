@@ -57,13 +57,15 @@ for work outside a skill. Keep them in any new skill.
   never replaced by a new one. Modelled on the architecture-questions
   page of 2026-11-01. The grills still write their questions files; this is
   for questions asked in chat.
-- `recap` — `/recap [since <ref|date>]`: publishes one short Artifact page
-  for review: Done, To review (every decision, open question and risk of
-  the latest skill output, git history or `docs/` trackers; a note box per
-  item) and Next (one recommended). Notes save in the page's `db` and are
-  read back with `ArtifactData`; the owning skill applies them. Read-only on
-  the repo; one recap artifact, found by title in any chat and updated
-  in place on each run, never a second. Claude Code only.
+- `recap` — `/recap [since <ref|date>]`: a review page in one fixed layout,
+  copied from `template.html` like `question-artifact` (only `META` and
+  `SECTIONS` change). It reads the document under review (`docs/stack.md`...)
+  and shows every decision, open question and risk with the document's own
+  IDs and reasons, plus what changed lately and Next, a card each with
+  Looks good / Change it, a note, progress bar, Accept all, Copy notes. Notes
+  save in the page's `db` and are read back with `ArtifactData`; the owning
+  skill applies them. Read-only on the repo; one recap artifact, found by
+  title in any chat and updated in place, never a second. Claude Code only.
 - `raise-pr` — `/raise-pr <target>`: opens a GitHub pull request from the
   current branch into the named target branch with `gh`. Pushes the current
   branch only when it is new or ahead (never forces or switches), stops if a

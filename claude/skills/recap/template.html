@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Recap</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: one narrow column of review cards under a sticky progress bar, grouped in sections. Notes save as you type. */
+:root {
+  --bg: #f4f6f8;
+  --surface: #ffffff;
+  --ink: #151a21;
+  --muted: #566170;
+  --line: #d9dee6;
+  --accent: #0b6e69;
+  --accent-ink: #ffffff;
+  --accent-soft: #e0f1ef;
+  --warn: #8a5a00;
+  --warn-soft: #fbf0d6;
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1419; --surface: #171d25; --ink: #e7ebf0; --muted: #9aa5b3; --line: #2a333f;
+    --accent: #5cc9bd; --accent-ink: #06201d; --accent-soft: #14312f;
+    --warn: #e8bd63; --warn-soft: #33290f; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1419; --surface: #171d25; --ink: #e7ebf0; --muted: #9aa5b3; --line: #2a333f;
+  --accent: #5cc9bd; --accent-ink: #06201d; --accent-soft: #14312f;
+  --warn: #e8bd63; --warn-soft: #33290f; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.55;
+  padding-block: 0 56px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 760px; margin: 0 auto; }
+header.top { padding-block: 28px 8px; }
+.eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 0 0 6px; }
+h1 { font-size: 28px; line-height: 1.2; margin: 0 0 10px; font-weight: 600; text-wrap: balance; }
+.lede { margin: 0; color: var(--muted); max-width: 62ch; }
+.bar {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg);
+  border-bottom: 1px solid var(--line); padding-block: 10px; margin-top: 18px;
+  display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; justify-content: space-between;
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+.progress { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.progress .count { font-family: var(--font-mono); font-size: 13px; font-variant-numeric: tabular-nums; }
+.meter { width: 96px; height: 6px; border-radius: 3px; background: var(--line); overflow: hidden; }
+.meter span { display: block; height: 100%; width: 0; background: var(--accent); }
+.status { font-size: 13px; color: var(--muted); }
+.status.err { color: var(--warn); }
+button {
+  font: inherit; font-size: 13px; font-weight: 500; padding: 7px 12px; border-radius: 6px; border: 1px solid var(--line);
+  background: var(--surface); color: var(--ink); cursor: pointer;
+}
+button:hover { border-color: var(--accent); }
+button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.q { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 20px; margin-top: 12px; }
+.q-head { display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap; }
+.chip { font-family: var(--font-mono); font-size: 12px; font-weight: 500; padding: 2px 8px; border-radius: 4px; background: var(--accent-soft); color: var(--accent); }
+.q h2 { font-size: 16px; line-height: 1.3; margin: 0; font-weight: 600; flex: 1 1 260px; min-width: 0; text-wrap: balance; }
+.ctx { color: var(--muted); margin: 10px 0 4px; max-width: 66ch; }
+.facts { font-size: 13px; color: var(--muted); margin: 0 0 14px; display: grid; gap: 2px; }
+.facts b { font-weight: 500; color: var(--ink); }
+.sec { font-size: 13px; font-family: var(--font-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 34px 0 0; font-weight: 500; }
+.sec + .q { margin-top: 10px; }
+.done ul { margin: 8px 0 0; padding-left: 18px; }
+.done li { margin: 3px 0; }
+.opts.row { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+.opts { border: 0; padding: 0; margin: 0; display: grid; gap: 8px; min-width: 0; }
+.opt { display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: 10px; padding: 11px 12px; border: 1px solid var(--line); border-radius: 8px; cursor: pointer; }
+.opt:hover { border-color: var(--accent); }
+.opt:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); }
+.opt input { margin: 3px 0 0; accent-color: var(--accent); width: 16px; height: 16px; }
+.opt .t { font-weight: 500; }
+.opt .d { color: var(--muted); font-size: 14px; margin-top: 2px; }
+.rec { font-family: var(--font-mono); font-size: 11px; letter-spacing: .04em; text-transform: uppercase; color: var(--accent); margin-left: 8px; font-weight: 500; }
+label.note { display: block; margin-top: 14px; font-size: 13px; color: var(--muted); }
+textarea {
+  display: block; width: 100%; margin-top: 6px; min-height: 48px; resize: vertical; font: inherit; font-size: 14px;
+  color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px;
+}
+.saved { font-size: 12px; color: var(--muted); height: 16px; margin-top: 6px; font-family: var(--font-mono); }
+.extra { margin-top: 24px; }
+details.sum { margin-top: 18px; }
+details.sum summary { cursor: pointer; color: var(--muted); font-size: 13px; }
+details.sum textarea { font-family: var(--font-mono); font-size: 12px; min-height: 180px; }
+.foot { margin-top: 26px; color: var(--muted); font-size: 13px; }
+.foot a { color: var(--accent); }
+@media (max-width: 520px) { .q { padding: 16px; } h1 { font-size: 24px; } }
+@media (prefers-reduced-motion: no-preference) { .opt, button { transition: border-color .12s, background-color .12s; } }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <p class="eyebrow" id="eyebrow"></p>
+    <h1 id="heading"></h1>
+    <p class="lede" id="lede"></p>
+  </header>
+
+  <div class="bar" role="status">
+    <div class="progress">
+      <span class="count" id="count"></span>
+      <span class="meter" aria-hidden="true"><span id="meter"></span></span>
+      <span class="status" id="status">Loading saved notes…</span>
+    </div>
+    <div>
+      <button type="button" id="accept" title="Select the recommended option on every unanswered item">Accept all</button>
+      <button type="button" class="primary" id="copy">Copy notes</button>
+    </div>
+  </div>
+
+  <section class="q done" id="done" hidden>
+    <div class="q-head"><span class="chip">Done</span><h2 id="done-title"></h2></div>
+    <ul id="done-list"></ul>
+  </section>
+
+  <main id="qs"></main>
+
+  <section class="q extra">
+    <div class="q-head"><span class="chip">Other</span><h2 id="other-title"></h2></div>
+    <p class="ctx" id="other-ctx"></p>
+    <label class="note" for="general-note">Changes</label>
+    <textarea id="general-note" data-id="general" placeholder="Optional"></textarea>
+    <div class="saved" id="saved-general"></div>
+  </section>
+
+  <details class="sum">
+    <summary>Plain-text summary of your review</summary>
+    <textarea id="summary" readonly aria-label="Summary of review"></textarea>
+  </details>
+
+  <p class="foot" id="foot" hidden></p>
+</div>
+
+<script>
+(function () {
+  // ===== FILL THESE AND NOTHING ELSE (see SKILL.md) =====
+  var META = {
+    title: "Recap",
+    eyebrow: "Repo · subject · status · 2026-11-02",
+    heading: "Recap of the stack proposal",
+    lede: "Every decision, open question and risk from the document, one card each. Leave a card as it is to accept it, or pick Change and say what in the note. Notes save as you go and Claude reads them back when you say you are done.",
+    summaryTitle: "Recap review (docs/stack.md, 2026-11-02)",
+    otherTitle: "Anything else to change?",
+    otherCtx: "For example “change S8 to better-sqlite3”, “drop S12”.",
+    done: { title: "What changed lately", items: ["Stack proposed in docs/stack.md (abc1234)"] },   // or null
+    foot: null   // or { text: "Source document: ", label: "docs/stack.md", url: "https://..." }
+  };
+  // Sections in order: decisions, open questions, risks, next steps. Omit one that is empty.
+  // Item: id (stable, lower-case), chip (the document's own ID), title (area: the choice or the question),
+  // ctx (the reason, assumption or detail, taken from the document), facts ([label, value] pairs, optional),
+  // options (optional; omit for a decision to get Looks good / Change it).
+  var SECTIONS = [
+    { title: "Decisions", items: [
+      { id: "s1", chip: "S1", title: "Language and runtime: TypeScript 7.0.2, Node 26 LTS",
+        ctx: "Why this was chosen, from the document.",
+        facts: [["Alternative", "What else was considered"], ["Ties to", "R1, N2"]] } ] },
+    { title: "Open questions", items: [
+      { id: "sq1", chip: "SQ1", title: "Home server OS, CPU, Docker?",
+        ctx: "Assumption: Linux with Docker Compose.",
+        facts: [["Affects", "S11"]],
+        options: [
+          { v: "assume", t: "Assumption is right", rec: true },
+          { v: "other", t: "Something else" } ] } ] },
+    { title: "Next", items: [
+      { id: "next1", chip: "1", title: "A step, in order",
+        ctx: "One-line reason.",
+        options: [
+          { v: "do", t: "Do this", rec: true },
+          { v: "later", t: "Later" },
+          { v: "drop", t: "Drop it" } ] } ] }
+  ];
+  // ===== END =====
+
+  var DEFAULT_OPTIONS = [
+    { v: "ok", t: "Looks good", rec: true },
+    { v: "change", t: "Change it" } ];
+  var ITEMS = [];
+  SECTIONS.forEach(function (sec) { sec.items.forEach(function (it) { if (!it.options) it.options = DEFAULT_OPTIONS; ITEMS.push(it); }); });
+  var state = {};          // id -> {choice, note}
+  var timers = {}, inflight = {}, dirty = {}, focused = {};
+  var db = null, store = null, mode = "loading";
+
+  function $(s, r) { return (r || document).querySelector(s); }
+  function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+
+  // ---- header, footer ----
+  document.title = META.title;
+  $("#eyebrow").textContent = META.eyebrow;
+  $("#heading").textContent = META.heading;
+  $("#lede").textContent = META.lede;
+  $("#other-title").textContent = META.otherTitle;
+  $("#other-ctx").textContent = META.otherCtx;
+  if (META.done && META.done.items.length) {
+    $("#done").hidden = false; $("#done-title").textContent = META.done.title;
+    META.done.items.forEach(function (t) { $("#done-list").appendChild(el("li", null, t)); });
+  }
+  if (META.foot) {
+    var foot = $("#foot"); foot.hidden = false; foot.appendChild(document.createTextNode(META.foot.text));
+    var a = el("a", null, META.foot.label); a.href = META.foot.url; a.target = "_blank"; a.rel = "noopener"; foot.appendChild(a);
+  }
+
+  // ---- render ----
+  var qs = $("#qs");
+  SECTIONS.forEach(function (sec) {
+    if (!sec.items.length) return;
+    qs.appendChild(el("h2", "sec", sec.title + " · " + sec.items.length));
+    sec.items.forEach(function (q) {
+      var card = el("section", "q"); card.id = q.id;
+      var head = el("div", "q-head"); head.appendChild(el("span", "chip", q.chip)); head.appendChild(el("h2", null, q.title)); card.appendChild(head);
+      if (q.ctx) card.appendChild(el("p", "ctx", q.ctx));
+      if (q.facts && q.facts.length) {
+        var fc = el("div", "facts");
+        q.facts.forEach(function (f) { var p = el("div"); p.appendChild(el("b", null, f[0] + ": ")); p.appendChild(document.createTextNode(f[1])); fc.appendChild(p); });
+        card.appendChild(fc);
+      }
+      var fs = el("fieldset", "opts" + (q.options.every(function (o) { return !o.d; }) ? " row" : "")); var lg = el("legend", null, q.title); lg.style.cssText = "position:absolute;left:-9999px"; fs.appendChild(lg);
+      q.options.forEach(function (o) {
+        var lab = el("label", "opt"); var inp = document.createElement("input");
+        inp.type = "radio"; inp.name = q.id; inp.value = o.v; inp.id = q.id + "-" + o.v; inp.dataset.q = q.id;
+        var box = el("div"); var t = el("div", "t", o.t);
+        if (o.rec) t.appendChild(el("span", "rec", "Recommended"));
+        box.appendChild(t); if (o.d) box.appendChild(el("div", "d", o.d));
+        lab.appendChild(inp); lab.appendChild(box); fs.appendChild(lab);
+      });
+      card.appendChild(fs);
+      var nl = el("label", "note", "Note (optional)"); nl.htmlFor = q.id + "-note"; card.appendChild(nl);
+      var ta = document.createElement("textarea"); ta.id = q.id + "-note"; ta.dataset.id = q.id; card.appendChild(ta);
+      var sv = el("div", "saved"); sv.id = "saved-" + q.id; card.appendChild(sv);
+      qs.appendChild(card);
+    });
+  });
+
+  // ---- state helpers ----
+  function get(id) { return state[id] || (state[id] = { choice: "", note: "" }); }
+  function readUI(id) {
+    var s = get(id);
+    if (id !== "general") { var c = document.querySelector('input[name="' + id + '"]:checked'); s.choice = c ? c.value : ""; }
+    s.note = $("#" + (id === "general" ? "general-note" : id + "-note")).value;
+    return s;
+  }
+  function writeUI(id) {
+    var s = get(id);
+    if (id !== "general") {
+      ITEMS.filter(function (q) { return q.id === id; })[0].options.forEach(function (o) { $("#" + id + "-" + o.v).checked = (o.v === s.choice); });
+    }
+    var ta = $("#" + (id === "general" ? "general-note" : id + "-note"));
+    if (!focused[id] && ta.value !== s.note) ta.value = s.note;
+  }
+  function setStatus(msg, err) { var s = $("#status"); s.textContent = msg; s.className = "status" + (err ? " err" : ""); }
+  function setSaved(id, msg) { var n = $("#saved-" + id); if (n) n.textContent = msg; }
+
+  function refreshSummary() {
+    var answered = ITEMS.filter(function (q) { return get(q.id).choice; }).length;
+    $("#count").textContent = answered + " of " + ITEMS.length + " reviewed";
+    $("#meter").style.width = (ITEMS.length ? Math.round(100 * answered / ITEMS.length) : 0) + "%";
+    var lines = [META.summaryTitle];
+    ITEMS.forEach(function (q) {
+      var s = get(q.id); var opt = q.options.filter(function (o) { return o.v === s.choice; })[0];
+      lines.push(q.chip + ": " + (opt ? opt.t + (opt.rec ? " (recommended)" : "") : "not reviewed") + (s.note ? " | " + s.note.replace(/\s+/g, " ") : ""));
+    });
+    var g = get("general"); if (g.note) lines.push("Other changes: " + g.note.replace(/\s+/g, " "));
+    $("#summary").value = lines.join("\n");
+  }
+
+  // ---- persistence ----
+  function persist(id) {
+    timers[id] = 0;
+    var s = readUI(id); refreshSummary();
+    if (mode === "local") { try { localStorage.setItem("rc:" + id, JSON.stringify(s)); setSaved(id, "Saved in this browser"); } catch (e) {} return; }
+    if (mode !== "db") return;
+    if (inflight[id]) { dirty[id] = true; return; }
+    inflight[id] = true; setSaved(id, "Saving…");
+    store.doc(id).set({ choice: s.choice, note: s.note, updatedAt: new Date().toISOString() }).then(function () {
+      inflight[id] = false; setSaved(id, "Saved"); setStatus("All notes saved");
+      if (dirty[id]) { dirty[id] = false; persist(id); }
+    }, function (e) {
+      inflight[id] = false; dirty[id] = false; setSaved(id, "Not saved"); setStatus("Could not save (" + ((e && e.code) || "error") + "). Use Copy notes instead.", true);
+    });
+  }
+  function schedule(id) { clearTimeout(timers[id]); timers[id] = setTimeout(function () { persist(id); }, 600); }
+
+  document.addEventListener("change", function (e) { var t = e.target; if (t && t.matches && t.matches('input[type="radio"]')) { clearTimeout(timers[t.dataset.q]); persist(t.dataset.q); } });
+  document.addEventListener("input", function (e) { var t = e.target; if (t && t.matches && t.matches("textarea[data-id]")) { readUI(t.dataset.id); refreshSummary(); schedule(t.dataset.id); } });
+  document.addEventListener("focusin", function (e) { var t = e.target; if (t && t.dataset && t.dataset.id) focused[t.dataset.id] = true; });
+  document.addEventListener("focusout", function (e) { var t = e.target; if (t && t.dataset && t.dataset.id) { focused[t.dataset.id] = false; clearTimeout(timers[t.dataset.id]); persist(t.dataset.id); } });
+
+  $("#accept").addEventListener("click", function () {
+    ITEMS.forEach(function (q) {
+      if (get(q.id).choice) return;
+      var r = q.options.filter(function (o) { return o.rec; })[0]; if (!r) return;
+      $("#" + q.id + "-" + r.v).checked = true; persist(q.id);
+    });
+  });
+  $("#copy").addEventListener("click", function () {
+    var txt = $("#summary").value, done = function () { setStatus("Notes copied"); };
+    var fallback = function () { var d = $("details.sum"); d.open = true; $("#summary").focus(); $("#summary").select(); setStatus("Select and copy the text below"); };
+    try { navigator.clipboard.writeText(txt).then(done, fallback); } catch (e) { fallback(); }
+  });
+
+  // ---- load ----
+  refreshSummary();
+  function loadLocal() {
+    mode = "local"; setStatus("Notes stay in this browser only. Use Copy notes to send them.");
+    ITEMS.concat([{ id: "general" }]).forEach(function (q) {
+      try { var raw = localStorage.getItem("rc:" + q.id); if (raw) state[q.id] = JSON.parse(raw); } catch (e) {}
+      writeUI(q.id);
+    });
+    refreshSummary();
+  }
+  var loadTimer = setTimeout(function () { if (mode === "loading") setStatus("Saved notes cannot be reached yet. You can still write notes.", true); }, 10000);
+  (window.claude && window.claude.use ? window.claude.use("db") : Promise.resolve(null)).then(function (d) {
+    clearTimeout(loadTimer);
+    if (!d) { loadLocal(); return; }
+    db = d; store = db.collection("answers"); mode = "db";
+    store.onSnapshot(function (snap) {
+      setStatus(snap.metadata.fromCache && snap.empty ? "Loading saved notes…" : "All notes saved");
+      snap.docs.forEach(function (doc) {
+        var id = doc.id; if (id !== "general" && !ITEMS.some(function (q) { return q.id === id; })) return;
+        if (inflight[id] || dirty[id] || timers[id]) return;
+        var data = doc.data() || {}; state[id] = { choice: data.choice || "", note: data.note || "" }; writeUI(id);
+      });
+      refreshSummary();
+    }, function (e) { loadLocal(); setStatus("Saved notes are unavailable (" + ((e && e.code) || "error") + "). Notes stay in this browser.", true); });
+  }, function () { clearTimeout(loadTimer); loadLocal(); });
+})();
+</script>
+</body>
+</html>
