@@ -37,6 +37,10 @@ then questions it until every choice is settled. Files are in the app repo
   dependency. An extra that looks worth having is not built in; record it as a
   `SQ` saying what it adds and costs, and the user decides whether it is
   needed.
+- Ask what is already settled. Before asking, read the documents, the answer
+  logs and this chat; an answer given in any earlier round, chat or file is
+  final and is applied, not asked again. Write each answer down where the
+  skill keeps them (log, document or tracker) before moving on.
 
 ## Step 1 — state
 

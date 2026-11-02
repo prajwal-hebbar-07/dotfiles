@@ -30,6 +30,14 @@ shared workflow, including templates and probes; retain each host's invocation
 syntax, metadata and tool instructions. Claude's explicit-only skills use
 `policy.allow_implicit_invocation: false` in Codex's `agents/openai.yaml`.
 
+Every skill that builds, reviews or asks carries two rules in its `Never`
+list (added 2026-11-02, in Claude, Codex and Oh My Pi alike): do only what
+the request needs (no over-engineering; a useful extra is named, not done;
+reviewers never ask for more than the documents need), and never ask what is
+already settled (read documents, answer logs and chat first; write each
+answer down where the skill keeps them). `claude/CLAUDE.md` states the same
+for work outside a skill. Keep them in any new skill.
+
 - `commit` — `/commit`: stops if `user.name`/`user.email` is unset; commits
   what is staged, or stages everything when nothing is. One commit by
   default; several focused commits only where the changes separate cleanly

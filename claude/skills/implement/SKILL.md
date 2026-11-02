@@ -79,6 +79,10 @@ Files, all in the app repo (git root, else the current directory):
 - Over-engineer. Build the best approach that serves the criteria, no more. A
   useful extra no criterion asks for is not built; name it in the hand-off as a
   suggestion, and the user decides whether it is needed.
+- Ask what is already settled. Before asking, read the documents, the answer
+  logs and this chat; an answer given in any earlier round, chat or file is
+  final and is applied, not asked again. Write each answer down where the
+  skill keeps them (log, document or tracker) before moving on.
 
 ## Step 1 — state
 

@@ -80,6 +80,10 @@ hypothetical; two is real.
   serves the requirement, no more. An extra nobody asked for becomes its own
   question (needed or not, what it adds and costs), recommended `no` unless a
   requirement needs it.
+- Ask what is already settled. Before asking, read the documents, the answer
+  logs and this chat; an answer given in any earlier round, chat or file is
+  final and is applied, not asked again. Write each answer down where the
+  skill keeps them (log, document or tracker) before moving on.
 
 ## Step 1 — state
 

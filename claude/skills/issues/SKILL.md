@@ -71,6 +71,13 @@ issue must pass), `principles.md` (the build rules pasted into every issue).
 - Leave a live item with no issue, or an issue with no item behind it.
 - Commit or push. Tell the user the files are uncommitted.
 - Renumber or reuse a key. A dropped issue keeps its line.
+- Over-engineer or widen scope. Do only what is needed for what was asked: no
+  extra feature, layer, option, dependency or cleanup for a possible future
+  need. A useful extra is named in the reply as a suggestion, never done.
+- Ask what is already settled. Before asking, read the documents, the answer
+  logs and this chat; an answer given in any earlier round, chat or file is
+  final and is applied, not asked again. Write each answer down where the
+  skill keeps them (log, document or tracker) before moving on.
 
 ## Step 1 — state
 

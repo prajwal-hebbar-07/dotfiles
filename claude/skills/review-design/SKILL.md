@@ -65,6 +65,9 @@ load them with ToolSearch first.
 - Show raw node ids in chat or the report; name boards by their artboard
   name.
 - Say something was checked that was not.
+- Ask for more than the documents or acceptance criteria need. Unrequested
+  layers, options, dependencies and dead code are findings; an extra that
+  would merely be nice is never a defect.
 
 ## Step 1 — state
 
