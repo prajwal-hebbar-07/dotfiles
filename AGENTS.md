@@ -58,10 +58,11 @@ for work outside a skill. Keep them in any new skill.
   page of 2026-11-01. The grills still write their questions files; this is
   for questions asked in chat.
 - `recap` — `/recap [since <ref|date>]`: publishes one short Artifact page
-  of what changed lately (git history, uncommitted work, unmerged branches,
-  `docs/` trackers and open questions): Done, Waiting on you, Next (one
-  recommended), one screen. Read-only on the repo; the same artifact is
-  updated on each run. Claude Code only.
+  for review: Done, To review (open questions, risks, uncertain choices of
+  the latest skill output, git history or `docs/` trackers; a note box per
+  item) and Next (one recommended). Notes save in the page's `db` and are
+  read back with `ArtifactData`; the owning skill applies them. Read-only on
+  the repo; the same artifact is updated on each run. Claude Code only.
 - `raise-pr` — `/raise-pr <target>`: opens a GitHub pull request from the
   current branch into the named target branch with `gh`. Pushes the current
   branch only when it is new or ahead (never forces or switches), stops if a
