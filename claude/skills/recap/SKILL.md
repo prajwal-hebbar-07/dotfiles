@@ -6,7 +6,7 @@ description: >
   changes on: a note box per item, saved in the page's own database and read
   back with ArtifactData. Reads the latest skill output in this chat (a stack
   proposal, a review, a QA run), git history, unmerged branches and the
-  project trackers, keeps the page to one screen, and updates the same
+  project trackers, keeps it compact, and updates the same
   artifact on each run. Use when the user says "/recap", asks for a recap,
   status page or summary of recent work, or wants to review what was just
   proposed and say what to change.
@@ -27,7 +27,8 @@ writes their changes in the note boxes, and says when they are done.
   document (`/stack`, `/architecture`, `/implement`...), never here.
 - Guess. Every line comes from git, a tracker or this chat; say "unknown"
   rather than fill a gap.
-- Pad. The page fits one screen; leave out a section with nothing in it.
+- Pad. Short lines, no prose; leave out a section with nothing in it. Never
+  cut a decision the user must review.
 - Over-engineer or widen scope. No extra section, chart, option or feature
   beyond the three below. A useful extra is named in chat, not added.
 - Ask what is already settled. Take the range from the argument, else from
@@ -63,11 +64,12 @@ requires it; the page declares the `db` capability). One HTML page, title
 
 1. **Done** — at most six lines, newest first: what changed in plain words,
    with the short sha or ID. Group related items into one line. No note boxes.
-2. **To review** — at most ten items, open questions first, then risks, then
-   choices the source marks uncertain or hard to reverse. A long table of
-   settled choices is one line naming its file, not one card each. Each item
-   is a card: ID chip, one plain line, what you propose or assume (marked), and
-   a note box. An empty note means the user accepts the proposal.
+2. **To review** — every decision the source made, then its open questions,
+   then its risks, each under its own ID. Never drop or merge a decision to
+   save space, and never replace the list with a pointer to the file: the
+   user reviews the decisions here. Each item is a compact card: ID chip,
+   area, the choice (or the question), a one-line reason or the assumption
+   (marked), and a note box. An empty note means the user accepts it.
 3. **Next** — at most three steps, ordered, each a card with a note box. Mark
    the one you recommend and give a one-line reason.
 
@@ -81,13 +83,15 @@ controls: no buttons, filters or progress bar.
 
 ## Step 3 — publish
 
-- An earlier recap in play (linked, open in this chat, or published earlier
-  in it): read it with the Artifact tool and republish to the same `url`.
-  Never make a second one. Keep the IDs of unchanged items so saved notes
-  stay; use new IDs for new items. Only the user's own artifact can be updated; if
-  it is not theirs, publish a new one and say why.
-- None: publish a new one with `capabilities: {"db": {}}`, `icon: "summary"`
-  and a one-sentence `description`.
+- There is one recap artifact, always reused. Find it: a linked one, one
+  open or published in this chat, else `action: "list"` (scope `mine`) and
+  take the most recently updated titled `Recap`, from any earlier chat. Read
+  it and republish to the same `url`, for any repository or subject; replace
+  its items with the new ones. Never make a second one. Keep the IDs of
+  unchanged items so saved notes stay; use new IDs for new items.
+- Create a new one only when none is found, or the found one is not the
+  user's own (say why): `capabilities: {"db": {}}`, `icon: "summary"` and a
+  one-sentence `description`.
 - Artifact tool missing or refused: print the same three sections in chat,
   and say so in one line.
 
