@@ -1,0 +1,1 @@
+../../../claude/skills/issues/issues-template.md

@@ -129,7 +129,7 @@ Then, by argument and state:
 | State / argument | Do |
 | --- | --- |
 | `status` | The checklist, then `debate-rules.md`'s status lines with the design ones of `design-rules.md` and `grill-rules.md`, screens by `Paper:` state, and the last review's verdict. Change nothing |
-| `approve` | Only when `Status: grilled`, every live `S` is `Paper: built <date>` (none `stale` or `not built`), and the last review is `approve-ready`, looked at the boards, and is on the current hashes; otherwise say what is missing. Then `design-rules.md`'s approve, with **Next action** `Design approved; planning the build is next`. Typing it is the user's approval of the idea and the boards |
+| `approve` | Only when `Status: grilled`, every live `S` is `Paper: built <date>` (none `stale` or `not built`), and the last review is `approve-ready`, looked at the boards, and is on the current hashes; otherwise say what is missing. Then `design-rules.md`'s approve, with **Next action** `Design approved; run /skill:debate-issues`. Typing it is the user's approval of the idea and the boards |
 | No `design.md` | **Propose** (any text is the brief), then **Next** |
 | A hash recorded in `design.md` differs from the current one | **Earlier stage moved**, then **Next** |
 | Argument starting with `brief`, or a change (including what the user saw on a board) | Designer: `design-rules.md` Step 3. A board that does not match the file, with the file right, only sets that screen `Paper: stale`. Run the ID check. Then **Next** |

@@ -522,6 +522,20 @@ refuses to replace another skill or agent. Invoke with `/skill:<name>`.
   idea, feel, moments, a brief item or money, never grill the visual
   direction, and never edit earlier stages. Same linking as `debate-stack`,
   with the Claude Code design trio and `paper-build.md`.
+- `debate-issues` — `/skill:debate-issues [status | sync | qa | change]`:
+  Claude Code's `/issues` in Oh My Pi, its rules linked as
+  `issues-rules.md` with its templates, `slicing.md` and `principles.md`.
+  Starts with a readiness checklist (all four stages `approved`, every
+  screen built, nothing open or stale, the agents linked, `gh` ready, which
+  blocks only publishing; ponytail installed, a warning). `issues-planner`
+  (Opus 5.5 medium) cuts and writes the plan and the issues;
+  `issues-checker` (GPT-6.1 Sol, `openai-codex`) challenges the cut once and
+  reads each issue cold, five at a time, as its implementer; a rebutted
+  objection and an unanswered gap become open points, never questions. The
+  runner runs `/issues`' checks and publishes with `gh` (epic, sub-issues,
+  blocked-by, markers). Writes the same files plus
+  `docs/issues-debate.md`. `debate-design`'s `approve` hands on to it, and
+  it hands on to `/implement` in Claude Code.
 
 The Paper MCP server is configured in `omp/mcp.json` as a stdio server running
 `${HOME}/.paper/bin/paper mcp`; the same file is copied to
