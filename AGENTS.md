@@ -4,8 +4,9 @@
 
 Every skill except `commit` was removed on 2026-11-05 (Claude Code, Codex,
 Cursor and Gemini alike); git history holds the old sets, and `SKILLS.md`
-describes the set cleared on 2026-09-19. List new skills here as they are
-added.
+describes the set cleared on 2026-09-19. The OMP-only
+`grill-requirements` skill was added afterward. List new skills here as they
+are added.
 
 `commit` has one copy per host:
 
@@ -36,8 +37,29 @@ what is already settled (read documents, answer logs and chat first).
   cleanly (revert, pick and one-sentence tests; code with its tests, docs and
   wiring). With several it prints the plan and commits without asking (`plan`
   only prints; `now` is a no-op), then checks the final tree equals the
-  starting index. Each message is a semantic subject plus two or more
-  bullets; never a co-author or attribution trailer.
+  starting index. In a new repository (no `HEAD`) it splits the whole project
+  into granular commits in build order (repo basics, skeleton, foundations,
+  one per feature with its tests, cross-feature tests, docs, CI/deploy),
+  staging intermediate versions of shared wiring files through
+  `git update-index --cacheinfo`, and stops first if dependency output or
+  secrets are in scope; never one `initial commit`. Each message is a
+  semantic subject plus two or more bullets; never a co-author or
+  attribution trailer. The Cursor/Gemini copy is the Claude one without the
+  advisor section.
+
+`grill-requirements` is OMP-only:
+
+- `omp/skills/grill-requirements/SKILL.md` — invoke with
+  `/skill:grill-requirements`. Haiku 5.5 high drafts the current question
+  frontier; Sonnet 5.5 high answers from the request, repository and sources;
+  Haiku challenges only Sonnet's answers. Unresolved decisions go to the user
+  in chat. The accepted result is written to `docs/requirements.md`; the skill
+  does not add unrequested features or make decisions for the user.
+- `omp/agents/requirements-haiku-griller.md` and
+  `omp/agents/requirements-sonnet-answerer.md` pin those model roles.
+  `omp/link-skills` links the skill into `~/.omp/agent/skills/` and both agents into
+  `~/.omp/agent/agents/`, pruning only its own broken links and refusing to
+  replace unrelated files.
 
 `archify` (tt-a1i/archify) and `ponytail` (DietrichGebert/ponytail) are
 third-party and **not** vendored here. Install with
