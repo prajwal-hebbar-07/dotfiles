@@ -1,1 +1,0 @@
-../../../claude/skills/grill-architecture/architecture-coverage-template.md

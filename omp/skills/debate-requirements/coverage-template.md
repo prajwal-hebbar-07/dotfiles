@@ -1,1 +1,0 @@
-../../../claude/skills/grill-requirements/coverage-template.md

@@ -1,1 +1,0 @@
-../../../claude/skills/grill-stack/SKILL.md

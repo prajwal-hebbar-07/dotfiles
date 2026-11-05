@@ -1,1 +1,0 @@
-../../../claude/skills/design/design-template.md

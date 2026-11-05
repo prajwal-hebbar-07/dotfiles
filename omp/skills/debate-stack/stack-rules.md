@@ -1,1 +1,0 @@
-../../../claude/skills/stack/SKILL.md

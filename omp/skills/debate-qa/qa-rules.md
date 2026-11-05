@@ -1,1 +1,0 @@
-../../../claude/skills/qa/SKILL.md

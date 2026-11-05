@@ -1,1 +1,0 @@
-../../../claude/skills/grill-design/probes.md

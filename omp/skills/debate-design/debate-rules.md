@@ -1,1 +1,0 @@
-../debate-requirements/SKILL.md
