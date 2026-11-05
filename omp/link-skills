@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+# Link this repo's OMP skills and task agents into the user OMP directories.
+set -euo pipefail
+
+root="$(cd "$(dirname "$0")" && pwd)"
+skills_src="$root/skills"
+agents_src="$root/agents"
+skills_dest="$HOME/.omp/agent/skills"
+agents_dest="$HOME/.omp/agent/agents"
+
+check_dest() {
+  local src=$1 dest=$2 item link
+  for item in "$src"/*/; do
+    [[ -f $item/SKILL.md ]] || continue
+    link="$dest/$(basename "$item")"
+    if [[ -e $link || -L $link ]]; then
+      if [[ ! -L $link ]] || [[ $(readlink "$link") != "$src"/* ]]; then
+        echo "Refusing to replace existing item: $link" >&2
+        exit 1
+      fi
+    fi
+  done
+}
+
+check_agents() {
+  local item link
+  for item in "$agents_src"/*.md; do
+    [[ -f $item ]] || continue
+    link="$agents_dest/$(basename "$item")"
+    if [[ -e $link || -L $link ]]; then
+      if [[ ! -L $link ]] || [[ $(readlink "$link") != "$agents_src"/* ]]; then
+        echo "Refusing to replace existing item: $link" >&2
+        exit 1
+      fi
+    fi
+  done
+}
+
+check_dest "$skills_src" "$skills_dest"
+check_agents
+mkdir -p "$skills_dest" "$agents_dest"
+
+for link in "$skills_dest"/*; do
+  if [[ -L $link && $(readlink "$link") == "$skills_src"/* && ! -e $link ]]; then
+    rm "$link"
+  fi
+done
+for item in "$skills_src"/*/; do
+  [[ -f $item/SKILL.md ]] || continue
+  ln -sfn "${item%/}" "$skills_dest/$(basename "$item")"
+done
+
+for link in "$agents_dest"/*.md; do
+  if [[ -L $link && $(readlink "$link") == "$agents_src"/* && ! -e $link ]]; then
+    rm "$link"
+  fi
+done
+for item in "$agents_src"/*.md; do
+  [[ -f $item ]] || continue
+  ln -sfn "$item" "$agents_dest/$(basename "$item")"
+done
