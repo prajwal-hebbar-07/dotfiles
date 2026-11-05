@@ -1,0 +1,1 @@
+../../../claude/skills/grill-design/design-coverage-template.md

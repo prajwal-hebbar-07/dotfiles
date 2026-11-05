@@ -1,0 +1,1 @@
+../../../claude/skills/grill-requirements/log-template.md

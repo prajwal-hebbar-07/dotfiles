@@ -1,0 +1,1 @@
+../../../claude/skills/grill-stack/stack-log-template.md

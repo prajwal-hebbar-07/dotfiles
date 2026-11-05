@@ -1,0 +1,1 @@
+../../../claude/skills/architecture/architecture-template.md

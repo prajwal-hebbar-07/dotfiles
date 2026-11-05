@@ -1,0 +1,1 @@
+../../../claude/skills/grill-architecture/SKILL.md

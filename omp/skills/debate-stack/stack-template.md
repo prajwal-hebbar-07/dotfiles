@@ -1,0 +1,1 @@
+../../../claude/skills/stack/stack-template.md

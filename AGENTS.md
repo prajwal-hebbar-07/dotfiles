@@ -442,9 +442,86 @@ new skills here.
 
 `omp/` was removed on 2026-10-27 with the software factory and restarted with
 one skill. `omp/skills/<name>/SKILL.md` are linked into
-`~/.omp/agent/skills/` by `omp/link-skills`; rerun it after adding or removing
-one. It prunes only its own broken links and refuses to replace another skill.
-Invoke with `/skill:<name>`.
+`~/.omp/agent/skills/`, and `omp/agents/<name>.md` (task agents that pin a
+model in their frontmatter) into `~/.omp/agent/agents/`, by `omp/link-skills`;
+rerun it after adding or removing one. It prunes only its own broken links and
+refuses to replace another skill or agent. Invoke with `/skill:<name>`.
+
+- `debate-requirements` — `/skill:debate-requirements`: `/requirements`,
+  `/grill-requirements` and `/review-requirements` in one loop, with models
+  answering first; it stops only for the user's answers, and ends at
+  `grilled` with an `approve-ready` review and a confirm round, for the
+  user's own `approve`. Haiku 5.5 medium captures, drafts each round, folds
+  answers in and responds to the review; Sonnet 5.5 medium challenges each
+  question (one objection, one reply); GPT-6 Luna medium (`openai-codex`)
+  rules on what is still disputed or left for the user, and runs the
+  fresh-eyes check; Opus 5.5 medium reviews, and the review's disputes are
+  settled by its response and rejoinder rules before the user sees what is
+  left. A question is settled by the models only with a quoted source (the
+  user's words, the repo, a URL) the runner checks; a best-practice answer is
+  pre-filled for the user to skim; the rest, and anything about intent,
+  scope, money or legal risk, is the user's. Writes the same files as the
+  Claude Code trio, plus `docs/grill/requirements-debate.md` (the models'
+  notes). The four models are the agents `debate-drafter`,
+  `debate-challenger`, `debate-tiebreaker` and `debate-reviewer` in
+  `omp/agents/`, so no per-call model setting is needed. Its rules are the
+  Claude Code skills themselves, linked into its directory as
+  `capture-rules.md`, `grill-rules.md` and `review-rules.md` with their
+  templates, so a change there carries over.
+- `debate-stack` — `/skill:debate-stack`: the same loop for the stack,
+  replacing `/stack`, `/grill-stack` and `/review-stack`. Needs requirements
+  `grilled` or `approved`. The first proposal is a debate too: Haiku
+  proposes, Sonnet argues each hard-to-reverse alternative and checks every
+  fact, Luna rules on disputes, the runner reads every fact's source. Then
+  the grill (frontier, simplicity sweep, pre-mortem, fresh-eyes), the Opus
+  review, and the confirm round. Models never set `settled` (only a lock
+  answer does), never pre-fill a hard-to-reverse lock, money, the user's
+  accounts or skills, or a `Fixed by` change, and never edit the
+  requirements: a gap goes to the user as a `/skill:debate-requirements`
+  change. Same four agents. Its mechanics are `debate-requirements`'s
+  `SKILL.md`, linked as `debate-rules.md` with a table of names, plus the
+  Claude Code stack trio linked as `stack-rules.md`, `grill-rules.md` and
+  `review-rules.md` with their templates; a change to `debate-requirements`
+  carries over.
+- `debate-architecture` — `/skill:debate-architecture`: the same loop for
+  the architecture, replacing `/architecture`, `/grill-architecture` and
+  `/review-architecture`, between three models only, its own agents in
+  `omp/agents/`: `arch-architect` (Opus 5.5 medium) proposes, drafts each
+  round, folds answers in and responds to the review; `arch-answerer` (Opus
+  5.5 high) designs the structurally different shape cold, challenges every
+  item and answers or sorts every question; `arch-reviewer` (GPT-6.1 Sol,
+  `openai-codex`) runs the cold fresh-eyes check and the review. No
+  tiebreaker: what is still disputed after the architect's one reply goes to
+  the user. Needs requirements and stack `grilled` or `approved`. Models
+  never set `settled`, never pre-fill the lock of the shape, data ownership,
+  consistency or permission model, money, or a `Fixed by` change, and never
+  edit the requirements or stack: a gap goes to the user as a
+  `/skill:debate-requirements` or `/skill:debate-stack` change. Debate
+  blocks are `P<N>.<k>` here, since the grill's questions are `D<N>.<k>`.
+  Same linking as `debate-stack`, with the Claude Code architecture trio.
+  The three `approve`s hand on in Oh My Pi: requirements to
+  `/skill:debate-stack`, stack to `/skill:debate-architecture`, architecture
+  to `/skill:debate-design`.
+- `debate-design` — `/skill:debate-design [brief <text>]`: the same loop for
+  the design, replacing `/design`, `/grill-design`, `/design build` and
+  `/review-design`, with its own four agents in `omp/agents/`:
+  `design-designer` (Sonnet 5.5 medium) proposes, answers the grill, folds
+  answers in and responds to the review; `design-griller` (Opus 5.5 medium)
+  designs the alternative idea cold, grills, and runs the fresh-eyes check as
+  a new task given only the file paths; `design-builder` (GPT-6 Astra medium,
+  `openai-codex`) draws the grilled design in Paper by `paper-build.md`, with
+  the guide pasted into its task, whole-screen boards for every state and no
+  notes, checked by the runner after each build; `design-reviewer` (Kimi K2.6
+  high, `ollama-cloud`) reviews the file and the boards (Paper read tools
+  only). A board that does not match the file goes back to the builder as
+  `stale`. Every run starts with a readiness checklist: requirements, stack
+  and architecture `grilled` or `approved`, nothing open or stale, the agents
+  linked, and a Paper pin (`/paper-target` in Claude Code) with Paper
+  answering; the last two block only the build. Order: propose, grill,
+  confirm, build, review, `approve`. Models never settle or pre-fill the
+  idea, feel, moments, a brief item or money, never grill the visual
+  direction, and never edit earlier stages. Same linking as `debate-stack`,
+  with the Claude Code design trio and `paper-build.md`.
 
 The Paper MCP server is configured in `omp/mcp.json` as a stdio server running
 `${HOME}/.paper/bin/paper mcp`; the same file is copied to

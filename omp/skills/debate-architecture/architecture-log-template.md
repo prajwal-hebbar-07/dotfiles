@@ -1,0 +1,1 @@
+../../../claude/skills/grill-architecture/architecture-log-template.md

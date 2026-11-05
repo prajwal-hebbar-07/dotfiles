@@ -1,31 +1,44 @@
 #!/usr/bin/env bash
 # Links every omp/skills/<name> into Oh My Pi's skill directory,
-# ~/.omp/agent/skills. Run it again after adding or removing a skill; links
-# left pointing at a removed skill are pruned. Refuses to replace any other
-# skill of the same name.
+# ~/.omp/agent/skills, and every omp/agents/<name>.md into its agent
+# directory, ~/.omp/agent/agents. Run it again after adding or removing one;
+# links left pointing at a removed one are pruned. Refuses to replace any other
+# skill or agent of the same name.
 set -euo pipefail
 
-src="$(cd "$(dirname "$0")" && pwd)/skills"
-dest=${1:-"$HOME/.omp/agent/skills"}
+root="$(cd "$(dirname "$0")" && pwd)"
+omp=${1:-"$HOME/.omp/agent"}
 
-for skill in "$src"/*/; do
-  [[ -f $skill/SKILL.md ]] || continue
-  link="$dest/$(basename "$skill")"
-  if [[ -e $link || -L $link ]]; then
-    if [[ ! -L $link ]] || [[ $(readlink "$link") != "$src"/* ]]; then
-      echo "Refusing to replace existing skill: $link" >&2
-      exit 1
+skills=()
+for skill in "$root"/skills/*/; do
+  [[ -f $skill/SKILL.md ]] && skills+=("${skill%/}")
+done
+agents=("$root"/agents/*.md)
+[[ -e ${agents[0]} ]] || agents=()
+
+# link <dest dir> <source items...>: one link per item, by basename.
+link() {
+  local dest=$1 item target
+  shift
+  for item in "$@"; do
+    target="$dest/$(basename "$item")"
+    if [[ -e $target || -L $target ]]; then
+      if [[ ! -L $target ]] || [[ $(readlink "$target") != "$root"/* ]]; then
+        echo "Refusing to replace existing entry: $target" >&2
+        exit 1
+      fi
     fi
-  fi
-done
+  done
+  mkdir -p "$dest"
+  for target in "$dest"/*; do
+    if [[ -L $target && $(readlink "$target") == "$root"/* && ! -e $target ]]; then
+      rm "$target"
+    fi
+  done
+  for item in "$@"; do
+    ln -sfn "$item" "$dest/$(basename "$item")"
+  done
+}
 
-mkdir -p "$dest"
-for link in "$dest"/*; do
-  if [[ -L $link && $(readlink "$link") == "$src"/* && ! -e $link ]]; then
-    rm "$link"
-  fi
-done
-for skill in "$src"/*/; do
-  [[ -f $skill/SKILL.md ]] || continue
-  ln -sfn "${skill%/}" "$dest/$(basename "$skill")"
-done
+link "$omp/skills" ${skills[@]+"${skills[@]}"}
+link "$omp/agents" ${agents[@]+"${agents[@]}"}
