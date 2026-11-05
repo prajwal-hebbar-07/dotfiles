@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# open <slug>: starts the artifact server if it is not running, then opens
+# http://127.0.0.1:$ARTIFACT_PORT/<slug>/ in Brave. Without a slug, opens the index.
+set -euo pipefail
+
+here="$(cd "$(dirname "$(readlink -f "$0")")" && pwd)"
+root=${ARTIFACT_ROOT:-"$HOME/artifacts"}
+port=${ARTIFACT_PORT:-4317}
+slug=${1:-}
+url="http://127.0.0.1:$port/${slug:+$slug/}"
+
+if [[ -n $slug && ! -f $root/$slug/index.html ]]; then
+  echo "No artifact at $root/$slug/index.html" >&2
+  exit 1
+fi
+
+if ! curl -fsS "http://127.0.0.1:$port/__health" >/dev/null 2>&1; then
+  mkdir -p "$root"
+  ARTIFACT_ROOT=$root ARTIFACT_PORT=$port nohup node "$here/serve.mjs" >>"$root/.server.log" 2>&1 &
+  for _ in $(seq 50); do
+    curl -fsS "http://127.0.0.1:$port/__health" >/dev/null 2>&1 && break
+    sleep 0.1
+  done
+  curl -fsS "http://127.0.0.1:$port/__health" >/dev/null || { echo "Server did not start; see $root/.server.log" >&2; exit 1; }
+fi
+
+open -a "Brave Browser" "$url"
+echo "$url"

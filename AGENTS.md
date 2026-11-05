@@ -567,6 +567,16 @@ refuses to replace another skill or agent. Invoke with `/skill:<name>`.
   the current code is a defect, left out and reported. Sol re-audits the
   branch. Never touches app code, pushes or opens the PR; defects go to
   `/skill:debate-issues qa` and `/skill:debate-implement`.
+- `local-artifact` — model-invoked: Oh My Pi's stand-in for Claude
+  Artifacts, built fresh for whatever the user asks each time. Writes one
+  self-contained page (no network) to `~/artifacts/<slug>/index.html` and runs
+  `open <slug>`, which starts `serve.mjs` on `127.0.0.1:4317` when it is not
+  already running and opens the page in Brave. The server injects
+  `runtime.js`: a Firestore-style `window.claude.use("db")` saved to
+  `~/artifacts/<slug>/data.json`, which the agent reads back like
+  `ArtifactData`. It also reloads the open page when its files change and
+  pushes outside edits to `data.json` into the page live. No dependencies
+  beyond Node.
 
 The Paper MCP server is configured in `omp/mcp.json` as a stdio server running
 `${HOME}/.paper/bin/paper mcp`; the same file is copied to
