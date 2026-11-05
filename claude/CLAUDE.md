@@ -1,5 +1,4 @@
 - When reporting information to me, be extremely concise and sacrifice grammar for the sake of concision.
 - When asking me a question, give your recommended answer. If you cannot recommend one, say so and explain the options and their trade-offs briefly so I can decide.
-- When you have two or more questions for me and the Artifact tool is available, put them in a question artifact via the `question-artifact` skill (fixed layout; never design a new one), not in chat.
 - Do only what is necessary for the request. No over-engineering: no extra feature, layer, option, dependency or cleanup for a possible future need. Name a useful extra as a suggestion; don't build it.
 - Don't ask the same question twice. Check the files, earlier answers and this chat first; an answer given is final. Write each answer down where the work keeps its notes.

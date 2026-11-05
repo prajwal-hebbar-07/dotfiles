@@ -2,451 +2,50 @@
 
 ## Skills
 
-Skills live under `skills/<name>/SKILL.md`, linked into `~/.cursor/skills/`
-and `~/.gemini/config/skills/`. None of them are used by Claude Code.
+Every skill except `commit` was removed on 2026-11-05 (Claude Code, Codex,
+Cursor and Gemini alike); git history holds the old sets, and `SKILLS.md`
+describes the set cleared on 2026-09-19. List new skills here as they are
+added.
 
-Claude Code skills live separately under `claude/skills/<name>/SKILL.md`,
-started from scratch on 2026-10-26 and empty until the user adds one.
-`claude/link-skills` links each into both accounts, `~/.claude/skills/`
-(`cc`) and `~/.claude-work/skills/` (`ccw`); rerun it after adding or
-removing one. List them here as they are added. The same script links
-`claude/CLAUDE.md`, the global instructions (concise reports; every question
-carries a recommendation or, failing that, an explanation; two or more
-questions go in a question artifact), as `CLAUDE.md` in both accounts.
+`commit` has one copy per host:
 
-Codex counterparts live under `codex/skills/<name>/SKILL.md`:
-`commit`, `design`, `grill-design`, `grill-feature`, `paper-target`, `review-requirements`,
-`review-stack`, `review-architecture`, `review-design`, `review-feature`, `review-code`, `qa`.
-Codex is the fallback for when Claude Code's limits run out. Requirements,
-stack, architecture and feature authoring, the requirements, stack and
-architecture grills, and `/implement` stay in Claude Code; Codex can review
-their output files.
-`codex/link-skills` links them into `~/.agents/skills/`, Codex's user skill
-directory; rerun it after adding or removing one. It prunes only its own
-broken links and refuses to replace another skill. Invoke with `$name`
-(for example `$commit plan` or `$design build`). The workflows below also
-describe these twelve Codex versions. Keep both hosts in step when changing a
-shared workflow, including templates and probes; retain each host's invocation
-syntax, metadata and tool instructions. Claude's explicit-only skills use
-`policy.allow_implicit_invocation: false` in Codex's `agents/openai.yaml`.
+- `skills/commit/SKILL.md` — plain Agent Skill, linked into `~/.cursor/skills/`
+  and `~/.gemini/config/skills/`. Not used by Claude Code.
+- `claude/skills/commit/SKILL.md` — Claude Code. `claude/link-skills` links
+  each skill under `claude/skills/` into both accounts, `~/.claude/skills/`
+  (`cc`) and `~/.claude-work/skills/` (`ccw`), and prunes links to removed
+  ones; rerun it after adding or removing one. The same script links
+  `claude/CLAUDE.md`, the global instructions (concise reports; every question
+  carries a recommendation or, failing that, an explanation; do only what the
+  request needs; never ask what is already settled), as `CLAUDE.md` in both
+  accounts.
+- `codex/skills/commit/SKILL.md` — Codex. `codex/link-skills` links each skill
+  under `codex/skills/` into `~/.agents/skills/`, prunes only its own broken
+  links and refuses to replace another skill; rerun it after adding or
+  removing one. Invoke with `$commit`.
 
-Every skill that builds, reviews or asks carries two rules in its `Never`
-list (added 2026-11-02, in Claude and Codex alike): do only what
-the request needs (no over-engineering; a useful extra is named, not done;
-reviewers never ask for more than the documents need), and never ask what is
-already settled (read documents, answer logs and chat first; write each
-answer down where the skill keeps them). `claude/CLAUDE.md` states the same
-for work outside a skill. Keep them in any new skill.
+Keep the Claude and Codex copies in step when changing a shared workflow;
+retain each host's invocation syntax, metadata and tool instructions. Any new
+skill that builds, reviews or asks carries two rules in its `Never` list: do
+only what the request needs (a useful extra is named, not done), and never ask
+what is already settled (read documents, answer logs and chat first).
 
-- `commit` — `/commit`: stops if `user.name`/`user.email` is unset; commits
-  what is staged, or stages everything when nothing is. One commit by
-  default; several focused commits only where the changes separate cleanly
-  (revert, pick and one-sentence tests; code with its tests, docs and
-  wiring). With several it prints the plan and commits without asking
-  (`plan` only prints; `now` is a no-op), then checks the final tree equals the starting index.
-  Each message is a semantic subject plus two or more bullets; never a
-  co-author or attribution trailer. This one skill replaced `commit` and
-  `split-commit` on 2026-10-27, in both Claude Code and Codex.
-- `question-artifact` — model-invoked, Claude Code only: any set of two or
-  more questions for the user is a published Artifact in one fixed layout,
-  copied from `template.html` (cards with a recommended option and a note,
-  progress bar, Accept recommendations, Copy answers, answers saved in the
-  page's `db` and read back with `ArtifactData`). Only the `META` and
-  `QUESTIONS` data change per page. An existing question artifact (linked,
-  open in the chat, published earlier or connected) is updated in place,
-  never replaced by a new one. Modelled on the architecture-questions
-  page of 2026-11-01. The grills still write their questions files; this is
-  for questions asked in chat.
-- `requirements-slides` — `/requirements-slides [path]`: publishes
-  `docs/requirements.md` as a colourful slide-deck Artifact for review (what
-  and who, what it does by theme, quality bar, limits, not doing, unsettled,
-  decided for you by the models, needs you, next). Simpler words, never a
-  changed meaning: numbers and must/never kept exactly, every ID kept.
-  Read-only on the repo; one deck per project, updated in place. Claude Code
-  only.
-- `stack-slides` — `/stack-slides [path]`: the same for `docs/stack.md`: the
-  stack in one picture, each choice with why, its alternative, cost and way
-  out, not needed, cost overall, assumptions, decided for you, needs you,
-  next. Names, versions, prices and dates kept exactly. Claude Code only.
-- `architecture-slides` — `/architecture-slides [path]`: the same for
-  `docs/architecture.md`: the shape and the alternative it beat, the module
-  map, modules, data, main flows with their failures, concerns, threats,
-  decided for you, needs you, next. The file's module words and glossary
-  terms kept. Claude Code only.
-- `brief` — `/brief <doc.md>`: reads a Markdown document plus what it links
-  or cites (one level, repo docs only) and publishes one free-designed,
-  visually appealing Artifact: hero with stat chips, TL;DR, decisions needed
-  (with a recommended option), decided, diagram, risks, next step. Uses the
-  document's own IDs; inferences are marked. Read-only on the repo; one brief
-  artifact per document, found by title and updated in place. Claude Code only.
-- `raise-pr` — `/raise-pr <target>`: opens a GitHub pull request from the
-  current branch into the named target branch with `gh`. Pushes the current
-  branch only when it is new or ahead (never forces or switches), stops if a
-  PR is already open, and writes the title and description from the branch's
-  commits and diff, with `Closes #<n>` when the branch starts with an open
-  issue's number. Neither mentions Claude, AI or any tool (no "Generated
-  with", robot emoji or co-author), checked before and after creating; commits
-  that carry such a trailer are reported, not rewritten. Claude Code only.
-- `requirements` — `/requirements`: records what the user says about an app
-  into `docs/requirements.md` (numbered R/N/C/X/Q items, exact wording kept)
-  and tracks the project in `docs/project.md` in the app repo, so a new chat
-  resumes from the files. Does not interview, design, or commit.
-  `/requirements approve` sets `approved` once the grill has set `grilled`.
-- `grill-requirements` — `/grill-requirements`: grills `docs/requirements.md`
-  in rounds written to `docs/grill/requirements-questions.md`, where the user
-  answers in place, leaving a question blank to take the recommendation, and
-  runs the grill again (chat gets only the path and counts). Each round and answer is logged to
-  `docs/grill/requirements-log.md` first, so a new chat resumes from the open
-  questions. Ends only when `requirements-coverage.md`, a
-  pre-mortem, a no-chat fresh-eyes check and the user's confirm all pass; then
-  sets `grilled`, never `approved`. Based on Matt Pocock's `grilling` and
-  `domain-modeling`.
-- `stack` — `/stack`: proposes the tech stack from the grilled requirements
-  into `docs/stack.md` (one choice per decision, a real alternative, sourced
-  facts, each tied to R/N/C IDs) and applies the user's changes. Tracked in
-  `docs/project.md`; `/stack approve` sets `approved`. Never edits the
-  requirements.
-- `grill-stack` — `/grill-stack`: grills `docs/stack.md` the same way as
-  `grill-requirements` (rounds answered in `docs/grill/stack-questions.md`,
-  logged to `docs/grill/stack-log.md`,
-  coverage list, simplicity sweep, pre-mortem, no-chat fresh-eyes check,
-  confirm). Settles each decision only on the user's yes, writes ADRs under
-  `docs/adr/` for hard-to-reverse choices, and logs requirement gaps instead
-  of editing the requirements.
-- `architecture` — `/architecture`: proposes the architecture from the
-  requirements and the stack into `docs/architecture.md` (shape with a
-  structurally different alternative, deep modules and their interfaces and
-  seams, data model, flows with failures, cross-cutting concerns, abuse cases
-  with verification, mermaid diagrams, a requirement-to-item traceability
-  table) and applies the user's changes. Uses Matt Pocock's `codebase-design`
-  vocabulary. `/architecture approve` sets `approved`. Never edits the
-  requirements or the stack.
-- `grill-architecture` — `/grill-architecture`: grills `docs/architecture.md`
-  the same way (answered in `docs/grill/architecture-questions.md`, logged to
-  `docs/grill/architecture-log.md`). Per-module
-  deletion test, per-entity lifecycle, per-flow failure attacks; checks the
-  module graph has no cycle and every entity one owner; adds settled domain
-  terms to the glossary and ADRs to `docs/adr/`; logs requirement and stack
-  gaps instead of editing them.
+- `commit` — `/commit` (`$commit` in Codex): stops if `user.name`/`user.email`
+  is unset; commits what is staged, or stages everything when nothing is. One
+  commit by default; several focused commits only where the changes separate
+  cleanly (revert, pick and one-sentence tests; code with its tests, docs and
+  wiring). With several it prints the plan and commits without asking (`plan`
+  only prints; `now` is a no-op), then checks the final tree equals the
+  starting index. Each message is a semantic subject plus two or more
+  bullets; never a co-author or attribution trailer.
 
-- `design` — `/design`: works out the design from the requirements,
-  architecture, stack, glossary and any brief the user adds
-  (`/design brief <text>`, kept verbatim as `BR` items) into
-  `docs/design.md` (idea with a structurally different alternative, moments of
-  use, journeys, screens with every state, shared patterns, a visual
-  direction, traceability), applies the user's changes, and `/design build`
-  draws it in Paper through the Paper MCP (design system board, then the
-  screens). `/design approve` needs `grilled` and every screen built. Never
-  edits the requirements, stack or architecture, and never writes app code.
-- `grill-design` — `/grill-design`: grills `docs/design.md` the same way
-  (rounds answered in `docs/grill/design-questions.md`, logged to
-  `docs/grill/design-log.md`) but to clear the idea,
-  not the look: say-it-back, the one thing, who and when, journeys, screens
-  and states, with feel words turned into checkable rules. Never asks about
-  colour, type or styling (those are reviewed in Paper). Fresh-eyes check is
-  a designer sub-agent; logs requirement, stack and architecture gaps instead
-  of editing them.
-
-**Feature flow.** For one feature in **any existing repository**, built with
-this pipeline or not, with or without `docs/`, starting from a GitHub issue
-someone else opened and the branch the user made from it (GitHub's **Create a
-branch**, or `gh issue develop <n> --checkout`). The same stages as the
-whole-app flow, without the stack and issues stages, and with the
-architecture and design fitted into what the app already has instead of
-built from nothing: `/feature` → `/grill-feature requirements` →
-`/feature approve` → `/feature-architecture` → `/grill-feature architecture`
-→ `/feature-architecture approve` → `/feature-design` → `/grill-feature
-design` → `/feature-design build` → `/feature-design approve` (or
-`/feature-design none <reason>` with no UI) → `/implement` on the branch → `/review-code` or `$review-code` → PR and merge by hand.
-`/review-feature <stage>` (or `$review-feature <stage>` in Codex) can run on
-any stage at any point. Every skill finds the feature from the branch's
-leading number or `#<n>`. State is in `docs/features/<n>-<slug>/`
-(`tracker.md`, `requirements.md`, `architecture.md`, `design.md`,
-`glossary.md`, `grill/`, `review/`), kept out of git through
-`.git/info/exclude`, so they are the only copy of the plan (remove the line
-and commit them to keep or share it). The issue is read, never written. `/issues` and
-`/release` are whole-app and not part of it. `/qa` and `$qa` are the user's
-to run by hand once the feature is built: on the feature's branch they switch
-to a feature mode, and nothing in the flow starts or waits for them.
-There is no grill of the code; the review is enough.
-
-- `feature` — `/feature`: reads the issue and what the app does today (`T`
-  facts with sources), captures the issue and anything the user adds as
-  `R`/`N`/`C`/`X`/`Q` items in their words (the `/requirements` rules), owns
-  the tracker and `status` across every stage, and `approve`s the
-  requirements. Never writes to GitHub: no issue, comment, edit or branch,
-  and no code.
-- `feature-architecture` — `/feature-architecture`: reads the code the
-  feature lands in and writes it as **As is** (`AS` items with `path:line`,
-  the stack and commands, an as-is diagram), then proposes the feature's
-  architecture around it in `/architecture`'s form and vocabulary: a shape
-  with a structurally different alternative (sub-agent), modules (`M`) and
-  entities (`E`) each `new` with a reason or `extends AS<n>`, existing rows
-  and migration, flows with failures and the existing permission checks,
-  concerns through existing mechanisms, threats, risks to what exists (`RK`,
-  each caller with its test), to-be diagrams, traceability, and **Fit** (the
-  stop rule: a new deployable, datastore, runtime, boundary change, new
-  dependency or more than about ten commits is a split the user decides).
-  Re-reads the code when `origin/<default>` moves. Never redesigns what
-  exists.
-- `feature-design` — `/feature-design`: reads the app's screens, navigation,
-  components, tokens and copy where the feature lands (**Existing UI**, `EU`
-  items), then proposes in `/design`'s form where the feature sits (with an
-  alternative placement), moments, journeys from existing screens, new and
-  changed screens (`Change: changes EU<n>`) with every state in the app's
-  words, new patterns only where none exists, and the app's own look reused.
-  `/feature-design build` draws it in Paper on a `#<n> <title>` page: the
-  app's tokens, a `· today` board for each existing screen it changes, then
-  the feature's boards beside them. `approve` needs `grilled` and every
-  screen built; `none <reason>` marks a feature with nothing to see.
-- `grill-feature` — `/grill-feature <stage>` (Claude Code) and
-  `$grill-feature <stage>` (Codex): grills one stage the same way as
-  the other grills (answered in the feature's `grill/<stage>-questions.md`,
-  logged to its `grill/<stage>-log.md`, coverage
-  in `grill/<stage>-coverage.md`), but looks up in the code whatever the code
-  can answer and re-checks every `T`, `AS` and `EU` fact. Per-stage attacks,
-  coverage and probes (requirements; architecture with the reuse, deletion,
-  callers, existing rows and undo tests; design with say-it-back and no
-  styling questions), then traceability, a simplicity sweep, a pre-mortem
-  about breaking what exists, a fresh-eyes sub-agent that may read the repo,
-  and the confirm round. Settled terms go in the feature's `glossary.md`.
-  Logs gaps in earlier stages instead of editing them. An approved stage is
-  grilled again only with `reopen`.
-
-`grill-requirements`, `grill-stack`, `grill-architecture`, `grill-design` and
-`grill-feature` share mechanics (round format, the questions file the user
-answers in, where a blank answer takes the recommendation, log handling, exit
-loop) and
-are each self-contained on purpose; change one, change the other four.
-
-- `review-requirements`, `review-stack`, `review-architecture`,
-  `review-design`, `review-feature` — `/review-<stage>` (`/review-feature
-  <stage>` for a feature's requirements, architecture or design): an independent reviewer for a stage
-  document that another model built. Reads the document cold (and for design
-  the Paper boards, read-only; for a feature also the code and the `· today`
-  boards against the changed ones), runs a
-  stage checklist, re-checks sourced facts, and appends ranked findings (blocker, major, minor, nit, each with
-  evidence and a confirmed or likely label) with a verdict (`blocked`,
-  `changes needed`, `approve-ready`) to `docs/review/<stage>-review.md` (a feature's to
-  its `review/<stage>-review.md`, prefixes `RR`, `AR`, `DR`). Each finding
-  carries the `/requirements`, `/stack`, `/architecture`, `/design`,
-  `/feature`, `/feature-architecture` or `/feature-design` command that would
-  fix it, and the report ends in a paste-ready fix list.
-  Running it again after the fixes marks each finding resolved, still open or
-  new; a different model may review the same version (`Also found by`,
-  `Disputed by`). Never edits the document, never changes a `Status:`, never approves;
-  only `docs/project.md`'s **Next action** and log change (for a feature,
-  its `tracker.md`'s Review cell, **Next action** and log). It does not
-  replace the grill. Available in both Claude Code and Codex. Codex uses
-  `$review-<stage>` and `$design`; fix commands for requirements, stack and
-  architecture are labeled Claude Code handoffs in the report and reply.
-
-`review-requirements`, `review-stack`, `review-architecture`, `review-design`
-and `review-feature` share mechanics (report format, re-review, severity) and
-are each self-contained on purpose; change one, change the other four.
-
-**Disputes.** The four stage reviews, `review-feature`, `review-code` and `qa`, in both hosts,
-let the models settle a review in the report before the user is asked. The
-author answers a finding with one `Response:` line under it (`accepted`,
-`rebutted` with evidence, or `intent` with the question only the user can
-answer): `/requirements respond`, `/stack respond`, `/architecture respond`,
-`/design respond` (also `$design respond`), `/feature respond`,
-`/feature-architecture respond`, `/feature-design respond`, `/implement fix` for code, and
-`/implement` for a QA finding. The reviewer's next run checks each response
-against the file or code and writes a `Rejoinder:` (`conceded` or `maintained`
-with evidence). A dispute ends after one rebuttal and one rejoinder. What is
-still `contested`, and every `intent` finding, is listed under `### For you`
-at the top of the review; the user decides only those. The responding command
-writes nothing to the report but `Response:` lines. The `## Responses and
-disputes` section is the same in all fourteen reviewer files and the `respond`
-section is the same in the four stage commands and the three feature stage
-commands (which also check the code); change one, change the rest.
-
-- `issues` — `/issues`: runs straight from the decided stages to GitHub, with
-  no approval or confirmation. Cuts the whole app into vertical-slice issues
-  (issue 0 bootstraps the project) and writes the plan to `docs/issues.md`
-  (approach, build waves, coverage of every requirement, module, flow,
-  entity, screen and stack decision) with one self-contained issue per file in
-  `docs/issues/<key>.md`. Each issue copies in, word for word, every item it
-  needs (requirements, architecture, stack, design with all screen states,
-  glossary, ADRs), plus acceptance criteria with falsifiers, required tests,
-  out of scope, assumptions, and the build rules in `principles.md` (YAGNI,
-  use what exists, no speculative layers or options, no dead code), so the
-  implementer asks nothing and builds only what is asked. A YAGNI sweep applies
-  the same rules to the plan, and both the sweep and every issue call for the
-  third-party `ponytail` skill when it is installed (not vendored; link
-  `~/.agents/skills/ponytail` into `~/.claude/skills` and `~/.claude-work/skills`
-  to make it available to Claude Code), and a sub-agent given only the issue files must
-  find nothing left to ask. It then creates them on GitHub with `gh` (an
-  epic, sub-issues, native blocked-by links, a hidden key marker so a re-run
-  never duplicates). Gaps are built to the simplest assumption and reported at
-  the end. `/issues sync` carries a later document change to open issues.
-  `/issues qa` files the open `/qa` findings the same way (labels `qa`, and
-  `needs-decision` for a finding that is a gap in a document: a stub issue
-  that `/issues sync` completes once the stage is grilled). Every QA issue
-  opens with a **Raised by QA** section: the run, finding, kind (missing test,
-  weak test, defect, flake, skipped test, document gap), where, and whether to
-  build it or decide it first. `/issues` adds each issue's row to
-  `docs/progress.md`.
-  Writes no code and edits no other stage's file. Claude Code only.
-
-- `implement` — `/implement`: builds the GitHub issues one at a time in plan
-  order (`docs/issues.md`): picks the first open issue whose blockers are
-  done, branches `issue/<n>-<slug>` from `origin/<default>`, builds it test
-  first, criterion by criterion, in small commits through `commit`, runs the
-  tests, lint and build, checks its own diff against the issue (scope, YAGNI
-  rules, architecture), and stops with a hand-off and a ready PR description.
-  It never pushes, opens the PR, merges or starts the next issue: the user
-  reviews, raises the PR and merges by hand, then runs `/implement` again.
-  With review findings on the branch (`/implement fix`) it fixes them and
-  stops again. State is tracked in `docs/progress.md` (key, GitHub number,
-  kind, state, branch, PR), read first on every run: `done` rows are final and
-  cost no GitHub call; only in-flight rows are checked against git and GitHub,
-  since the user merges by hand; a lost file is rebuilt from them. Local
-  state, never staged. An issue labelled `needs-decision` (a QA finding that
-  is a gap in a document) is never built: when it comes up in plan order
-  `/implement` asks the user the questions itself, then hands over the
-  pre-filled `/<stage>` command with their answers, `/grill-<stage>`, and
-  `/issues sync`. On the branch of an issue planned with `/feature` (its
-  `docs/features/<n>-*/` exists), or with that `#<n>`, it runs in feature
-  mode: only once the requirements and architecture are approved and the
-  design approved or `n/a`; builds from those stage files (acceptance
-  criteria from the `Accept:` lines, flow failures, abuse cases, risks,
-  numbers and screen states; rules from `principles.md`; commands from the
-  architecture) on the existing branch without switching, rebasing or
-  merging; no plan or `progress.md`; keeps the tracker's Build row and the
-  stage hashes it built from, and flags a stage that changed since. Claude
-  Code only.
-- `review-code` — `/review-code` (Claude Code) and `$review-code` (Codex):
-  an independent review of an issue branch, by a different model from the one
-  that wrote it. Checks the diff against the issue's acceptance criteria,
-  scope, build rules, architecture, stack, design, tests, correctness and
-  security, runs the issue's own test, lint and build commands, and appends
-  ranked findings (same severities and verdicts as the stage reviews, prefix
-  `CR`) to `docs/review/code/<key>-review.md`. Also finds a feature from a
-  `<n>-<slug>` branch and reviews it against its approved stage files, writing
-  to its `review/code-review.md` and the tracker's Build row. Reviews from several models
-  share one report, with `Also found by` and `Disputed by` lines. Never edits
-  code, pushes or comments on a PR; `/implement` fixes the findings. Same
-  mechanics as the stage reviews; change one, change the other five.
-- `qa` — `/qa`: a whole-app test audit on the merged default branch, after
-  some or all issues are done. Builds a coverage matrix (every `R`, `C`, `N`,
-  `F` failure step, `B`, `J` across issues, screen state, entity, concern and
-  assumption against the test that covers it, read for whether it could fail),
-  runs the project's own test command twice (flakes), lint, type check and
-  build, and appends ranked findings (prefix `QA`, same severities and
-  verdicts as `review-code`) to `docs/review/qa-report.md`. Each finding names
-  its route: `issue`, a stage command, or `manual`. Items whose
-  issues are not done are `not yet built`, so it doubles as a progress check. On
-  a `/feature` branch it audits that feature from its stage files, adding `RK`
-  and existing rows, into `docs/features/<key>/review/qa-report.md`; findings go
-  to `/implement fix`, not `/issues qa`.
-  Never starts the app, a server or a browser (so screens and live requests
-  are `not judged`, with the manual check to do), never edits code. Reports
-  from several models share one report (`Also found by`, `Disputed by`). Same
-  mechanics as `review-code`; change one, change the other. Available in both
-  Claude Code and Codex (`$qa`); Codex labels `/issues qa` and `/implement`
-  as Claude Code handoffs and files no issues.
-- `release` — `/release [version]`: the last gate, from files and GitHub only.
-  Checks every issue done, everything in the coverage table built, `/qa`
-  ready on the current default-branch commit, code reviews clear, stage
-  documents settled and unstale, CI green on the commit, the suite, build and
-  audit passing, no secrets. Rewrites `docs/release.md` with the verdict
-  (`ready`, `ready with warnings`, `not ready`), what the user is accepting
-  (not built, assumed, open points, known limits), a manual-check list, the
-  deploy steps issue 0 recorded, draft release notes, and the tag and
-  `gh release` commands for the user to run. Never tags, pushes, deploys or
-  publishes. Claude Code only.
-
-Every Claude Code skill above ends in an `## Advisor` section: where, if an
-advisor is on (`/advisor`), the skill consults it (the reviews before writing
-the verdict; the proposals before writing the document; the grills before the
-first round and the confirm round; `commit` only when it splits). The advisor is set
-with `/advisor claude-opus-5-5` or `"advisorModel": "claude-opus-5-5"` in each
-account's `settings.json`, which this repo does not hold. It is picked by model
-only, so there is no advisor effort setting, and Claude decides when to call it:
-the skills can name the point but not force the call. The Codex counterparts
-have no advisor and need none.
-
-`paper-target` — `/paper-target` (Claude Code) and `$paper-target` (Codex): pins
-the one Paper file and page a project uses, so several sessions or open tabs
-cannot pull design work onto the wrong file. Resolves them through the Paper MCP
-and writes a marked block into the repository's `AGENTS.md` / `CLAUDE.md`, read
-by `design`, `feature-design`, `review-design` and `review-feature`,
-which pass both ids on their calls instead of following the focus. `show` and
-`clear`. Never draws or commits. It has no advisor section: nothing in it is a
-judgement.
-
-- `commit` — commits already-staged changes with a semantic message.
-- `paper-target` — the older Cursor and Gemini copy: pins the Paper file/page this
-  repo's design work reads from, and commits it. Writes the same block.
-- `paper-design-prompt` — turns a design direction into one Paper prompt
-  (a reference UI as the base, then the requested changes). Does not draw.
-- `paper-design` — builds that prompt (`paper-design-prompt.md`) in Paper:
-  tokens and design system, then the screens in order. Does not write code.
-- `implementation-plan` — turns this chat's finalized decisions into one
-  commit-by-commit plan file, in windows of at most five commits.
-- `review-implementation-plan` — a second model reviews that plan file,
-  editing sequence and outcomes before follow; never implements.
-- `follow-implementation-plan` — implements the current window (at most five
-  commits) via `commit`, stamps `Landed:<sha>`, then starts the next window
-  in a new chat.
-- `follow-plan-with-review` — same plan as `follow-implementation-plan`, but
-  stops after each step for review; commits via `commit` only on the user's
-  go-ahead, then does the next step. At the window's end it hands over a
-  prompt for the next window's new chat instead of starting one.
-- `arc-design` — directs `archify` to build a diagram set (overview + one per
-  piece) under `docs/architecture/diagrams/`, then commits via `commit`.
-- `docs` — generate or verify architecture and/or plain-English docs
-  (each surface pinned per repo in `docs/README.md`), then commit via
-  `commit`.
-- `sync-lyik-docs` — copies `lyik_forms_v3/docs/architecture/` into
-  `lyik_docs/docs/lyik_enterprise/design/architecture/`. No checks, no commit.
-- `pdocs` — `docs` renamed for Claude Code; only `SKILL.md` is its own, the
-  rest are relative links into `skills/docs/`.
-`ponytail` (third-party, DietrichGebert/ponytail) is installed like `archify`
-(`npx skills add DietrichGebert/ponytail -g --skill ponytail`) and linked from
-`~/.agents/skills/ponytail` into `~/.claude/skills` and `~/.claude-work/skills`
-for the `issues` skill; do not vendor it.
-
-`archify` (third-party, tt-a1i/archify) is **not** vendored here. Install it
-with `npx skills add tt-a1i/archify -g`; it lands in `~/.agents/skills/archify`
-and is symlinked into the Cursor, Gemini, and Claude Code skill dirs. Do not copy its Node
-sources into `skills/` — the installer owns updates.
-
-The skill directory was otherwise cleared on 2026-09-19 to start over; the old
-set is described in `SKILLS.md` at the repo root (also in git history). List
-new skills here.
+`archify` (tt-a1i/archify) and `ponytail` (DietrichGebert/ponytail) are
+third-party and **not** vendored here. Install with
+`npx skills add tt-a1i/archify -g` and
+`npx skills add DietrichGebert/ponytail -g --skill ponytail`; they land in
+`~/.agents/skills/` and the installer owns updates.
 
 ## Cursor skills
 
-Cursor's built-in skills are copied from `~/.cursor/skills-cursor/` into
-`cursor/skills/<name>/`. Cursor still loads the live copies from
-`~/.cursor/skills-cursor/`; this tree is the repo copy.
-
-- `automate`
-- `autopilot`
-- `canvas`
-- `create-hook`
-- `create-rule`
-- `create-skill`
-- `create-subagent`
-- `deploy-with-vercel`
-- `goal`
-- `loop`
-- `migrate-to-skills`
-- `new-repo`
-- `onboard`
-- `origin`
-- `rename-chat`
-- `review`
-- `review-bugbot`
-- `review-security`
-- `sdk`
-- `share`
-- `shell`
-- `split-to-prs`
-- `statusline`
-- `update-cli-config`
-- `update-cursor-settings`
-- `visualize`
+Cursor's built-in skills live in `~/.cursor/skills-cursor/`, which Cursor
+keeps in sync itself; no copy is kept in this repo.

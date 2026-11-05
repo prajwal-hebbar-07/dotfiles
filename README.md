@@ -67,15 +67,10 @@ keybindings, settings, and extensions carry over.
 
 **Skills** — Cursor discovers user-level skills from `~/.cursor/skills/` (and
 `~/.agents/skills/`, plus the Claude and Codex directories for compatibility),
-so `paper-target`, `implement-commit-prompt`, `implementation-plan`,
-`review-implementation-plan`, `follow-implementation-plan`, `report-arc`,
-`repo-docs`, and `twitter-campaign` are linked there from `skills/`.
-`~/.cursor/skills-cursor/` is Cursor's own directory for its built-in skills,
-kept in sync from a `.sync-manifest.json`; nothing of mine goes in it. `commit`
-is linked in too — it is plain `git` over the staged index, so it behaves the
-same in every host. The review
-skill is linked here for completeness; the intended use is to copy that
-`SKILL.md` plus the plan into another agent.
+so `commit` is linked there from `skills/`. It is plain `git` over the staged
+index, so it behaves the same in every host. `~/.cursor/skills-cursor/` is
+Cursor's own directory for its built-in skills, kept in sync from a
+`.sync-manifest.json`; nothing of mine goes in it.
 
 **Paper MCP** — comes from the `paper-desktop` plugin here rather than a hand
 written server: Cursor expands `${userHome}` in plugin manifests, so the
@@ -87,9 +82,7 @@ per project under `~/.cursor/projects/<slug>/mcps/`.
 Google's AI coding assistant environment (`agy`).
 
 **Skills** — Antigravity discovers global skills from `~/.gemini/config/skills/`
-(as well as workspace skills under `.agents/skills/`). The shared documentation,
-commit, and implementation skills — `commit`, `docs-twins`, `docs-verify`,
-`follow-implementation-plan`, and `repo-docs` — are linked into
+(as well as workspace skills under `.agents/skills/`). `commit` is linked into
 `~/.gemini/config/skills/` from `skills/`.
 
 ### zsh
@@ -236,172 +229,28 @@ open after a render, so several files can be opened in a row; `q` closes it.
 
 ## Skills
 
-`skills/` holds plain Agent Skills packages — Markdown instructions, nothing
-host-specific — linked into Cursor (`~/.cursor/skills/`) and Gemini
-(`~/.gemini/config/skills/`). None of them are linked into Claude Code.
+Only `commit` is kept for now; every other skill was removed on 2026-11-05.
+It exists in three copies, one per host:
 
-Claude Code has its own set, started from scratch on 2026-10-26:
-`claude/skills/<name>/SKILL.md`. `claude/link-skills` links each one into
-both accounts — `~/.claude/skills/` (`cc`) and `~/.claude-work/skills/`
-(`ccw`) — and prunes links to skills that were removed. Rerun it after adding
-or removing a skill. Each account's `skills/synced/` (skills synced from
-claude.ai) is left alone.
+- `skills/commit/` — plain Agent Skill, linked into Cursor
+  (`~/.cursor/skills/`) and Gemini (`~/.gemini/config/skills/`).
+- `claude/skills/commit/` — Claude Code. `claude/link-skills` links each
+  skill under `claude/skills/` into both accounts — `~/.claude/skills/` (`cc`)
+  and `~/.claude-work/skills/` (`ccw`) — prunes links to removed skills, and
+  links `claude/CLAUDE.md` as each account's global instructions. Each
+  account's `skills/synced/` (skills synced from claude.ai) is left alone.
+- `codex/skills/commit/` — Codex. `codex/link-skills` links each skill under
+  `codex/skills/` into `~/.agents/skills/`, prunes its own broken links, and
+  refuses to overwrite another skill. Invoke with `$commit`.
 
-Codex has counterparts under `codex/skills/`, adapted from the Claude Code
-set: `commit`, `design`, `grill-design`, `review-requirements`,
-`review-stack`, `review-architecture`, `review-design`, `review-feature`, `review-code`, `qa`.
-Requirements, stack, architecture and feature authoring and grilling stay in
-Claude Code; Codex can review their output files.
-Run `codex/link-skills` to link them into `~/.agents/skills/` for use across
-repos. It can be rerun, prunes its own broken links, and refuses to overwrite
-another skill. The approval gates, templates and logged progress are the
-same, so either host can resume from an app's `docs/` files. Keep the two
-sets in step when changing a workflow.
+Rerun the link scripts after adding or removing a skill.
 
-Use `$commit` (`plan` to preview a split, `now` to skip its confirmation),
-`$design`, and `$grill-design` in Codex. `$design brief <text>`,
-`$design build`, and `$design approve` work
-the same way as their Claude counterparts; drawing needs a connected Paper
-MCP. Explicit-only invocation is preserved through `agents/openai.yaml`;
-`commit` remains available for automatic selection. If the skills do not
-appear, restart Codex. See the [official skill documentation](https://learn.chatgpt.com/docs/build-skills).
-
-Use `$review-requirements`, `$review-stack`, `$review-architecture`, or
-`$review-design` in an app repo for an independent review. They write ranked
-findings, a verdict and a paste-ready fix list to `docs/review/`, leaving the
-stage documents unchanged. Run the reviewer again after fixes to track what
-was resolved. Each accepts `status` or focus text; `$review-design no-paper`
-reviews only the document. Fix commands for requirements, stack and
-architecture are labeled for pasting into Claude Code; design fixes use
-`$design` in Codex. The Codex reviewers have no advisor step.
-
-Use `$review-code` (or `/review-code` in Claude Code) on an issue branch that
-`/implement` has built, to get a second model's view before raising the PR. It
-writes ranked findings to `docs/review/code/<key>-review.md`, shared between
-the two hosts, runs the issue's own tests, and changes no code. `/implement`
-(Claude Code only) builds the issues in plan order, one branch each, stops
-after each without pushing or opening a PR, and fixes review findings when
-run again.
-
-To build a feature in an existing repository, built with this pipeline or
-not, start from its GitHub issue: make a branch from it (**Create a branch** on
-the issue, or `gh issue develop <n> --checkout`) and run the same stages as a
-whole app, without the stack and issues stages, fitted into what the app
-already has: `/feature` (requirements), `/feature-architecture` (how it fits
-the existing architecture), `/feature-design` (how it fits the existing
-screens, drawn in Paper with `build`), each grilled with `/grill-feature
-<stage>`, reviewed with `/review-feature <stage>` or `$review-feature
-<stage>`, and approved with its own `approve`. State is kept in
-`docs/features/<n>-<slug>/`, out of git; the issue itself is never edited.
-`/implement` then builds from the approved stages on the same branch and
-stops, and you review with `/review-code` or `$review-code` and raise and
-merge the PR yourself.
-
-- **`commit`** (`/commit`) — stops if `user.name` or `user.email` is not set.
-  Commits what is staged; when nothing is, it stages everything first. One
-  commit by default; several focused commits only where the changes separate
-  cleanly (`/commit plan` previews, `/commit now` skips the confirmation).
-  Each message is a semantic `type(scope): summary` with two or more bullets,
-  and never carries a `Co-Authored-By:` or any other attribution trailer.
-  Replaces the former `split-commit`.
-
-**`pdocs` skill** (`/pdocs`) — the `docs` skill under another name for Claude
-Code, whose account-synced skills already include a `docs`. Only `SKILL.md` is
-its own; every other file is a relative link into `skills/docs/`.
-
-**`commit` skill** (`/commit`) — turns staged changes into one semantic
-commit. It checks that `user.name` and `user.email` are set, refuses to run with
-an empty index, writes a `type(scope): summary` subject followed by pointer
-bullets, and adds no `Co-Authored-By:` or "Generated with" trailer, so git
-history carries no tool attribution. It never runs `git add` — staging stays
-my decision.
-
-**`implementation-plan` skill** (`/implementation-plan`) — after an
-architecture conversation is done, writes numbered files under
-`docs/implementation-plan/` (gitignored): at most five commits each. Each
-step is an outcome plus a prompt; how to build it is left to the
-implementing agent. The file itself is the protocol — implement one step
-exactly, stop for that commit, then the next in that file. When the file
-is done it is deleted and the next file starts on its own. Nothing in it
-is host-specific.
-
-**`review-implementation-plan` skill** (`/review-implementation-plan`) — a
-second agent (often a stronger implementer, and often a different host) reads
-one plan file and updates it before anyone codes: split or merge steps,
-reorder, strip how-to, add missing outcomes, re-chunk if a file grows past
-five commits. It does not implement, and it does not replace the planner's
-how with its own. Pass one plan file plus this `SKILL.md`; review the next
-file in a new window. It is a plain Agent Skill, not a Cursor feature.
-
-**`follow-implementation-plan` skill** (`/follow-implementation-plan`) —
-executes the plan from one invoke: the next unfinished step, exactly as
-written, `git add` only that step's files, then `/commit` with the
-plan's subject. It does not `git commit` itself. An empty index is not the
-end of the plan — add the files and commit. After the SHA lands, it takes
-the next step in that file. When the file is done, it deletes it and starts
-the next remaining file in a new agent with empty history — never this
-same agent. On Cursor that is a Task/subagent. After every step it emits a
-**report-arc** report.
-
-**`report-arc` skill** (`/report-arc`) — the step-report shape (status,
-Done when table, changed, leftover unstaged, verification, next) and a
-second mode that turns any such report — pasted, a file, or this chat —
-into a page under `docs/reports/`. It does not implement. Pass the report
-plus this `SKILL.md` to any agent.
-
-**`repo-docs` skill** (`/repo-docs`) — the same paired docs as
-`docs-twins` (architecture + plain-English, same number, stored baseline,
-one writer per pair, never commit), for **any** tree: a dotfiles repo, Python,
-Go, Rust, a single crate. The path → pair table lives in that repo's
-`docs/README.md`, not in the skill, so `docs-twins` can stay hardcoded for
-the monorepos it already serves. Incremental by default; `full` or named
-numbers for a sweep.
-
-**`docs-twins` skill** (`/docs-twins`) — generates or refreshes twin
-documentation (technical doc in `docs/architecture/` and plain-English twin in
-`docs/plain-english/`) for monorepos, diff-driven from a stored baseline SHA
-in `docs/README.md`.
-
-**`docs-verify` skill** (`/docs-verify`) — audits documentation claims
-against the code in the reverse direction of `docs-twins`. Finds dead paths,
-dead symbols, renamed modules, and stale counts, running `check-claims.py`
-mechanically and delegating prose checking.
-
-**`implement-commit-prompt` skill** (`/implement-commit-prompt`) —
-extracts **one** step from that plan into a copy-pastable prompt for a fresh
-chat. If the step already has a Prompt block, that is what gets copied rather
-than a rewrite. Use this when you want a new session per commit; following
-the whole sequence from one invoke is `follow-implementation-plan`. These live in
-`skills/` and are linked into Cursor, same as `paper-target`.
-
-**`twitter-campaign` skill** (`/twitter-campaign`) — walks a project
-directory and writes `docs/twitter-campaign.md`: a coordinated developer
-launch campaign for Twitter/X and Reddit, from architecture, release notes,
-and commit history. Copy is first-person and honest about trade-offs. Tweets
-are ≤ 280 characters; Reddit posts are long-form for named subreddits and
-reuse the Twitter screenshots/recordings 1:1. A
-`twitter-campaign-baseline:` sha in that file is the commit the plan was
-last read against; a later run diffs from there and appends, it does not
-start over. `full` rewrites. It does not post, and it does not invent
-features that are not in the tree. Linked into Cursor, same as
-`paper-target`.
-
-**`paper-target` skill** (`/paper-target`) — pins which Paper file and
-page a repository's design work reads from. It resolves them through the Paper
-MCP (`list_files`, `open_file`, `get_basic_info` — never a guessed id) and writes
-the result into that repo's `AGENTS.md` / `CLAUDE.md` between
-`<!-- paper-target:start -->` markers, so the target is already in context at the
-start of every later session instead of depending on whatever file Paper has
-focused. `show` reports the block against a live `get_basic_info` and says
-whether they agree; `clear` removes the block and nothing else. The write is
-idempotent, touches only the marked region, and Paper stays read-only throughout.
-
-Page ids are the awkward part: the MCP cannot enumerate pages, so when only a
-page name is known the skill records `pageId: UNKNOWN` and leaves the consuming
-skill to confirm the page by name — it never pins a page it did not see.
-
-It is a plain Agent Skills package that reads the Paper MCP and writes Markdown,
-linked into `~/.cursor/skills/paper-target`.
+**`commit`** (`/commit`, `$commit`) — stops if `user.name` or `user.email` is
+not set. Commits what is staged; when nothing is, it stages everything first.
+One commit by default; several focused commits only where the changes
+separate cleanly (`plan` previews). Each message is a semantic
+`type(scope): summary` with two or more bullets, and never carries a
+`Co-Authored-By:` or any other attribution trailer.
 
 ## Intended layout
 
@@ -414,21 +263,14 @@ dotfiles/
 │   ├── config
 │   └── themes/pale-knight
 ├── claude/     # Claude Code, both accounts (cc, ccw)
+│   ├── CLAUDE.md                   # global instructions
 │   ├── link-skills                 # links claude/skills/* into both
-│   └── skills/<name>/SKILL.md
+│   └── skills/commit/SKILL.md
+├── codex/      # Codex
+│   ├── link-skills                 # links codex/skills/* into ~/.agents/skills
+│   └── skills/commit/SKILL.md
 ├── skills/     # Agent Skills, linked into Cursor and Gemini
-│   ├── commit/SKILL.md
-│   ├── docs/SKILL.md
-│   ├── implementation-plan/SKILL.md
-│   ├── review-implementation-plan/SKILL.md
-│   ├── follow-implementation-plan/SKILL.md
-│   ├── follow-plan-with-review/SKILL.md
-│   ├── arc-design/SKILL.md
-│   ├── paper-target/SKILL.md
-│   ├── paper-design-prompt/SKILL.md
-│   ├── paper-design/SKILL.md
-│   ├── sync-lyik-docs/SKILL.md
-│   └── pdocs/SKILL.md
+│   └── commit/SKILL.md
 ├── cursor/     # editor settings, keybindings, extension list
 ├── zsh/        # zshrc, and bin/pk-preview for the fzf preview pane
 ├── tmux/       # tmux.conf, Pale Knight theme and keys
@@ -490,24 +332,10 @@ ln -sfn "$PWD/ghostty/config" ~/.config/ghostty/config
 ln -sfn "$PWD/ghostty/themes" ~/.config/ghostty/themes
 ln -sfn "$PWD/skills/commit"     ~/.cursor/skills/commit
 ln -sfn "$PWD/skills/archify"    ~/.cursor/skills/archify
-ln -sfn "$PWD/skills/docs"       ~/.cursor/skills/docs
-ln -sfn "$PWD/skills/paper-target" ~/.cursor/skills/paper-target
-ln -sfn "$PWD/skills/implement-commit-prompt" ~/.cursor/skills/implement-commit-prompt
-ln -sfn "$PWD/skills/implementation-plan" ~/.cursor/skills/implementation-plan
-ln -sfn "$PWD/skills/review-implementation-plan" ~/.cursor/skills/review-implementation-plan
-ln -sfn "$PWD/skills/follow-implementation-plan" ~/.cursor/skills/follow-implementation-plan
-ln -sfn "$PWD/skills/report-arc" ~/.cursor/skills/report-arc
-ln -sfn "$PWD/skills/repo-docs" ~/.cursor/skills/repo-docs
-ln -sfn "$PWD/skills/twitter-campaign" ~/.cursor/skills/twitter-campaign
 
 mkdir -p ~/.gemini/config/skills
 ln -sfn "$PWD/skills/commit" ~/.gemini/config/skills/commit
 ln -sfn "$PWD/skills/archify" ~/.gemini/config/skills/archify
-ln -sfn "$PWD/skills/docs" ~/.gemini/config/skills/docs
-ln -sfn "$PWD/skills/docs-twins" ~/.gemini/config/skills/docs-twins
-ln -sfn "$PWD/skills/docs-verify" ~/.gemini/config/skills/docs-verify
-ln -sfn "$PWD/skills/follow-implementation-plan" ~/.gemini/config/skills/follow-implementation-plan
-ln -sfn "$PWD/skills/repo-docs" ~/.gemini/config/skills/repo-docs
 
 npx skills add DietrichGebert/ponytail -g --skill ponytail
 
@@ -565,4 +393,4 @@ current window. A running tmux server picks up edits to `tmux/tmux.conf` with
 `Cmd+Shift+,` — a config change does not reach already-open windows until then.
 Cursor also reads its skill directories at startup: **Developer: Reload Window**
 is enough, and the skill then appears under Customize → Skills and as
-`/paper-target` in Agent chat.
+`/commit` in Agent chat.
