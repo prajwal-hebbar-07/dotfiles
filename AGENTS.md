@@ -57,6 +57,24 @@ for work outside a skill. Keep them in any new skill.
   never replaced by a new one. Modelled on the architecture-questions
   page of 2026-11-01. The grills still write their questions files; this is
   for questions asked in chat.
+- `requirements-slides` — `/requirements-slides [path]`: publishes
+  `docs/requirements.md` as a colourful slide-deck Artifact for review (what
+  and who, what it does by theme, quality bar, limits, not doing, unsettled,
+  decided for you by the models, needs you, next). Simpler words, never a
+  changed meaning: numbers and must/never kept exactly, every ID kept.
+  Read-only on the repo; one deck per project, updated in place. Claude Code
+  only; the slides for Oh My Pi's `debate-requirements`.
+- `stack-slides` — `/stack-slides [path]`: the same for `docs/stack.md`: the
+  stack in one picture, each choice with why, its alternative, cost and way
+  out, not needed, cost overall, assumptions, decided for you, needs you,
+  next. Names, versions, prices and dates kept exactly. Claude Code only; the
+  slides for Oh My Pi's `debate-stack`.
+- `architecture-slides` — `/architecture-slides [path]`: the same for
+  `docs/architecture.md`: the shape and the alternative it beat, the module
+  map, modules, data, main flows with their failures, concerns, threats,
+  decided for you, needs you, next. The file's module words and glossary
+  terms kept. Claude Code only; the slides for Oh My Pi's
+  `debate-architecture`.
 - `brief` — `/brief <doc.md>`: reads a Markdown document plus what it links
   or cites (one level, repo docs only) and publishes one free-designed,
   visually appealing Artifact: hero with stat chips, TL;DR, decisions needed
