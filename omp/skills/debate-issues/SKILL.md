@@ -153,4 +153,4 @@ the runner running Step 3's checks and every `gh` call.
 
 `issues-rules.md` Step 7, with the readiness checklist's warnings, the
 objections the planner rebutted, and **Next action** `Start with issue #<n>
-(bootstrap): run /implement in Claude Code`. The files are uncommitted.
+(bootstrap): run /skill:debate-implement`. The files are uncommitted.
