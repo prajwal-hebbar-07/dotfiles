@@ -248,9 +248,12 @@ Rerun the link scripts after adding or removing a skill.
 **`commit`** (`/commit`, `$commit`) — stops if `user.name` or `user.email` is
 not set. Commits what is staged; when nothing is, it stages everything first.
 One commit by default; several focused commits only where the changes
-separate cleanly (`plan` previews). Each message is a semantic
-`type(scope): summary` with two or more bullets, and never carries a
-`Co-Authored-By:` or any other attribution trailer.
+separate cleanly (`plan` previews). In a new repository it instead splits
+the whole project into granular commits in build order (basics, skeleton,
+foundations, one per feature with its tests, docs, CI), never one
+`initial commit`. Each message is a semantic `type(scope): summary` with two
+or more bullets, and never carries a `Co-Authored-By:` or any other
+attribution trailer.
 
 ## Intended layout
 

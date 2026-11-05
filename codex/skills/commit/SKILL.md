@@ -4,7 +4,9 @@ description: >
   Commits the current changes as the fewest focused commits, each with a
   semantic message: a brief type(scope) subject and two or more bullets. One
   commit by default; several only where the changes really separate, so any
-  one can be reverted or cherry-picked alone. Commits what is staged; if
+  one can be reverted or cherry-picked alone. In a new repository with no
+  commit yet, splits the whole project into granular feature-by-feature
+  commits instead of one initial commit. Commits what is staged; if
   nothing is staged, stages everything first. Stops if user.name or
   user.email is not set. Never adds a Co-Authored-By or any other attribution
   trailer. Use when the user says "commit", "commit this", "$commit", "commit
@@ -22,6 +24,10 @@ one thing, without dragging along or breaking another. Work only through
 
 The default answer is **one commit**. Split only where a clean seam exists.
 Never cut a change apart to make the count bigger.
+
+The exception is a repository with no commit yet. Its history starts as the
+project built up feature by feature, one commit per unit, as many as it has
+(Step 3, **First commit**). A single `initial commit` is never the answer there.
 
 Argument: text is a hint on how to divide ("keep the docs with the skill");
 `plan` prints the plan and commits nothing; `now` is accepted and changes
@@ -48,6 +54,11 @@ nothing, since a split plan is never waited on (Step 4).
 - Say a commit builds or passes tests unless you ran something that showed it.
 - Split a file by hunk unless Step 3 says it is clean. Interactive staging
   (`git add -p`) is not available; use a patch.
+- Commit a new repository's whole project as one commit (`initial commit`,
+  `first commit`, `init`), unless Step 3's **First commit** finds it is one
+  small thing.
+- Stop after the plan or partway through it, except for `plan` or a rejected
+  hook. Every unit in the plan is committed in the same run.
 
 ## Step 1 — identity and state
 
@@ -66,6 +77,8 @@ git diff --name-only --diff-filter=U
   STOP and say so.
 - If nothing differs from `HEAD` (no staged, unstaged or untracked changes),
   STOP: there is nothing to commit.
+- If `HEAD` does not resolve, this is a **new repository**: Step 3's
+  **First commit** rules apply.
 
 ## Step 2 — scope
 
@@ -85,6 +98,13 @@ git diff --cached                       # read all of it
 ```
 
 Read the whole staged diff, not only the file names.
+
+In a new repository, check the file list for what rarely belongs in history:
+dependency or build output (`node_modules/`, `.venv/`, `dist/`, `build/`,
+`target/`), secrets (`.env`, `*.pem`, private keys, credential files), and OS
+or editor litter (`.DS_Store`, `*.swp`). If any is in scope, STOP: list it and
+say a `.gitignore` entry would keep it out. If `git add -A` ran above, unstage
+it first with the Step 5 command.
 
 ## Step 3 — find the seams
 
@@ -128,9 +148,61 @@ Order the units so each only needs ones before it: setup and refactors first,
 then the features that use them, then docs. Independent units go in the order
 that reads best.
 
-**No seam found** (one purpose, tightly woven files, a small diff, or every
-split would need many hunk cuts): the plan is one commit. Say why in one line,
-then go to Step 5 with one group.
+### First commit (no `HEAD`)
+
+In a new repository the scope is usually the whole project. Split it into the
+commits a careful author would have made while building it, so the log reads
+as the project's story and each feature can be reviewed, reverted or picked on
+its own. The default flips: one commit per unit below, as many as there are.
+One commit only when the whole project is one small thing (a single file, or a
+few files with one purpose).
+
+Map it first: list every file (`git diff --cached --name-only`), read the
+manifests, entry points, README and the imports between files, and note which
+file uses which. A file goes in the earliest unit that has everything it uses.
+
+Units, in this order, each left out when the project has none:
+
+1. `chore` — repository basics: `.gitignore`, `.gitattributes`,
+   `.editorconfig`, licence, tool-version files.
+2. `build` — the skeleton: package manifest and lockfile; build, compiler,
+   lint, format and test-runner config; the bare entry point that runs with
+   nothing in it.
+3. Foundations the rest imports: shared types, config loading, logging, error
+   handling, data schema and migrations, utilities. One commit per module with
+   its own purpose, with its tests (`feat` when it adds behaviour, `build` or
+   `chore` when it is setup).
+4. Features: one commit per feature, meaning one user-facing capability,
+   endpoint group, screen, command, or module with one job. Its code, tests,
+   fixtures, assets, styles and own config go with it. A feature that builds
+   on another comes after it. Two features never share a commit; a feature too
+   big to read in one sitting splits into its own working steps (model, then
+   logic, then interface).
+5. `test` — suites spanning several features (end-to-end, integration) and
+   shared test helpers no one feature owns. A feature's own tests stay in 4.
+6. `docs` — README, guides, architecture notes, changelog, examples.
+7. `ci` — CI workflows; `build` — container, packaging and deploy files,
+   release scripts.
+
+Shared wiring files (a router, an `index` that re-exports, an entry point that
+registers each feature, a manifest's dependency list) should give each commit
+only the lines for what it adds, so no commit points at code not yet there.
+When those lines separate cleanly (one import or registration per feature),
+stage an intermediate version of the file, working tree untouched: write the
+version to a temp file outside the repo (`mktemp`), then
+
+```sh
+git update-index --add --cacheinfo <mode>,"$(git hash-object -w <tmp>)",<path>
+```
+
+with `<mode>` the file's own (`100644`, or `100755` if executable). The last
+unit that touches the file stages it with `git add`. When the lines are
+interwoven, the whole file goes in the latest unit it needs; say so under
+"Kept together". A lockfile is never split.
+
+**No seam found** (in a repository with commits: one purpose, tightly woven
+files, a small diff, or every split would need many hunk cuts): the plan is
+one commit. Say why in one line, then go to Step 5 with one group.
 
 ## Step 4 — plan
 
@@ -151,8 +223,9 @@ with a file split by hunk says which hunks.
 - Argument `plan`: print it (also for one unit) and stop. Change nothing in
   the index. If `git add -A` ran in Step 2, unstage it again with the Step 5
   command and stop.
-- Otherwise (including `now`) go on to Step 5 without waiting. The user can
-  steer a split with a hint argument beforehand, not with a confirmation.
+- Otherwise (including `now`) go on to Step 5 without waiting, and commit
+  every unit in the plan in this run. The user can steer a split with a hint
+  argument beforehand, not with a confirmation.
 
 ## Step 5 — commit each unit
 
@@ -175,6 +248,8 @@ Then for each unit in order:
      `git apply --cached --recount <patch>`. Take the hunks from a fresh
      `git diff -- <file>` each time, since earlier units change what is left.
      The last unit that touches the file stages the rest with `git add`.
+   - An intermediate version of a new file (Step 3, **First commit**):
+     `git update-index --cacheinfo` as shown there.
 2. `git diff --cached --stat` and confirm it is the unit and nothing else.
 3. **Message.** Read the staged diff, and only the staged diff
    (`git diff --cached`), and write:
@@ -193,7 +268,11 @@ Then for each unit in order:
      `perf`, `test`, `style`, `build`, `ci`, `chore`, or `revert`. `docs` only
      when every staged file is prose.
    - `scope` is optional: the top-level directory that changed (`zsh`,
-     `codex`). Drop it when the change spans the repo.
+     `codex`). Drop it when the change spans the repo. In a new repository,
+     where one directory holds everything, name the module or feature
+     (`auth`, `cli`) instead.
+   - Never `initial commit` or `first commit`: say what the unit adds
+     (`build: scaffold vite react app`, `feat(auth): add password sign-in`).
    - Imperative ("add", not "added"), lowercase after the colon, no trailing
      period, 72 characters or fewer.
 
@@ -260,9 +339,9 @@ git status --short
 - Nothing that was in scope may still show as modified; out-of-scope changes
   may.
 
-Report in at most eight lines (five for one commit):
+Report in at most eight lines (five for one commit), plus one per commit:
 
-- the commits, newest last, short sha and subject
+- the commits, newest last, short sha and subject, every one of them
 - that the final tree matches (or what does not)
 - what was kept together and why, if the user might have expected a split
 - whether everything was staged by this skill, and what is left uncommitted
