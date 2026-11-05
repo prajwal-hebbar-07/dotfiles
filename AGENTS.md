@@ -31,7 +31,7 @@ syntax, metadata and tool instructions. Claude's explicit-only skills use
 `policy.allow_implicit_invocation: false` in Codex's `agents/openai.yaml`.
 
 Every skill that builds, reviews or asks carries two rules in its `Never`
-list (added 2026-11-02, in Claude, Codex and Oh My Pi alike): do only what
+list (added 2026-11-02, in Claude and Codex alike): do only what
 the request needs (no over-engineering; a useful extra is named, not done;
 reviewers never ask for more than the documents need), and never ask what is
 already settled (read documents, answer logs and chat first; write each
@@ -63,18 +63,16 @@ for work outside a skill. Keep them in any new skill.
   decided for you by the models, needs you, next). Simpler words, never a
   changed meaning: numbers and must/never kept exactly, every ID kept.
   Read-only on the repo; one deck per project, updated in place. Claude Code
-  only; the slides for Oh My Pi's `debate-requirements`.
+  only.
 - `stack-slides` — `/stack-slides [path]`: the same for `docs/stack.md`: the
   stack in one picture, each choice with why, its alternative, cost and way
   out, not needed, cost overall, assumptions, decided for you, needs you,
-  next. Names, versions, prices and dates kept exactly. Claude Code only; the
-  slides for Oh My Pi's `debate-stack`.
+  next. Names, versions, prices and dates kept exactly. Claude Code only.
 - `architecture-slides` — `/architecture-slides [path]`: the same for
   `docs/architecture.md`: the shape and the alternative it beat, the module
   map, modules, data, main flows with their failures, concerns, threats,
   decided for you, needs you, next. The file's module words and glossary
-  terms kept. Claude Code only; the slides for Oh My Pi's
-  `debate-architecture`.
+  terms kept. Claude Code only.
 - `brief` — `/brief <doc.md>`: reads a Markdown document plus what it links
   or cites (one level, repo docs only) and publishes one free-designed,
   visually appealing Artifact: hero with stat chips, TL;DR, decisions needed
@@ -167,9 +165,9 @@ leading number or `#<n>`. State is in `docs/features/<n>-<slug>/`
 `glossary.md`, `grill/`, `review/`), kept out of git through
 `.git/info/exclude`, so they are the only copy of the plan (remove the line
 and commit them to keep or share it). The issue is read, never written. `/issues` and
-`/release` are whole-app and not part of it. `/qa`, `$qa` and `/skill:live-qa`
-are the user's to run by hand once the feature is built: on the feature's branch
-they switch to a feature mode, and nothing in the flow starts or waits for them.
+`/release` are whole-app and not part of it. `/qa` and `$qa` are the user's
+to run by hand once the feature is built: on the feature's branch they switch
+to a feature mode, and nothing in the flow starts or waits for them.
 There is no grill of the code; the review is enough.
 
 - `feature` — `/feature`: reads the issue and what the app does today (`T`
@@ -349,24 +347,6 @@ commands (which also check the code); change one, change the rest.
   mechanics as `review-code`; change one, change the other. Available in both
   Claude Code and Codex (`$qa`); Codex labels `/issues qa` and `/implement`
   as Claude Code handoffs and files no issues.
-- `live-qa` — `/skill:live-qa`, **Oh My Pi only** (`omp/skills/live-qa/`,
-  linked into `~/.omp/agent/skills/` by `omp/link-skills`; not in the Claude
-  Code or Codex skill directories, and `qa`/`$qa` tell those hosts never to run
-  the app). Starts the app on its own port and empty data, drives the
-  journeys, flows, failure paths and abuse cases in a browser it opens itself,
-  checks what was stored, console, network, keyboard and focus, and compares
-  every screen state with its Paper board through the Paper read tools (size,
-  tokens, computed styles, words, pixel diff, a look at the hot regions). Also
-  settles `/qa`'s `manual` and `not judged` rows. Appends ranked findings
-  (prefix `LQ`, routes as `qa`) to `docs/review/live-qa-report.md` with
-  evidence in `qa-evidence/<sha>/`; `/issues qa` files them and `/implement`
-  fixes them. On a `/feature` branch it runs that feature from its stage files,
-  adds `RK`, data from before the feature and the `· today` boards, and writes to
-  `docs/features/<key>/review/`; findings go to `/implement fix`. Same dispute
-  round as the reviews. Never edits code or the
-  design, and never touches production. Its steps name the browser, `eval`
-  and Paper tools as last known from the old factory agents, not re-checked
-  against the current Oh My Pi.
 - `release` — `/release [version]`: the last gate, from files and GitHub only.
   Checks every issue done, everything in the coverage table built, `/qa`
   ready on the current default-branch commit, code reviews clear, stage
@@ -392,10 +372,10 @@ have no advisor and need none.
 the one Paper file and page a project uses, so several sessions or open tabs
 cannot pull design work onto the wrong file. Resolves them through the Paper MCP
 and writes a marked block into the repository's `AGENTS.md` / `CLAUDE.md`, read
-by `design`, `feature-design`, `review-design`, `review-feature` and `live-qa`,
+by `design`, `feature-design`, `review-design` and `review-feature`,
 which pass both ids on their calls instead of following the focus. `show` and
 `clear`. Never draws or commits. It has no advisor section: nothing in it is a
-judgement. Oh My Pi has no copy; `live-qa` only reads the block.
+judgement.
 
 - `commit` — commits already-staged changes with a semantic message.
 - `paper-target` — the older Cursor and Gemini copy: pins the Paper file/page this
@@ -437,153 +417,6 @@ sources into `skills/` — the installer owns updates.
 The skill directory was otherwise cleared on 2026-09-19 to start over; the old
 set is described in `SKILLS.md` at the repo root (also in git history). List
 new skills here.
-
-## Oh My Pi
-
-`omp/` was removed on 2026-10-27 with the software factory and restarted with
-one skill. `omp/skills/<name>/SKILL.md` are linked into
-`~/.omp/agent/skills/`, and `omp/agents/<name>.md` (task agents that pin a
-model in their frontmatter) into `~/.omp/agent/agents/`, by `omp/link-skills`;
-rerun it after adding or removing one. It prunes only its own broken links and
-refuses to replace another skill or agent. Invoke with `/skill:<name>`.
-
-- `debate-requirements` — `/skill:debate-requirements`: `/requirements`,
-  `/grill-requirements` and `/review-requirements` in one loop, with models
-  answering first; it stops only for the user's answers, and ends at
-  `grilled` with an `approve-ready` review and a confirm round, for the
-  user's own `approve`. Haiku 5.5 medium captures, drafts each round, folds
-  answers in and responds to the review; Sonnet 5.5 medium challenges each
-  question (one objection, one reply); GPT-6 Luna medium (`openai-codex`)
-  rules on what is still disputed or left for the user, and runs the
-  fresh-eyes check; Opus 5.5 medium reviews, and the review's disputes are
-  settled by its response and rejoinder rules before the user sees what is
-  left. A question is settled by the models only with a quoted source (the
-  user's words, the repo, a URL) the runner checks; a best-practice answer is
-  pre-filled for the user to skim; the rest, and anything about intent,
-  scope, money or legal risk, is the user's. Writes the same files as the
-  Claude Code trio, plus `docs/grill/requirements-debate.md` (the models'
-  notes). The four models are the agents `debate-drafter`,
-  `debate-challenger`, `debate-tiebreaker` and `debate-reviewer` in
-  `omp/agents/`, so no per-call model setting is needed. Its rules are the
-  Claude Code skills themselves, linked into its directory as
-  `capture-rules.md`, `grill-rules.md` and `review-rules.md` with their
-  templates, so a change there carries over.
-- `debate-stack` — `/skill:debate-stack`: the same loop for the stack,
-  replacing `/stack`, `/grill-stack` and `/review-stack`. Needs requirements
-  `grilled` or `approved`. The first proposal is a debate too: Haiku
-  proposes, Sonnet argues each hard-to-reverse alternative and checks every
-  fact, Luna rules on disputes, the runner reads every fact's source. Then
-  the grill (frontier, simplicity sweep, pre-mortem, fresh-eyes), the Opus
-  review, and the confirm round. Models never set `settled` (only a lock
-  answer does), never pre-fill a hard-to-reverse lock, money, the user's
-  accounts or skills, or a `Fixed by` change, and never edit the
-  requirements: a gap goes to the user as a `/skill:debate-requirements`
-  change. Same four agents. Its mechanics are `debate-requirements`'s
-  `SKILL.md`, linked as `debate-rules.md` with a table of names, plus the
-  Claude Code stack trio linked as `stack-rules.md`, `grill-rules.md` and
-  `review-rules.md` with their templates; a change to `debate-requirements`
-  carries over.
-- `debate-architecture` — `/skill:debate-architecture`: the same loop for
-  the architecture, replacing `/architecture`, `/grill-architecture` and
-  `/review-architecture`, between three models only, its own agents in
-  `omp/agents/`: `arch-architect` (Opus 5.5 medium) proposes, drafts each
-  round, folds answers in and responds to the review; `arch-answerer` (Opus
-  5.5 high) designs the structurally different shape cold, challenges every
-  item and answers or sorts every question; `arch-reviewer` (GPT-6.1 Sol,
-  `openai-codex`) runs the cold fresh-eyes check and the review. No
-  tiebreaker: what is still disputed after the architect's one reply goes to
-  the user. Needs requirements and stack `grilled` or `approved`. Models
-  never set `settled`, never pre-fill the lock of the shape, data ownership,
-  consistency or permission model, money, or a `Fixed by` change, and never
-  edit the requirements or stack: a gap goes to the user as a
-  `/skill:debate-requirements` or `/skill:debate-stack` change. Debate
-  blocks are `P<N>.<k>` here, since the grill's questions are `D<N>.<k>`.
-  Same linking as `debate-stack`, with the Claude Code architecture trio.
-  The three `approve`s hand on in Oh My Pi: requirements to
-  `/skill:debate-stack`, stack to `/skill:debate-architecture`, architecture
-  to `/skill:debate-design`.
-- `debate-design` — `/skill:debate-design [brief <text>]`: the same loop for
-  the design, replacing `/design`, `/grill-design`, `/design build` and
-  `/review-design`, with its own four agents in `omp/agents/`:
-  `design-designer` (Sonnet 5.5 medium) proposes, answers the grill, folds
-  answers in and responds to the review; `design-griller` (Opus 5.5 medium)
-  designs the alternative idea cold, grills, and runs the fresh-eyes check as
-  a new task given only the file paths; `design-builder` (GPT-6 Astra medium,
-  `openai-codex`) draws the grilled design in Paper by `paper-build.md`, with
-  the guide pasted into its task, whole-screen boards for every state and no
-  notes, checked by the runner after each build; `design-reviewer` (Kimi K2.6
-  high, `ollama-cloud`) reviews the file and the boards (Paper read tools
-  only). A board that does not match the file goes back to the builder as
-  `stale`. Every run starts with a readiness checklist: requirements, stack
-  and architecture `grilled` or `approved`, nothing open or stale, the agents
-  linked, and a Paper pin (`/paper-target` in Claude Code) with Paper
-  answering; the last two block only the build. Order: propose, grill,
-  confirm, build, review, `approve`. Models never settle or pre-fill the
-  idea, feel, moments, a brief item or money, never grill the visual
-  direction, and never edit earlier stages. Same linking as `debate-stack`,
-  with the Claude Code design trio and `paper-build.md`.
-- `debate-issues` — `/skill:debate-issues [status | sync | qa | change]`:
-  Claude Code's `/issues` in Oh My Pi, its rules linked as
-  `issues-rules.md` with its templates, `slicing.md` and `principles.md`.
-  Starts with a readiness checklist (all four stages `approved`, every
-  screen built, nothing open or stale, the agents linked, `gh` ready, which
-  blocks only publishing; ponytail installed, a warning). `issues-planner`
-  (Opus 5.5 medium) cuts and writes the plan and the issues;
-  `issues-checker` (GPT-6.1 Sol, `openai-codex`) challenges the cut once and
-  reads each issue cold, five at a time, as its implementer; a rebutted
-  objection and an unanswered gap become open points, never questions. The
-  runner runs `/issues`' checks and publishes with `gh` (epic, sub-issues,
-  blocked-by, markers). Writes the same files plus
-  `docs/issues-debate.md`. `debate-design`'s `approve` hands on to it, and
-  it hands on to `debate-implement`.
-- `debate-implement` — `/skill:debate-implement [status | <key or #n>]`:
-  Claude Code's `/implement` in one run, rules linked as
-  `implement-rules.md`, `commit-rules.md` and `principles.md`. Readiness
-  checklist, then the tracker (`docs/progress.md`, plus a `## Log` of every
-  pick, branch and build) picks the first issue not done; it
-  makes the branch, `code-builder` (Opus 5.5 medium) builds it test first in
-  ponytail's full mode, or `code-builder-high` (Opus 5.5 high) when the
-  issue is labelled security, spans three or more modules or two flows with
-  failures, has more than eight criteria, or medium failed. No grill and no
-  review of any kind (removed 2026-11-05 at the user's call: no reviewer, no
-  report, no `fix`): the runner checks the commits, the tests and the map
-  itself. Each issue also
-  creates or updates `docs/codebase.md` (from the skill's
-  `codebase-template.md`: layout, modules, data, tests, commands, where to
-  change what; every path checked to exist) and a marked `codebase-map`
-  block in the app's `AGENTS.md` pointing to it. Never pushes or opens the
-  PR: hands over the branch and a PR description; the user merges and runs
-  it again.
-- `debate-qa` — `/skill:debate-qa [status | <focus>]`: Claude Code's `/qa`
-  rules (linked as `qa-rules.md`) plus the tests it finds missing. No manual
-  checks: what only a person can judge is listed as not judged. Readiness
-  checklist (on an up-to-date default branch, at least one issue done, no
-  unmerged earlier `qa/*` branch, ponytail and the agents, a test command).
-  `qa-auditor` (GPT-6.1 Sol) builds the matrix, with each row's test kind
-  (unit, integration, journey, regression: every merged fix pinned by a
-  test), runs every test command twice; `qa-tester` (Opus 5.5 medium) writes
-  the missing and weak tests on `qa/<N>-tests`, test files only, each seen to
-  pass and then to fail with the guarded code broken; a test that fails on
-  the current code is a defect, left out and reported. Sol re-audits the
-  branch. Never touches app code, pushes or opens the PR; defects go to
-  `/skill:debate-issues qa` and `/skill:debate-implement`.
-- `local-artifact` — model-invoked: Oh My Pi's stand-in for Claude
-  Artifacts, built fresh for whatever the user asks each time. Writes one
-  self-contained page (no network) to `~/artifacts/<slug>/index.html` and runs
-  `open <slug>`, which starts `serve.mjs` on `127.0.0.1:4317` when it is not
-  already running and opens the page in Brave. The server injects
-  `runtime.js`: a Firestore-style `window.claude.use("db")` saved to
-  `~/artifacts/<slug>/data.json`, which the agent reads back like
-  `ArtifactData`. It also reloads the open page when its files change and
-  pushes outside edits to `data.json` into the page live. No dependencies
-  beyond Node.
-
-The Paper MCP server is configured in `omp/mcp.json` as a stdio server running
-`${HOME}/.paper/bin/paper mcp`; the same file is copied to
-`~/.omp/agent/mcp.json` so Oh My Pi discovers it at user scope. In an `omp`
-session run `/mcp list` and `/mcp test paper` to verify the connection.
-Paper Desktop must be running for the tools to do work; starting it is the
-user's step, never the skill's.
 
 ## Cursor skills
 

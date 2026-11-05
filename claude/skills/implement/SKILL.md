@@ -50,7 +50,7 @@ Files, all in the app repo (git root, else the current directory):
 | the GitHub issue | The issue body is the brief. Read with `gh issue view` |
 | `docs/review/code/<key>-review.md` | Review findings on the branch. Read; the only thing written here is a `Response:` line under a finding (Step 6). Never committed |
 | `docs/requirements.md`, `docs/architecture.md`, `docs/stack.md`, `docs/design.md`, `docs/glossary.md` | Read only, to check an unclear point against its source. Never edited |
-| `docs/features/<key>/` | **Feature mode** only: the approved stage files (`requirements.md`, `architecture.md`, `design.md`), read only, which are the brief, and `tracker.md`, whose Build row, **Built from**, **Next action** and log this skill writes instead of `docs/progress.md`; and its `review/code-review.md`, `review/qa-report.md` and `review/live-qa-report.md`, `Response:` lines only |
+| `docs/features/<key>/` | **Feature mode** only: the approved stage files (`requirements.md`, `architecture.md`, `design.md`), read only, which are the brief, and `tracker.md`, whose Build row, **Built from**, **Next action** and log this skill writes instead of `docs/progress.md`; and its `review/code-review.md` and `review/qa-report.md`, `Response:` lines only |
 
 ## Never
 
@@ -296,13 +296,13 @@ off) is Steps 4 to 7, unchanged except as listed here.
    Never create `docs/progress.md` in this mode.
 6. **Hand-off.** As Step 7, without a next issue: "Review it: `/review-code`
    here, or `$review-code` in Codex. QA is yours to run when you choose, on this
-   branch: `/qa` or `$qa`, and `/skill:live-qa` in Oh My Pi. Raise the PR yourself
+   branch: `/qa` or `$qa`. Raise the PR yourself
    when you are happy (`Closes #<n>`), and merge it." The PR description is the same, and its
    summary names the feature's stage files as the plan.
 7. **Findings.** Step 6 reads whichever of the feature's reports exist, in
    `docs/features/<key>/review/`, in place of `docs/review/code/<key>-review.md`:
-   `code-review.md`, `qa-report.md` and `live-qa-report.md`. `Response:` lines go
-   there, and a commit names its finding (`fixes QA2`). In the two QA reports it
+   `code-review.md` and `qa-report.md`. `Response:` lines go
+   there, and a commit names its finding (`fixes QA2`). In the QA report it
    takes route `fix`; a finding routed to a stage command is not built, and the
    hand-off names that command. The last paragraph of Step 6 (a `qa` issue) does
    not apply.
@@ -420,8 +420,8 @@ disputed for the user. Do not edit anything else in the report. Then hand off
 (Step 7) and stop. In the hand-off list the findings by `Response:`: accepted,
 rebutted and intent.
 
-A `qa` issue's finding lives in `docs/review/qa-report.md` or
-`docs/review/live-qa-report.md`, named in the issue's **Raised by QA** section. If building it shows the finding is wrong,
+A `qa` issue's finding lives in `docs/review/qa-report.md`, named in the
+issue's **Raised by QA** section. If building it shows the finding is wrong,
 build nothing for it: write `Response: rebutted — <evidence>` (or `intent —
 <the question>`) under that finding there, say so in the hand-off, and stop.
 When the issue is built, write `Response: accepted — built in #<n>, <short

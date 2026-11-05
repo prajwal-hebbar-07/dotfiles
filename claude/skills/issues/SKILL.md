@@ -293,12 +293,10 @@ to fix.
 built, reviewed and merged by the same loop as every other issue. Run straight
 through; nothing waits for the user.
 
-1. **Select.** Read `docs/review/qa-report.md` and `docs/review/live-qa-report.md`
-   (the app run by Oh My Pi; prefix `LQ`, `Live QA N`); neither: stop, run
-   `/qa`. Take every finding in either with status `open` and route `issue` or a
-   stage command
+1. **Select.** Read `docs/review/qa-report.md`; missing: stop, run `/qa`.
+   Take every finding with status `open` and route `issue` or a stage command
    (`/requirements`, `/stack`, `/architecture`, `/design`) that has no issue yet:
-   search the issue bodies for `<!-- issues:finding=<ID> -->` (`QA3`, `LQ2`) as in
+   search the issue bodies for `<!-- issues:finding=<ID> -->` (`QA3`) as in
    Step 4.3.
    Route `manual` is not filed; it stays in the report and in `/release`'s
    manual checks. Minor and nit findings are filed only if the user asks.
@@ -314,7 +312,7 @@ through; nothing waits for the user.
    ```
    ## Raised by QA
 
-   - Found by: QA <N> or Live QA <N>, <date>, finding <ID>, severity <s>, <confirmed | likely>
+   - Found by: QA <N>, <date>, finding <ID>, severity <s>, <confirmed | likely>
    - Kind: <missing test | weak test | defect | flake | skipped test | document gap>
    - Where: <the item IDs and the file:line the finding cites>
    - In one line: <what is wrong, in the finding's words>

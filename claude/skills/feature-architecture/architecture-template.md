@@ -33,8 +33,6 @@ it does not redesign them.
 - Test: `<command>` · Lint: `<command>` · Type check: `<command>` · Build:
   `<command>` (`<where each was found>`). A command the repository does not
   have is written `none`.
-- Start: `<command>` · Seed: `<command>` · Health check: `<route or log line>` ·
-  Stop: `<how>` (`<where each was found>`), for `/skill:live-qa`, or `none`.
 
 ### As-is diagram
 

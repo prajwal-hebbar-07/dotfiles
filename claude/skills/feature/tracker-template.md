@@ -20,7 +20,6 @@ Issue: #<n> · Branch: <branch>
 | Design | not started | [design.md](design.md) | | |
 | Build | not started | <branch> | | |
 | QA | not run | [review/qa-report.md](review/qa-report.md) | | |
-| Live QA | not run | [review/live-qa-report.md](review/live-qa-report.md) | | |
 
 Requirements status moves `capturing` → `captured` → `grilling` → `grilled`
 → `approved`. Architecture and design move `not started` → `proposed` →
@@ -30,9 +29,9 @@ the user runs its `approve` command. `/review-feature <stage>` never changes a
 status; its verdict goes in the Review column and **Next action**. Build
 status, written by `/implement`, moves `not started` → `in progress` →
 `awaiting review` → `done` (the pull request merged); its Review cell is written
-by `/review-code` or `$review-code`. QA (`/qa`, `$qa`) and Live QA
-(`/skill:live-qa`) move `not run` → `run` when you run them, with the verdict in
-Review; no stage starts them or waits for them.
+by `/review-code` or `$review-code`. QA (`/qa`, `$qa`) moves `not run` →
+`run` when you run it, with the verdict in Review; no stage starts it or
+waits for it.
 
 Built from (set by `/implement` when it starts, to notice a stage changed
 since): requirements <hash> · architecture <hash> · design <hash | n/a>

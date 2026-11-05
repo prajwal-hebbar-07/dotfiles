@@ -33,11 +33,10 @@ and the screens the app already has.
 | Design | `/feature-design` (and `build` in Paper) | `/grill-feature design`, `/review-feature design` |
 | Build | `/implement` on the branch | `/review-code`, `$review-code` |
 | QA | `/qa` or `$qa`, by hand once built | none |
-| Live QA | `/skill:live-qa` in Oh My Pi, by hand once built | none |
 
 Requirements, architecture and design each have their own `approve`.
 `$grill-feature <stage>` and `$review-feature <stage>` are the Codex grill and
-reviewer. Nothing starts or waits for QA or Live QA. This skill owns the requirements and the tracker. The issue is
+reviewer. Nothing starts or waits for QA. This skill owns the requirements and the tracker. The issue is
 read, never written: it stays as whoever opened it wrote it, and the approved
 stage files are what `/implement` builds from and `/review-code` reviews
 against.
@@ -56,7 +55,7 @@ skill's directory: `requirements-template.md`, `tracker-template.md`.
 | `docs/features/<key>/architecture.md`, `design.md` | Read only here, for `status` |
 | `docs/features/<key>/glossary.md` | The feature's terms, written by the grill. Read only here |
 | `docs/features/<key>/review/requirements-review.md` | Requirements review findings. Here only `Response:` lines (respond mode) |
-| `docs/features/<key>/review/code-review.md`, `qa-report.md`, `live-qa-report.md` | Read only here, for `status` |
+| `docs/features/<key>/review/code-review.md`, `qa-report.md` | Read only here, for `status` |
 | the GitHub issue `#<n>` | The request. Read only |
 | the repository's code, docs, manifests | Read only |
 
@@ -175,7 +174,7 @@ Requirements: <status> · R<n> N<n> C<n> X<n> · Q<n> open · review <verdict or
 Architecture: <status> · M<n> E<n> F<n> K<n> B<n> RK<n> · AQ<n> open · review <verdict or none>
 Design: <status> · J<n> S<n> (built <b>) P<n> · DQ<n> open · review <verdict or none>
 Build: <status> · review <verdict or none>
-QA: <verdict or not run> · Live QA: <verdict or not run>
+QA: <verdict or not run>
 Next: <Next action from tracker.md>
 Last: <last log line>
 ```
