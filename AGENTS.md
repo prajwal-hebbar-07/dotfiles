@@ -554,6 +554,19 @@ refuses to replace another skill or agent. Invoke with `/skill:<name>`.
   block in the app's `AGENTS.md` pointing to it. Never pushes or opens the
   PR: hands over the branch and a PR description; the user merges and runs
   it again.
+- `debate-qa` — `/skill:debate-qa [status | <focus>]`: Claude Code's `/qa`
+  rules (linked as `qa-rules.md`) plus the tests it finds missing. No manual
+  checks: what only a person can judge is listed as not judged. Readiness
+  checklist (on an up-to-date default branch, at least one issue done, no
+  unmerged earlier `qa/*` branch, ponytail and the agents, a test command).
+  `qa-auditor` (GPT-6.1 Sol) builds the matrix, with each row's test kind
+  (unit, integration, journey, regression: every merged fix pinned by a
+  test), runs every test command twice; `qa-tester` (Opus 5.5 medium) writes
+  the missing and weak tests on `qa/<N>-tests`, test files only, each seen to
+  pass and then to fail with the guarded code broken; a test that fails on
+  the current code is a defect, left out and reported. Sol re-audits the
+  branch. Never touches app code, pushes or opens the PR; defects go to
+  `/skill:debate-issues qa` and `/skill:debate-implement`.
 
 The Paper MCP server is configured in `omp/mcp.json` as a stdio server running
 `${HOME}/.paper/bin/paper mcp`; the same file is copied to
