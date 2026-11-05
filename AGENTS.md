@@ -536,21 +536,24 @@ refuses to replace another skill or agent. Invoke with `/skill:<name>`.
   blocked-by, markers). Writes the same files plus
   `docs/issues-debate.md`. `debate-design`'s `approve` hands on to it, and
   it hands on to `debate-implement`.
-- `debate-implement` — `/skill:debate-implement [status | fix | <key or #n>]`:
-  Claude Code's `/implement` and `/review-code` in one run, rules linked as
-  `implement-rules.md`, `review-rules.md`, `commit-rules.md` and
-  `principles.md`. Readiness checklist, then the tracker
-  (`docs/progress.md`, plus a `## Log` of every pick, branch, build, review
-  and fix round) picks the first issue not done; it makes the branch,
-  `code-builder` (Opus 5.5 medium) builds it test first in ponytail's full
-  mode, or `code-builder-high` (Opus 5.5 high) when the issue is labelled
-  security, spans three or more modules or two flows with failures, has
-  more than eight criteria, or medium failed; `code-reviewer` (GPT-6.1 Sol,
-  `openai-codex`) reviews, counting reinvented or duplicated code as major;
-  the builder fixes and Sol re-reviews until `approve-ready`, only the
-  user's decisions are left, a round changes nothing, or five rounds. No
-  grill. Never pushes or opens the PR: hands over the branch and a PR
-  description; the user merges and runs it again.
+- `debate-implement` — `/skill:debate-implement [status | <key or #n>]`:
+  Claude Code's `/implement` in one run, rules linked as
+  `implement-rules.md`, `commit-rules.md` and `principles.md`. Readiness
+  checklist, then the tracker (`docs/progress.md`, plus a `## Log` of every
+  pick, branch and build) picks the first issue not done; it
+  makes the branch, `code-builder` (Opus 5.5 medium) builds it test first in
+  ponytail's full mode, or `code-builder-high` (Opus 5.5 high) when the
+  issue is labelled security, spans three or more modules or two flows with
+  failures, has more than eight criteria, or medium failed. No grill and no
+  review of any kind (removed 2026-11-05 at the user's call: no reviewer, no
+  report, no `fix`): the runner checks the commits, the tests and the map
+  itself. Each issue also
+  creates or updates `docs/codebase.md` (from the skill's
+  `codebase-template.md`: layout, modules, data, tests, commands, where to
+  change what; every path checked to exist) and a marked `codebase-map`
+  block in the app's `AGENTS.md` pointing to it. Never pushes or opens the
+  PR: hands over the branch and a PR description; the user merges and runs
+  it again.
 
 The Paper MCP server is configured in `omp/mcp.json` as a stdio server running
 `${HOME}/.paper/bin/paper mcp`; the same file is copied to
