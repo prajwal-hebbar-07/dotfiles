@@ -624,6 +624,8 @@ alias t=tmux
 alias ta='tmux attach -t'
 alias tl='tmux list-sessions'
 
+alias lb=logbook
+
 # Claude Code — one config directory per account, so the login, sessions,
 # skills, and MCP servers never cross. `cc` is hebbarprajwal72@gmail.com
 # (~/.claude). `ccw` is prajwal.chaos@gmail.com (~/.claude-work).
