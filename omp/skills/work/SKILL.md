@@ -1,12 +1,12 @@
 ---
 name: work
-description: Create an evidence-backed implementation plan in docs/implementation-plan.md, wait for explicit user approval, then implement and verify only the approved changes. Use when the user wants to review a plan before code changes.
+description: Create a developer-facing, evidence-backed implementation plan in docs/implementation-plan.md, wait for explicit user approval, then implement and verify only the approved changes as the smallest complete change that reuses existing code. Use when the user wants to review a plan before code changes.
 disable-model-invocation: true
 ---
 
 # work
 
-Turn an implementation request into a reviewable Markdown plan. Do not change the product, source, tests, configuration, dependencies, or user documentation until the user explicitly approves that plan. After approval, implement the approved plan, verify the changed behavior, and record the result in the same document.
+Turn an implementation request into a reviewable Markdown plan written for the developer: what will change, how it works, and which existing code it reuses. Do not change the product, source, tests, configuration, dependencies, or user documentation until the user explicitly approves that plan. After approval, implement the approved plan as the smallest complete change, verify the changed behavior, and record the result in the same document.
 
 Invoke explicitly as `/skill:work [request]`.
 
@@ -20,6 +20,28 @@ Invoke explicitly as `/skill:work [request]`.
 - Expand the approved scope while implementing. A necessary material deviation requires a plan update and new approval.
 - Leave stubs, placeholders, fake fallbacks, disabled checks, or unfinished plan items.
 - Commit unless the user separately requests a commit.
+- Write code that duplicates an existing helper, component, service, pattern, or dependency. Reuse or extend the shared code instead.
+- Add a wrapper, option, configuration, type conversion, boilerplate, or "for later" code nobody asked for.
+
+## Code style — smallest complete change
+
+Adapted from [ponytail](https://github.com/DietrichGebert/ponytail) (MIT) so this skill works whether or not ponytail is installed or active.
+
+Apply this to both the plan and the implementation. For each needed piece, take the first option that fully works:
+
+1. **Does it need to exist?** Drop anything the request does not need; name it once under `Not included`.
+2. **Already in this repository?** Reuse the existing helper, component, service, or pattern the way surrounding code uses it.
+3. **Standard library or platform feature?** Use it, unless the repository has its own equivalent.
+4. **Installed dependency?** Use it. Never add a dependency for a few lines.
+5. **Otherwise** write the minimum new code, following the repository's existing structure, layers, and conventions.
+
+- Deletion beats addition; the shortest diff that reaches every affected caller, test, fixture, config, and export wins. A dense one-liner that needs decoding is not short.
+- Fix bugs once at the root in shared code after finding every caller, not per call site.
+- Moved or merged code keeps its error handling and validation.
+- Between options of equal size, take the one correct on edge cases.
+- Comment only the why the code cannot show. A shortcut with a known limit gets `shortcut: <limit>, <when to upgrade>`.
+- New non-trivial logic (a branch, loop, parser, money or security path, or a new script) gets one small test or assert-based self-check; trivial changes need none.
+- Never cut validation at trust boundaries, error handling that prevents data loss, security, accessibility, or anything the user asked for.
 
 ## Approval contract
 
@@ -44,7 +66,7 @@ Read the invocation and settled chat context. Then read only the repository evid
 - affected source, tests, documentation, and every call site of an exported symbol that would change;
 - authoritative external documentation only when repository evidence cannot establish a required API or constraint.
 
-Run the current behavior when practical if the request fixes or changes an observable path. Record observed facts, not assumptions. Do not edit implementation files during this step.
+Before proposing new code, search the repository for existing helpers, components, services, patterns, and installed dependencies that already do the job or can be extended, and record what you found. Run the current behavior when practical if the request fixes or changes an observable path. Record observed facts, not assumptions. Do not edit implementation files during this step.
 
 Classify uncertainty:
 
@@ -64,6 +86,10 @@ Create or update `docs/implementation-plan.md`. Preserve no stale content from a
 Status: Awaiting approval
 Updated: YYYY-MM-DD
 
+## Summary
+
+<3–6 sentences for the developer: what will change, how it works end to end, and the key design choice>
+
 ## Request
 
 <concise statement of the requested outcome and explicit exclusions>
@@ -75,6 +101,11 @@ Updated: YYYY-MM-DD
 ## Proposed implementation
 
 1. <ordered change, naming the file or component and exact responsibility>
+
+## Reuse
+
+- `path:symbol` — <existing code, platform feature, or installed dependency reused, and for what>
+- New code: <each piece of new code and why nothing existing covers it>
 
 ## Files affected
 
@@ -92,12 +123,16 @@ Updated: YYYY-MM-DD
 
 - <only concrete risks, assumptions, or unavailable runtime proof>
 
+## Not included
+
+- <useful extra deliberately left out, one line each>
+
 ## Open decisions
 
 - <only unresolved user decisions>
 ```
 
-Omit empty sections except `Request`, `Proposed implementation`, `Files affected`, and `Verification`. The plan must be specific enough that approval authorizes one bounded implementation: name affected files or explicitly bounded discovery work, behavior changes, migration or compatibility effects, and proof of completion. Do not paste speculative code or restate entire source files.
+Omit empty sections except `Summary`, `Request`, `Proposed implementation`, `Reuse`, `Files affected`, and `Verification`. If nothing is reusable, say what was searched under `Reuse`. The plan must be specific enough that approval authorizes one bounded implementation: name affected files or explicitly bounded discovery work, behavior changes, migration or compatibility effects, and proof of completion. Do not paste speculative code or restate entire source files.
 
 Writing or revising this Markdown document is the only mutation allowed before approval. Reply with the path, a one-sentence scope, the number of implementation steps and open decisions, and ask the user to approve or request changes. Do not repeat the document in chat. Stop without implementing.
 
@@ -116,7 +151,7 @@ Minor line movement or implementation detail that preserves the approved behavio
 
 ## Step 4 — implement the approved plan
 
-Follow the plan in order while adapting to repository conventions. Update every affected caller, test, configuration file, and user-facing document required by the approved cutover. Remove code made obsolete by the approved change; do not retain compatibility shims unless the plan explicitly requires them.
+Follow the plan in order and the code style above while adapting to repository conventions. Update every affected caller, test, configuration file, and user-facing document required by the approved cutover. Remove code made obsolete by the approved change; do not retain compatibility shims unless the plan explicitly requires them. Reusing existing code found during implementation, where it preserves the approved behavior and makes the diff smaller, is not a material deviation; record it under `Reuse`.
 
 If implementation exposes a new material decision or requires a material deviation, finish any independently safe work, update the plan with the finding, set it back to `Awaiting approval`, and stop before the unapproved change. Do not choose for the user.
 
@@ -133,4 +168,4 @@ After successful implementation:
 
 If a check fails because of the implementation, fix it before closing. If completion is blocked by an external prerequisite, keep the status `Approved`, record the exact blocker and completed work in the plan, and report it without claiming completion.
 
-Reply with the plan path, changed behavior, affected files, verification run, and any remaining limit. Do not repeat the full plan in chat.
+Reply with the plan path, changed behavior, affected files, verification run, and any remaining limit. End with one or two lines naming what was skipped or not checked. Do not repeat the full plan in chat.

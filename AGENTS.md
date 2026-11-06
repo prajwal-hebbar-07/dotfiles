@@ -85,8 +85,13 @@ what is already settled (read documents, answer logs and chat first).
 `work` is OMP-only:
 
 - `omp/skills/work/SKILL.md` — invoke with `/skill:work`. It writes an
-  evidence-backed review document to `docs/implementation-plan.md` and makes
-  no implementation changes until the user explicitly approves that plan.
+  evidence-backed, developer-facing review document to
+  `docs/implementation-plan.md` (a `Summary` of what changes and how, plus a
+  `Reuse` section naming the existing code it builds on) and makes no
+  implementation changes until the user explicitly approves that plan. Plan
+  and code follow inlined ponytail-style YAGNI rules: the smallest complete
+  change, reusing existing code, platform features and installed dependencies
+  before writing new code, with skipped extras listed under `Not included`.
   After approval it implements only the accepted scope, verifies the changed
   behavior, and creates or updates `docs/codebase-guide.md` as the stable OMP
   navigation entry point. For larger repositories that entry point may link to
