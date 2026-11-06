@@ -128,6 +128,27 @@ what is already settled (read documents, answer logs and chat first).
   writes its own `docs/architecture-review.md` and treats the draft as the
   claim to verify. The shared `omp/link-skills` installs it.
 
+`issue-branch` is OMP-only:
+
+- `omp/skills/issue-branch/SKILL.md` — invoke with
+  `/skill:issue-branch <issue URL>`. It reads the GitHub issue with `gh`,
+  checks the issue belongs to the current repository and the working tree is
+  clean, creates the local branch `<number>-<slug>` from
+  `origin/<default branch>` (switching to it if it exists; never pushed), and
+  replies with three to eight one-line pointers from the issue's body and
+  comments, at most a page. It implements and writes nothing. The shared
+  `omp/link-skills` installs it.
+
+`raise-pr` is OMP-only:
+
+- `omp/skills/raise-pr/SKILL.md` — invoke with
+  `/skill:raise-pr <destination branch> [draft]`. It stops on a detached or
+  destination `HEAD`, uncommitted changes, a destination missing on `origin`,
+  no new commits, or an already open PR (printing its URL); otherwise it runs
+  `git push -u origin HEAD` (never forced) and `gh pr create` with a title
+  and two-to-six-bullet summary written from the branch's commits, without
+  attribution trailers. The shared `omp/link-skills` installs it.
+
 `archify` (tt-a1i/archify) and `ponytail` (DietrichGebert/ponytail) are
 third-party and **not** vendored here. Install with
 `npx skills add tt-a1i/archify -g` and
