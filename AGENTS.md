@@ -96,6 +96,21 @@ what is already settled (read documents, answer logs and chat first).
   an artifact prompt. The shared `omp/link-skills` installs it with the other
   OMP skills.
 
+`implement` is OMP-only:
+
+- `omp/skills/implement/SKILL.md` — invoke with `/skill:implement`. It turns
+  a request or a user-supplied plan into a short developer-facing plan in
+  `docs/implementation-plan.md` (summary, steps, files, reused code, extras
+  left out, verification) and changes nothing else until the user explicitly
+  approves it. Implementation loads the third-party `ponytail` skill (below)
+  and stops if it is missing; the skill adds only implement-specific rules:
+  reuse the map's helpers first, list skipped extras in the plan. It creates
+  and keeps `docs/codebase-map.md` current (layout, entry points, files with
+  their uses/used-by links, flows, reusable helpers) and adds one pointer to
+  the repository's root `AGENTS.md` so every OMP session reads the map before
+  working. It overlaps `work`, which uses the same plan path. The shared
+  `omp/link-skills` installs it with the other OMP skills.
+
 `archify` (tt-a1i/archify) and `ponytail` (DietrichGebert/ponytail) are
 third-party and **not** vendored here. Install with
 `npx skills add tt-a1i/archify -g` and
