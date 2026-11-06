@@ -122,6 +122,19 @@ third-party and **not** vendored here. Install with
 `npx skills add DietrichGebert/ponytail -g --skill ponytail`; they land in
 `~/.agents/skills/` and the installer owns updates.
 
+## OMP rules
+
+`omp/rules/*.md` are user-level OMP rules; `omp/link-skills` links them into
+`~/.omp/agent/rules/` (same pruning and refusal as skills and agents). Rules
+reach task subagents too, unlike `~/.omp/agent/AGENTS.md`.
+
+- `worktrees.md` — always applied: new git worktrees go under `.worktrees/`
+  at the main checkout's root, never beside the repository; `.worktrees/` is
+  added to `.git/info/exclude` first so it is never staged as an embedded
+  repository. Covers only worktrees the agent creates with `git worktree add`;
+  OMP's own `omp worktree` and `pr_checkout` use the absolute `worktree.base`
+  setting (default `~/.omp/wt`), which cannot point inside each repository.
+
 ## Cursor skills
 
 Cursor's built-in skills live in `~/.cursor/skills-cursor/`, which Cursor

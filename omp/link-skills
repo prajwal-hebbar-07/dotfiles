@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Link this repo's OMP skills and task agents into the user OMP directories.
+# Link this repo's OMP skills, task agents and rules into the user OMP
+# directories.
 set -euo pipefail
 
 root="$(cd "$(dirname "$0")" && pwd)"
@@ -7,6 +8,8 @@ skills_src="$root/skills"
 agents_src="$root/agents"
 skills_dest="$HOME/.omp/agent/skills"
 agents_dest="$HOME/.omp/agent/agents"
+rules_src="$root/rules"
+rules_dest="$HOME/.omp/agent/rules"
 
 check_dest() {
   local src=$1 dest=$2 item link
@@ -22,13 +25,13 @@ check_dest() {
   done
 }
 
-check_agents() {
-  local item link
-  for item in "$agents_src"/*.md; do
+check_files() {
+  local src=$1 dest=$2 item link
+  for item in "$src"/*.md; do
     [[ -f $item ]] || continue
-    link="$agents_dest/$(basename "$item")"
+    link="$dest/$(basename "$item")"
     if [[ -e $link || -L $link ]]; then
-      if [[ ! -L $link ]] || [[ $(readlink "$link") != "$agents_src"/* ]]; then
+      if [[ ! -L $link ]] || [[ $(readlink "$link") != "$src"/* ]]; then
         echo "Refusing to replace existing item: $link" >&2
         exit 1
       fi
@@ -36,9 +39,23 @@ check_agents() {
   done
 }
 
+link_files() {
+  local src=$1 dest=$2 item link
+  for link in "$dest"/*.md; do
+    if [[ -L $link && $(readlink "$link") == "$src"/* && ! -e $link ]]; then
+      rm "$link"
+    fi
+  done
+  for item in "$src"/*.md; do
+    [[ -f $item ]] || continue
+    ln -sfn "$item" "$dest/$(basename "$item")"
+  done
+}
+
 check_dest "$skills_src" "$skills_dest"
-check_agents
-mkdir -p "$skills_dest" "$agents_dest"
+check_files "$agents_src" "$agents_dest"
+check_files "$rules_src" "$rules_dest"
+mkdir -p "$skills_dest" "$agents_dest" "$rules_dest"
 
 for link in "$skills_dest"/*; do
   if [[ -L $link && $(readlink "$link") == "$skills_src"/* && ! -e $link ]]; then
@@ -50,12 +67,5 @@ for item in "$skills_src"/*/; do
   ln -sfn "${item%/}" "$skills_dest/$(basename "$item")"
 done
 
-for link in "$agents_dest"/*.md; do
-  if [[ -L $link && $(readlink "$link") == "$agents_src"/* && ! -e $link ]]; then
-    rm "$link"
-  fi
-done
-for item in "$agents_src"/*.md; do
-  [[ -f $item ]] || continue
-  ln -sfn "$item" "$agents_dest/$(basename "$item")"
-done
+link_files "$agents_src" "$agents_dest"
+link_files "$rules_src" "$rules_dest"
