@@ -4,9 +4,8 @@
 
 Every skill except `commit` was removed on 2026-11-05 (Claude Code, Codex,
 Cursor and Gemini alike); git history holds the old sets, and `SKILLS.md`
-describes the set cleared on 2026-09-19. The OMP-only
-`grill-requirements` skill was added afterward. List new skills here as they
-are added.
+describes the set cleared on 2026-09-19. OMP-only grilling skills were added
+afterward. List new skills here as they are added.
 
 `commit` has one copy per host:
 
@@ -60,6 +59,42 @@ what is already settled (read documents, answer logs and chat first).
   `omp/link-skills` links the skill into `~/.omp/agent/skills/` and both agents into
   `~/.omp/agent/agents/`, pruning only its own broken links and refusing to
   replace unrelated files.
+
+`grill-stack` is OMP-only:
+
+- `omp/skills/grill-stack/SKILL.md` — invoke with `/skill:grill-stack`.
+  It reads requirements, the existing stack, manifests and lockfiles; researches
+  current primary sources; and writes the evidence-backed assessment to
+  `docs/stack.md`. Haiku 5.5 high drafts questions and challenges Sonnet 5.5
+  high's research. Recommendations remain suggestions until the user decides.
+- `omp/agents/stack-haiku-griller.md` and
+  `omp/agents/stack-sonnet-researcher.md` pin those model roles. The shared
+  `omp/link-skills` installs them with the other OMP skill and agents.
+
+`grill-architecture` is OMP-only:
+
+- `omp/skills/grill-architecture/SKILL.md` — invoke with
+  `/skill:grill-architecture`. Sonnet 5.5 high asks the evidence-backed
+  architecture questions; Opus 5.5 medium answers them from the implementation;
+  Sonnet challenges once and Opus writes the conclusion to
+  `docs/architecture-review.md`. The debate is bounded to those two specialists.
+- `omp/agents/architecture-sonnet-griller.md` and
+  `omp/agents/architecture-opus-reviewer.md` pin those model roles. The shared
+  `omp/link-skills` installs them with the other OMP skills and agents.
+
+`work` is OMP-only:
+
+- `omp/skills/work/SKILL.md` — invoke with `/skill:work`. It writes an
+  evidence-backed review document to `docs/implementation-plan.md` and makes
+  no implementation changes until the user explicitly approves that plan.
+  After approval it implements only the accepted scope, verifies the changed
+  behavior, and creates or updates `docs/codebase-guide.md` as the stable OMP
+  navigation entry point. For larger repositories that entry point may link to
+  focused pages under `docs/codebase-guide/`; a concise root `AGENTS.md`
+  pointer makes the guide discoverable in later OMP sessions. The workflow
+  records the result in the plan and never uses Claude Artifacts or generates
+  an artifact prompt. The shared `omp/link-skills` installs it with the other
+  OMP skills.
 
 `archify` (tt-a1i/archify) and `ponytail` (DietrichGebert/ponytail) are
 third-party and **not** vendored here. Install with
