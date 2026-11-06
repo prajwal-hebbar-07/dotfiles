@@ -116,6 +116,18 @@ what is already settled (read documents, answer logs and chat first).
   working. It overlaps `work`, which uses the same plan path. The shared
   `omp/link-skills` installs it with the other OMP skills.
 
+`draft-docs` is OMP-only:
+
+- `omp/skills/draft-docs/SKILL.md` — invoke with
+  `/skill:draft-docs <requirements|stack|architecture> [statements]`. It
+  records only what the user stated (invocation and chat), with no research
+  or recommendations, in the shape the matching grill reads:
+  `docs/requirements.md`, `docs/stack.md`, or `docs/architecture.md`. Gaps
+  and ambiguities go to the document's open section for the grill to take
+  up. The architecture draft is a separate file because `grill-architecture`
+  writes its own `docs/architecture-review.md` and treats the draft as the
+  claim to verify. The shared `omp/link-skills` installs it.
+
 `archify` (tt-a1i/archify) and `ponytail` (DietrichGebert/ponytail) are
 third-party and **not** vendored here. Install with
 `npx skills add tt-a1i/archify -g` and

@@ -36,7 +36,7 @@ Spawn each with its named `agent`; do not pass a per-call `model`. If either age
 
 Read the invocation and settled chat context. Then read, when present and relevant:
 
-- `docs/requirements.md`, `docs/stack.md`, architecture documents, and ADRs;
+- `docs/requirements.md`, `docs/stack.md`, `docs/architecture.md`, other architecture documents, and ADRs;
 - manifests, lockfiles, deployment files, and configuration;
 - the source and tests needed to trace the implemented architecture's main flows.
 
