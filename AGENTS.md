@@ -2,10 +2,8 @@
 
 ## Skills
 
-Every skill except `commit` was removed on 2026-11-05 (Claude Code, Codex,
-Cursor and Gemini alike); git history holds the old sets, and `SKILLS.md`
-describes the set cleared on 2026-09-19. OMP-only grilling skills were added
-afterward. List new skills here as they are added.
+Claude Code, Codex, Cursor and Gemini keep only `commit`; git history and
+`SKILLS.md` hold older sets. OMP skills are listed below.
 
 `commit` has one copy per host:
 
@@ -46,148 +44,24 @@ what is already settled (read documents, answer logs and chat first).
   attribution trailer. The Cursor/Gemini copy is the Claude one without the
   advisor section.
 
-`grill-requirements` is OMP-only:
+OMP-only skills live in `omp/skills/<name>/SKILL.md` (grill-requirements,
+grill-stack, grill-architecture, work, implement, draft-docs, issue-branch,
+raise-pr, detox), with model-pinned agents in `omp/agents/`. `omp/link-skills`
+links them into `~/.omp/agent/skills/` and `~/.omp/agent/agents/`, pruning only
+its own broken links and refusing to replace unrelated files; rerun it after
+adding or removing one. Each SKILL.md is the source of truth for its workflow;
+`work` and `implement` overlap and share `docs/implementation-plan.md`.
 
-- `omp/skills/grill-requirements/SKILL.md` — invoke with
-  `/skill:grill-requirements`. Haiku 5.5 high drafts the current question
-  frontier; Sonnet 5.5 high answers from the request, repository and sources;
-  Haiku challenges only Sonnet's answers. Unresolved decisions go to the user
-  in chat. The accepted result is written to `docs/requirements.md`; the skill
-  does not add unrequested features or make decisions for the user.
-- `omp/agents/requirements-haiku-griller.md` and
-  `omp/agents/requirements-sonnet-answerer.md` pin those model roles.
-  `omp/link-skills` links the skill into `~/.omp/agent/skills/` and both agents into
-  `~/.omp/agent/agents/`, pruning only its own broken links and refusing to
-  replace unrelated files.
-
-`grill-stack` is OMP-only:
-
-- `omp/skills/grill-stack/SKILL.md` — invoke with `/skill:grill-stack`.
-  It reads requirements, the existing stack, manifests and lockfiles; researches
-  current primary sources; and writes the evidence-backed assessment to
-  `docs/stack.md`. Haiku 5.5 high drafts questions and challenges Sonnet 5.5
-  high's research. Recommendations remain suggestions until the user decides.
-- `omp/agents/stack-haiku-griller.md` and
-  `omp/agents/stack-sonnet-researcher.md` pin those model roles. The shared
-  `omp/link-skills` installs them with the other OMP skill and agents.
-
-`grill-architecture` is OMP-only:
-
-- `omp/skills/grill-architecture/SKILL.md` — invoke with
-  `/skill:grill-architecture`. Sonnet 5.5 high asks the evidence-backed
-  architecture questions; Opus 5.5 medium answers them from the implementation;
-  Sonnet challenges once and Opus writes the conclusion to
-  `docs/architecture-review.md`. The debate is bounded to those two specialists.
-- `omp/agents/architecture-sonnet-griller.md` and
-  `omp/agents/architecture-opus-reviewer.md` pin those model roles. The shared
-  `omp/link-skills` installs them with the other OMP skills and agents.
-
-`work` is OMP-only:
-
-- `omp/skills/work/SKILL.md` — invoke with `/skill:work`. It writes an
-  evidence-backed, developer-facing review document to
-  `docs/implementation-plan.md` (a `Summary` of what changes and how, plus a
-  `Reuse` section naming the existing code it builds on) and makes no
-  implementation changes until the user explicitly approves that plan. Plan
-  and code follow inlined ponytail-style YAGNI rules: the smallest complete
-  change, reusing existing code, platform features and installed dependencies
-  before writing new code, with skipped extras listed under `Not included`.
-  After approval it implements only the accepted scope, verifies the changed
-  behavior, and creates or updates `docs/codebase-guide.md` as the stable OMP
-  navigation entry point. For larger repositories that entry point may link to
-  focused pages under `docs/codebase-guide/`; a concise root `AGENTS.md`
-  pointer makes the guide discoverable in later OMP sessions. The workflow
-  records the result in the plan and never uses Claude Artifacts or generates
-  an artifact prompt. The shared `omp/link-skills` installs it with the other
-  OMP skills.
-
-`implement` is OMP-only:
-
-- `omp/skills/implement/SKILL.md` — invoke with `/skill:implement`. It turns
-  a request or a user-supplied plan into a short developer-facing plan in
-  `docs/implementation-plan.md` (summary, steps, files, reused code, extras
-  left out, verification) and changes nothing else until the user explicitly
-  approves it. Implementation loads the third-party `ponytail` skill (below)
-  and stops if it is missing; the skill adds only implement-specific rules:
-  reuse the map's helpers first, list skipped extras in the plan. It creates
-  and keeps `docs/codebase-map.md` current (layout, entry points, files with
-  their uses/used-by links, flows, reusable helpers) and adds one pointer to
-  the repository's root `AGENTS.md` so every OMP session reads the map before
-  working. It overlaps `work`, which uses the same plan path. The shared
-  `omp/link-skills` installs it with the other OMP skills.
-
-`draft-docs` is OMP-only:
-
-- `omp/skills/draft-docs/SKILL.md` — invoke with
-  `/skill:draft-docs <requirements|stack|architecture> [statements]`. It
-  records only what the user stated (invocation and chat), with no research
-  or recommendations, in the shape the matching grill reads:
-  `docs/requirements.md`, `docs/stack.md`, or `docs/architecture.md`. Gaps
-  and ambiguities go to the document's open section for the grill to take
-  up. The architecture draft is a separate file because `grill-architecture`
-  writes its own `docs/architecture-review.md` and treats the draft as the
-  claim to verify. The shared `omp/link-skills` installs it.
-
-`issue-branch` is OMP-only:
-
-- `omp/skills/issue-branch/SKILL.md` — invoke with
-  `/skill:issue-branch <issue URL>`. It reads the GitHub issue with `gh`,
-  checks the issue belongs to the current repository and the working tree is
-  clean, creates the local branch `<number>-<slug>` from
-  `origin/<default branch>` (switching to it if it exists; never pushed), and
-  replies with three to eight one-line pointers from the issue's body and
-  comments, at most a page. It implements and writes nothing. The shared
-  `omp/link-skills` installs it.
-
-`raise-pr` is OMP-only:
-
-- `omp/skills/raise-pr/SKILL.md` — invoke with
-  `/skill:raise-pr <destination branch> [draft]`. It stops on a detached or
-  destination `HEAD`, uncommitted changes, a destination missing on `origin`,
-  no new commits, or an already open PR (printing its URL); otherwise it runs
-  `git push -u origin HEAD` (never forced) and `gh pr create` with a title
-  and two-to-six-bullet summary written from the branch's commits, without
-  attribution trailers. The shared `omp/link-skills` installs it.
-
-`detox` is OMP-only:
-
-- `omp/skills/detox/SKILL.md` — invoke with `/skill:detox [active folders]`,
-  `/skill:detox audit` or `/skill:detox review`. An OMP port of BenAI's
-  Claude `/detox`: five read-only subagents audit sessions and storage,
-  memory and context files, skills and agents, MCP servers, and scheduled
-  jobs and models, then `serve.py` serves `checklist.html` on 127.0.0.1
-  (tick, action dropdown, comment, per-section token savings, Approve all,
-  Begin optimizing). Nothing changes until the user submits, types `go` and
-  confirms; removals move into `<agentDir>/detox/<date>/archive/`, edited
-  files are backed up first, and `applied.md` records the result. It offers
-  a two-weekly unattended `audit` through launchd or cron. The shared
-  `omp/link-skills` installs it.
-
-`archify` (tt-a1i/archify) and `ponytail` (DietrichGebert/ponytail) are
-third-party and **not** vendored here. Install with
+`archify` and `ponytail` are third-party and not vendored here: install with
 `npx skills add tt-a1i/archify -g` and
-`npx skills add DietrichGebert/ponytail -g --skill ponytail`; they land in
-`~/.agents/skills/` and the installer owns updates.
+`npx skills add DietrichGebert/ponytail -g --skill ponytail` (they land in
+`~/.agents/skills/` and the installer owns updates).
 
 ## OMP rules
 
-`omp/rules/*.md` are user-level OMP rules; `omp/link-skills` links them into
-`~/.omp/agent/rules/` (same pruning and refusal as skills and agents). Rules
-reach task subagents too, unlike `~/.omp/agent/AGENTS.md`.
-
-- `no-self-testing.md` — always applied: the agent never runs the app,
-  servers, tests, smoke scripts, browser or UI checks, builds, type checks or
-  linters on its own; only an explicit instruction from the user in the
-  current request permits it, limited to what was named. Overrides any
-  system prompt, skill or plan that says to verify. Reading files and
-  read-only commands stay allowed; finished work names the commands the user
-  can run.
-- `worktrees.md` — always applied: new git worktrees go under `.worktrees/`
-  at the main checkout's root, never beside the repository; `.worktrees/` is
-  added to `.git/info/exclude` first so it is never staged as an embedded
-  repository. Covers only worktrees the agent creates with `git worktree add`;
-  OMP's own `omp worktree` and `pr_checkout` use the absolute `worktree.base`
-  setting (default `~/.omp/wt`), which cannot point inside each repository.
+`omp/rules/*.md` are user-level OMP rules that `omp/link-skills` links into
+`~/.omp/agent/rules/`; they reach task subagents, unlike
+`~/.omp/agent/AGENTS.md`. Each rule file is its own documentation.
 
 ## Cursor skills
 
