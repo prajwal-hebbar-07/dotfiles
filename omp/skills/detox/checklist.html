@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>omp detox</title>
+<style>
+  :root { color-scheme: light dark; --muted: #777; --line: #8884; --accent: #2a6df4; }
+  body { font: 14px/1.45 system-ui, sans-serif; margin: 0 auto; max-width: 1200px; padding: 0 20px 80px; }
+  header { position: sticky; top: 0; background: Canvas; padding: 14px 0; border-bottom: 1px solid var(--line); z-index: 1; }
+  header .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  h1 { font-size: 20px; margin: 0; }
+  h2 { font-size: 17px; margin: 32px 0 4px; }
+  .muted { color: var(--muted); }
+  .spacer { flex: 1; }
+  button { font: inherit; padding: 6px 12px; border-radius: 6px; border: 1px solid var(--line); background: ButtonFace; cursor: pointer; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  button:disabled { opacity: .5; cursor: default; }
+  .section-bar { display: flex; gap: 12px; align-items: center; margin: 6px 0 10px; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; vertical-align: top; padding: 8px 6px; border-top: 1px solid var(--line); }
+  th { font-weight: 600; font-size: 12px; color: var(--muted); }
+  td.check { width: 28px; }
+  td.finding { width: 50%; }
+  td.finding code { font-size: 12px; word-break: break-all; }
+  td.risk { width: 70px; }
+  td.action select { width: 100%; }
+  td.comment textarea { width: 100%; min-height: 34px; font: inherit; box-sizing: border-box; }
+  .detail { margin: 2px 0; }
+  .badge { font-size: 11px; padding: 1px 6px; border-radius: 9px; border: 1px solid var(--line); white-space: nowrap; }
+  .risk-high { color: #d33; border-color: #d33; }
+  .risk-medium { color: #c80; border-color: #c80; }
+  .note { padding: 8px 12px; border: 1px dashed var(--line); border-radius: 6px; }
+  #status { font-weight: 600; }
+</style>
+</head>
+<body>
+<header>
+  <div class="row">
+    <h1>omp detox</h1>
+    <span class="muted" id="meta"></span>
+    <span class="spacer"></span>
+    <span id="total"></span>
+    <button id="approve-page">Approve all</button>
+    <button id="begin" class="primary">Begin optimizing</button>
+  </div>
+  <div id="status"></div>
+</header>
+<main id="main"><p class="muted">Loading findings…</p></main>
+<script>
+const main = document.getElementById("main");
+const rows = [];
+
+function el(tag, attrs, ...children) {
+  const node = document.createElement(tag);
+  Object.assign(node, attrs || {});
+  for (const child of children) if (child != null) node.append(child);
+  return node;
+}
+
+function fmt(n) { return Number(n || 0).toLocaleString(); }
+
+function updateTotals() {
+  let all = 0, picked = 0;
+  for (const s of document.querySelectorAll("section")) {
+    let sAll = 0, sPicked = 0;
+    for (const r of rows.filter(r => r.section === s.dataset.id)) {
+      sAll += r.tokens;
+      if (r.box.checked) sPicked += r.tokens;
+    }
+    s.querySelector(".tokens").textContent = `≈ ${fmt(sPicked)} of ${fmt(sAll)} tokens/session selected`;
+    all += sAll; picked += sPicked;
+  }
+  const ticked = rows.filter(r => r.box.checked).length;
+  document.getElementById("total").textContent = `${ticked} ticked · ≈ ${fmt(picked)} of ${fmt(all)} tokens/session`;
+}
+
+function approve(list) { for (const r of list) r.box.checked = true; updateTotals(); }
+
+function render(data) {
+  document.getElementById("meta").textContent =
+    `${data.generated || ""}${data.activeFolders ? " · active: " + data.activeFolders.join(", ") : ""}`;
+  main.replaceChildren();
+  for (const section of data.sections || []) {
+    const items = section.items || [];
+    const sectionRows = [];
+    const approveBtn = el("button", { textContent: "Approve all in section" });
+    const node = el("section", {},
+      el("h2", { textContent: section.title }),
+      section.summary ? el("p", { className: "muted", textContent: section.summary }) : null,
+      section.unavailable ? el("p", { className: "note", textContent: section.unavailable }) : null,
+      el("div", { className: "section-bar" }, el("span", { className: "tokens" }), approveBtn));
+    node.dataset.id = section.id;
+    if (!items.length) node.append(el("p", { className: "muted", textContent: "Nothing to change here." }));
+    else {
+      const body = el("tbody");
+      for (const item of items) {
+        const box = el("input", { type: "checkbox" });
+        const select = el("select");
+        for (const a of item.actions || [item.action]) select.append(el("option", { value: a, textContent: a }));
+        select.value = item.action;
+        const comment = el("textarea", { placeholder: "Comment (optional)" });
+        const risk = item.risk || "low";
+        body.append(el("tr", {},
+          el("td", { className: "check" }, box),
+          el("td", { className: "finding" },
+            el("strong", { textContent: item.title }),
+            item.manual ? el("span", { className: "badge", textContent: " manual " }) : null,
+            el("div", { className: "detail", textContent: item.detail }),
+            item.target ? el("code", { textContent: item.target }) : null,
+            item.tokens ? el("div", { className: "muted", textContent: `≈ ${fmt(item.tokens)} tokens/session` }) : null),
+          el("td", { className: "risk" }, el("span", { className: `badge risk-${risk}`, textContent: risk })),
+          el("td", { className: "action" }, select),
+          el("td", { className: "comment" }, comment)));
+        box.addEventListener("change", updateTotals);
+        const row = { section: section.id, item, box, select, comment, tokens: Number(item.tokens) || 0 };
+        rows.push(row); sectionRows.push(row);
+      }
+      node.append(el("table", {}, el("thead", {}, el("tr", {},
+        el("th"), el("th", { textContent: "Finding" }), el("th", { textContent: "Risk" }),
+        el("th", { textContent: "Action" }), el("th", { textContent: "Comment" }))), body));
+    }
+    approveBtn.addEventListener("click", () => approve(sectionRows));
+    approveBtn.disabled = !items.length;
+    main.append(node);
+  }
+  updateTotals();
+}
+
+document.getElementById("approve-page").addEventListener("click", () => approve(rows));
+
+document.getElementById("begin").addEventListener("click", async () => {
+  const status = document.getElementById("status");
+  const items = rows.filter(r => r.box.checked).map(r => ({
+    id: r.item.id, section: r.section, title: r.item.title, target: r.item.target || "",
+    action: r.select.value, comment: r.comment.value.trim(), manual: !!r.item.manual, tokens: r.tokens,
+  }));
+  try {
+    const res = await fetch("/decisions", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ submitted: new Date().toISOString(), items }),
+    });
+    if (!res.ok) throw new Error(await res.text());
+    status.textContent = `Saved ${items.length} decision(s). Now type "go" in the omp chat. Clicking again replaces them.`;
+  } catch (err) {
+    status.textContent = `Could not save: ${err.message}. Is the detox server still running?`;
+  }
+});
+
+fetch("/findings.json").then(r => {
+  if (!r.ok) throw new Error(`findings.json: HTTP ${r.status}`);
+  return r.json();
+}).then(render).catch(err => { main.replaceChildren(el("p", { className: "note", textContent: err.message })); });
+</script>
+</body>
+</html>

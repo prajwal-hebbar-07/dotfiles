@@ -149,6 +149,20 @@ what is already settled (read documents, answer logs and chat first).
   and two-to-six-bullet summary written from the branch's commits, without
   attribution trailers. The shared `omp/link-skills` installs it.
 
+`detox` is OMP-only:
+
+- `omp/skills/detox/SKILL.md` — invoke with `/skill:detox [active folders]`,
+  `/skill:detox audit` or `/skill:detox review`. An OMP port of BenAI's
+  Claude `/detox`: five read-only subagents audit sessions and storage,
+  memory and context files, skills and agents, MCP servers, and scheduled
+  jobs and models, then `serve.py` serves `checklist.html` on 127.0.0.1
+  (tick, action dropdown, comment, per-section token savings, Approve all,
+  Begin optimizing). Nothing changes until the user submits, types `go` and
+  confirms; removals move into `<agentDir>/detox/<date>/archive/`, edited
+  files are backed up first, and `applied.md` records the result. It offers
+  a two-weekly unattended `audit` through launchd or cron. The shared
+  `omp/link-skills` installs it.
+
 `archify` (tt-a1i/archify) and `ponytail` (DietrichGebert/ponytail) are
 third-party and **not** vendored here. Install with
 `npx skills add tt-a1i/archify -g` and
