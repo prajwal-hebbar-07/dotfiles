@@ -1,0 +1,57 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# herdr — Pale Knight
+#
+# Source of truth: dotfiles/herdr/config.toml  (~/.config/herdr/config.toml -> here)
+# Reload in place: prefix shift+r, or `herdr server reload-config`
+# Every key and default: `herdr --default-config`
+#
+# herdr's Settings screen writes back into this file through the link (theme
+# name, status indicators, sound, toasts), so review `git diff` after using it.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Notification setup was already chosen; don't show it on startup.
+onboarding = false
+
+
+# ── Theme ────────────────────────────────────────────────────────────────────
+# Same palette as tmux/tmux.conf, ghostty/themes/pale-knight and zsh/zshrc.
+# Every token below is overridden, so the base theme only matters if a token is
+# removed. Picking a theme in Settings rewrites `name` but these overrides still
+# win; delete [theme.custom] to try a built-in theme as it ships.
+[theme]
+name = "kanagawa"
+auto_switch = false
+
+[theme.custom]
+# Surfaces. sidebar_bg is left unset so the sidebar keeps the terminal's void
+# (#0f111a); the tab bar and overlays sit on crypt, like the tmux status bar.
+panel_bg      = "#32334a"   # crypt
+active_row_bg = "#32334a"   # crypt
+selection_bg  = "#444364"   # shade
+surface0      = "#32334a"   # crypt
+surface1      = "#444364"   # shade
+surface_dim   = "#32334a"   # crypt, separators
+
+# Text ladder, dimmest to brightest.
+overlay0 = "#696e93"        # stone
+overlay1 = "#9297ba"        # ash
+subtext0 = "#a6accd"        # bone
+text     = "#d4d7f1"        # pale
+
+# Soul-cyan for focus, as in tmux's active border and session badge.
+accent = "#5cb1d2"          # soul
+
+# Agent states, on the equal-lightness ANSI accents.
+green  = "#91b171"          # done / idle
+yellow = "#c39e5c"          # infection, working
+red    = "#da8c8d"          # needs attention / blocked
+peach  = "#ddb875"          # bright infection, interrupted / warning
+blue   = "#86a4e1"          # lifeblood, unseen / done notification
+teal   = "#5cb1d2"          # soul, notification markers
+mauve  = "#ba92d5"          # essence, branch names
+
+[ui]
+status_indicators = "dots"
+
+[ui.toast]
+delivery = "herdr"

@@ -227,6 +227,21 @@ and `.markdown` files to `pk-mdopen` on `o` / Enter, with the editor offered
 under `O`; every other file type keeps yazi's default opener. The popup stays
 open after a render, so several files can be opened in a row; `q` closes it.
 
+### herdr
+
+[herdr](https://herdr.dev) — terminal workspace manager for AI coding agents —
+themed **Pale Knight** through `[theme.custom]` in `herdr/config.toml`: every
+colour token is overridden with the tmux palette, so the tab bar and overlays
+sit on crypt, focus is soul-cyan, and agent states use the equal-lightness
+ANSI accents (working is infection-amber, blocked is red, done is green). The
+sidebar keeps the terminal's own background. Keybindings are herdr's defaults
+(prefix `C-b`); `herdr --default-config` lists them.
+
+Reload with `prefix shift+r` or `herdr server reload-config`. herdr's Settings
+screen writes back into the linked file (theme name, status indicators,
+sound, toasts), so check `git diff` after using it. A theme picked there
+changes only `name`; the custom tokens still apply on top.
+
 ## Skills
 
 Only `commit` is kept for now; every other skill was removed on 2026-11-05.
@@ -277,6 +292,7 @@ dotfiles/
 ├── cursor/     # editor settings, keybindings, extension list
 ├── zsh/        # zshrc, and bin/pk-preview for the fzf preview pane
 ├── tmux/       # tmux.conf, Pale Knight theme and keys
+├── herdr/      # config.toml, Pale Knight theme
 └── yazi/       # yazi.toml, Markdown opens through pk-mdopen
 ```
 
@@ -326,13 +342,14 @@ Already linked:
 
 ```sh
 ln -sfn "$PWD/zsh/zshrc"       ~/.zshrc
-mkdir -p ~/.local/bin ~/.config/tmux ~/.config/yazi ~/.config/ghostty ~/.cursor/skills
+mkdir -p ~/.local/bin ~/.config/tmux ~/.config/yazi ~/.config/ghostty ~/.config/herdr ~/.cursor/skills
 ln -sfn "$PWD/zsh/bin/pk-preview" ~/.local/bin/pk-preview
 ln -sfn "$PWD/zsh/bin/pk-mdopen" ~/.local/bin/pk-mdopen
 ln -sfn "$PWD/tmux/tmux.conf"  ~/.config/tmux/tmux.conf
 ln -sfn "$PWD/yazi/yazi.toml"  ~/.config/yazi/yazi.toml
 ln -sfn "$PWD/ghostty/config" ~/.config/ghostty/config
 ln -sfn "$PWD/ghostty/themes" ~/.config/ghostty/themes
+ln -sfn "$PWD/herdr/config.toml" ~/.config/herdr/config.toml
 ln -sfn "$PWD/skills/commit"     ~/.cursor/skills/commit
 ln -sfn "$PWD/skills/archify"    ~/.cursor/skills/archify
 
