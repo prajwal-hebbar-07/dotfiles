@@ -5,7 +5,7 @@
 //
 // Clone of the shipped `spaces` mod with keyboard selection: `spaces-keys.focus`
 // (ctrl-s s in the prefix mod) or pane.go into it puts the keyboard on the list;
-// up/down move, Enter shows the space, Esc goes back to the panes.
+// j/k or up/down move, Enter shows the space, Esc goes back to the panes.
 
 import { View, div, svg } from "gpui-kit";
 import { v_flex, h_flex } from "gpui-base";
@@ -89,14 +89,14 @@ export default class Spaces extends View {
     });
   }
 
-  // Up/down walk the rows as shown (folded machines skipped); Enter shows the
+  // j/k or up/down walk the rows as shown (folded machines skipped); Enter shows the
   // space under the cursor; Enter and Esc hand the keyboard back to the panes.
   onKey(e, cx) {
     const ids = this.ordered().filter((r) => !this.folded.has(r.w.machine ?? null)).map((r) => r.w.id);
-    if (e.key === "up" || e.key === "down") {
+    const step = { down: 1, j: 1, up: -1, k: -1 }[e.keystroke];
+    if (step) {
       if (!ids.length) return;
       const at = ids.indexOf(this.cursor);
-      const step = e.key === "down" ? 1 : -1;
       this.cursor = ids[at === -1 ? 0 : (at + step + ids.length) % ids.length];
     } else if (e.key === "enter" || e.key === "escape") {
       if (e.key === "enter" && ids.includes(this.cursor)) run("space.select", { id: this.cursor });

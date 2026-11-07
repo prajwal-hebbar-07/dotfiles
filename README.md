@@ -257,7 +257,7 @@ files changed here, each linked in one by one so the app's generated
   `hjkl` move, `m` zoom, `e` nvim in a new tab, `g` lazygit, `v` markdown
   picker, `ctrl-s` a literal `ctrl-s`. Esc or any other key closes it.
 - `mods/spaces-keys/` — a clone of the shipped `spaces` sidebar that takes the
-  keyboard: ↑/↓ move, Enter shows the space, Esc returns to the panes.
+  keyboard: `j`/`k` or ↑/↓ move, Enter shows the space, Esc returns to the panes.
 - `layouts/main-keys.json` — a clone of the shipped `main` layout with its
   spaces block on `spaces-keys`. Select it with `ctrl-shift-l` or
   `herdr-app do layout.switch --name main-keys`.
