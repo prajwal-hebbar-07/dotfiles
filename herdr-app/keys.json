@@ -1,7 +1,7 @@
 {
   "global": {
     "ctrl-s": "mod.open:prefix",
-    "cmd-q": "app.quit",
+    "cmd-q": "mod.open:quit-all",
     "cmd-h": "app.hide",
     "cmd-alt-h": "app.hide_others",
     "cmd-t": "tab.new",

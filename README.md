@@ -249,8 +249,13 @@ above, with its own config in `~/.config/herdr-app`. `herdr-app/` keeps only the
 files changed here, each linked in one by one so the app's generated
 `gpui-kit.d.ts` / `jsconfig.json` stay out of the repo:
 
-- `keys.json` — the app's default keys plus `ctrl-s` → `mod.open:prefix`.
-  Once edited, app updates no longer add new default shortcuts to it.
+- `keys.json` — the app's default keys plus `ctrl-s` → `mod.open:prefix` and
+  `cmd-q` → `mod.open:quit-all`. Once edited, app updates no longer add new
+  default shortcuts to it.
+- `mods/quit-all/` — `cmd-q` closes every space (all machines), which ends
+  their terminals, then quits. A plain `app.quit` leaves them running in
+  herdr-core for the next start; Quit from the app menu or the Dock still
+  does that.
 - `mods/prefix/` — a tmux-style prefix: `ctrl-s` opens a key panel, the next
   key runs and closes it. `c` new tab, `1-9` select tab, `r`/`S` rename
   tab/space, `s` spaces list, `a` agents list, `X`/`x` close tab/pane,
@@ -323,7 +328,7 @@ dotfiles/
 ├── zsh/        # zshrc, and bin/pk-preview for the fzf preview pane
 ├── tmux/       # tmux.conf, Pale Knight theme and keys
 ├── herdr/      # config.toml, Pale Knight theme
-├── herdr-app/  # desktop app: keys.json, ctrl-s prefix mod, keyboard spaces/agents lists
+├── herdr-app/  # desktop app: keys.json, ctrl-s prefix mod, cmd-q quit-all mod, keyboard spaces/agents lists
 └── yazi/       # yazi.toml, Markdown opens through pk-mdopen
 ```
 
@@ -381,8 +386,8 @@ ln -sfn "$PWD/yazi/yazi.toml"  ~/.config/yazi/yazi.toml
 ln -sfn "$PWD/ghostty/config" ~/.config/ghostty/config
 ln -sfn "$PWD/ghostty/themes" ~/.config/ghostty/themes
 ln -sfn "$PWD/herdr/config.toml" ~/.config/herdr/config.toml
-mkdir -p ~/.config/herdr-app/mods/{prefix,spaces-keys,agents-keys} ~/.config/herdr-app/layouts
-for f in keys.json layouts/main-keys.json mods/{prefix,spaces-keys,agents-keys}/{main.js,mod.json}; do
+mkdir -p ~/.config/herdr-app/mods/{prefix,spaces-keys,agents-keys,quit-all} ~/.config/herdr-app/layouts
+for f in keys.json layouts/main-keys.json mods/{prefix,spaces-keys,agents-keys,quit-all}/{main.js,mod.json}; do
   ln -sfn "$PWD/herdr-app/$f" ~/.config/herdr-app/$f
 done
 ln -sfn "$PWD/skills/commit"     ~/.cursor/skills/commit
