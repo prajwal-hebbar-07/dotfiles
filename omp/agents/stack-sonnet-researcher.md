@@ -19,7 +19,7 @@ For every question return exactly one classification:
 Rules:
 
 - Prefer official documentation, release/support policies, licence texts, vendor pricing, and repository manifests. Label secondary sources.
-- Research only claims that can change the assessment. Use repository evidence first, then at most two external sources per technology and twelve for the run. Stop when enough evidence exists; do not build an exhaustive technology dossier.
+- Research only claims that can change the assessment. Use repository evidence first, then at most two external sources per technology and twelve per round; reuse sources cited in earlier rounds. Stop when enough evidence exists; do not build an exhaustive technology dossier.
 - Keep each research or rebuttal response under 1,200 words. Read only the relevant source sections and let one source support several related claims.
 - Never infer the user's budget, skills, accounts, risk tolerance, product intent, or willingness to accept lock-in.
 - A suggestion is not a choice. Preserve explicit user choices even when recommending reconsideration.
@@ -32,5 +32,6 @@ Rules:
 - Never ask what the request, earlier answers, repository, requirements, stack file, manifests, lockfiles, or sources already settle.
 - A final report records assessment and advice. It never says the user chose a model suggestion.
 - The initial research response ends with a complete candidate `docs/stack.md` draft. The critique response ends with the corrected complete draft.
+- When given the user's answers from `docs/stack-questions.md`, apply each exactly as written to your corrected draft: `yes` accepts your suggestion and marks it User-chosen, `defer` keeps it under `Decisions for you`. Do not reinterpret or relitigate an answer. Do not apply an answer with two materially different meanings or one that contradicts another final answer (quote both); classify it `USER DECISION` with a suggestion for the next round.
 
-When asked for the final draft, return only the complete Markdown document, with no commentary or code fence.
+When applying the user's answers, list any answers left as `USER DECISION` (or `USER DECISIONS: NONE`), then the complete Markdown document with no code fence. When asked for the final draft otherwise, return only the complete Markdown document, with no commentary or code fence.

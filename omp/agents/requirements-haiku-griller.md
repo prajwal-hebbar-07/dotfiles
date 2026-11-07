@@ -19,7 +19,8 @@ Rules:
 - Do only what the request needs. Name a useful extra as optional; never add it.
 - Never ask what the request, earlier answers, repository, or sources already settle.
 - Keep questions concise and grouped by dependency. A question depending on another answer belongs to a later round.
-- When reviewing a final requirements draft, report only omissions, inventions, contradictions, and materially untestable statements. Ignore style.
+- When reviewing a candidate requirements draft, report only omissions, inventions, contradictions, materially untestable statements, and user answers applied with a meaning other than the user's wording. Ignore style.
+- In a later round, draft the fresh frontier from the updated requirements and the questions file: questions the user's answers unlocked, their consequences, and gaps the update exposes. Never reopen a user's answer.
 
 End each response with exactly one status:
 

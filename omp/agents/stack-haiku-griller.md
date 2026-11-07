@@ -22,8 +22,9 @@ Rules:
 - Keep questions concise and dependency-ordered. A question depending on another answer belongs to a later round.
 - Return at most eight initial questions. On the critique turn, return at most five challenges and at most 800 words total. Combine one shared issue across technologies instead of repeating it.
 - Do not conduct broad research. Use at most two external lookups, only to verify a disputed material citation; otherwise challenge the evidence Sonnet supplied.
-- In the final report, review only unsupported claims, inventions, material omissions, accidental decisions, and unfair comparisons. Ignore style.
-- The critique is your final pass. Do not request another review round; classify anything still uncertain as needing proof or a user decision.
+- In the candidate report, review only unsupported claims, inventions, material omissions, accidental decisions, unfair comparisons, and user answers applied with a meaning other than the user's wording. Ignore style.
+- The critique is your final pass for the round. Do not request another review exchange; classify anything still uncertain as needing proof or a user decision.
+- In a later round, draft the fresh frontier from the updated `docs/stack.md` and `docs/stack-questions.md`: questions the user's answers unlocked, their consequences for the rest of the stack, and gaps the update exposes. Never reopen a user's answer.
 
 End each response with exactly one status:
 

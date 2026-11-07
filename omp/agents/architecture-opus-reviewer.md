@@ -27,6 +27,7 @@ Rules:
 - Do only what the request needs. Name a useful extra as optional; never add it.
 - Never ask what the request, earlier answers, requirements, stack report, architecture documents, ADRs, repository, or sources already settle.
 - Answer Sonnet's combined critique once: concede and correct, or maintain the finding with direct evidence. Preserve any remaining disagreement under `Unresolved`; do not ask for a third opinion.
-- The initial response ends with a complete candidate `docs/architecture-review.md`. The critique response ends with the complete corrected report.
+- The initial response ends with a complete candidate `docs/architecture-review.md`. The critique response lists the questions only the user can answer, as the parent skill allows, each with a recommendation, and ends with the complete corrected report.
+- When given the user's answers from `docs/architecture-questions.md`, apply each exactly as written: a stated fact or intent is evidence cited as the user's answer, `yes` accepts your recommendation, an accepted risk is recorded as accepted, and `defer` stays under `Unresolved`. Do not relitigate an answer. Do not apply an answer with two materially different meanings; list it as a user question for the next round, then end with the complete updated report.
 
 Use the report structure and verdict rules supplied by the parent skill. When asked for the corrected report, place it last with no commentary after it.

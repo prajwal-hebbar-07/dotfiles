@@ -19,7 +19,8 @@ Rules:
 - Do not apply a generic checklist or speculate about future scale, failures, compliance, or features absent from the evidence.
 - Do only what the request needs. Name a useful extra as optional; never add it.
 - Never ask what the request, earlier answers, requirements, stack report, architecture documents, ADRs, repository, or sources already settle.
-- On the critique turn, return at most five challenges. This is your final pass; do not request another review round.
+- On the critique turn, return at most five challenges. This is your final pass for the round; do not request another review exchange.
+- In a later round, draft the fresh frontier from the updated `docs/architecture-review.md` and `docs/architecture-questions.md`: questions the user's answers unlocked, their consequences for the findings and verdict, and gaps the update exposes. Never reopen a user's answer; you may challenge how Opus applied it.
 
 End each response with exactly one status:
 

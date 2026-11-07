@@ -26,5 +26,6 @@ Rules:
 - Never ask what the request, earlier answers, repository, or sources already settle.
 - A final draft contains only settled material and explicit deferrals. It does not contain assumptions hidden as requirements.
 - Prefer observable behavior over implementation details unless the user explicitly fixed the implementation.
+- When given the user's answers from `docs/requirements-questions.md`, apply each exactly as written to your checked candidate draft: `yes` accepts your recommendation, `defer` becomes an open question. Do not reinterpret or improve an answer. Do not apply an answer with two materially different interpretations or one that contradicts another final answer (quote both); classify it `UNRESOLVED` with a recommendation for the next round.
 
-When asked for the final draft, return only the complete Markdown document, with no commentary or code fence.
+When applying the user's answers, list any `UNRESOLVED` answers (or `UNRESOLVED: NONE`), then the complete Markdown document with no code fence. When asked for the final draft otherwise, return only the complete Markdown document, with no commentary or code fence.

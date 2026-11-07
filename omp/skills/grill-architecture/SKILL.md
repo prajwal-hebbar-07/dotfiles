@@ -1,27 +1,27 @@
 ---
 name: grill-architecture
-description: "Verify an implemented architecture through a bounded debate: Sonnet 5.5 high asks the material questions, Opus 5.5 medium answers them, Sonnet challenges the answers, and Opus produces the evidence-backed conclusion in docs/architecture-review.md."
+description: "Verify an implemented architecture in rounds of bounded debate: Sonnet 5.5 high asks the material questions, Opus 5.5 medium answers them, Sonnet challenges the answers, and Opus writes the evidence-backed conclusion in docs/architecture-review.md. What only the user can answer goes to docs/architecture-questions.md; after the user answers, Opus updates the review and the next round grills it again, until nothing is left for the user."
 disable-model-invocation: true
 ---
 
 # grill-architecture
 
-Verify the architecture that exists, not an idealized redesign. Sonnet identifies the material questions. Opus answers from repository evidence. They debate once, then Opus produces the conclusion. The parent only gathers evidence, orchestrates the two specialists, and writes their accepted report.
+Verify the architecture that exists, not an idealized redesign, in rounds. In each round Sonnet identifies the material questions, Opus answers from repository evidence, they debate once, and what only the user can answer goes into `docs/architecture-questions.md`. After the user answers, Opus applies the answers, the parent updates `docs/architecture-review.md`, and the next round grills the updated review. Rounds repeat until one ends with nothing left for the user. The parent only gathers evidence, orchestrates the two specialists, and writes their accepted report.
 
 Invoke explicitly as `/skill:grill-architecture [scope or question]`.
 
 ## Never
 
 - Add a feature, option, layer, abstraction, dependency, future-proofing, cleanup, or requirement the user did not request. Name a useful extra as optional; do not include it as required work.
-- Ask what the request, earlier answers, requirements, stack report, architecture documents, ADRs, repository, or authoritative sources already settle.
+- Ask what the request, earlier answers, `docs/architecture-questions.md`, requirements, stack report, architecture documents, ADRs, repository, or authoritative sources already settle.
 - Reward complexity. Prefer the smallest architecture that satisfies the actual requirements, and flag modules or infrastructure with no evidenced need.
 - Apply a generic architecture checklist. Review only concerns material to this system and invocation scope.
 - Treat a diagram, architecture document, or stated intention as proof that the implementation follows it.
 - Claim runtime, scale, failure, recovery, or performance behavior that static evidence cannot prove; classify it as `NEEDS PROOF`.
 - Let the parent model answer the grill, adjudicate the debate, replace either specialist, or silently continue when a pinned specialist is unavailable.
-- Ask the user to referee model disagreement. Preserve unresolved disagreement in the report.
+- Ask the user to referee model disagreement. Preserve unresolved disagreement in the report. Ask the user only what Step 5 allows.
 - Produce a score, exhaustive redesign, implementation plan, or speculative future architecture.
-- Implement, refactor, commit, or edit anything except `docs/architecture-review.md`.
+- Implement, refactor, commit, or edit anything except `docs/architecture-review.md` and `docs/architecture-questions.md`.
 
 ## Specialists
 
@@ -30,13 +30,13 @@ Use only these OMP task agents:
 - `architecture-sonnet-griller` — `anthropic/claude-sonnet-5-5`, high thinking. It asks the first questions and challenges Opus's answers.
 - `architecture-opus-reviewer` — `anthropic/claude-opus-5-5`, medium thinking. It answers from evidence and produces the final conclusion.
 
-Spawn each with its named `agent`; do not pass a per-call `model`. If either agent fails, reports another model, or is unavailable, stop and name it. Keep both agents alive and send follow-ups through `write agent://<id>`.
+Spawn each with its named `agent`; do not pass a per-call `model`. If either agent fails, reports another model, or is unavailable, stop and name it. Keep both agents alive across rounds and send follow-ups through `write agent://<id>`. If either is no longer running, for example because the user answered in a new session, spawn a fresh one: `docs/architecture-review.md` and `docs/architecture-questions.md` carry the state.
 
 ## Step 1 — establish evidence
 
 Read the invocation and settled chat context. Then read, when present and relevant:
 
-- `docs/requirements.md`, `docs/stack.md`, `docs/architecture.md`, other architecture documents, and ADRs;
+- `docs/requirements.md`, `docs/stack.md`, `docs/architecture.md`, `docs/architecture-questions.md`, other architecture documents, and ADRs; every answered question in the questions file is a settled user answer, and `defer` is an explicit deferral;
 - manifests, lockfiles, deployment files, and configuration;
 - the source and tests needed to trace the implemented architecture's main flows.
 
@@ -51,7 +51,7 @@ Do not infer a requirement from a common practice or model preference.
 
 ## Step 2 — Sonnet starts the grill
 
-Spawn `architecture-sonnet-griller` first with the scope, requirements, architecture claims, and relevant repository paths. Ask for the whole current frontier, capped at eight questions.
+Spawn `architecture-sonnet-griller` first with the scope, requirements, architecture claims, relevant repository paths, and the paths `docs/architecture-review.md` and `docs/architecture-questions.md` when they exist. Ask for the whole current frontier, capped at eight questions.
 
 Each question must identify the evidence that prompted it and why its answer could change the conclusion. Questions may examine only material concerns: requirement fit, unnecessary complexity, responsibilities and dependency direction, interfaces and data ownership, critical flows and failure behavior, trust boundaries, deployment constraints, or proof of claimed qualities.
 
@@ -72,20 +72,61 @@ Opus then returns a complete candidate `docs/architecture-review.md`. Correction
 
 Send Opus's complete response to the existing Sonnet agent once. Sonnet returns at most five material challenges, limited to:
 
-- an unsupported or overstated conclusion;
+- an unsupported or overstated conclusion, including a user answer applied with a meaning other than the user's wording;
 - a missed requirement, contradiction, dependency, or critical flow;
 - documentation that disagrees with implementation;
 - complexity with no evidenced requirement;
 - a static inference that needs runtime proof;
 - a proposed correction larger than the evidenced problem.
 
-Send Sonnet's complete critique to the existing Opus agent once. Opus must concede and correct, or maintain a finding with direct evidence. Its response ends with the complete corrected report.
+Send Sonnet's complete critique to the existing Opus agent once. Opus must concede and correct, or maintain a finding with direct evidence. Its response lists any user questions allowed by Step 5, each with its recommendation, and ends with the complete corrected report.
 
-Stop there. Do not add a third reviewer or another autonomous debate round. If the two specialists still disagree, Opus records the exact disagreement and both evidence-based positions under `Unresolved`, without inventing a tie-breaker.
+Stop there. Do not add a third reviewer or another debate exchange in this round. If the two specialists still disagree, Opus records the exact disagreement and both evidence-based positions under `Unresolved`, without inventing a tie-breaker.
 
-## Step 5 — write the conclusion
+## Step 5 — write the round's user questions to a file
 
-The parent writes Opus's corrected report to `docs/architecture-review.md` without changing its findings. Use this shape unless an existing review has a clear structure:
+A user question is allowed only for:
+
+- a fact the conclusion needs that the repository and sources cannot show, such as production load, the deployment target, or an external system's behavior;
+- the intent behind structure flagged as having no evidenced requirement;
+- whether the user accepts a material risk.
+
+Never ask the user to settle a Sonnet–Opus disagreement or a `NEEDS PROOF` item that needs measurement; both stay under `Unresolved`. If no allowed question remains, go to Step 7.
+
+Otherwise write the questions to `docs/architecture-questions.md` instead of asking in chat. Clear the file first and write only this round's questions, numbered from Q1: earlier answers already live in `docs/architecture-review.md`, which Step 6 updated before this round began. Use this shape:
+
+```markdown
+# Architecture questions
+
+Write your answer on the `Answer:` line under each question, then say they are answered. `yes` accepts the recommendation; `defer` leaves it under `Unresolved`.
+
+## Round <N>
+
+### Q1. <the question in plain language>
+
+- Finding: <the finding it affects>
+- Evidence: <what the repository shows and why it cannot settle this>
+- Recommendation: <Opus's recommendation and its main trade-off>
+- Choices: <concise options, worded so `yes` accepts the recommendation when possible>
+
+Answer:
+```
+
+Reply with the file path, the round number, and the number of questions, then wait.
+
+## Step 6 — apply the answers and grill again
+
+When the user says the questions are answered, read the file. An empty `Answer:` is unanswered: name those questions in chat and wait, unless the user says to defer them. Then:
+
+1. Send the exact answers to the existing Opus agent. It applies them to its corrected report and returns the complete updated report: a stated fact or intent becomes evidence cited as the user's answer, an accepted risk is recorded as accepted, and a deferral stays under `Unresolved`. An answer with two materially different meanings is not applied; it stays a user question for the next round.
+2. The parent writes the updated report to `docs/architecture-review.md`, so the file always holds every settled answer.
+3. Start the next round at Step 2 with the updated review and the answered questions file as the baseline. Sonnet drafts the fresh frontier: questions the answers unlocked, consequences of the answers for the findings and verdict, gaps the updated review exposes, and anything left unresolved in item 1. Steps 3 and 4 run in full, and Step 5 replaces the file with the next round's questions.
+
+Every settled answer, and every deferral under `Unresolved`, lives in `docs/architecture-review.md`; that is what lets the next round clear the questions file.
+
+## Step 7 — close the grill
+
+The grill closes when a round's Step 4 leaves no question allowed by Step 5. The parent writes Opus's corrected report from that round to `docs/architecture-review.md` without changing its findings. Use this shape unless an existing review has a clear structure:
 
 ```markdown
 # Architecture review
@@ -113,9 +154,9 @@ Scope: <reviewed system or subsystem>
 
 ## Unresolved
 
-- <needed proof or remaining Sonnet–Opus disagreement>
+- <needed proof, remaining Sonnet–Opus disagreement, or a user question deferred in docs/architecture-questions.md>
 ```
 
 Omit empty sections and inapplicable fields. Use `Verified` only when no material risk, conflict, or missing proof remains; `Verified with risks` for accepted material risks; `Revise` for a conflict requiring change; and `Not verifiable` when missing evidence prevents a responsible conclusion.
 
-Reply with the file path, verdict, finding counts by assessment, and the most consequential risk, conflict, or proof gap. Do not repeat the report in chat.
+Reply with the file path, the number of rounds, verdict, finding counts by assessment, and the most consequential risk, conflict, or proof gap. Do not repeat the report in chat.
