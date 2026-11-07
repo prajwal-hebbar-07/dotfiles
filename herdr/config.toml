@@ -53,5 +53,7 @@ mauve  = "#ba92d5"          # essence, branch names
 [ui]
 status_indicators = "dots"
 
+# No pop-up toasts: the agent-state sound (ui.sound, on by default) is enough,
+# and the sidebar shows which agent finished.
 [ui.toast]
-delivery = "herdr"
+delivery = "off"
