@@ -242,6 +242,30 @@ screen writes back into the linked file (theme name, status indicators,
 sound, toasts), so check `git diff` after using it. A theme picked there
 changes only `name`; the custom tokens still apply on top.
 
+### herdr app
+
+The [herdr desktop app](https://herdr.dev) is a separate program from the TUI
+above, with its own config in `~/.config/herdr-app`. `herdr-app/` keeps only the
+files changed here, each linked in one by one so the app's generated
+`gpui-kit.d.ts` / `jsconfig.json` stay out of the repo:
+
+- `keys.json` — the app's default keys plus `ctrl-s` → `mod.open:prefix`.
+  Once edited, app updates no longer add new default shortcuts to it.
+- `mods/prefix/` — a tmux-style prefix: `ctrl-s` opens a key panel, the next
+  key runs and closes it. `c` new tab, `1-9` select tab, `r`/`S` rename
+  tab/space, `s` spaces list, `X`/`x` close tab/pane, `\`/`|`/`-` split,
+  `hjkl` move, `m` zoom, `e` nvim in a new tab, `g` lazygit, `v` markdown
+  picker, `ctrl-s` a literal `ctrl-s`. Esc or any other key closes it.
+- `mods/spaces-keys/` — a clone of the shipped `spaces` sidebar that takes the
+  keyboard: ↑/↓ move, Enter shows the space, Esc returns to the panes.
+- `layouts/main-keys.json` — a clone of the shipped `main` layout with its
+  spaces block on `spaces-keys`. Select it with `ctrl-shift-l` or
+  `herdr-app do layout.switch --name main-keys`.
+
+The clones don't follow Herdr's updates to `spaces` and `main`. Edits through
+the links may not hot-reload, since the app watches its own folder; restart it
+if a change doesn't show. `ctrl-alt-shift-escape` resets keys and layout.
+
 ## Skills
 
 Only `commit` is kept for now; every other skill was removed on 2026-11-05.
@@ -293,6 +317,7 @@ dotfiles/
 ├── zsh/        # zshrc, and bin/pk-preview for the fzf preview pane
 ├── tmux/       # tmux.conf, Pale Knight theme and keys
 ├── herdr/      # config.toml, Pale Knight theme
+├── herdr-app/  # desktop app: keys.json, ctrl-s prefix mod, keyboard spaces sidebar
 └── yazi/       # yazi.toml, Markdown opens through pk-mdopen
 ```
 
@@ -350,6 +375,11 @@ ln -sfn "$PWD/yazi/yazi.toml"  ~/.config/yazi/yazi.toml
 ln -sfn "$PWD/ghostty/config" ~/.config/ghostty/config
 ln -sfn "$PWD/ghostty/themes" ~/.config/ghostty/themes
 ln -sfn "$PWD/herdr/config.toml" ~/.config/herdr/config.toml
+mkdir -p ~/.config/herdr-app/mods/prefix ~/.config/herdr-app/mods/spaces-keys ~/.config/herdr-app/layouts
+for f in keys.json mods/prefix/main.js mods/prefix/mod.json mods/spaces-keys/main.js \
+         mods/spaces-keys/mod.json layouts/main-keys.json; do
+  ln -sfn "$PWD/herdr-app/$f" ~/.config/herdr-app/$f
+done
 ln -sfn "$PWD/skills/commit"     ~/.cursor/skills/commit
 ln -sfn "$PWD/skills/archify"    ~/.cursor/skills/archify
 
