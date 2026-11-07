@@ -38,6 +38,7 @@ This workflow adds to ponytail:
 - Extras that ponytail drops go under `Not doing` in the plan; the code that will be reused goes under `Reuse`.
 - Duplicated logic in the touched path is fixed once in shared code when the change needs it; unrelated duplication is named, not refactored.
 - Code made obsolete by the change is removed in the same change; no compatibility shims unless the plan requires them.
+- A change that adds or changes UI also follows `skill://ui-craft` and the parts it lists; `/skill:build-ui` is the entry point when the change implements a design.
 
 ## States
 

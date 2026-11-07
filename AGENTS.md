@@ -46,11 +46,22 @@ what is already settled (read documents, answer logs and chat first).
 
 OMP-only skills live in `omp/skills/<name>/SKILL.md` (grill-requirements,
 grill-stack, grill-architecture, work, implement, draft-docs, issue-branch,
-raise-pr, detox), with model-pinned agents in `omp/agents/`. `omp/link-skills`
-links them into `~/.omp/agent/skills/` and `~/.omp/agent/agents/`, pruning only
-its own broken links and refusing to replace unrelated files; rerun it after
-adding or removing one. Each SKILL.md is the source of truth for its workflow;
-`work` and `implement` overlap and share `docs/implementation-plan.md`.
+raise-pr, detox, design, build-ui, review-ui, ui-craft), with model-pinned
+agents in `omp/agents/`. `omp/link-skills` links them into
+`~/.omp/agent/skills/` and `~/.omp/agent/agents/`, pruning only its own broken
+links and refusing to replace unrelated files; rerun it after adding or
+removing one. Each SKILL.md is the source of truth for its workflow; `work`
+and `implement` overlap and share `docs/implementation-plan.md`.
+
+The design skills are distilled from ui-ux-pro-max and Emil Kowalski's skills,
+neither of which is installed. `ui-craft` holds the shared rules (interface,
+motion, platforms, worst-case data) that `design`, `build-ui`, `review-ui`,
+`work` and `implement` read. `design` refuses to start until requirements,
+stack and an architecture review (`Verified` or `Verified with risks`, newer
+than the documents) exist, then draws directions, the design system and
+screens in Paper and writes `docs/design.md`; `build-ui` implements a design
+through `implement`; `review-ui` writes read-only findings to
+`docs/ui-review.md` for `implement` to fix.
 
 `archify` and `ponytail` are third-party and not vendored here: install with
 `npx skills add tt-a1i/archify -g` and

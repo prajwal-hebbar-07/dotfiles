@@ -42,6 +42,7 @@ Apply this to both the plan and the implementation. For each needed piece, take 
 - Comment only the why the code cannot show. A shortcut with a known limit gets `shortcut: <limit>, <when to upgrade>`.
 - New non-trivial logic (a branch, loop, parser, money or security path, or a new script) gets one small test or assert-based self-check; trivial changes need none.
 - Never cut validation at trust boundaries, error handling that prevents data loss, security, accessibility, or anything the user asked for.
+- A change that adds or changes UI also follows `skill://ui-craft` and the parts it lists.
 
 ## Approval contract
 
