@@ -38,6 +38,7 @@ const GROUPS = [
     [["e"], "nvim", tool("nvim", "nvim .")],
     [["g"], "lazygit", tool("lazygit", "lazygit")],
     [["v"], "markdown", tool("markdown", MARKDOWN)],
+    [["d"], "changes", { name: "pane.split", args: { direction: "right", mod: "changes" } }],
     [["ctrl-s"], "send ctrl-s", { send: "ctrl+s" }],
   ]],
 ];
