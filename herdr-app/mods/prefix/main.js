@@ -21,6 +21,7 @@ const GROUPS = [
     [["r"], "rename tab", { name: "tab.rename" }],
     [["S"], "rename space", { name: "space.rename" }],
     [["s"], "spaces list", { name: "spaces-keys.focus" }],
+    [["a"], "agents list", { name: "agents-keys.focus" }],
     [["X"], "close tab", { name: "tab.close" }],
   ]],
   ["Panes", [

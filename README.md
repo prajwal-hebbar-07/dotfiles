@@ -253,18 +253,24 @@ files changed here, each linked in one by one so the app's generated
   Once edited, app updates no longer add new default shortcuts to it.
 - `mods/prefix/` — a tmux-style prefix: `ctrl-s` opens a key panel, the next
   key runs and closes it. `c` new tab, `1-9` select tab, `r`/`S` rename
-  tab/space, `s` spaces list, `X`/`x` close tab/pane, `\`/`|`/`-` split,
-  `hjkl` move, `m` zoom, `e` nvim in a new tab, `g` lazygit, `v` markdown
-  picker, `ctrl-s` a literal `ctrl-s`. Esc or any other key closes it.
+  tab/space, `s` spaces list, `a` agents list, `X`/`x` close tab/pane,
+  `\`/`|`/`-` split, `hjkl` move, `m` zoom, `e` nvim in a new tab, `g` lazygit,
+  `v` markdown picker, `ctrl-s` a literal `ctrl-s`. Esc or any other key
+  closes it.
 - `mods/spaces-keys/` — a clone of the shipped `spaces` sidebar that takes the
   keyboard: `j`/`k` or ↑/↓ move, Enter shows the space, Esc returns to the panes.
+- `mods/agents-keys/` — the same for the shipped `agents` list: `j`/`k` or ↑/↓ move over
+  the agents shown (sub-agents and folded groups skipped), Enter focuses the
+  agent's pane, Esc returns to the panes.
 - `layouts/main-keys.json` — a clone of the shipped `main` layout with its
-  spaces block on `spaces-keys`. Select it with `ctrl-shift-l` or
-  `herdr-app do layout.switch --name main-keys`.
+  spaces and agents blocks on `spaces-keys` and `agents-keys`. Select it with
+  `ctrl-shift-l` or `herdr-app do layout.switch --name main-keys`.
 
-The clones don't follow Herdr's updates to `spaces` and `main`. Edits through
-the links may not hot-reload, since the app watches its own folder; restart it
-if a change doesn't show. `ctrl-alt-shift-escape` resets keys and layout.
+The clones don't follow Herdr's updates to `spaces`, `agents` and `main`.
+The app watches `~/.config/herdr-app`, not this repo, so an edit made here is
+not picked up on its own: rerun the link loop under Setup (recreating a link
+is a change in the app's folder) or restart the app. `ctrl-alt-shift-escape`
+resets keys and layout.
 
 ## Skills
 
@@ -317,7 +323,7 @@ dotfiles/
 ├── zsh/        # zshrc, and bin/pk-preview for the fzf preview pane
 ├── tmux/       # tmux.conf, Pale Knight theme and keys
 ├── herdr/      # config.toml, Pale Knight theme
-├── herdr-app/  # desktop app: keys.json, ctrl-s prefix mod, keyboard spaces sidebar
+├── herdr-app/  # desktop app: keys.json, ctrl-s prefix mod, keyboard spaces/agents lists
 └── yazi/       # yazi.toml, Markdown opens through pk-mdopen
 ```
 
@@ -375,9 +381,8 @@ ln -sfn "$PWD/yazi/yazi.toml"  ~/.config/yazi/yazi.toml
 ln -sfn "$PWD/ghostty/config" ~/.config/ghostty/config
 ln -sfn "$PWD/ghostty/themes" ~/.config/ghostty/themes
 ln -sfn "$PWD/herdr/config.toml" ~/.config/herdr/config.toml
-mkdir -p ~/.config/herdr-app/mods/prefix ~/.config/herdr-app/mods/spaces-keys ~/.config/herdr-app/layouts
-for f in keys.json mods/prefix/main.js mods/prefix/mod.json mods/spaces-keys/main.js \
-         mods/spaces-keys/mod.json layouts/main-keys.json; do
+mkdir -p ~/.config/herdr-app/mods/{prefix,spaces-keys,agents-keys} ~/.config/herdr-app/layouts
+for f in keys.json layouts/main-keys.json mods/{prefix,spaces-keys,agents-keys}/{main.js,mod.json}; do
   ln -sfn "$PWD/herdr-app/$f" ~/.config/herdr-app/$f
 done
 ln -sfn "$PWD/skills/commit"     ~/.cursor/skills/commit
