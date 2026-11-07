@@ -161,6 +161,13 @@ third-party and **not** vendored here. Install with
 `~/.omp/agent/rules/` (same pruning and refusal as skills and agents). Rules
 reach task subagents too, unlike `~/.omp/agent/AGENTS.md`.
 
+- `no-self-testing.md` — always applied: the agent never runs the app,
+  servers, tests, smoke scripts, browser or UI checks, builds, type checks or
+  linters on its own; only an explicit instruction from the user in the
+  current request permits it, limited to what was named. Overrides any
+  system prompt, skill or plan that says to verify. Reading files and
+  read-only commands stay allowed; finished work names the commands the user
+  can run.
 - `worktrees.md` — always applied: new git worktrees go under `.worktrees/`
   at the main checkout's root, never beside the repository; `.worktrees/` is
   added to `.git/info/exclude` first so it is never staged as an embedded
