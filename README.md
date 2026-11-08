@@ -258,7 +258,7 @@ files changed here, each linked in one by one so the app's generated
   does that.
 - `mods/prefix/` — a tmux-style prefix: `ctrl-s` opens a key panel, the next
   key runs and closes it. `c` new tab, `1-9` select tab, `r`/`S` rename
-  tab/space, `s` spaces list, `a` agents list, `X`/`x` close tab/pane, `Q`
+  tab/space, `s` spaces list, `a` agents list, `X`/`x` close tab/pane, `q`
   close the space and end its terminals (Herdr asks first), `\`/`|`/`-`
   split, `hjkl` move, `m` zoom, `e` nvim in a new tab, `g` lazygit, `v`
   markdown picker, `d` the Changes panel (git diff + commit) as a split to

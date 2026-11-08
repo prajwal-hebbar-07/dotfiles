@@ -23,7 +23,7 @@ const GROUPS = [
     [["s"], "spaces list", { name: "spaces-keys.focus" }],
     [["a"], "agents list", { name: "agents-keys.focus" }],
     [["X"], "close tab", { name: "tab.close" }],
-    [["Q"], "close space", { name: "space.close" }],
+    [["q"], "close space", { name: "space.close" }],
   ]],
   ["Panes", [
     [["\\", "|"], "split right", { name: "pane.split", args: { direction: "right" } }],
