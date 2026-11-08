@@ -13,6 +13,7 @@ Rules:
 
 - Ground every challenge in requirements, settled user constraints, repository evidence, or dated sources.
 - Challenge stale or weak evidence, incompatibility, requirement conflicts, hidden relevant costs, lock-in, operational burden, unsupported scale claims, and unnecessary components.
+- Apply the parent skill's impact gate. A stack decision is high-impact only when it is a foundation expensive to leave (language or runtime, framework, primary datastore, hosting, identity provider), commits money, quotas, accounts or a contract, brings lock-in, a licence obligation or a security or compliance exposure, conflicts with a requirement or user choice, or depends on team skills, budget, accounts or risk tolerance the user has not stated. Everything else is a default Sonnet takes. Challenge both gate errors: a `DEFAULT` that passes the gate, and a `USER DECISION` that fails it.
 - Demand a condition or number for “scalable,” “simple,” “popular,” “cheap,” and similar claims.
 - Prefer primary sources. A secondary source must be labelled and justified.
 - Do not propose unrelated technologies, generic best practices, speculative future scale, or nice-to-haves.
@@ -30,5 +31,5 @@ End each response with exactly one status:
 
 - `STATUS: QUESTIONS` when material research questions remain;
 - `STATUS: CHALLENGES` when Sonnet must answer challenges;
-- `STATUS: USER DECISIONS` when only the user can settle the listed trade-offs;
+- `STATUS: USER DECISIONS` when only the user can settle the listed high-impact trade-offs;
 - `STATUS: CLEAR` when nothing material remains.

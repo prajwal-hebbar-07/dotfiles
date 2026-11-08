@@ -15,6 +15,7 @@ Rules:
 - Ask only questions whose answers could change the conclusion. Return at most eight initial questions, grouped by dependency.
 - For every question, cite the prompting evidence and state why the answer matters.
 - Challenge unsupported conclusions, missed contradictions or critical flows, documentation drift, unnecessary complexity, unproved runtime claims, and oversized corrections.
+- Challenge both impact-gate errors: a user question Opus proposes that could not change the verdict or a finding about stored data, security or privacy, money, availability of a critical flow, or a large correction; and an assumption Opus took where it could.
 - Prefer the smallest architecture that satisfies evidenced requirements. Do not demand a pattern, layer, service, interface, or infrastructure component because it is conventional.
 - Do not apply a generic checklist or speculate about future scale, failures, compliance, or features absent from the evidence.
 - Do only what the request needs. Name a useful extra as optional; never add it.

@@ -1,18 +1,19 @@
 ---
 name: grill-stack
-description: Research and stress-test technology-stack choices in rounds through Haiku 5.5 high and Sonnet 5.5 high, give evidence-backed suggestions without deciding for the user, and write docs/stack.md. Each round writes unresolved decisions to docs/stack-questions.md; after the user answers, Sonnet updates docs/stack.md and the next round grills it again, until nothing is left open. Use when the user wants to choose, validate, compare, research, or grill a tech stack.
+description: Research and stress-test technology-stack choices in rounds through Haiku 5.5 high and Sonnet 5.5 high, give evidence-backed suggestions, take low-impact picks as recorded defaults, and write docs/stack.md. Only high-impact stack decisions go to the user, in docs/stack-questions.md; after the user answers, Sonnet updates docs/stack.md and the next round grills it again, until nothing is left open. Use when the user wants to choose, validate, compare, research, or grill a tech stack.
 disable-model-invocation: true
 ---
 
 # grill-stack
 
-Research and stress-test the technology stack against the actual requirements, in rounds. In each round Haiku drafts the questions, Sonnet answers from repository evidence and current primary sources and drafts the report, and Haiku grills Sonnet's research, answers, and draft. The models give recommendations; the user owns every stack decision and answers them in `docs/stack-questions.md`. After the user answers, Sonnet applies the answers, the parent updates `docs/stack.md`, and the next round grills the updated report. Rounds repeat until one ends with no decision left for the user.
+Research and stress-test the technology stack against the actual requirements, in rounds. In each round Haiku drafts the questions, Sonnet answers from repository evidence and current primary sources and drafts the report, and Haiku grills Sonnet's research, answers, and draft. Low-impact picks are taken as labelled defaults; the user owns every high-impact stack decision (the impact gate in Step 1) and answers them in `docs/stack-questions.md`. After the user answers, Sonnet applies the answers, the parent updates `docs/stack.md`, and the next round grills the updated report. Rounds repeat until one ends with no decision left for the user.
 
 Invoke explicitly as `/skill:grill-stack [choices or question]`.
 
 ## Never
 
-- Choose, approve, reject, replace, or lock a technology for the user. A verdict or recommendation is advice, not a decision.
+- Choose, approve, reject, replace, or lock a high-impact technology for the user. A verdict or recommendation is advice, not a decision. A default only fills a gap: it never replaces a user-chosen or existing technology.
+- Ask the user a question that fails the impact gate. Take the default, mark it `Origin: Default`, and move on.
 - Add a service, framework, database, queue, cache, abstraction, dependency, deployment layer, or other technology that no requirement needs. Mention a useful extra only as an optional suggestion; do not add it to the chosen stack.
 - Treat popularity, novelty, stars, benchmark headlines, or “industry standard” as sufficient evidence.
 - State a version, support date, licence, price, quota, compatibility claim, or performance limit without a source and the date checked.
@@ -20,7 +21,7 @@ Invoke explicitly as `/skill:grill-stack [choices or question]`.
 - Ask the same question twice. A user answer is final unless it conflicts with another final answer; quote both and ask which wins.
 - Let the parent model replace either specialist, answer the grill itself, or continue silently when a pinned specialist is unavailable.
 - Have Haiku answer its own questions, grill the user, or reopen a user's answer. Haiku questions and challenges Sonnet's research, answers, and drafts only, including how Sonnet applied a user's answer.
-- Treat a model suggestion, assumption, or consensus as a user choice.
+- Treat a model suggestion, default, assumption, or consensus as a user choice.
 - Edit `docs/requirements.md`, source code, manifests, lockfiles, configuration, ADRs, trackers, or implementation plans. Write only `docs/stack.md` and `docs/stack-questions.md`.
 - Implement, install, migrate, benchmark production systems, commit, or approve the stack.
 
@@ -46,10 +47,23 @@ Classify every stack item:
 
 - **User-chosen** — the user explicitly chose it. Evaluate it; never replace it silently.
 - **Existing** — the repository already depends on it. Report that fact without claiming the user chose it.
-- **Candidate** — a model suggestion. It stays a suggestion until the user accepts it.
+- **Candidate** — a model suggestion for a high-impact choice. It stays a suggestion until the user accepts it.
+- **Default** — a model pick for a choice that fails the impact gate. It is used unless the user overrides it, and is never shown as user-chosen.
 - **Fixed constraint** — a requirement or platform forces it.
 
 Map each choice to the requirement or existing dependency it serves. A choice with no such reason is a simplicity question: suggest removing it, but do not remove it.
+
+### Impact gate
+
+A stack decision goes to the user only when getting it wrong would change what the user gets or be costly to undo — at least one of:
+
+1. It is a foundation that is expensive to leave: language or runtime, application framework, primary datastore, hosting or deployment platform, identity or auth provider.
+2. It commits money, quotas, accounts, or a contract: a paid or metered service, a plan tier, a vendor the user must sign up with.
+3. It brings lock-in, a licence obligation (copyleft, source-available, commercial), or a security or compliance exposure.
+4. It conflicts with a requirement, a user-chosen technology, or another of the user's statements.
+5. It depends on what only the user knows and has not said: team skills, budget, existing accounts, risk or lock-in tolerance.
+
+Everything else is a default: utility libraries, dev tooling, formatters, linters and test runners when the repository implies none, a version within a supported range, and any pick inside an already-chosen ecosystem that can be swapped later without a data migration or rewrite. Take the smallest sufficient option — the platform or standard library first, then what the existing stack already uses. When unsure, ask whether swapping it after launch needs a migration, a rewrite, or money; only a yes passes the gate.
 
 If there is no requirements file, use only requirements stated by the user or evidenced in the repository. Missing product intent is a user decision, not permission to invent a requirement.
 
@@ -78,7 +92,8 @@ For each question return one classification:
 - `SUPPORTED — <answer> — Evidence: <path or URL, checked YYYY-MM-DD>`
 - `CONFLICT — <concrete mismatch> — Evidence: <requirement and source>`
 - `NEEDS PROOF — <benchmark, spike, or missing fact needed> — Why: <reason>`
-- `USER DECISION — <trade-off only the user can settle> — Suggestion: <smallest sufficient option and trade-off>`
+- `DEFAULT — <pick taken> — Why safe: <which gate test it fails and why it is cheap to swap>`
+- `USER DECISION — <high-impact trade-off only the user can settle> — Impact: <the gate test it passes> — Suggestion: <smallest sufficient option and trade-off>`
 
 For each technology, Sonnet gives at most one best real alternative. It says what would make that alternative win. It must not manufacture an alternative where the current choice plainly fits.
 After the classifications, Sonnet includes a complete candidate `docs/stack.md` draft in the shape under Step 7. This is the only full drafting pass before Haiku's critique.
@@ -94,27 +109,29 @@ Send Sonnet's classifications and candidate draft to the existing Haiku agent on
 - vague claims such as “scalable,” “simple,” “popular,” or “cheap” without a condition or number;
 - a model preference presented as a user decision;
 - an unnecessary stack component;
-- a user answer applied with a meaning other than the user's wording.
+- a user answer applied with a meaning other than the user's wording;
+- a `DEFAULT` that passes the impact gate, or a `USER DECISION` that fails it.
 
 Send Haiku's complete critique to the existing Sonnet agent once. Sonnet must either concede and correct the draft, or maintain the claim with one direct piece of evidence. Its response ends with the complete corrected draft.
 
-Do not send Sonnet's response back to Haiku and do not open another debate exchange in this round. Any disagreement left after this exchange becomes `NEEDS PROOF` when measurement or stronger evidence could settle it, or a user decision when it needs preference, budget, risk tolerance, or product intent. Discard unrelated scope.
+Do not send Sonnet's response back to Haiku and do not open another debate exchange in this round. Any disagreement left after this exchange becomes `NEEDS PROOF` when measurement or stronger evidence could settle it, a user decision when it needs preference, budget, risk tolerance, or product intent and passes the impact gate, and a default otherwise. A disagreement about the gate itself goes to the user. Discard unrelated scope.
 
 ## Step 5 — write the round's questions to a file
 
-If no user decision remains, go to Step 7.
+If no high-impact decision remains, go to Step 7.
 
-Otherwise write the whole current user-decision frontier to `docs/stack-questions.md` instead of asking in chat. Clear the file first and write only this round's questions, numbered from Q1: earlier answers already live in `docs/stack.md`, which Step 6 updated before this round began. Use this shape:
+Otherwise write the whole current frontier of high-impact decisions to `docs/stack-questions.md` instead of asking in chat. Before writing, test each against the impact gate once more and move any that fail it to the defaults. Clear the file first and write only this round's questions, numbered from Q1: earlier answers already live in `docs/stack.md`, which Step 6 updated before this round began. Use this shape:
 
 ```markdown
 # Stack questions
 
-Write your answer on the `Answer:` line under each question, then say they are answered. `yes` accepts the suggestion; `defer` leaves the decision open.
+Write your answer on the `Answer:` line under each question, then say they are answered. `yes` accepts the suggestion; `defer` leaves the decision open. To override a default, write the change under it.
 
 ## Round <N>
 
 ### Q1. <the choice in plain language>
 
+- Why you: <the gate test it passes, in one line>
 - Affects: <the requirement it serves>
 - Facts: <verified facts — source, checked YYYY-MM-DD>
 - Suggestion: <Sonnet's smallest sufficient option>
@@ -122,7 +139,13 @@ Write your answer on the `Answer:` line under each question, then say they are a
 - Choices: <concise options, worded so `yes` accepts the suggestion when possible>
 
 Answer:
+
+## Defaults taken this round (no answer needed)
+
+- <area>: <pick> — <one-line reason>
 ```
+
+Omit the defaults section when there are none.
 
 Reply with the file path, the round number, and the number of questions, then wait. Do not mark an unanswered suggestion as chosen.
 
@@ -130,7 +153,7 @@ Reply with the file path, the round number, and the number of questions, then wa
 
 When the user says the questions are answered, read the file. An empty `Answer:` is unanswered: name those questions in chat and wait, unless the user says to defer them. Then:
 
-1. Send the exact answers to the existing Sonnet agent. It applies them to its corrected draft and returns the complete updated draft. An answer with two materially different meanings, or one that directly contradicts another final answer (quote both), is not applied; it stays a user decision for the next round.
+1. Send the exact answers, and any change written under a default, to the existing Sonnet agent. It applies them to its corrected draft and returns the complete updated draft; an overridden default becomes User-chosen. An answer with two materially different meanings, or one that directly contradicts another final answer (quote both), is not applied; it stays a user decision for the next round.
 2. The parent writes the updated draft to `docs/stack.md`, so the file always holds every settled answer.
 3. Start the next round at Step 2 with the updated `docs/stack.md` and the answered questions file as the baseline. Haiku drafts the fresh frontier: questions the answers unlocked, consequences of the answers for the rest of the stack, gaps the updated report exposes, and anything left unresolved in item 1. Steps 3 and 4 run in full, and Step 5 replaces the file with the next round's questions.
 
@@ -155,9 +178,9 @@ Checked: YYYY-MM-DD
 
 ### <area>: <technology and version/range when verified>
 
-- Origin: User-chosen | Existing | Candidate | Fixed constraint
+- Origin: User-chosen | Existing | Candidate | Default | Fixed constraint
 - Serves: <requirement or existing need>
-- Assessment: Supported | Conflict | Needs proof | User decision
+- Assessment: Supported | Conflict | Needs proof | Default | User decision
 - Evidence: <fact — source, checked date>
 - Risks: <only material risks>
 - Alternative: <one real alternative, or “None needed”>
@@ -173,6 +196,6 @@ Checked: YYYY-MM-DD
 - <only unanswered or explicitly deferred decisions>
 ```
 
-Omit empty sections and fields. Preserve existing user choices exactly. Suggestions never change `Origin` to `User-chosen`. Do not invent decision IDs, scores, weighted matrices, or a single “best stack” verdict.
+Omit empty sections and fields. Preserve existing user choices exactly. Suggestions and defaults never change `Origin` to `User-chosen`; only the user's answer does. Do not invent decision IDs, scores, weighted matrices, or a single “best stack” verdict.
 
-Reply with the file path, the number of rounds, counts by assessment, the number of user decisions, and the most consequential verified risk or `Needs proof` item. Do not repeat the report in chat.
+Reply with the file path, the number of rounds, counts by assessment, the number of defaults taken and of user decisions, and the most consequential verified risk or `Needs proof` item. Do not repeat the report in chat.
