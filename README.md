@@ -258,10 +258,11 @@ files changed here, each linked in one by one so the app's generated
   does that.
 - `mods/prefix/` — a tmux-style prefix: `ctrl-s` opens a key panel, the next
   key runs and closes it. `c` new tab, `1-9` select tab, `r`/`S` rename
-  tab/space, `s` spaces list, `a` agents list, `X`/`x` close tab/pane,
-  `\`/`|`/`-` split, `hjkl` move, `m` zoom, `e` nvim in a new tab, `g` lazygit,
-  `v` markdown picker, `d` the Changes panel (git diff + commit) as a split
-  to the right, `ctrl-s` a literal `ctrl-s`. Esc or any other key closes it.
+  tab/space, `s` spaces list, `a` agents list, `X`/`x` close tab/pane, `Q`
+  close the space and end its terminals (Herdr asks first), `\`/`|`/`-`
+  split, `hjkl` move, `m` zoom, `e` nvim in a new tab, `g` lazygit, `v`
+  markdown picker, `d` the Changes panel (git diff + commit) as a split to
+  the right, `ctrl-s` a literal `ctrl-s`. Esc or any other key closes it.
 - `mods/spaces-keys/` — a clone of the shipped `spaces` sidebar that takes the
   keyboard: `j`/`k` or ↑/↓ move, Enter shows the space, Esc returns to the panes.
 - `mods/agents-keys/` — the same for the shipped `agents` list: `j`/`k` or ↑/↓ move over
