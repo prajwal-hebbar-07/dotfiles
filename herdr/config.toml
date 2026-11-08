@@ -53,7 +53,14 @@ mauve  = "#ba92d5"          # essence, branch names
 [ui]
 status_indicators = "dots"
 
-# No pop-up toasts: the agent-state sound (ui.sound, on by default) is enough,
-# and the sidebar shows which agent finished.
+# Desktop notifications when a background agent finishes or needs input, so
+# they reach you in another app. "terminal" hands them to Ghostty (OSC), which
+# posts them to Notification Center under its own name and focuses Ghostty on
+# click; no extra install. herdr skips the popup for the active tab.
 [ui.toast]
-delivery = "off"
+delivery = "terminal"
+
+# Sound when an agent in a background workspace changes state (herdr's default,
+# made explicit).
+[ui.sound]
+enabled = true
