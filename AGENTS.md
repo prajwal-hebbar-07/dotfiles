@@ -46,12 +46,34 @@ what is already settled (read documents, answer logs and chat first).
 
 OMP-only skills live in `omp/skills/<name>/SKILL.md` (grill-requirements,
 grill-stack, grill-architecture, work, implement, draft-docs, issue-branch,
-raise-pr, detox, design, build-ui, review-ui, ui-craft), with model-pinned
-agents in `omp/agents/`. `omp/link-skills` links them into
-`~/.omp/agent/skills/` and `~/.omp/agent/agents/`, pruning only its own broken
-links and refusing to replace unrelated files; rerun it after adding or
-removing one. Each SKILL.md is the source of truth for its workflow; `work`
-and `implement` overlap and share `docs/implementation-plan.md`.
+raise-pr, detox, design, build-ui, review-ui, ui-craft, manual,
+herdr-worktree), with model-pinned agents in `omp/agents/`. `omp/link-skills`
+links them into `~/.omp/agent/skills/` and `~/.omp/agent/agents/`, pruning
+only its own broken links and refusing to replace unrelated files; rerun it
+after adding or removing one. Each SKILL.md is the source of truth for its
+workflow; `work` and `implement` overlap and share
+`docs/implementation-plan.md`.
+
+The three grill skills (requirements, stack, architecture) share an impact
+gate: the models research facts and settle low-impact choices themselves,
+recorded as `Defaults` (requirements), `Origin: Default` (stack) or
+`Assumptions` (architecture), listed at the foot of each round's questions
+file where the user can override them. Only decisions that move scope,
+change core behaviour, are costly to reverse (stored data, public
+interfaces, auth, platform foundations), commit money or carry legal or
+security exposure reach the user.
+
+`manual` (`/skill:manual`) creates an empty `manual.md` at the project root if
+missing and adds it to `.gitignore`, never reading the file. Afterwards the
+`manual-guard` extension blocks every OMP tool call that names a `manual.md`,
+in the main session and subagents, and the `omp/rules/manual-md.md` rule
+forbids reaching it any other way (a shell glob or `grep -r` the extension
+cannot see).
+
+`herdr-worktree` turns task names into one git worktree each under the main
+checkout's `.worktrees/` and opens each as a named tab in the current Herdr
+desktop space through `herdr-app` (never `herdr`, whose server is normally
+off); outside Herdr it prints the `herdr-app do tab.new` commands instead.
 
 The design skills are distilled from ui-ux-pro-max and Emil Kowalski's skills,
 neither of which is installed. `ui-craft` holds the shared rules (interface,
@@ -73,6 +95,15 @@ through `implement`; `review-ui` writes read-only findings to
 `omp/rules/*.md` are user-level OMP rules that `omp/link-skills` links into
 `~/.omp/agent/rules/`; they reach task subagents, unlike
 `~/.omp/agent/AGENTS.md`. Each rule file is its own documentation.
+
+## OMP extensions
+
+`omp/extensions/*.ts` are OMP extensions that `omp/link-skills` links into
+`~/.omp/agent/extensions/`; OMP loads them at startup, so restart it after
+adding or changing one. `manual-guard.ts` blocks tool calls that name
+`manual.md`; to let an agent at the file on purpose, add
+`extension-module:manual-guard` to `disabledExtensions` in
+`~/.omp/agent/config.yml` for that session.
 
 ## Cursor skills
 
