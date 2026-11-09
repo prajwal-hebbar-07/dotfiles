@@ -46,13 +46,18 @@ what is already settled (read documents, answer logs and chat first).
 
 OMP-only skills live in `omp/skills/<name>/SKILL.md` (grill-requirements,
 grill-stack, grill-architecture, work, implement, feature, draft-docs,
-issue-branch, raise-pr, detox, design, build-ui, review-ui, ui-craft, manual,
-herdr-worktree), with model-pinned agents in `omp/agents/`. `omp/link-skills`
-links them into `~/.omp/agent/skills/` and `~/.omp/agent/agents/`, pruning
-only its own broken links and refusing to replace unrelated files; rerun it
-after adding or removing one. Each SKILL.md is the source of truth for its
-workflow; `work` and `implement` overlap and share
-`docs/implementation-plan.md`.
+raise-issues, issue-branch, raise-pr, detox, design, build-ui, review-ui,
+ui-craft, manual, herdr-worktree), with model-pinned agents in `omp/agents/`.
+`omp/link-skills` links them into `~/.omp/agent/skills/` and
+`~/.omp/agent/agents/`, pruning only its own broken links and refusing to
+replace unrelated files; rerun it after adding or removing one. Each SKILL.md
+is the source of truth for its workflow. `implement` and `work` are one
+workflow: both take an issue URL, a request or a plan, plan in
+`docs/implementation-plan.md` after explicit approval, stay inside the
+architecture in place (a new component, technology or trust boundary goes
+back to the grills) and update existing documents the change makes stale.
+Only `implement` keeps the AI navigation map `docs/codebase-map.md` (and its
+`AGENTS.md` pointer); `work` runs `implement` with every map step removed.
 
 The three grill skills (requirements, stack, architecture) share an impact
 gate: the models research facts and settle low-impact choices themselves,
@@ -62,6 +67,17 @@ file where the user can override them. Only decisions that move scope,
 change core behaviour, are costly to reverse (stored data, public
 interfaces, auth, platform foundations), commit money or carry legal or
 security exposure reach the user.
+
+`raise-issues` turns the settled documents into GitHub issues: a walking
+skeleton first when no app runs yet, then vertical slices (never one per
+layer), shared prefactors, and unaccepted architecture-review corrections,
+linked with native `--blocked-by` (gh 2.94.0 or later). Acceptance restates
+requirement lines; nothing is invented. It drafts `docs/issues.md`, raises
+only on `/skill:raise-issues approve`, records each number as it goes so a
+rerun never duplicates, and skips what the code already does, what an
+existing issue covers and what waits on an open question. Each raised issue
+is then worked with `issue-branch` and `implement` (or `work`); `feature` is
+for asks not yet in `docs/requirements.md`.
 
 `feature` is the loop for one feature on an app the greenfield pipeline
 already built. It runs the requirements grill (same agents, gate plus two

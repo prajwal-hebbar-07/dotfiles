@@ -201,7 +201,10 @@ Where they and this list disagree, this list wins:
 - The spec is the settled request. `Scope: In` is `Requirements` plus
   `Changes to existing behaviour`; `Scope: Out` is `Out of scope`; defaults
   stand. A conflict between the spec and the code is an `Open decision`, not
-  a reason to reopen the spec.
+  a reason to reopen the spec. The spec's `Impact: Stack`, `UI` and
+  `Architecture` lines are approved departures from the architecture in
+  place, and its changes to the planning documents are folded in by Step 5,
+  not edited during implementation.
 - Start from `Impact: Code` and `docs/codebase-map.md`.
 - `Verification` names, for every line under `Requirements` and `Changes to
   existing behaviour`, the command or scenario that proves it.
