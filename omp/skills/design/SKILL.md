@@ -1,6 +1,6 @@
 ---
 name: design
-description: After requirements, stack and a verified architecture, turn them into a design in Paper and docs/design.md — direction, tokens, screens with every state, and motion — by drawing two or three real directions to pick from, then the design system and screens, checked against ui-craft. Use when the user wants something designed before it is built.
+description: After approved requirements, stack and architecture, turn them into a design in Paper and docs/design.md — direction, tokens, screens with every state, and motion — by drawing two or three real directions to pick from, then the design system and screens, checked against ui-craft. Implementation verification is not a prerequisite. Use when the user wants something designed before it is built.
 disable-model-invocation: true
 ---
 
@@ -51,32 +51,46 @@ A change after `Approved` returns the status to `Drawn`.
 
 ## Step 0 — readiness
 
-Design comes after the architecture is settled. Every run starts with this
-check; print it as a checklist, one line each, `ready` or
-`not ready: <what> — run <command>`:
+Design needs an approved, consistent intended design, not working software.
+Every run starts with this check; print it as a checklist, one line each,
+`ready` or `not ready: <what> — <next action>`:
 
 | # | Check | Fix |
 | --- | --- | --- |
 | 1 | `docs/requirements.md` exists | `/skill:draft-docs requirements`, then `/skill:grill-requirements` |
 | 2 | `docs/stack.md` exists | `/skill:draft-docs stack`, then `/skill:grill-stack` |
 | 3 | `docs/architecture.md` exists | `/skill:draft-docs architecture` |
-| 4 | `docs/architecture-review.md` has `Verdict: Verified` or `Verified with risks` and nothing under `Unresolved` | `/skill:grill-architecture` |
-| 5 | The review is current: `docs/architecture.md`, `docs/stack.md` and `docs/requirements.md` have not changed after its `Reviewed:` date (`git log -1 --format=%cs -- <file>`, or the file date when uncommitted) | `/skill:grill-architecture` |
+| 4 | The documents or current chat establish user approval of the intended design | Ask only for the missing approval; never approve on the user's behalf |
+| 5 | No unresolved decision or contradiction prevents defining the requested screens | Resolve from the approved sources first; ask only for a remaining user decision, or name `/skill:grill-architecture` for a blocking architecture gap |
 
-Any `not ready` stops the run before anything is written or drawn. Items
-the user deferred (`Open questions` in the requirements, `Decisions for
-you` in the stack) are printed as `warning:` lines and copied into the
-design's `Open decisions` when a screen depends on them. Paper is not part
-of this check; it is checked when drawing starts.
+Any `not ready` stops the run before anything is written or drawn. Scope
+decisions and contradictions to the requested screens; unrelated or
+explicitly deferred work does not block them.
+
+A standalone architecture review is optional. Use it when present, or the
+review embedded in the architecture when that supersedes it. A missing or
+outdated review, `Not verifiable` verdict, missing implementation, runtime
+tests or deployment evidence are warnings, not wireframe blockers. Inspect
+any relevant finding for an actual screen-definition gap rather than
+blocking on a verdict, date or unresolved-evidence heading alone. Never
+relabel a review as verified or treat design approval as implementation
+proof, provider permission or release readiness.
+
+Print relevant evidence gaps and deferred items as `warning:` lines.
+Record risks that affect a screen in the design's `Risks and evidence
+gaps`; put only decisions the user still needs to make in `Open decisions`.
+Paper is not part of this check; it is checked when drawing starts.
 
 ## Step 1 — gather
 
-1. Read the settled sources listed under `Never`, with `docs/architecture.md`
-   and `docs/architecture-review.md`: the screens follow the architecture's
-   flows and its failure modes become screen states (offline, sync
-   conflict, permission denied, rate limited). A screen that needs
-   something the architecture does not provide is an open decision naming
-   `/skill:grill-architecture`, not a design workaround.
+1. Read the settled sources listed under `Never`, including any standalone
+   or embedded architecture review that is available and not superseded.
+   The screens follow the architecture's flows and its failure modes
+   become screen states (offline, sync conflict, permission denied, rate
+   limited). Distinguish an intended capability awaiting implementation
+   evidence from a capability the architecture does not provide. Record
+   the former under `Risks and evidence gaps`; the latter is an open
+   decision naming `/skill:grill-architecture`, not a design workaround.
 2. Establish, from evidence: who uses it and how often, the platform and
    size (`platform` in `skill://ui-craft` decides; phone 390×844, desktop
    1440×900, tablet 834×1194), the screens and their states, and what each
@@ -189,6 +203,10 @@ Sources: <requirements, brief, reference documents used>
 ## Rejected directions
 
 - <name> — <why it lost>
+
+## Risks and evidence gaps
+
+- <screen affected, unverified assumption or integration, and required evidence; not a claim of working software>
 
 ## Open decisions
 
