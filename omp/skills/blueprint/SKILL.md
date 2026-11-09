@@ -1,6 +1,6 @@
 ---
 name: blueprint
-description: After requirements and stack are settled, write docs/blueprint.html — one self-contained page that links the official docs of every stack choice and the component library, lists the install and setup steps, proposes the project structure, and breaks the build into chunks that can become issues, with the review steps that lead to design and raise-issues. Use when the user wants to see how the settled documents turn into a build before designing.
+description: After requirements and stack are settled, write docs/blueprint.html — one self-contained page that links the official docs of every stack choice and the component library, lists the install and setup steps, proposes the project structure, and breaks the build into chunks that can become issues, with the review steps that lead to design and raise-issues. An Opus 5.5 orchestrator fans the doc research and chunk drafting out to parallel Sonnet 5.5 workers, or GPT 6.1 Sol and Terra when either is unavailable or hits a limit. Use when the user wants to see how the settled documents turn into a build before designing.
 disable-model-invocation: true
 ---
 
@@ -11,6 +11,11 @@ before design: what the project is built with (linked to the official docs),
 what to install and set up, how the project is laid out, and the build cut
 into chunks that `raise-issues` turns into issues. The user reviews it, then
 gives the design direction to `/skill:design`.
+
+The parent session checks readiness and writes the file. A pinned
+orchestrator does the rest: it reads the settled documents, sends the doc
+research and then the chunk drafting to parallel workers, cuts and checks
+the build order itself, and returns the page.
 
 Invoke explicitly:
 
@@ -39,8 +44,43 @@ already set, and `feature` goes from the spec to design and issues.
   `docs/stack.md`.
 - Install, scaffold, run anything, raise issues, commit, or write any file
   except `docs/blueprint.html`.
+- Let the parent session gather, chunk or compose the page itself, use an
+  agent outside the pairs below, mix pairs, or continue silently when a
+  pinned agent fails.
 - Use scripts, external CSS, web fonts, images or trackers in the page. It
   is static HTML that opens from disk.
+
+## Specialists
+
+Use only these OMP task agents.
+
+Primary pair:
+
+- `blueprint-opus-orchestrator` — `anthropic/claude-opus-5-5`, high
+  thinking. Runs Steps 2–4, spawns the workers, owns the cut, the checks
+  and the page.
+- `blueprint-sonnet-worker` — `anthropic/claude-sonnet-5-5`, medium
+  thinking. Researches one slice of the stack docs or drafts the chunks it
+  is given. Only the orchestrator spawns it.
+
+Authorised fallback pair:
+
+- `blueprint-sol-orchestrator` — `openai-codex/gpt-6.1-sol`, high thinking.
+- `blueprint-terra-worker` — `openai-codex/gpt-6.1-terra`, medium thinking.
+
+The parent spawns the primary orchestrator unless the user asks for the
+fallback pair. If the orchestrator fails (including a rate limit or quota
+error), is unavailable, reports a model other than its pin, or returns
+`PAIR FAILED` because a worker did, name the failure and rerun Steps 2–4
+from the start with the fallback orchestrator; nothing has been written, so
+nothing carries over. Never mix pairs or use output from the superseded
+pair. If the fallback pair fails the same way, stop and name it. No other
+fallback is authorised.
+
+Spawn each agent by its name and never pass a per-call `model`; each agent
+file pins its model and reports its identity first. The orchestrator
+spawns workers from its own nesting level, so `task.maxRecursionDepth`
+must stay at its default `2` or higher.
 
 ## Step 1 — readiness
 
@@ -56,29 +96,47 @@ Any `not ready` stops the run. Print each `Open questions` item in the
 requirements and each `Decisions for you` item in the stack as a `warning:`
 line; the chunks that depend on one say `waits on` it.
 
-## Step 2 — gather
+## Step 2 — orchestrate: gather
 
-1. Read `docs/requirements.md`, `docs/stack.md`, `docs/codebase-map.md`
+The parent spawns the orchestrator with the invocation (focus or change),
+the readiness warnings and the date. Steps 2–4 are the orchestrator's.
+
+1. Read `docs/requirements.md`, `docs/stack.md`, an existing
+   `docs/blueprint.html` (for `<change>`: keep everything the change does
+   not touch, and send workers only what it does), `docs/codebase-map.md`
    when present, the manifests and the repository tree. Whatever the
    repository already has is `done`, not a step.
-2. For each stack choice, open its official documentation and take: the
-   getting-started or installation page for the framework the project uses,
-   and the reference page a developer will need most. For the component
-   library also take its theming page. Confirm each page covers the version
-   in `docs/stack.md`; record the date checked. At most three links per
-   choice.
-3. Take every setup command from those pages, not from memory: create the
-   project, add each dependency, initialise the component library,
-   environment variables, and the accounts or keys the stack names (the
-   user creates these by hand).
-4. Take the project layout from the framework's documented conventions,
-   adding only what the chunks need.
+2. **Docs wave.** One parallel batch of `docs` workers, at most eight; one
+   per stack choice, related choices grouped (one ecosystem, one worker) when
+   there are more. Each task gives the choices with the versions from
+   `docs/stack.md` and asks, per choice, for: the getting-started or
+   installation page for the framework the project uses, the reference page
+   a developer will need most, and for the component library its theming
+   page (at most three links, each confirmed to cover the version, with the
+   date checked); every setup command taken from those pages, not from
+   memory (create the project, add each dependency, initialise the
+   component library, environment variables); the accounts or keys the
+   user creates by hand; and, for the framework, its documented project
+   layout. Return format, per choice:
+
+   ```text
+   ### <area>: <choice> <version>
+   - Link: <title> — <URL> — covers <version>, checked YYYY-MM-DD
+   - Setup: <command> — <URL>
+   - By hand: <account, key or variable> — <URL>
+   - Layout: <convention, framework only> — <URL>
+   - Problems: <page missing, version not covered, conflict with the stack>
+   ```
+
+3. The orchestrator orders the setup steps, marks `done` against the
+   repository, and takes the project layout from the framework's documented
+   conventions, adding only what the chunks need.
 
 ## Step 3 — chunk the build
 
-Cut the requirements into the chunks a careful author would build, in
-order. The rules are `raise-issues`' slicing rules, so its issues follow
-the chunks:
+The orchestrator cuts the requirements into the chunks a careful author
+would build, in order; the workers only fill them in. The rules are
+`raise-issues`' slicing rules, so its issues follow the chunks:
 
 1. **C0 setup.** The setup steps plus a walking skeleton: runtime,
    framework, datastore and host wired end to end with one trivial path.
@@ -95,13 +153,31 @@ the chunks:
    domains, store listings) is listed under the step that needs it, never
    as a candidate.
 
-Every requirement line ends up in exactly one chunk, or under `Gaps` with
-its reason.
+**Chunk wave.** One parallel batch of `chunks` workers, at most eight; one
+per chunk, neighbouring chunks grouped when there are more. Each task gives
+the chunk's id, title, the requirement lines assigned to it (quoted), its
+dependencies, any `waits on` item, and the stack choices and setup steps it
+uses. Return format, per chunk:
 
-## Step 4 — write `docs/blueprint.html`
+```text
+### C<n> <title>
+- Covers: "<requirement line, exact>" — <requirements.md section>
+- Issue candidate: <pull-request-sized piece> — <the Covers lines it builds>
+- Screen: <name>
+- Creates: <path in the project structure>
+- By hand: <manual step this chunk needs>
+- Problems: <line that belongs elsewhere, vague line, missing stack choice — with the command that settles it>
+```
 
-Replace any earlier page. One file, sections in this order, each with an
-`id` so the table of contents links to it:
+The orchestrator then settles every `Problems` entry (moves the line, or
+records a `Gaps` entry naming its command) and checks that every requirement
+line ends up in exactly one chunk, or under `Gaps` with its reason.
+
+## Step 4 — compose the page
+
+The orchestrator composes the whole page and returns it as its agent file
+specifies. One file, sections in this order, each with an `id` so the
+table of contents links to it:
 
 | Section | `id` | Content |
 | --- | --- | --- |
@@ -135,9 +211,17 @@ short inline `<style>` (system font, readable line length, light and dark
 through `prefers-color-scheme`), external links with `rel="noreferrer"`.
 No script.
 
+## Step 5 — write `docs/blueprint.html`
+
+The parent takes the orchestrator's page from `<!doctype html>` to
+`</html>` (reading the full `agent://<id>` output when the inline result is
+a preview) and writes it to `docs/blueprint.html`, replacing any earlier
+page. It changes nothing in the page.
+
 ## Reply
 
-Reply with the path, the number of stack links, setup steps (and how many
-are `done` or `by hand`), chunks, issue candidates and gaps, and the next
+Reply with the path, the pair that ran (and the failure that switched it,
+when it did), the number of stack links, setup steps (and how many are
+`done` or `by hand`), chunks, issue candidates and gaps, and the next
 command: the first gap's command, or `/skill:design <direction>` when there
 is none. Do not repeat the page in chat.

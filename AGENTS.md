@@ -89,7 +89,13 @@ hosting, and for a UI the component library and styling).
 (checked, for the pinned version), the component library, the setup steps
 with their commands, the project structure, and the build cut into chunks
 with issue candidates, plus the review steps that lead to `design`. New
-apps only.
+apps only. An Opus 5.5 (high) orchestrator agent does the work: one
+parallel wave of Sonnet 5.5 (medium) workers researches the stack's
+official docs and setup commands, the orchestrator cuts the chunks, and a
+second wave drafts each chunk's issue candidates and screens; the
+orchestrator checks coverage and returns the page, which the parent
+writes. When either model is unavailable or hits a limit, the whole pair
+switches to GPT 6.1 Sol (high) and Terra (medium); pairs never mix.
 
 `raise-issues` turns the settled documents into GitHub issues in the
 blueprint's chunk order: a walking skeleton first when no app runs yet,
