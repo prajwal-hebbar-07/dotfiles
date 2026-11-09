@@ -1,6 +1,6 @@
 ---
 name: grill-stack
-description: Research and stress-test technology-stack choices in rounds through Haiku 5.5 high and Sonnet 5.5 high, give evidence-backed suggestions, take low-impact picks as recorded defaults, and write docs/stack.md. Only high-impact stack decisions go to the user, in docs/stack-questions.md; after the user answers, Sonnet updates docs/stack.md and the next round grills it again, until nothing is left open. Use when the user wants to choose, validate, compare, research, or grill a tech stack.
+description: Research and stress-test technology-stack choices in rounds with Haiku/Sonnet, or an authorised GPT 6.1-terra griller and GPT 6.1-sol researcher fallback pair. Give evidence-backed suggestions, record low-impact defaults, and write docs/stack.md. Only high-impact decisions go to docs/stack-questions.md; apply the user's answers and grill again until nothing is left open.
 disable-model-invocation: true
 ---
 
@@ -19,7 +19,7 @@ Invoke explicitly as `/skill:grill-stack [choices or question]`.
 - State a version, support date, licence, price, quota, compatibility claim, or performance limit without a source and the date checked.
 - Ask what the request, earlier answers, `docs/requirements.md`, `docs/stack.md`, `docs/stack-questions.md`, manifests, lockfiles, repository, or authoritative documentation already settles.
 - Ask the same question twice. A user answer is final unless it conflicts with another final answer; quote both and ask which wins.
-- Let the parent model replace either specialist, answer the grill itself, or continue silently when a pinned specialist is unavailable.
+- Let the parent model replace either specialist outside the authorised pairs below, answer the grill itself, or continue silently when a pinned specialist is unavailable.
 - Have Haiku answer its own questions, grill the user, or reopen a user's answer. Haiku questions and challenges Sonnet's research, answers, and drafts only, including how Sonnet applied a user's answer.
 - Treat a model suggestion, default, assumption, or consensus as a user choice.
 - Edit `docs/requirements.md`, source code, manifests, lockfiles, configuration, ADRs, trackers, or implementation plans. Write only `docs/stack.md` and `docs/stack-questions.md`.
@@ -27,12 +27,23 @@ Invoke explicitly as `/skill:grill-stack [choices or question]`.
 
 ## Specialists
 
-Use only these OMP task agents:
+Use only these OMP task agents, in one of these pairs:
 
-- `stack-haiku-griller` — `anthropic/claude-haiku-5-5`, high thinking. It drafts the current question frontier and attacks Sonnet's evidence and reasoning.
+Primary pair:
+
+- `stack-haiku-griller` — `anthropic/claude-haiku-5-5`, high thinking. It drafts the current question frontier and attacks the researcher's evidence and reasoning.
 - `stack-sonnet-researcher` — `anthropic/claude-sonnet-5-5`, high thinking. It researches primary sources, evaluates choices, suggests alternatives, and drafts the report.
 
-Spawn each with its named `agent`; do not pass a per-call `model`. If either agent fails, reports another model, or is unavailable, stop and name it. Keep both agents alive across rounds and send follow-ups through `write agent://<id>`. If either is no longer running, for example because the user answered in a new session, spawn a fresh one: `docs/stack.md` and `docs/stack-questions.md` carry the state.
+Authorised fallback pair:
+
+- `stack-terra-griller` — `openai-codex/gpt-6.1-terra`, high thinking. It performs the griller's questions and bounded critique.
+- `stack-sol-researcher` — `openai-codex/gpt-6.1-sol`, high thinking. It performs the source research, evidence-based answers, rebuttal and report drafting.
+
+Start with the primary pair unless the user requests the fallback pair. If either primary specialist fails (including a rate limit or quota error), is unavailable, or reports a model other than its pin, name the failure and switch both roles to the fallback pair. Restart the unfinished round from `docs/stack.md`, the current repository evidence and any answered `docs/stack-questions.md`; preserve settled user answers, but do not treat an unchecked candidate as accepted. Do not mix pairs or accept further results from the superseded pair. If either fallback specialist fails, reports another model, or is unavailable, stop and name it. No other fallback is authorised.
+
+Spawn each specialist with its named `agent`; do not pass a per-call `model`. Each agent file pins its model; require the specialist to report its actual model identity before substantive work. Throughout the steps below, “Haiku” means the active griller (Haiku or Terra), and “Sonnet” means the active researcher (Sonnet or Sol). Keep the selected pair for the rest of the run.
+
+Keep both agents alive across rounds and send follow-ups through `write agent://<id>`. If either is no longer running, for example because the user answered in a new session, spawn a fresh one from the selected pair: `docs/stack.md` and `docs/stack-questions.md` carry the state.
 
 ## Step 1 — establish the stack and constraints
 
@@ -69,7 +80,7 @@ If there is no requirements file, use only requirements stated by the user or ev
 
 ## Step 2 — Haiku drafts the grill
 
-Spawn `stack-haiku-griller` with the choices, requirements, repository evidence, settled user constraints, and the paths `docs/stack.md` and `docs/stack-questions.md` when they exist. Ask for at most eight questions across the whole current frontier and at most three for one technology. Shared questions cover several choices once.
+Spawn the griller from the selected pair (`stack-haiku-griller` or `stack-terra-griller`) with the choices, requirements, repository evidence, settled user constraints, and the paths `docs/stack.md` and `docs/stack-questions.md` when they exist. Ask for at most eight questions across the whole current frontier and at most three for one technology. Shared questions cover several choices once.
 
 Questions may cover only what changes the recommendation:
 
@@ -85,7 +96,7 @@ No generic checklist. No speculative future scale. No technology shopping list.
 
 ## Step 3 — Sonnet researches and answers
 
-Spawn `stack-sonnet-researcher` with Haiku's questions and the evidence boundaries. Sonnet researches only facts needed to classify a choice. It uses repository evidence first, then at most two external primary sources per technology and twelve external sources per round; a source already cited in an earlier round is reused, not looked up again. One source may support several claims. Secondary sources are allowed only when no primary source covers the point, and must be labelled secondary. Stop looking once the available evidence supports a classification; do not research every property of every technology.
+Spawn the researcher from the selected pair (`stack-sonnet-researcher` or `stack-sol-researcher`) with Haiku's questions and the evidence boundaries. Sonnet researches only facts needed to classify a choice. It uses repository evidence first, then at most two external primary sources per technology and twelve external sources per round; a source already cited in an earlier round is reused, not looked up again. One source may support several claims. Secondary sources are allowed only when no primary source covers the point, and must be labelled secondary. Stop looking once the available evidence supports a classification; do not research every property of every technology.
 
 For each question return one classification:
 

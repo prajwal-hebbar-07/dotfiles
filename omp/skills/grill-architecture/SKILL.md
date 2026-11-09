@@ -1,6 +1,6 @@
 ---
 name: grill-architecture
-description: "Verify an implemented architecture in rounds of bounded debate: Sonnet 5.5 high asks the material questions, Opus 5.5 medium answers them, Sonnet challenges the answers, and Opus writes the evidence-backed conclusion in docs/architecture-review.md. Low-impact unknowns become recorded assumptions; only high-impact questions only the user can answer go to docs/architecture-questions.md, and after the user answers, Opus updates the review and the next round grills it again, until nothing is left for the user."
+description: "Verify an implemented architecture in bounded rounds with Sonnet/Opus, or an authorised GPT 6.1-terra griller and GPT 6.1-sol reviewer fallback pair. Write the evidence-backed conclusion in docs/architecture-review.md. Low-impact unknowns become assumptions; only high-impact questions only the user can answer go to docs/architecture-questions.md, then grill again until nothing is left for the user."
 disable-model-invocation: true
 ---
 
@@ -18,19 +18,30 @@ Invoke explicitly as `/skill:grill-architecture [scope or question]`.
 - Apply a generic architecture checklist. Review only concerns material to this system and invocation scope.
 - Treat a diagram, architecture document, or stated intention as proof that the implementation follows it.
 - Claim runtime, scale, failure, recovery, or performance behavior that static evidence cannot prove; classify it as `NEEDS PROOF`.
-- Let the parent model answer the grill, adjudicate the debate, replace either specialist, or silently continue when a pinned specialist is unavailable.
+- Let the parent model answer the grill, adjudicate the debate, replace either specialist outside the authorised pairs below, or silently continue when a pinned specialist is unavailable.
 - Ask the user to referee model disagreement. Preserve unresolved disagreement in the report. Ask the user only what passes the Step 5 impact gate; record anything else as an assumption.
 - Produce a score, exhaustive redesign, implementation plan, or speculative future architecture.
 - Implement, refactor, commit, or edit anything except `docs/architecture-review.md` and `docs/architecture-questions.md`.
 
 ## Specialists
 
-Use only these OMP task agents:
+Use only these OMP task agents, in one of these pairs:
 
-- `architecture-sonnet-griller` — `anthropic/claude-sonnet-5-5`, high thinking. It asks the first questions and challenges Opus's answers.
+Primary pair:
+
+- `architecture-sonnet-griller` — `anthropic/claude-sonnet-5-5`, high thinking. It asks the first questions and challenges the reviewer's answers.
 - `architecture-opus-reviewer` — `anthropic/claude-opus-5-5`, medium thinking. It answers from evidence and produces the final conclusion.
 
-Spawn each with its named `agent`; do not pass a per-call `model`. If either agent fails, reports another model, or is unavailable, stop and name it. Keep both agents alive across rounds and send follow-ups through `write agent://<id>`. If either is no longer running, for example because the user answered in a new session, spawn a fresh one: `docs/architecture-review.md` and `docs/architecture-questions.md` carry the state.
+Authorised fallback pair:
+
+- `architecture-terra-griller` — `openai-codex/gpt-6.1-terra`, high thinking. It performs the griller's questions and bounded critique.
+- `architecture-sol-reviewer` — `openai-codex/gpt-6.1-sol`, high thinking. It performs the evidence-based answers, rebuttal and final review.
+
+Start with the primary pair unless the user requests the fallback pair. If either primary specialist fails (including a rate limit or quota error), is unavailable, or reports a model other than its pin, name the failure and switch both roles to the fallback pair. Restart the unfinished round from `docs/architecture-review.md`, the current repository evidence and any answered `docs/architecture-questions.md`; preserve settled user answers, but do not treat an unchecked candidate as accepted. Do not mix pairs or accept further results from the superseded pair. If either fallback specialist fails, reports another model, or is unavailable, stop and name it. No other fallback is authorised.
+
+Spawn each specialist with its named `agent`; do not pass a per-call `model`. Each agent file pins its model; require the specialist to report its actual model identity before substantive work. Throughout the steps below, “Sonnet” means the active griller (Sonnet or Terra), and “Opus” means the active reviewer (Opus or Sol). Keep the selected pair for the rest of the run.
+
+Keep both agents alive across rounds and send follow-ups through `write agent://<id>`. If either is no longer running, for example because the user answered in a new session, spawn a fresh one from the selected pair: `docs/architecture-review.md` and `docs/architecture-questions.md` carry the state.
 
 ## Step 1 — establish evidence
 
@@ -51,7 +62,7 @@ Do not infer a requirement from a common practice or model preference.
 
 ## Step 2 — Sonnet starts the grill
 
-Spawn `architecture-sonnet-griller` first with the scope, requirements, architecture claims, relevant repository paths, and the paths `docs/architecture-review.md` and `docs/architecture-questions.md` when they exist. Ask for the whole current frontier, capped at eight questions.
+Spawn the griller from the selected pair (`architecture-sonnet-griller` or `architecture-terra-griller`) first with the scope, requirements, architecture claims, relevant repository paths, and the paths `docs/architecture-review.md` and `docs/architecture-questions.md` when they exist. Ask for the whole current frontier, capped at eight questions.
 
 Each question must identify the evidence that prompted it and why its answer could change the conclusion. Questions may examine only material concerns: requirement fit, unnecessary complexity, responsibilities and dependency direction, interfaces and data ownership, critical flows and failure behavior, trust boundaries, deployment constraints, or proof of claimed qualities.
 
@@ -59,7 +70,7 @@ The questions are for Opus, not the user.
 
 ## Step 3 — Opus answers
 
-Spawn `architecture-opus-reviewer` with Sonnet's complete questions and the same evidence boundaries. Opus inspects the repository and classifies every question:
+Spawn the reviewer from the selected pair (`architecture-opus-reviewer` or `architecture-sol-reviewer`) with Sonnet's complete questions and the same evidence boundaries. Opus inspects the repository and classifies every question:
 
 - `VERIFIED — <claim supported> — Evidence: <paths>`
 - `RISK — <architecture works but has a material consequence> — Evidence: <paths>`

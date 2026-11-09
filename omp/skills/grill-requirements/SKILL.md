@@ -1,6 +1,6 @@
 ---
 name: grill-requirements
-description: Grill a requirements request in rounds through a Haiku 5.5 high questioner and a Sonnet 5.5 high answerer. The models settle facts and low-impact choices themselves and ask the user only high-impact decisions; each round writes those to docs/requirements-questions.md, and after the user answers, Sonnet updates docs/requirements.md and the next round grills it again, until nothing is left open. Use when the user asks to grill, clarify, or turn a request into requirements.
+description: Grill requirements in rounds with a Haiku questioner and Sonnet answerer, or the authorised GPT 6.1-terra questioner and GPT 6.1-sol answerer fallback pair. Settle facts and low-impact defaults, ask only high-impact decisions, and check the draft until nothing remains open.
 disable-model-invocation: true
 ---
 
@@ -17,7 +17,7 @@ Invoke explicitly as `/skill:grill-requirements [request]`.
 - Add a feature, option, layer, abstraction, dependency, future-proofing, cleanup, or requirement the user did not request. Mention a useful extra only as an optional suggestion; do not put it in the requirements.
 - Ask what the request, earlier answers, `docs/requirements.md`, `docs/requirements-questions.md`, repository, or authoritative documentation already settles.
 - Ask the same question twice. Treat the user's answer as final unless it directly contradicts another final answer; quote both and ask which wins.
-- Let the parent model answer the grill, replace either specialist, or silently continue when a pinned specialist is unavailable.
+- Let the parent model answer the grill, replace either specialist outside the authorised pairs below, or silently continue when a pinned specialist is unavailable.
 - Have Haiku answer its own questions, grill the user, or reopen a user's answer. Haiku questions and challenges Sonnet's answers and drafts only, including how Sonnet applied a user's answer.
 - Treat a model recommendation, default, assumption, or majority view as a user decision. A default is labelled as one until the user confirms or overrides it.
 - Write trackers, logs, glossaries, architecture documents, tickets, tests, or implementation plans.
@@ -25,12 +25,21 @@ Invoke explicitly as `/skill:grill-requirements [request]`.
 
 ## Specialists
 
-Use only these OMP task agents:
+Use only these OMP task agents, in one of these pairs:
 
-- `requirements-haiku-griller` — `anthropic/claude-haiku-5-5`, high thinking. It drafts the current question frontier and challenges Sonnet.
+Primary pair:
+
+- `requirements-haiku-griller` — `anthropic/claude-haiku-5-5`, high thinking. It drafts the current question frontier and challenges the answerer.
 - `requirements-sonnet-answerer` — `anthropic/claude-sonnet-5-5`, high thinking. It answers from explicit evidence and drafts the requirements.
 
-Spawn each specialist with its named `agent`. Do not pass a per-call `model`; the agent files pin it. If either agent fails, reports another model, or is unavailable, stop and name the missing specialist. Do not substitute the parent or another model.
+Authorised fallback pair:
+
+- `requirements-terra-griller` — `openai-codex/gpt-6.1-terra`, high thinking. It performs the griller's questions, challenges and candidate-draft checks.
+- `requirements-sol-answerer` — `openai-codex/gpt-6.1-sol`, high thinking. It performs the answerer's evidence-based answers, rebuttals and drafting.
+
+Start with the primary pair unless the user requests the fallback pair. If either primary specialist fails (including a rate limit or quota error), is unavailable, or reports a model other than its pin, name the failure and switch both roles to the fallback pair. Restart the unfinished round from `docs/requirements.md`, the current repository evidence and any answered `docs/requirements-questions.md`; preserve settled user answers, but do not treat an unchecked candidate as accepted. Do not mix pairs or accept further results from the superseded pair. If either fallback specialist fails, reports another model, or is unavailable, stop and name it. No other fallback is authorised.
+
+Spawn each specialist with its named `agent`. Do not pass a per-call `model`; each agent file pins its model. Require the specialist to report its actual model identity before substantive work. Throughout the steps below, “Haiku” means the active griller (Haiku or Terra), and “Sonnet” means the active answerer (Sonnet or Sol). Keep the selected pair for the rest of the run.
 
 Keep both agents alive across rounds. Use the first returned agent ID for follow-ups through `write agent://<id>` instead of spawning a fresh copy. If either is no longer running, for example because the user answered in a new session, spawn a fresh one: `docs/requirements.md` and `docs/requirements-questions.md` carry the state.
 
@@ -62,7 +71,7 @@ An existing `docs/requirements.md` is the baseline. Preserve settled content out
 
 ## Step 2 — Haiku drafts the grill
 
-Spawn `requirements-haiku-griller` with:
+Spawn the griller from the selected pair (`requirements-haiku-griller` or `requirements-terra-griller`) with:
 
 - the user's request and settled chat answers;
 - the paths `docs/requirements.md` and `docs/requirements-questions.md` when they exist;
@@ -73,7 +82,7 @@ Questions must test scope, observable behavior, failure and empty cases, constra
 
 ## Step 3 — Sonnet answers first
 
-Spawn `requirements-sonnet-answerer` with Haiku's questions and the same evidence boundaries. Sonnet must answer each question as one of:
+Spawn the answerer from the selected pair (`requirements-sonnet-answerer` or `requirements-sol-answerer`) with Haiku's questions and the same evidence boundaries. Sonnet must answer each question as one of:
 
 - `ANSWERED — <answer> — Evidence: <user statement, path, or source>`
 - `DEFAULT — <choice taken> — Why safe: <which gate test it fails and why it is cheap to change>`
