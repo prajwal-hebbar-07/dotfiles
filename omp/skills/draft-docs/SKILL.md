@@ -1,6 +1,6 @@
 ---
 name: draft-docs
-description: Write docs/requirements.md, docs/stack.md, or docs/architecture.md only from what the user stated in the invocation and chat, in the shape the matching grill skill reads. Use when the user wants a starting document to grill afterwards.
+description: Write docs/requirements.md or docs/stack.md only from what the user stated in the invocation and chat, in the shape the matching grill skill reads. Use when the user wants a starting document to grill afterwards.
 disable-model-invocation: true
 ---
 
@@ -10,23 +10,22 @@ Turn what the user has told you into the starting document for a grill skill.
 Record their statements; do not research, judge, or complete them. The grill
 skills find the gaps afterwards.
 
-Invoke explicitly as `/skill:draft-docs <requirements|stack|architecture> [what you want recorded]`.
+Invoke explicitly as `/skill:draft-docs <requirements|stack> [what you want recorded]`.
 
 | Kind | File | Grill afterwards |
 | --- | --- | --- |
 | `requirements` | `docs/requirements.md` | `/skill:grill-requirements` |
 | `stack` | `docs/stack.md` | `/skill:grill-stack` |
-| `architecture` | `docs/architecture.md` | `/skill:grill-architecture` |
 
-The architecture draft goes to `docs/architecture.md`, not
-`docs/architecture-review.md`: the review is the grill's own output, and the
-grill reads this draft as the architecture claim to verify.
+There is no architecture document: the architecture follows from the
+settled requirements and stack, and the user gives it per issue to
+`implement`.
 
 ## Never
 
-- Do only what the request needs. Add no requirement, technology, component,
-  flow, constraint, or exclusion the user did not state. A useful extra is
-  named in the reply, not written.
+- Do only what the request needs. Add no requirement, technology,
+  constraint, or exclusion the user did not state. A useful extra is named in
+  the reply, not written.
 - Never ask what is already settled. Read the invocation, this chat, and the
   existing target file first.
 - Research the repository or the web, or validate, rank, or recommend a
@@ -38,9 +37,8 @@ grill reads this draft as the architecture claim to verify.
 ## Step 1 — pick the document
 
 The kind is the first word of the invocation. Accept obvious variants
-(`reqs`, `tech stack`, `arch`). Without a kind, infer it only when every
-statement belongs to one document; otherwise ask once which document to
-write.
+(`reqs`, `tech stack`). Without a kind, infer it only when every statement
+belongs to one document; otherwise ask once which document to write.
 
 The content is the rest of the invocation plus anything the user stated
 earlier in this chat for this document. If there is nothing to record, say
@@ -53,8 +51,12 @@ numbers, and force words such as “must,” “only,” “never,” and “alw
 Rephrase only to make one statement per line; never sharpen, soften, or
 quantify it.
 
-- A statement that belongs to another document kind is left out and named in
-  the reply, so the user can draft that document next.
+- A statement that belongs to the other document kind is left out and named
+  in the reply, so the user can draft that document next. Hosting and
+  deployment belong to the stack.
+- A statement about how the code is structured (components, layers, flows
+  between modules) is left out and named in the reply as input for
+  `implement`.
 - A vague, conflicting, or half-made decision goes under the shape's open
   section, worded as the question it leaves.
 
@@ -119,38 +121,8 @@ dates, scores, or acceptance criteria the user did not give.
 `Checked`, `Assessment`, `Evidence`, `Risks`, `Alternative`, `Suggestion`,
 and `Exit` out: `grill-stack` fills them from its research.
 
-### `architecture` → `docs/architecture.md`
-
-```markdown
-# Architecture
-
-## Overview
-
-<the system's shape in the user's words>
-
-## Components
-
-### <component>
-
-- Responsibility: <what it does>
-- Depends on: <other components or external systems>
-- Owns: <data or state it owns>
-
-## Flows
-
-- <critical flow, step by step as described>
-
-## Deployment
-
-- <where and how each part runs>
-
-## Open questions
-
-- <ambiguity or undecided point the user left>
-```
-
 ## Step 4 — reply
 
 Reply with the file path, the number of entries per section, every replaced
-line, statements left out because they belong to another document, and the
-grill command to run next. Do not repeat the document in chat.
+line, statements left out because they belong elsewhere, and the grill
+command to run next. Do not repeat the document in chat.

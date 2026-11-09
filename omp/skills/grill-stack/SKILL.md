@@ -50,7 +50,7 @@ Keep both agents alive across rounds and send follow-ups through `write agent://
 Read:
 
 - the invocation request and settled answers in chat;
-- `docs/requirements.md`, `docs/stack.md`, and `docs/stack-questions.md` when present; every answered question in the questions file is a settled user answer, and `defer` is an explicit deferral;
+- `docs/requirements.md`, `docs/stack.md`, and `docs/stack-questions.md` when present; every answered question in the questions file is a settled user answer. A deferral is only the user's: `defer` on the `Answer:` line, or words to the same effect ("not sure, come back to it later"). The models never defer a decision for the user;
 - manifests, lockfiles, deployment files, and configuration that identify the current stack;
 - only the source needed to understand how a disputed technology is used.
 
@@ -63,6 +63,8 @@ Classify every stack item:
 - **Fixed constraint** — a requirement or platform forces it.
 
 Map each choice to the requirement or existing dependency it serves. A choice with no such reason is a simplicity question: suggest removing it, but do not remove it.
+
+There is no architecture grill after this one, and `blueprint` builds the setup steps and project structure from this report. The report therefore names a choice, of any origin, or a user deferral for every area the requirements need: language and runtime, application framework, datastore, authentication, hosting and deployment, and, when the requirements have a user interface, the component library and styling approach. An area the requirements do not need is left out, not filled.
 
 ### Impact gate
 
@@ -121,7 +123,8 @@ Send Sonnet's classifications and candidate draft to the existing Haiku agent on
 - a model preference presented as a user decision;
 - an unnecessary stack component;
 - a user answer applied with a meaning other than the user's wording;
-- a `DEFAULT` that passes the impact gate, or a `USER DECISION` that fails it.
+- a `DEFAULT` that passes the impact gate, or a `USER DECISION` that fails it;
+- an area Step 1 says the requirements need with neither a choice nor a user deferral.
 
 Send Haiku's complete critique to the existing Sonnet agent once. Sonnet must either concede and correct the draft, or maintain the claim with one direct piece of evidence. Its response ends with the complete corrected draft.
 
@@ -209,4 +212,4 @@ Checked: YYYY-MM-DD
 
 Omit empty sections and fields. Preserve existing user choices exactly. Suggestions and defaults never change `Origin` to `User-chosen`; only the user's answer does. Do not invent decision IDs, scores, weighted matrices, or a single “best stack” verdict.
 
-Reply with the file path, the number of rounds, counts by assessment, the number of defaults taken and of user decisions, and the most consequential verified risk or `Needs proof` item. Do not repeat the report in chat.
+Reply with the file path, the number of rounds, counts by assessment, the number of defaults taken and of user decisions, and the most consequential verified risk or `Needs proof` item. Do not repeat the report in chat. Name the next command: `/skill:blueprint` for a new app; within `feature`, the feature continues on its own.

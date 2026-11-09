@@ -8,6 +8,8 @@ disable-model-invocation: true
 
 Turn the user's request into `docs/requirements.md` in rounds. In each round Haiku drafts the questions, Sonnet answers first from evidence, Haiku grills only Sonnet's answers, and Haiku checks Sonnet's candidate draft. Facts are researched and low-impact choices are taken as recorded defaults; only high-impact decisions (the impact gate in Step 1) go into `docs/requirements-questions.md`. After the user answers, Sonnet applies the answers, the parent updates `docs/requirements.md`, and the next round grills the updated requirements. Rounds repeat until one ends with no question for the user and a clean draft check.
 
+Requirements are the first step for a new app and for every feature, and there is no architecture grill after them: what the system keeps, who may do what and which outside systems it depends on must be settled here. The grill ends with nothing ambiguous. A high-impact decision is either answered or deferred by the user in their own words; nothing is left vague.
+
 Invoke explicitly as `/skill:grill-requirements [request]`.
 
 ## Never
@@ -45,7 +47,7 @@ Keep both agents alive across rounds. Use the first returned agent ID for follow
 
 ## Step 1 — collect evidence
 
-Read the invocation request, this chat's settled answers, `docs/requirements.md` if it exists, and `docs/requirements-questions.md` if it exists. Every answered question in that file is a settled answer; `defer` is an explicit deferral. Inspect only repository files needed to answer factual questions. Look up authoritative external documentation only when the request depends on it.
+Read the invocation request, this chat's settled answers, `docs/requirements.md` if it exists, and `docs/requirements-questions.md` if it exists. Every answered question in that file is a settled answer. A deferral is only the user's: `defer` on the `Answer:` line, or words to the same effect ("not sure, come back to it later"). The models never defer a decision for the user.
 
 Classify every potential unknown:
 
@@ -78,7 +80,7 @@ Spawn the griller from the selected pair (`requirements-haiku-griller` or `requi
 - the relevant repository paths and authoritative sources found in Step 1;
 - an instruction to return the whole current frontier: every material question whose prerequisites are already settled.
 
-Questions must test scope, observable behavior, failure and empty cases, constraints, exclusions, and contradictions only where relevant to this request. No generic checklist and no speculative feature hunt. Haiku may still ask Sonnet about low-impact gaps; the gate decides only what reaches the user.
+Questions must test scope, observable behavior, failure and empty cases, constraints, exclusions, and contradictions only where relevant to this request. Because no architecture grill follows, they also cover, where the request touches them: the users and roles and what each may see and do, the data kept and for how long, the outside systems involved and what the user sees when one fails. No generic checklist and no speculative feature hunt. Haiku may still ask Sonnet about low-impact gaps; the gate decides only what reaches the user. Haiku also flags any requirement line still open to two readings; it is a question, never a line left as written.
 
 ## Step 3 — Sonnet answers first
 
@@ -188,9 +190,9 @@ Use this shape unless an existing file already has a clear structure:
 
 ## Open questions
 
-- <only a decision the user explicitly deferred>
+- <decision the user explicitly deferred, with their words>
 ```
 
 Omit empty sections. Keep the user's exact numbers and force words such as “must,” “only,” “never,” and “always.” Do not invent IDs or acceptance criteria. Create `docs/` only if needed. A default stays under `Defaults`, never under `Requirements`, until the user confirms or overrides it.
 
-Reply with the file path, the number of rounds, the count of requirements, constraints, exclusions, defaults, and deferred questions, plus one sentence naming any limitation. Do not repeat the document in chat.
+Reply with the file path, the number of rounds, the count of requirements, constraints, exclusions, defaults, and deferred questions, plus one sentence naming any limitation. Do not repeat the document in chat. Name the next command: `/skill:grill-stack` for a new app; within `feature`, the feature continues on its own.

@@ -1,14 +1,14 @@
 ---
 name: ui-craft
-description: Shared interface, motion, platform and worst-case-data rules read by the design, build-ui and review-ui skills, and by implement or work when a change touches UI. Distilled from ui-ux-pro-max (rules with numbers) and Emil Kowalski's skills (motion, mobile, break-ui).
+description: Shared interface, motion, platform and worst-case-data rules read by the design and review-ui skills, and by implement or work when a change touches UI. Distilled from ui-ux-pro-max (rules with numbers) and Emil Kowalski's skills (motion, mobile, break-ui).
 disable-model-invocation: true
 ---
 
 # ui-craft
 
-Reference rules, not a workflow. `design`, `build-ui` and `review-ui` read
-this file and the parts below; `implement` and `work` read it when a change
-adds or changes UI. Read only the parts the task needs.
+Reference rules, not a workflow. `design` and `review-ui` read this file
+and the parts below; `implement` and `work` read it when a change adds or
+changes UI. Read only the parts the task needs.
 
 | File | Read when |
 | --- | --- |

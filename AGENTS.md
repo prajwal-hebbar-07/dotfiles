@@ -45,49 +45,71 @@ what is already settled (read documents, answer logs and chat first).
   advisor section.
 
 OMP-only skills live in `omp/skills/<name>/SKILL.md` (grill-requirements,
-grill-stack, grill-architecture, work, implement, feature, draft-docs,
-raise-issues, issue-branch, raise-pr, detox, design, build-ui, review-ui,
-ui-craft, manual, herdr-worktree), with model-pinned agents in `omp/agents/`.
+grill-stack, blueprint, design, raise-issues, issue-branch, implement, work,
+review-ui, feature, draft-docs, raise-pr, detox, ui-craft, manual,
+herdr-worktree), with model-pinned agents in `omp/agents/`.
 `omp/link-skills` links them into `~/.omp/agent/skills/` and
 `~/.omp/agent/agents/`, pruning only its own broken links and refusing to
 replace unrelated files; rerun it after adding or removing one. Each SKILL.md
-is the source of truth for its workflow. `implement` and `work` are one
-workflow: both take an issue URL, a request or a plan, plan in
-`docs/implementation-plan.md` after explicit approval, stay inside the
-architecture in place (a new component, technology or trust boundary goes
-back to the grills) and update existing documents the change makes stale.
-Only `implement` keeps the AI navigation map `docs/codebase-map.md` (and its
-`AGENTS.md` pointer); `work` runs `implement` with every map step removed.
+is the source of truth for its workflow.
 
-The three grill skills (requirements, stack, architecture) share an impact
-gate: the models research facts and settle low-impact choices themselves,
-recorded as `Defaults` (requirements), `Origin: Default` (stack) or
-`Assumptions` (architecture), listed at the foot of each round's questions
+A new app runs: `grill-requirements` → `grill-stack` → `blueprint` →
+`design` (wireframes, then the Paper design) → `raise-issues`, then stops.
+Each issue is worked with `issue-branch`, the user's architecture for it and
+`implement` (or `work`); `review-ui` compares the built UI with the design
+and its gaps go back through `raise-issues`; `commit` and `raise-pr` finish
+the branch. There is no architecture grill or architecture document: the
+requirements and stack settle what it would, and the user gives the
+structure per issue. `draft-docs` writes a starting requirements or stack
+document from what the user said.
+
+The two grill skills share an impact gate: the models research facts and
+settle low-impact choices themselves, recorded as `Defaults` (requirements)
+or `Origin: Default` (stack), listed at the foot of each round's questions
 file where the user can override them. Only decisions that move scope,
 change core behaviour, are costly to reverse (stored data, public
 interfaces, auth, platform foundations), commit money or carry legal or
-security exposure reach the user.
+security exposure reach the user. Nothing is left ambiguous: a decision is
+answered or deferred by the user in their own words, never by a model. The
+requirements grill also covers roles, kept data and outside systems; the
+stack grill must name a choice or deferral for every area the requirements
+need (runtime, framework, datastore, auth, hosting, and for a UI the
+component library and styling).
 
-`raise-issues` turns the settled documents into GitHub issues: a walking
-skeleton first when no app runs yet, then vertical slices (never one per
-layer), shared prefactors, and unaccepted architecture-review corrections,
-linked with native `--blocked-by` (gh 2.94.0 or later). Acceptance restates
-requirement lines; nothing is invented. It drafts `docs/issues.md`, raises
-only on `/skill:raise-issues approve`, records each number as it goes so a
-rerun never duplicates, and skips what the code already does, what an
-existing issue covers and what waits on an open question. Each raised issue
-is then worked with `issue-branch` and `implement` (or `work`); `feature` is
-for asks not yet in `docs/requirements.md`.
+`blueprint` turns the settled requirements and stack into
+`docs/blueprint.html`: one static page linking each choice's official docs
+(checked, for the pinned version), the component library, the setup steps
+with their commands, the project structure, and the build cut into chunks
+with issue candidates, plus the review steps that lead to `design`. New
+apps only.
 
-`feature` is the loop for one feature on an app the greenfield pipeline
-already built. It runs the requirements grill (same agents, gate plus two
-tests: changing shipped behaviour, contradicting the architecture review or
-bringing in a gated technology) into `docs/features/<branch>/spec.md`, stops
-for `grill-stack` or `design` when the spec's `Impact` needs them, runs
-`implement` (or `build-ui`) with the plan in `docs/features/<branch>/plan.md`,
-and on `/skill:feature close` folds the spec into `docs/requirements.md` (and
-new dependencies or components into `docs/stack.md` and
-`docs/architecture.md`), then deletes the folder. Per-branch folders keep
+`raise-issues` turns the settled documents into GitHub issues in the
+blueprint's chunk order: a walking skeleton first when no app runs yet,
+then vertical slices (never one per layer) and shared prefactors, linked
+with native `--blocked-by` (gh 2.94.0 or later); it also takes a feature
+spec or `docs/ui-review.md` as its source. Acceptance restates source
+lines; nothing is invented. It drafts `docs/issues.md`, raises only on
+`/skill:raise-issues approve`, records each number as it goes so a rerun
+never duplicates, and skips what the code already does, what an existing
+issue covers and what waits on a deferred decision.
+
+`implement` and `work` are one workflow: both take an issue URL, a request
+or a plan, take the architecture from the user (or the code's existing
+structure), plan in `docs/implementation-plan.md` with an `Architecture`
+section, implement after explicit approval, build a designed screen from
+Paper and `docs/design.md` when the issue has one, and update existing
+documents the change makes stale. Only `implement` keeps the AI navigation
+map `docs/codebase-map.md` (and its `AGENTS.md` pointer), read first in
+every session; `work` runs `implement` with every map step removed.
+
+`feature` is the same pipeline for one feature on an app that already
+exists: the requirements grill (same agents, gate plus two tests: changing
+shipped behaviour, or contradicting the stack or bringing in a gated
+technology) into `docs/features/<branch>/spec.md`, `grill-stack` only when
+the spec brings in new technology, `design` only when it changes the UI, no
+blueprint, then `raise-issues` with the draft in
+`docs/features/<branch>/issues.md`. Once raised, it folds the spec into
+`docs/requirements.md` and deletes the folder. Per-branch folders keep
 parallel worktrees from colliding on shared planning files.
 
 `manual` (`/skill:manual`) creates an empty `manual.md` at the project root if
@@ -104,13 +126,14 @@ off); outside Herdr it prints the `herdr-app do tab.new` commands instead.
 
 The design skills are distilled from ui-ux-pro-max and Emil Kowalski's skills,
 neither of which is installed. `ui-craft` holds the shared rules (interface,
-motion, platforms, worst-case data) that `design`, `build-ui`, `review-ui`,
-`work` and `implement` read. `design` refuses to start until requirements,
-stack and an architecture review (`Verified` or `Verified with risks`, newer
-than the documents) exist, then draws directions, the design system and
-screens in Paper and writes `docs/design.md`; `build-ui` implements a design
-through `implement`; `review-ui` writes read-only findings to
-`docs/ui-review.md` for `implement` to fix.
+motion, platforms, worst-case data) that `design`, `review-ui`, `work` and
+`implement` read. `design` needs the requirements, stack and (for a new
+app) blueprint, draws grey wireframes and a flow board in Paper for the
+user to approve, then the direction, design system and screens with every
+state, and writes `docs/design.md`. `review-ui` reads the code against
+Paper and the design: which screens and states are built, partial or
+missing, where they drift, and ui-craft findings, written read-only to
+`docs/ui-review.md` for `raise-issues`.
 
 `archify` and `ponytail` are third-party and not vendored here: install with
 `npx skills add tt-a1i/archify -g` and
