@@ -63,18 +63,26 @@ requirements and stack settle what it would, and the user gives the
 structure per issue. `draft-docs` writes a starting requirements or stack
 document from what the user said.
 
-The two grill skills share an impact gate: the models research facts and
-settle low-impact choices themselves, recorded as `Defaults` (requirements)
-or `Origin: Default` (stack), listed at the foot of each round's questions
-file where the user can override them. Only decisions that move scope,
-change core behaviour, are costly to reverse (stored data, public
+The two grill skills run the same format with the same models: a Haiku 5.5
+griller and a Sonnet 5.5 answerer (stack: researcher), falling back to GPT
+6.1 Terra and Sol together when either is unavailable or hits a limit. In
+one session the answerer settles everything it can from evidence or its own
+expertise, the griller challenges it (one rebuttal and one rejoinder per
+challenge), and low-impact choices are recorded as `Defaults`
+(requirements) or `Origin: Default` (stack). Only decisions that move
+scope, change core behaviour, are costly to reverse (stored data, public
 interfaces, auth, platform foundations), commit money or carry legal or
-security exposure reach the user. Nothing is left ambiguous: a decision is
-answered or deferred by the user in their own words, never by a model. The
-requirements grill also covers roles, kept data and outside systems; the
-stack grill must name a choice or deferral for every area the requirements
-need (runtime, framework, datastore, auth, hosting, and for a UI the
-component library and styling).
+security exposure reach the user, through an interview in the same session
+(`ask` forms; recommendations labelled, never preselected; defaults listed
+for override); there are no questions files. Once nothing is left for the
+user, a final round runs with a fresh pair, Sonnet 5.5 asking and
+challenging and Opus 5.5 answering and writing the final document, by the
+same rules; it has no fallback and resumes with `final`. Nothing is left
+ambiguous: a decision is answered or deferred by the user in their own
+words, never by a model. The requirements grill also covers roles, kept
+data and outside systems; the stack grill must name a choice or deferral
+for every area the requirements need (runtime, framework, datastore, auth,
+hosting, and for a UI the component library and styling).
 
 `blueprint` turns the settled requirements and stack into
 `docs/blueprint.html`: one static page linking each choice's official docs

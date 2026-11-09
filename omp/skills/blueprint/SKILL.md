@@ -50,7 +50,7 @@ Print one line per check, `ready` or `not ready: <what> — run <command>`:
 | --- | --- | --- |
 | 1 | `docs/requirements.md` exists | `/skill:draft-docs requirements`, then `/skill:grill-requirements` |
 | 2 | `docs/stack.md` exists | `/skill:draft-docs stack`, then `/skill:grill-stack` |
-| 3 | `docs/requirements-questions.md` and `docs/stack-questions.md` have no unanswered question | finish the grill that owns it |
+| 3 | The last grill of each ended with nothing unanswered: no high-impact decision is left that the user neither answered nor deferred | rerun the grill that owns it |
 
 Any `not ready` stops the run. Print each `Open questions` item in the
 requirements and each `Decisions for you` item in the stack as a `warning:`

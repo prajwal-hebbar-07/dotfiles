@@ -1,6 +1,6 @@
 ---
 name: feature
-description: Add one feature to an application that already exists. Specify it against the shipped app in rounds through the requirements grill (only high-impact decisions reach the user, in a per-feature questions file), run the stack grill only when the feature brings in new technology and the design (wireframes, then Paper) only when it changes the UI, then draft and raise its issues after explicit approval and fold the spec into docs/requirements.md. Every working file lives in docs/features/<branch>/, so features on parallel branches never collide. Use when the user wants a feature on an existing codebase.
+description: Add one feature to an application that already exists. Specify it against the shipped app in rounds through the requirements grill (only high-impact decisions reach the user, through an interview in the session), run the stack grill only when the feature brings in new technology and the design (wireframes, then Paper) only when it changes the UI, then draft and raise its issues after explicit approval and fold the spec into docs/requirements.md. Every working file lives in docs/features/<branch>/, so features on parallel branches never collide. Use when the user wants a feature on an existing codebase.
 disable-model-invocation: true
 ---
 
@@ -21,6 +21,8 @@ Invoke explicitly:
   current branch.
 - `/skill:feature [answers | change]` — continue from where the feature
   folder says.
+- `/skill:feature final` — run only the spec's final grill round, after it
+  stopped for an unavailable model.
 - `/skill:feature approve` — approve the issue draft and raise it.
 
 Not for: a bug fix or small change with no decision to make (use
@@ -51,7 +53,6 @@ All working state lives in `docs/features/<slug>/`, where `<slug>` is the
 current branch name with `/` replaced by `-`:
 
 - `spec.md` — what the feature must do. `Status: Grilling | Settled`.
-- `questions.md` — the current grill round's questions for the user.
 - `issues.md` — the issue draft. `Draft | Approved | Raised`.
 
 Continue from the first row that matches:
@@ -59,7 +60,7 @@ Continue from the first row that matches:
 | Found | Run |
 | --- | --- |
 | no folder | Step 1; without a request, ask for one and stop |
-| spec `Grilling` | Step 2, from `grill-requirements` Step 6 once the user says the questions are answered |
+| spec `Grilling` | Step 2, resuming the grill from the spec |
 | spec `Settled`, no `issues.md` | Step 3 |
 | issues `Draft` | Step 4 at its review; `approve` raises |
 | issues `Approved` | Step 4 at `raise-issues` Step 5, resuming |
@@ -105,25 +106,26 @@ request in the user's words.
 
 ## Step 2 — grill the spec
 
-Read `skill://grill-requirements` and run its Steps 2–6, with its `Never`
-list, specialists and round mechanics, substituting:
+Read `skill://grill-requirements` and run its Steps 2–7, final round
+included, with its `Never` list, specialists and round mechanics,
+substituting:
 
 | `grill-requirements` | `feature` |
 | --- | --- |
 | `docs/requirements.md` | `docs/features/<slug>/spec.md` |
-| `docs/requirements-questions.md` | `docs/features/<slug>/questions.md` |
-| the Step 7 shape | the spec shape below |
+| the Step 8 shape | the spec shape below |
 | the impact gate | the gate in Step 1, tests 1–8 |
+| `/skill:grill-requirements final` | `/skill:feature final` |
 
-Give both specialists the baseline documents and traced code from Step 1 as
-read-only evidence. Haiku also checks the draft's `Changes to existing
-behaviour` against `docs/requirements.md` and the traced code: an existing
-behaviour the feature changes but the spec does not list is an omission.
-Sonnet fills `Impact` from evidence only.
+Give every specialist the baseline documents and traced code from Step 1 as
+read-only evidence. The griller in each round also checks the draft's
+`Changes to existing behaviour` against `docs/requirements.md` and the
+traced code: an existing behaviour the feature changes but the spec does
+not list is an omission. The answerer fills `Impact` from evidence only.
 
-The grill closes on the `grill-requirements` Step 7 condition. Write the
-corrected spec with `Status: Settled` and continue to Step 3 in the same
-run.
+The grill closes on the `grill-requirements` Step 8 condition, after the
+final round. Write the corrected spec with `Status: Settled` and continue
+to Step 3 in the same run.
 
 ```markdown
 # Feature: <name>
