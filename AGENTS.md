@@ -45,8 +45,8 @@ what is already settled (read documents, answer logs and chat first).
   advisor section.
 
 OMP-only skills live in `omp/skills/<name>/SKILL.md` (grill-requirements,
-grill-stack, grill-architecture, work, implement, draft-docs, issue-branch,
-raise-pr, detox, design, build-ui, review-ui, ui-craft, manual,
+grill-stack, grill-architecture, work, implement, feature, draft-docs,
+issue-branch, raise-pr, detox, design, build-ui, review-ui, ui-craft, manual,
 herdr-worktree), with model-pinned agents in `omp/agents/`. `omp/link-skills`
 links them into `~/.omp/agent/skills/` and `~/.omp/agent/agents/`, pruning
 only its own broken links and refusing to replace unrelated files; rerun it
@@ -62,6 +62,17 @@ file where the user can override them. Only decisions that move scope,
 change core behaviour, are costly to reverse (stored data, public
 interfaces, auth, platform foundations), commit money or carry legal or
 security exposure reach the user.
+
+`feature` is the loop for one feature on an app the greenfield pipeline
+already built. It runs the requirements grill (same agents, gate plus two
+tests: changing shipped behaviour, contradicting the architecture review or
+bringing in a gated technology) into `docs/features/<branch>/spec.md`, stops
+for `grill-stack` or `design` when the spec's `Impact` needs them, runs
+`implement` (or `build-ui`) with the plan in `docs/features/<branch>/plan.md`,
+and on `/skill:feature close` folds the spec into `docs/requirements.md` (and
+new dependencies or components into `docs/stack.md` and
+`docs/architecture.md`), then deletes the folder. Per-branch folders keep
+parallel worktrees from colliding on shared planning files.
 
 `manual` (`/skill:manual`) creates an empty `manual.md` at the project root if
 missing and adds it to `.gitignore`, never reading the file. Afterwards the
