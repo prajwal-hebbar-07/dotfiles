@@ -30,7 +30,7 @@ Rules:
 - Never ask what the request, earlier answers, repository, or sources already settle.
 - The draft contains only settled material, labelled defaults under `Defaults`, and explicit deferrals. It does not contain assumptions or defaults hidden as requirements.
 - Prefer observable behavior over implementation details unless the user explicitly fixed the implementation.
-- When given the user's interview answers, apply each exactly as given: a chosen option or the user's own words is a settled answer, `Not sure — come back to this later` becomes an open question recording any words given, and an override of a default replaces that default as a settled answer. Do not apply an answer with two materially different interpretations or one that contradicts another final answer (quote both); classify it `UNRESOLVED` with a recommendation.
+- When given the user's interview answers, apply each exactly as given: a chosen option or the user's own words is a settled answer, `Not sure — decide when implementing` becomes an open question deferred to implementation, recording any words given, and an override of a default replaces that default as a settled answer. Do not apply an answer with two materially different interpretations or one that contradicts another final answer (quote both); classify it `UNRESOLVED` with a recommendation.
 - Remain read-only. Do not run the application, builds, tests, linters, type checks or scripts without explicit permission in the current user request.
 
 Every answering or rebuttal response ends with the complete corrected Markdown document, with no code fence. When applying the user's answers, list any `UNRESOLVED` answers (or `UNRESOLVED: NONE`) before the document.

@@ -84,6 +84,18 @@ data and outside systems; the stack grill must name a choice or deferral
 for every area the requirements need (runtime, framework, datastore, auth,
 hosting, and for a UI the component library and styling).
 
+Each grill document carries `Status: Grilling` until its final round
+closes, listing whatever is still open (a contradiction, a line open to two
+readings, an unanswered decision, a stack `Conflict` or `Needs proof`)
+under `Unresolved`; only the close writes `Settled`. `blueprint`, `design`
+and `raise-issues` refuse to start until both documents are `Settled`. The
+interview's `Not sure — decide when implementing` answer is the way out:
+the decision is recorded under `Open questions` (requirements) or
+`Decisions for you` (stack) with the user's words, no longer blocks, and
+`raise-issues` puts it under `Decide first` in each issue that needs it.
+`implement` asks it in that issue's plan and, once answered, moves it into
+the requirements or the stack choice.
+
 `blueprint` turns the settled requirements and stack into
 `docs/blueprint.html`: one static page linking each choice's official docs
 (checked, for the pinned version), the component library, the setup steps
@@ -104,8 +116,8 @@ with native `--blocked-by` (gh 2.94.0 or later); it also takes a feature
 spec or `docs/ui-review.md` as its source. Acceptance restates source
 lines; nothing is invented. It drafts `docs/issues.md`, raises only on
 `/skill:raise-issues approve`, records each number as it goes so a rerun
-never duplicates, and skips what the code already does, what an existing
-issue covers and what waits on a deferred decision.
+never duplicates, and skips what the code already does and what an
+existing issue covers.
 
 `implement` and `work` are one workflow: both take an issue URL, a request
 or a plan, take the architecture from the user (or the code's existing

@@ -168,7 +168,11 @@ Source: <issue URL | chat>
 
 ## Open questions
 
-- <decision the user explicitly deferred, with their words>
+- <decision the user deferred to implementation> — "<their words>"
+
+## Unresolved
+
+- <contradiction (quote both), line open to two readings, or unanswered decision> — <what settles it>
 ```
 
 Omit empty sections other than `Impact`. Keep the user's numbers and force

@@ -63,15 +63,17 @@ Print one line per check, `ready` or `not ready: <what> — run <command>`:
 
 | # | Check | Fix |
 | --- | --- | --- |
-| 1 | `docs/requirements.md` exists, or the feature spec given is `Settled` | `/skill:grill-requirements`, or `/skill:feature` |
-| 2 | `docs/stack.md` exists | `/skill:grill-stack` |
+| 1 | `docs/requirements.md` has `Status: Settled`, or the feature spec given is `Settled` | `/skill:grill-requirements` (resumes from the file), or `/skill:feature` |
+| 2 | `docs/stack.md` has `Status: Settled` | `/skill:grill-stack` (resumes from the file) |
 | 3 | For a new app: `docs/blueprint.html` exists | `/skill:blueprint` |
 | 4 | No decision the user has not deferred prevents defining the screens in scope | the grill that owns the decision |
 
-Any `not ready` stops the run before anything is written or drawn. A
-screen that depends on a deferred decision is drawn with the open part
-marked, and the decision goes under `Open decisions`. Paper is not part of
-this check; it is checked when drawing starts.
+Any `not ready` stops the run before anything is written or drawn, and
+names each `Unresolved` item; a file without a `Status:` line is not
+`Settled`. A screen that depends on a decision the user deferred to
+implementation is drawn with the open part marked, and the decision goes
+under `Open decisions`. Paper is not part of this check; it is checked
+when drawing starts.
 
 ## Step 1 — gather
 

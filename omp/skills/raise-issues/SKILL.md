@@ -1,6 +1,6 @@
 ---
 name: raise-issues
-description: Turn the settled documents into GitHub issues — the requirements and stack in the blueprint's chunk order, an approved design, a feature spec, or a UI review's gaps — as vertical slices with native blocked-by links, each covering its source lines word for word, drafted for review and raised only after explicit approval. Skips what the code already does, what an existing issue covers and what waits on a deferred decision. Use when the user wants the settled documents turned into issues.
+description: Turn the settled documents into GitHub issues — the requirements and stack in the blueprint's chunk order, an approved design, a feature spec, or a UI review's gaps — as vertical slices with native blocked-by links, each covering its source lines word for word, drafted for review and raised only after explicit approval. Skips what the code already does and what an existing issue covers, and carries each decision the user deferred to implementation into the issue that needs it. Use when the user wants the settled documents turned into issues.
 disable-model-invocation: true
 ---
 
@@ -40,8 +40,10 @@ is that file in place of `docs/issues.md`.
   raised` with `/skill:grill-requirements`.
 - Decide the architecture of an issue. The user gives it when the issue is
   implemented; notes name only what the documents already settle.
-- Raise an issue for a requirement that depends on a deferred decision or a
-  stack `Decisions for you` item.
+- Raise an issue that depends on a decision the user deferred to
+  implementation (`Open questions` in the requirements or spec,
+  `Decisions for you` in the stack) without naming it under
+  `Decide first`, or settle that decision in the issue.
 - Raise anything before the user explicitly approves the current draft.
   The invocation, silence or an acknowledgement is not approval.
 - Raise a duplicate of an open or closed issue, or raise one draft entry
@@ -67,17 +69,20 @@ Print one line per check, `ready` or `not ready: <what> — run <command>`:
 
 | # | Check | Fix |
 | --- | --- | --- |
-| 1 | `docs/requirements.md` exists, or the feature spec is `Settled` | `/skill:grill-requirements`, or `/skill:feature` |
-| 2 | `docs/stack.md` exists | `/skill:grill-stack` |
+| 1 | `docs/requirements.md` has `Status: Settled`, or the feature spec is `Settled` | `/skill:grill-requirements` (resumes from the file), or `/skill:feature` |
+| 2 | `docs/stack.md` has `Status: Settled` | `/skill:grill-stack` (resumes from the file) |
 | 3 | For a new app's documents: `docs/blueprint.html` exists | `/skill:blueprint` |
 | 4 | When the requirements or spec in scope have a user interface: `docs/design.md` is `Approved` for those screens | `/skill:design` |
 | 5 | For a UI review source: `docs/ui-review.md` exists | `/skill:review-ui` |
 | 6 | `gh auth status` succeeds, `gh --version` is 2.94.0 or later, and `gh repo view --json nameWithOwner,hasIssuesEnabled` shows issues enabled | `gh auth login`, `brew upgrade gh`, or enable issues on the repository |
 
-Any `not ready` stops the run; when the user says to skip check 4, record
-that in the draft's header. Print `Open questions` in the requirements,
-`Decisions for you` in the stack and the blueprint's `Gaps` as `warning:`
-lines; what depends on them goes under `Not raised`.
+Any `not ready` stops the run and names each `Unresolved` item; a file
+without a `Status:` line is not settled. When the user says to skip check
+4, record that in the draft's header. Print `Open questions` in the
+requirements, `Decisions for you` in the stack and the blueprint's `Gaps`
+as `warning:` lines. A deferred item goes under `Decide first` in each
+issue that depends on it; what depends on a `Gaps` entry goes under
+`Not raised`.
 
 ## Step 2 — gather
 
@@ -142,12 +147,13 @@ Source: <documents | feature spec path | docs/ui-review.md>
 - What: <the capability, two or three sentences>
 - Acceptance:
   - [ ] <a source line restated as an observable check>
+- Decide first: <each deferred decision this issue depends on, quoted with the user's words and its source> | none
 - Notes: <blueprint chunk, stack choices, design screens (`S<n>`, Paper board names) and setup steps the work must follow>
 - Issue: <#number once raised>
 
 ## Not raised
 
-- <requirement or item> — <already in the code: path | open issue #n | waits on: deferred decision | needs grilling: gap>
+- <requirement or item> — <already in the code: path | open issue #n | needs grilling: gap>
 ```
 
 Order the issues so every blocker comes before what it blocks. Reply with
@@ -168,10 +174,10 @@ gh issue create --title '<title>' --body-file - [--blocked-by <numbers>] <<'BODY
 BODY
 ```
 
-The body is the entry's `What`, `Acceptance` checklist, `Covers` as a
-`Source` section and `Notes`, followed by the marker
-`<!-- raise-issues:<Updated date>:<I-id> -->`. Before creating, search the
-issue list from this run for that marker; if it is there, record that
+The body is the entry's `What`, `Acceptance` checklist, `Decide first`
+when not `none`, `Covers` as a `Source` section and `Notes`, followed by
+the marker `<!-- raise-issues:<Updated date>:<I-id> -->`. Before creating,
+search the issue list from this run for that marker; if it is there, record that
 number instead of creating a second issue. After each creation, write the
 number into the entry's `Issue:` line at once, so an interrupted run resumes
 without duplicates. Map each `Blocked by` I-id to its recorded number.

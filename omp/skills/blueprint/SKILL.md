@@ -90,11 +90,12 @@ Print one line per check, `ready` or `not ready: <what> — run <command>`:
 | --- | --- | --- |
 | 1 | `docs/requirements.md` exists | `/skill:draft-docs requirements`, then `/skill:grill-requirements` |
 | 2 | `docs/stack.md` exists | `/skill:draft-docs stack`, then `/skill:grill-stack` |
-| 3 | The last grill of each ended with nothing unanswered: no high-impact decision is left that the user neither answered nor deferred | rerun the grill that owns it |
+| 3 | Both have `Status: Settled`: their grills closed with nothing the user neither answered nor deferred. A file without a `Status:` line is not settled | rerun the grill that owns it; it resumes from the file |
 
-Any `not ready` stops the run. Print each `Open questions` item in the
-requirements and each `Decisions for you` item in the stack as a `warning:`
-line; the chunks that depend on one say `waits on` it.
+Any `not ready` stops the run and names each `Unresolved` item. Print each
+`Open questions` item in the requirements and each `Decisions for you` item
+in the stack as a `warning:` line: the user deferred it to implementation,
+and the chunks that depend on one name it under `Decide when implementing`.
 
 ## Step 2 — orchestrate: gather
 
@@ -156,8 +157,8 @@ would build, in order; the workers only fill them in. The rules are
 **Chunk wave.** One parallel batch of `chunks` workers, at most eight; one
 per chunk, neighbouring chunks grouped when there are more. Each task gives
 the chunk's id, title, the requirement lines assigned to it (quoted), its
-dependencies, any `waits on` item, and the stack choices and setup steps it
-uses. Return format, per chunk:
+dependencies, any `Decide when implementing` item, and the stack choices
+and setup steps it uses. Return format, per chunk:
 
 ```text
 ### C<n> <title>
@@ -187,7 +188,7 @@ table of contents links to it:
 | Component library | `components` | The library, how it is installed and themed, links; or the `Gaps` entry when the stack has none and the app has a UI |
 | Setup | `setup` | Numbered steps, each with its command in `<pre><code>`, the doc it came from, and `done` when the repository already has it; manual steps marked `by hand` |
 | Project structure | `structure` | A `<pre>` tree; each entry one short note and the chunk that creates it; the framework's convention doc linked |
-| Chunks | `chunks` | One `<section id="C<n>">` per chunk: title, `Covers` (requirement lines quoted), `Depends on` (links to chunk ids), `Waits on` (deferred item, when any), `Issue candidates` (list), `Screens` (the screens it implies, by name) |
+| Chunks | `chunks` | One `<section id="C<n>">` per chunk: title, `Covers` (requirement lines quoted), `Depends on` (links to chunk ids), `Decide when implementing` (deferred item, when any), `Issue candidates` (list), `Screens` (the screens it implies, by name) |
 | Gaps | `gaps` | What blocks a chunk, each with the command that settles it |
 | Not included | `not-included` | Useful extras left out, one line each |
 | Next steps | `next` | The review checklist below, as a list |

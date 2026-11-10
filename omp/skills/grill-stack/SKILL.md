@@ -10,6 +10,8 @@ Research and stress-test the technology stack against the actual requirements, i
 
 Invoke explicitly as `/skill:grill-stack [choices or question]`, or `/skill:grill-stack final` to run only the final round (Step 7) against the saved `docs/stack.md`.
 
+Every write of `docs/stack.md` before Step 8, including one before a stop (a failed specialist, a cancelled interview), sets `Status: Grilling` and lists what is still open under `Unresolved`. Only Step 8 writes `Status: Settled`, and `blueprint`, `design` and `raise-issues` do not start on a stack that is not `Settled`.
+
 ## Never
 
 - Choose, approve, reject, replace, or lock a high-impact technology for the user. A verdict or recommendation is advice, not a decision. A default only fills a gap: it never replaces a user-chosen or existing technology.
@@ -23,6 +25,7 @@ Invoke explicitly as `/skill:grill-stack [choices or question]`, or `/skill:gril
 - Have Haiku answer its own questions, grill the user, or reopen a user's answer. Haiku questions and challenges Sonnet's research, answers, and drafts only, including how Sonnet applied a user's answer.
 - Treat a model suggestion, default, assumption, or consensus as a user choice.
 - Edit `docs/requirements.md`, source code, manifests, lockfiles, configuration, ADRs, trackers, or implementation plans. Write only `docs/stack.md`.
+- Write `Status: Settled` while a `Conflict`, a `Needs proof`, an area the requirements need, or a high-impact decision is left that the user neither answered nor deferred.
 - Implement, install, migrate, benchmark production systems, commit, or approve the stack.
 
 ## Specialists
@@ -57,7 +60,7 @@ Keep the agents alive across rounds and send follow-ups through `write agent://<
 Read:
 
 - the invocation request and settled answers in chat;
-- `docs/requirements.md` and `docs/stack.md` when present. A deferral is only the user's: `Not sure — come back to this later` in an interview, or words to the same effect in chat. The models never defer a decision for the user;
+- `docs/requirements.md` and `docs/stack.md` when present. A deferral is only the user's: `Not sure — decide when implementing` in an interview, or words to the same effect in chat. It means the user will decide it while implementing the issue that needs it: it goes under `Decisions for you` with their words, `raise-issues` carries it into that issue, and it does not keep the grill open. The models never defer a decision for the user;
 - manifests, lockfiles, deployment files, and configuration that identify the current stack;
 - only the source needed to understand how a disputed technology is used.
 
@@ -139,27 +142,27 @@ Send each maintained claim back to Haiku for one rejoinder: it accepts the evide
 
 ## Step 5 — interview the user
 
-If no high-impact decision remains, go to Step 7.
+A `Conflict` or `Needs proof` the debate left is a high-impact decision here and in the final round, unless the user already answered or deferred it: its options are to keep the choice and accept the named risk, take the alternative, or defer. If no high-impact decision remains, go to Step 7.
 
 Otherwise interview the user now, in this session, with the `ask` tool; do not write a questions file or wait for a later message. Before asking, test each decision against the impact gate once more and move any that fails it to the defaults. One form holds at most five questions; more go in a second form straight after. For each question:
 
 - a `<fieldset>` whose `<legend>` is the choice in plain language;
 - a `<p>` with `Why you:` (the gate test it passes), `Affects:` (the requirement it serves), `Facts:` (verified facts with source and date checked) and `Trade-off:` (the strongest trade-off; at most one real alternative and what would make it win);
-- one radio per concise option, Sonnet's suggestion labelled `(suggested)`, and a last radio `Not sure — come back to this later`. The form adds a free-text answer by itself.
+- one radio per concise option, Sonnet's suggestion labelled `(suggested)`, and a last radio `Not sure — decide when implementing`. The form adds a free-text answer by itself.
 
 After the questions, list the defaults taken this round in a `<ul>` as `<area>: <pick> — <one-line reason>`, followed by one optional `<textarea name="override_defaults">` for changing any of them. Omit the list when there are none.
 
-Never preselect an answer. A form that times out or returns without an answer leaves that question unanswered; it is not the suggestion. Ask an unanswered question once more in the next form. If the user cancels the interview, write the settled draft as in Step 6 item 2, list the open decisions in chat, and stop; rerunning the skill resumes from `docs/stack.md`. Never mark an unanswered suggestion as chosen.
+Never preselect an answer. A form that times out or returns without an answer leaves that question unanswered; it is not the suggestion. Ask an unanswered question once more in the next form. If the user cancels the interview, write the settled draft as in Step 6 item 2 with every unanswered decision under `Unresolved`, list them in chat, and stop; rerunning the skill resumes from `docs/stack.md`. Never mark an unanswered suggestion as chosen.
 
 ## Step 6 — apply the answers and grill again
 
 As soon as the interview returns, in the same run:
 
-1. Send the exact answers to the existing Sonnet agent: the chosen option, the user's own words, `Not sure` as a deferral with any words given, and any default override. It applies them to its corrected draft and returns the complete updated draft; a chosen option or an overridden default becomes User-chosen. An answer with two materially different meanings, or one that directly contradicts another final answer (quote both), is not applied; it stays a user decision for the next round.
-2. The parent writes the updated draft to `docs/stack.md`, so the file always holds every settled answer.
+1. Send the exact answers to the existing Sonnet agent: the chosen option, the user's own words, `Not sure` as a deferral to implementation with any words given, and any default override. It applies them to its corrected draft and returns the complete updated draft; a chosen option or an overridden default becomes User-chosen. An answer with two materially different meanings, or one that directly contradicts another final answer (quote both), is not applied; it stays a user decision for the next round.
+2. The parent writes the updated draft to `docs/stack.md` with `Status: Grilling` and every decision still open under `Unresolved`, so the file always holds every settled answer and everything still open.
 3. Start the next round at Step 2 with the updated `docs/stack.md` as the baseline. Haiku drafts the fresh frontier: questions the answers unlocked, consequences of the answers for the rest of the stack, gaps the updated report exposes, and anything left unresolved in item 1. Steps 3 and 4 run in full, and Step 5 interviews the user again only if a high-impact decision remains.
 
-Every settled answer, and every deferral under `Decisions for you`, lives in `docs/stack.md`; that is what lets a later session resume.
+Every settled answer, every deferral under `Decisions for you` and every open item under `Unresolved` lives in `docs/stack.md`; that is what lets a later session resume.
 
 ## Step 7 — final round
 
@@ -176,13 +179,14 @@ The final round ends when its challenges leave no decision for the user.
 
 ## Step 8 — close the grill
 
-The grill closes when the final round ends. The parent writes Opus's corrected report to `docs/stack.md`. Do not ask any specialist for another general review.
+The grill closes when the final round ends and nothing is left for `Unresolved`: no `Conflict`, `Needs proof`, area the requirements need without a choice, or other high-impact decision that the user neither answered nor deferred. The parent writes Opus's corrected report to `docs/stack.md` with `Status: Settled` and no `Unresolved` section. Do not ask any specialist for another general review.
 
 Use this shape unless an existing file already has a clear structure:
 
 ```markdown
 # Technology stack
 
+Status: Grilling | Settled
 Checked: YYYY-MM-DD
 
 ## Context
@@ -208,9 +212,13 @@ Checked: YYYY-MM-DD
 
 ## Decisions for you
 
-- <only unanswered or explicitly deferred decisions>
+- <decision the user deferred to implementation> — "<their words>"
+
+## Unresolved
+
+- <conflict, needs proof, missing area or unanswered decision> — <what settles it>
 ```
 
-Omit empty sections and fields. Preserve existing user choices exactly. Suggestions and defaults never change `Origin` to `User-chosen`; only the user's answer does. Do not invent decision IDs, scores, weighted matrices, or a single “best stack” verdict.
+Omit empty sections and fields. The `Status` and `Checked` lines are required whatever the structure. Preserve existing user choices exactly. Suggestions and defaults never change `Origin` to `User-chosen`; only the user's answer does. Do not invent decision IDs, scores, weighted matrices, or a single “best stack” verdict.
 
-Reply with the file path, the number of main rounds and final rounds, what the final round changed (one line), counts by assessment, the number of defaults taken and of user decisions, and the most consequential verified risk or `Needs proof` item. Do not repeat the report in chat. Name the next command: `/skill:blueprint` for a new app; within `feature`, the feature continues on its own.
+Reply with the file path, the status, the number of main rounds and final rounds, what the final round changed (one line), counts by assessment, the number of defaults taken and of user decisions, and the most consequential verified risk or `Needs proof` item. Do not repeat the report in chat. Name the next command: `/skill:blueprint` for a new app; within `feature`, the feature continues on its own.

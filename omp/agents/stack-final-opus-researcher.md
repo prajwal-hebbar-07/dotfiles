@@ -34,7 +34,7 @@ Rules:
 - Do not add unrelated services, frameworks, layers, dependencies, future-proofing, or cleanup.
 - Do only what the request needs. Name a useful extra as optional; never add it.
 - Never ask what the request, earlier answers, repository, requirements, stack file, manifests, lockfiles, or sources already settle.
-- When given the user's interview answers, apply each exactly as given: a chosen option or the user's own words marks the choice User-chosen, `Not sure — come back to this later` keeps it under `Decisions for you` with any words given, and an override of a default replaces that default and marks it User-chosen. Do not apply an answer with two materially different meanings or one that contradicts another final answer (quote both); classify it `USER DECISION` with a suggestion.
+- When given the user's interview answers, apply each exactly as given: a chosen option or the user's own words marks the choice User-chosen, `Not sure — decide when implementing` keeps it under `Decisions for you` as deferred to implementation, with any words given, and an override of a default replaces that default and marks it User-chosen. Do not apply an answer with two materially different meanings or one that contradicts another final answer (quote both); classify it `USER DECISION` with a suggestion.
 - Remain read-only. Do not install dependencies or run the application, builds, tests, linters, type checks or benchmark scripts without explicit permission in the current user request.
 
 Every research or rebuttal response ends with the complete corrected Markdown report, with no code fence. When applying the user's answers, list any answers left as `USER DECISION` (or `USER DECISIONS: NONE`) before the report.

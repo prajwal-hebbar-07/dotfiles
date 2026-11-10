@@ -8,7 +8,7 @@ disable-model-invocation: true
 
 Turn the user's request into `docs/requirements.md` in rounds, in one session. In each round Haiku drafts the questions, Sonnet answers everything it can first — from evidence, or from its own expertise as a labelled default — Haiku grills Sonnet's answers, and Haiku checks Sonnet's candidate draft. Only a decision that passes the impact gate (Step 1) and that the debate cannot settle reaches the user, through an interview in the same session. Sonnet applies the answers, the parent updates `docs/requirements.md`, and the next round grills the updated requirements at once. Rounds repeat until one ends with no question for the user and a clean draft check; then a final round with a fresh Sonnet griller and an Opus answerer checks the whole document once more (Step 7).
 
-Requirements are the first step for a new app and for every feature, and there is no architecture grill after them: what the system keeps, who may do what and which outside systems it depends on must be settled here. The grill ends with nothing ambiguous. A high-impact decision is either answered or deferred by the user in their own words; nothing is left vague.
+Requirements are the first step for a new app and for every feature, and there is no architecture grill after them: what the system keeps, who may do what and which outside systems it depends on must be settled here. The grill ends with nothing ambiguous. A high-impact decision is either answered or deferred by the user in their own words; nothing is left vague. Every write of `docs/requirements.md` before Step 8, including one before a stop (a failed specialist, a cancelled interview), sets `Status: Grilling` and lists what is still open under `Unresolved`. Only Step 8 writes `Status: Settled`, and `blueprint`, `design` and `raise-issues` do not start on requirements that are not `Settled`.
 
 Invoke explicitly as `/skill:grill-requirements [request]`, or `/skill:grill-requirements final` to run only the final round (Step 7) against the saved `docs/requirements.md`.
 
@@ -23,6 +23,7 @@ Invoke explicitly as `/skill:grill-requirements [request]`, or `/skill:grill-req
 - Have Haiku answer its own questions, grill the user, or reopen a user's answer. Haiku questions and challenges Sonnet's answers and drafts only, including how Sonnet applied a user's answer.
 - Treat a model recommendation, default, assumption, or majority view as a user decision. A default is labelled as one until the user confirms or overrides it.
 - Write trackers, logs, glossaries, architecture documents, tickets, tests, or implementation plans.
+- Write `Status: Settled` while a contradiction, a line open to two readings, or a high-impact decision the user neither answered nor deferred remains.
 - Implement, commit, or change files other than `docs/requirements.md`.
 
 ## Specialists
@@ -54,7 +55,7 @@ Keep the agents alive across rounds. Use the first returned agent ID for follow-
 
 ## Step 1 — collect evidence
 
-Read the invocation request, this chat's settled answers, and `docs/requirements.md` if it exists. A deferral is only the user's: `Not sure — come back to this later` in an interview, or words to the same effect in chat. The models never defer a decision for the user.
+Read the invocation request, this chat's settled answers, and `docs/requirements.md` if it exists. A deferral is only the user's: `Not sure — decide when implementing` in an interview, or words to the same effect in chat. It means the user will decide it while implementing the issue that needs it: it goes under `Open questions` with their words, `raise-issues` carries it into that issue, and it does not keep the grill open. A deferred contradiction keeps neither statement as a requirement; the `Open questions` entry quotes both. The models never defer a decision for the user.
 
 Classify every potential unknown:
 
@@ -133,21 +134,21 @@ Otherwise interview the user now, in this session, with the `ask` tool; do not w
 
 - a `<fieldset>` whose `<legend>` is the decision in plain language;
 - a `<p>` with `Why you:` (the gate test it passes), `Known:` (what is settled or found) and `Trade-off:` (of Sonnet's recommendation);
-- one radio per concise choice, the recommendation labelled `(recommended)`, and a last radio `Not sure — come back to this later`. The form adds a free-text answer by itself.
+- one radio per concise choice, the recommendation labelled `(recommended)`, and a last radio `Not sure — decide when implementing`. The form adds a free-text answer by itself.
 
 After the questions, list the defaults taken this round in a `<ul>`, each with its one-line reason, followed by one optional `<textarea name="override_defaults">` for changing any of them. Omit the list when there are none.
 
-Never preselect an answer. A form that times out or returns without an answer leaves that question unanswered; it is not the recommendation. Ask an unanswered question once more in the next form. If the user cancels the interview, write the settled draft as in Step 6 item 2, list the open questions in chat, and stop; rerunning the skill resumes from `docs/requirements.md`. Do not write a requirement for an unanswered decision.
+Never preselect an answer. A form that times out or returns without an answer leaves that question unanswered; it is not the recommendation. Ask an unanswered question once more in the next form. If the user cancels the interview, write the settled draft as in Step 6 item 2 with every unanswered decision under `Unresolved`, list them in chat, and stop; rerunning the skill resumes from `docs/requirements.md`. Do not write a requirement for an unanswered decision.
 
 ## Step 6 — apply the answers and grill again
 
 As soon as the interview returns, in the same run:
 
-1. Send the exact answers to the existing Sonnet agent: the chosen option, the user's own words, `Not sure` as a deferral with any words given, and any default override. It applies them to its checked candidate draft and returns the complete updated draft; an overridden default becomes a settled answer. An answer with two materially different interpretations, or one that directly contradicts another final answer (quote both), is not applied; it stays unresolved for the next round.
-2. The parent writes the updated draft to `docs/requirements.md`, so the file always holds every settled answer.
+1. Send the exact answers to the existing Sonnet agent: the chosen option, the user's own words, `Not sure` as a deferral to implementation with any words given, and any default override. It applies them to its checked candidate draft and returns the complete updated draft; an overridden default becomes a settled answer. An answer with two materially different interpretations, or one that directly contradicts another final answer (quote both), is not applied; it stays unresolved for the next round.
+2. The parent writes the updated draft to `docs/requirements.md` with `Status: Grilling` and every decision still open under `Unresolved`, so the file always holds every settled answer and everything still open.
 3. Start the next round at Step 2 with the updated `docs/requirements.md` as the baseline. Haiku drafts the fresh frontier: questions the answers unlocked, consequences of the answers, gaps the updated requirements expose, and anything left unresolved in item 1. Steps 3 and 4 run in full, including the candidate-draft check, and Step 5 interviews the user again only if a high-impact decision remains.
 
-Every settled answer, and every deferral under `Open questions`, lives in `docs/requirements.md`; that is what lets a later session resume.
+Every settled answer, every deferral under `Open questions` and every open item under `Unresolved` lives in `docs/requirements.md`; that is what lets a later session resume.
 
 ## Step 7 — final round
 
@@ -164,12 +165,15 @@ The final round ends when the final Sonnet reports no material question, no deci
 
 ## Step 8 — close the grill
 
-The grill closes when the final round ends. The parent writes Opus's corrected draft to `docs/requirements.md`.
+The grill closes when the final round ends and nothing is left for `Unresolved`: no contradiction between lines or with a user statement, no line open to two readings, and no high-impact decision the user neither answered nor deferred. The parent writes Opus's corrected draft to `docs/requirements.md` with `Status: Settled`, the date, and no `Unresolved` section.
 
 Use this shape unless an existing file already has a clear structure:
 
 ```markdown
 # Requirements
+
+Status: Grilling | Settled
+Updated: YYYY-MM-DD
 
 ## Goal
 
@@ -193,9 +197,13 @@ Use this shape unless an existing file already has a clear structure:
 
 ## Open questions
 
-- <decision the user explicitly deferred, with their words>
+- <decision the user deferred to implementation> — "<their words>"
+
+## Unresolved
+
+- <contradiction (quote both), line open to two readings, or unanswered decision> — <what settles it>
 ```
 
-Omit empty sections. Keep the user's exact numbers and force words such as “must,” “only,” “never,” and “always.” Do not invent IDs or acceptance criteria. Create `docs/` only if needed. A default stays under `Defaults`, never under `Requirements`, until the user confirms or overrides it.
+Omit empty sections. The `Status` and `Updated` lines are required whatever the structure. Keep the user's exact numbers and force words such as “must,” “only,” “never,” and “always.” Do not invent IDs or acceptance criteria. Create `docs/` only if needed. A default stays under `Defaults`, never under `Requirements`, until the user confirms or overrides it.
 
-Reply with the file path, the number of main rounds and final rounds, what the final round changed (one line), the count of requirements, constraints, exclusions, defaults, and deferred questions, plus one sentence naming any limitation. Do not repeat the document in chat. Name the next command: `/skill:grill-stack` for a new app; within `feature`, the feature continues on its own.
+Reply with the file path, the status, the number of main rounds and final rounds, what the final round changed (one line), the count of requirements, constraints, exclusions, defaults, and deferred questions, plus one sentence naming any limitation. Do not repeat the document in chat. Name the next command: `/skill:grill-stack` for a new app; within `feature`, the feature continues on its own.

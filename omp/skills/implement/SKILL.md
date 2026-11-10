@@ -74,7 +74,7 @@ If no current plan exists, or the invocation asks for something materially diffe
 5. Run the current behavior when practical for a bug or an observable change. Record observed facts.
 6. Search for existing code the change can reuse, and note it for the plan.
 
-Classify each uncertainty as a **repository fact** (settle it yourself), **already decided** (keep the user's decision) or a **user decision** (a material trade-off the evidence does not settle). Ask all open user decisions together, each with a smallest-sufficient recommendation and its main trade-off. Do not mark a plan approvable while a decision is open.
+Classify each uncertainty as a **repository fact** (settle it yourself), **already decided** (keep the user's decision) or a **user decision** (a material trade-off the evidence does not settle). Each item under the issue's `Decide first`, and each `Open questions` item in `docs/requirements.md` or `Decisions for you` item in `docs/stack.md` the change depends on, is a user decision here: the user deferred it to implementation. Ask all open user decisions together, each with a smallest-sufficient recommendation and its main trade-off. Do not mark a plan approvable while a decision is open.
 
 Make no implementation changes in this step.
 
@@ -154,7 +154,7 @@ Line movement or implementation detail that keeps the approved behavior, scope, 
 
 Follow the steps in order, applying the YAGNI rules above, the plan's architecture and the repository's conventions. Update every affected caller, test, configuration and user-facing document the change breaks or obsoletes.
 
-Update every existing document the change makes inaccurate — README, guides, API or CLI docs, changelog, `.env.example`, inline usage docs — in the same change, keeping each document's structure and wording elsewhere. Create no new document other than the codebase map. The planning documents (`docs/requirements.md`, `docs/stack.md`, `docs/blueprint.html`, `docs/design.md`, `docs/issues.md`) belong to their own skills: a change that would make one of them wrong is a material deviation, not an edit.
+Update every existing document the change makes inaccurate — README, guides, API or CLI docs, changelog, `.env.example`, inline usage docs — in the same change, keeping each document's structure and wording elsewhere. Create no new document other than the codebase map. The planning documents (`docs/requirements.md`, `docs/stack.md`, `docs/blueprint.html`, `docs/design.md`, `docs/issues.md`) belong to their own skills: a change that would make one of them wrong is a material deviation, not an edit. The one exception is a deferred decision the user answered for this plan: move it, in the user's words, from `Open questions` into `Requirements` or from `Decisions for you` into its choice as `Origin: User-chosen`, so no later issue asks it again.
 
 Update `docs/codebase-map.md` as you go (Step 5 format): whenever a step adds, removes, renames or moves a file, changes what a file is responsible for, changes which files depend on each other, or adds a reusable helper.
 
