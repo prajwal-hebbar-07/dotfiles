@@ -8,7 +8,7 @@ disable-model-invocation: true
 
 The new-app pipeline (`grill-requirements` → `grill-stack` → `blueprint` →
 `design` → `raise-issues`) builds the baseline: `docs/requirements.md`,
-`docs/stack.md`, `docs/blueprint.html`, `docs/design.md` and the issues
+`docs/stack.md`, `docs/blueprint/`, `docs/design.md` and the issues
 that `implement` turns into code and `docs/codebase-map.md`. This skill is
 the same pipeline for one feature: requirements always, the stack only
 when it changes, design only when the UI changes, no blueprint, and it

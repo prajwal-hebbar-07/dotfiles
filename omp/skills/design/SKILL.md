@@ -33,7 +33,7 @@ and `skill://design/paper.md` before any Paper call.
   blueprint's chunks or the feature spec imply; add no screen, feature,
   control or destination. A useful extra is named in the reply, not drawn.
 - Never ask what is already settled: read the direction or brief, this
-  chat, `docs/requirements.md`, `docs/stack.md`, `docs/blueprint.html`,
+  chat, `docs/requirements.md`, `docs/stack.md`, `docs/blueprint/`,
   `docs/design.md`, the feature spec when given, reference documents the
   user pointed at, and the repository's existing tokens and components
   first.
@@ -65,7 +65,7 @@ Print one line per check, `ready` or `not ready: <what> — run <command>`:
 | --- | --- | --- |
 | 1 | `docs/requirements.md` has `Status: Settled`, or the feature spec given is `Settled` | `/skill:grill-requirements` (resumes from the file), or `/skill:feature` |
 | 2 | `docs/stack.md` has `Status: Settled` | `/skill:grill-stack` (resumes from the file) |
-| 3 | For a new app: `docs/blueprint.html` exists | `/skill:blueprint` |
+| 3 | For a new app: `docs/blueprint/index.html` exists | `/skill:blueprint` |
 | 4 | No decision the user has not deferred prevents defining the screens in scope | the grill that owns the decision |
 
 Any `not ready` stops the run before anything is written or drawn, and
@@ -78,11 +78,11 @@ when drawing starts.
 ## Step 1 — gather
 
 1. Read the settled sources listed under `Never`. The screens come from the
-   requirements' user journeys and the blueprint's `Screens` per chunk;
-   their failure cases (offline, permission denied, an outside system down)
-   become screen states. A screen that needs something the requirements or
-   stack do not provide is an open decision naming the grill that owns it,
-   not a design workaround.
+   requirements' user journeys and the blueprint's `Screens` per chunk
+   (`docs/blueprint/build.html`); their failure cases (offline, permission
+   denied, an outside system down) become screen states. A screen that
+   needs something the requirements or stack do not provide is an open
+   decision naming the grill that owns it, not a design workaround.
 2. Establish, from evidence: who uses it and how often, the platform and
    size (`platform` in `skill://ui-craft` decides; phone 390×844, desktop
    1440×900, tablet 834×1194), the screens and their states, and each

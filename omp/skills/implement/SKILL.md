@@ -18,7 +18,7 @@ Two documents:
 ## Never
 
 - Do only what the request needs. Add no feature, option, layer, abstraction, wrapper, config, dependency, future-proofing or cleanup nobody asked for. A useful extra is named under `Not doing`, not built.
-- Never ask what is already settled: read the issue, the request, the supplied plan, chat answers, `docs/codebase-map.md`, `docs/requirements.md`, `docs/stack.md`, `docs/blueprint.html`, `docs/design.md` and the repository first.
+- Never ask what is already settled: read the issue, the request, the supplied plan, chat answers, `docs/codebase-map.md`, `docs/requirements.md`, `docs/stack.md`, `docs/blueprint/`, `docs/design.md` and the repository first.
 - Redesign a plan the user supplied or reinterpret an issue. Keep their decisions; condense them, fill in only repository facts, and raise a conflict with the code as an open decision.
 - Choose the architecture yourself. Which component owns the change, any new module or layer, data ownership, dependency direction and trust boundaries come from the architecture the user gave for this change (invocation, issue, chat) or, where they gave none, the structure the code already follows. A change that needs structure neither settles is an open decision with a recommendation; a technology `docs/stack.md` lacks is an open decision naming `/skill:grill-stack`. Never work around either in code.
 - Treat the invocation, silence, a general acknowledgement or approval of an older plan as approval.
@@ -154,7 +154,7 @@ Line movement or implementation detail that keeps the approved behavior, scope, 
 
 Follow the steps in order, applying the YAGNI rules above, the plan's architecture and the repository's conventions. Update every affected caller, test, configuration and user-facing document the change breaks or obsoletes.
 
-Update every existing document the change makes inaccurate — README, guides, API or CLI docs, changelog, `.env.example`, inline usage docs — in the same change, keeping each document's structure and wording elsewhere. Create no new document other than the codebase map. The planning documents (`docs/requirements.md`, `docs/stack.md`, `docs/blueprint.html`, `docs/design.md`, `docs/issues.md`) belong to their own skills: a change that would make one of them wrong is a material deviation, not an edit. The one exception is a deferred decision the user answered for this plan: move it, in the user's words, from `Open questions` into `Requirements` or from `Decisions for you` into its choice as `Origin: User-chosen`, so no later issue asks it again.
+Update every existing document the change makes inaccurate — README, guides, API or CLI docs, changelog, `.env.example`, inline usage docs — in the same change, keeping each document's structure and wording elsewhere. Create no new document other than the codebase map. The planning documents (`docs/requirements.md`, `docs/stack.md`, `docs/blueprint/`, `docs/design.md`, `docs/issues.md`) belong to their own skills: a change that would make one of them wrong is a material deviation, not an edit. The one exception is a deferred decision the user answered for this plan: move it, in the user's words, from `Open questions` into `Requirements` or from `Decisions for you` into its choice as `Origin: User-chosen`, so no later issue asks it again.
 
 Update `docs/codebase-map.md` as you go (Step 5 format): whenever a step adds, removes, renames or moves a file, changes what a file is responsible for, changes which files depend on each other, or adds a reusable helper.
 

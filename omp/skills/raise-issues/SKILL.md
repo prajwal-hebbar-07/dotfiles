@@ -71,7 +71,7 @@ Print one line per check, `ready` or `not ready: <what> — run <command>`:
 | --- | --- | --- |
 | 1 | `docs/requirements.md` has `Status: Settled`, or the feature spec is `Settled` | `/skill:grill-requirements` (resumes from the file), or `/skill:feature` |
 | 2 | `docs/stack.md` has `Status: Settled` | `/skill:grill-stack` (resumes from the file) |
-| 3 | For a new app's documents: `docs/blueprint.html` exists | `/skill:blueprint` |
+| 3 | For a new app's documents: `docs/blueprint/index.html` exists | `/skill:blueprint` |
 | 4 | When the requirements or spec in scope have a user interface: `docs/design.md` is `Approved` for those screens | `/skill:design` |
 | 5 | For a UI review source: `docs/ui-review.md` exists | `/skill:review-ui` |
 | 6 | `gh auth status` succeeds, `gh --version` is 2.94.0 or later, and `gh repo view --json nameWithOwner,hasIssuesEnabled` shows issues enabled | `gh auth login`, `brew upgrade gh`, or enable issues on the repository |
@@ -79,14 +79,14 @@ Print one line per check, `ready` or `not ready: <what> — run <command>`:
 Any `not ready` stops the run and names each `Unresolved` item; a file
 without a `Status:` line is not settled. When the user says to skip check
 4, record that in the draft's header. Print `Open questions` in the
-requirements, `Decisions for you` in the stack and the blueprint's `Gaps`
-as `warning:` lines. A deferred item goes under `Decide first` in each
-issue that depends on it; what depends on a `Gaps` entry goes under
-`Not raised`.
+requirements, `Decisions for you` in the stack and the blueprint's gaps
+(`Before you continue` on its overview) as `warning:` lines. A deferred
+item goes under `Decide first` in each issue that depends on it; what
+depends on a gap goes under `Not raised`.
 
 ## Step 2 — gather
 
-1. Read `docs/requirements.md`, `docs/stack.md`, `docs/blueprint.html`,
+1. Read `docs/requirements.md`, `docs/stack.md`, `docs/blueprint/`,
    `docs/design.md`, `docs/codebase-map.md`, the feature spec and
    `docs/ui-review.md` when present and in scope.
 2. Read existing issues:
@@ -100,14 +100,16 @@ issue that depends on it; what depends on a `Gaps` entry goes under
 Draft the fewest issues that build everything left, each one a pull
 request's worth of work a developer can plan with `implement` alone:
 
-1. **Blueprint order.** The blueprint's chunks and their `Issue candidates`
-   are the starting cut and the build order; follow them unless the rules
-   below or the code say otherwise, and say where the draft departs.
+1. **Blueprint order.** The chunks and `Issue candidates` on
+   `docs/blueprint/build.html` are the starting cut and the build order;
+   follow them unless the rules below or the code say otherwise, and say
+   where the draft departs.
 2. **Skeleton first.** When the code has no runnable app yet, issue `I0` is
-   the blueprint's `C0`: its setup steps (manual ones listed as a
-   checklist for the user) and the walking skeleton. Every other issue is
-   blocked by it. On an existing app, add only the stack choices the code
-   lacks, inside the first slice that needs them.
+   the blueprint's `C0` with the steps on `docs/blueprint/setup.html`
+   (manual ones listed as a checklist for the user) and the walking
+   skeleton. Every other issue is blocked by it. On an existing app, add
+   only the stack choices the code lacks, inside the first slice that
+   needs them.
 3. **Vertical slices.** One issue per user-observable capability, cut
    through data, logic and interface, so it can be demonstrated and tested
    alone. Never one issue per layer. A slice with a screen names its
