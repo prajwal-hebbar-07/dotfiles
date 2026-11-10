@@ -1,0 +1,312 @@
+/* Shared stylesheet for docs/blueprint/. Copied verbatim by the blueprint
+   skill; pages use only these classes and no inline styles. */
+
+:root {
+  color-scheme: light dark;
+  --bg: #ffffff;
+  --fg: #1f2328;
+  --muted: #59636e;
+  --border: #d1d9e0;
+  --surface: #f6f8fa;
+  --accent: #0969da;
+
+  /* Layers: diagram nodes and stack cards. */
+  --ui: #0969da;      --ui-bg: #ddf4ff;
+  --app: #8250df;     --app-bg: #fbefff;
+  --data: #1a7f37;    --data-bg: #dafbe1;
+  --ext: #bc4c00;     --ext-bg: #fff1e5;
+  --role: #59636e;    --role-bg: #f6f8fa;
+
+  /* States: badges, steps, chunk nodes. */
+  --done: #1a7f37;    --done-bg: #dafbe1;
+  --todo: #0969da;    --todo-bg: #ddf4ff;
+  --hand: #59636e;    --hand-bg: #eff2f5;
+  --decide: #9a6700;  --decide-bg: #fff8c5;
+  --gap: #d1242f;     --gap-bg: #ffebe9;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0d1117;
+    --fg: #e6edf3;
+    --muted: #9198a1;
+    --border: #3d444d;
+    --surface: #151b23;
+    --accent: #4493f8;
+
+    --ui: #4493f8;      --ui-bg: #0c2d6b;
+    --app: #ab7df8;     --app-bg: #2e1a5c;
+    --data: #3fb950;    --data-bg: #0f3d1f;
+    --ext: #f0883e;     --ext-bg: #4a2109;
+    --role: #9198a1;    --role-bg: #212830;
+
+    --done: #3fb950;    --done-bg: #0f3d1f;
+    --todo: #4493f8;    --todo-bg: #0c2d6b;
+    --hand: #9198a1;    --hand-bg: #262c36;
+    --decide: #d29922;  --decide-bg: #3d2e00;
+    --gap: #f85149;     --gap-bg: #4c1215;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font: 16px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+a { color: var(--accent); }
+code, pre { font: 14px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre {
+  margin: 8px 0;
+  padding: 10px 12px;
+  overflow-x: auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+/* Page frame */
+header.top {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+.top-inner, main, footer {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+.top-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 24px;
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+.project { font-weight: 700; }
+nav.pages { display: flex; flex-wrap: wrap; gap: 4px; }
+nav.pages a {
+  padding: 4px 10px;
+  border-radius: 999px;
+  color: var(--muted);
+  text-decoration: none;
+}
+nav.pages a[aria-current="page"] { background: var(--surface); color: var(--fg); font-weight: 600; }
+nav.pages a:hover { color: var(--fg); }
+
+main { padding-top: 24px; padding-bottom: 48px; }
+h1 { margin: 0 0 4px; font-size: 28px; line-height: 1.25; }
+h2 { margin: 40px 0 12px; font-size: 20px; }
+h3 { margin: 0; font-size: 16px; }
+p, li { max-width: 72ch; }
+.muted, .checked { color: var(--muted); }
+.checked { font-size: 13px; }
+
+footer {
+  padding-top: 16px;
+  padding-bottom: 32px;
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* Read time and summary */
+.readtime {
+  display: inline-block;
+  margin-bottom: 16px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 13px;
+}
+.tldr {
+  margin: 0 0 24px;
+  padding: 12px 16px;
+  border-left: 4px solid var(--accent);
+  background: var(--surface);
+  border-radius: 0 8px 8px 0;
+}
+.tldr ul { margin: 4px 0 0; padding-left: 20px; }
+
+/* Stat cards */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin: 16px 0 24px;
+}
+.stat {
+  padding: 12px 16px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+}
+.stat .value { display: block; font-size: 28px; font-weight: 700; line-height: 1.2; }
+.stat .label { color: var(--muted); font-size: 14px; }
+.stat.gap .value { color: var(--gap); }
+.stat.decide .value { color: var(--decide); }
+
+/* Cards */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+}
+.card {
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg);
+}
+.card + .card { margin-top: 12px; }
+.grid .card + .card { margin-top: 0; }
+.card-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+  margin-bottom: 6px;
+}
+.card p { margin: 6px 0; }
+.card ul { margin: 6px 0; padding-left: 20px; }
+.card .area { color: var(--muted); font-size: 13px; text-transform: uppercase; letter-spacing: 0.04em; }
+.card.ui { border-left-color: var(--ui); }
+.card.app { border-left-color: var(--app); }
+.card.data { border-left-color: var(--data); }
+.card.ext { border-left-color: var(--ext); }
+.card.ready { border-left-color: var(--todo); }
+.card.done { border-left-color: var(--done); }
+.card.decide { border-left-color: var(--decide); }
+.card.gap { border-left-color: var(--gap); }
+.field { color: var(--muted); font-size: 14px; font-weight: 600; }
+
+/* Badges and pills */
+.badge, .pill {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.6;
+  white-space: nowrap;
+}
+.pill { background: var(--surface); border: 1px solid var(--border); color: var(--fg); text-decoration: none; }
+.pill.chunk { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+.badge.done { background: var(--done-bg); color: var(--done); }
+.badge.ready { background: var(--todo-bg); color: var(--todo); }
+.badge.hand { background: var(--hand-bg); color: var(--hand); }
+.badge.decide { background: var(--decide-bg); color: var(--decide); }
+.badge.gap { background: var(--gap-bg); color: var(--gap); }
+.badge.ui { background: var(--ui-bg); color: var(--ui); }
+.badge.app { background: var(--app-bg); color: var(--app); }
+.badge.data { background: var(--data-bg); color: var(--data); }
+.badge.ext { background: var(--ext-bg); color: var(--ext); }
+.badge.role { background: var(--role-bg); color: var(--role); border: 1px solid var(--border); }
+.badge.user-chosen { background: var(--todo-bg); color: var(--todo); }
+.badge.existing { background: var(--hand-bg); color: var(--hand); }
+.badge.fixed { background: var(--app-bg); color: var(--app); }
+.badge.candidate { background: var(--decide-bg); color: var(--decide); }
+.badge.default { border: 1px dashed var(--muted); color: var(--muted); }
+
+/* Callouts */
+.callout {
+  margin: 16px 0;
+  padding: 12px 16px;
+  border: 1px solid var(--border);
+  border-radius: 0 8px 8px 0;
+}
+.callout.gap { border-left-color: var(--gap); background: var(--gap-bg); }
+.callout.decide { border-left-color: var(--decide); background: var(--decide-bg); }
+.callout h3 { margin-bottom: 4px; }
+.callout ul { margin: 4px 0 0; padding-left: 20px; }
+
+/* Numbered steps */
+ol.steps { list-style: none; margin: 0; padding: 0; counter-reset: step; }
+ol.steps > li {
+  position: relative;
+  max-width: none;
+  margin: 0 0 16px;
+  padding: 0 0 0 48px;
+  counter-increment: step;
+}
+ol.steps > li::before {
+  content: counter(step);
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  background: var(--todo-bg);
+  color: var(--todo);
+}
+ol.steps > li.done::before { background: var(--done-bg); color: var(--done); }
+ol.steps > li.hand::before { background: var(--hand-bg); color: var(--hand); }
+ol.steps > li.gap::before { background: var(--gap-bg); color: var(--gap); }
+
+/* Folded detail */
+details { margin: 8px 0; }
+summary { cursor: pointer; color: var(--muted); font-size: 14px; }
+details[open] summary { margin-bottom: 6px; }
+blockquote {
+  margin: 6px 0;
+  padding: 2px 12px;
+  border-left: 3px solid var(--border);
+  color: var(--muted);
+}
+
+/* Tables */
+table { width: 100%; border-collapse: collapse; margin: 8px 0 16px; font-size: 15px; }
+th, td { padding: 8px 10px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: top; }
+th { color: var(--muted); font-weight: 600; font-size: 13px; }
+
+/* Diagrams: inline SVG */
+figure.diagram {
+  margin: 16px 0 24px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+}
+figure.diagram svg { display: block; width: 100%; height: auto; }
+figure.diagram figcaption { margin-top: 8px; color: var(--muted); font-size: 14px; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+
+svg text { fill: var(--fg); font: 13px system-ui, -apple-system, "Segoe UI", sans-serif; }
+svg .node text, svg .lane-label, svg .bar-label { text-anchor: middle; dominant-baseline: middle; }
+svg .node text.sub { fill: var(--muted); font-size: 11px; }
+svg .node rect { stroke-width: 1.5; fill: var(--bg); stroke: var(--border); }
+svg .node.ui rect { fill: var(--ui-bg); stroke: var(--ui); }
+svg .node.app rect { fill: var(--app-bg); stroke: var(--app); }
+svg .node.data rect { fill: var(--data-bg); stroke: var(--data); }
+svg .node.ext rect { fill: var(--ext-bg); stroke: var(--ext); }
+svg .node.role rect { fill: var(--role-bg); stroke: var(--role); }
+svg .node.ready rect { fill: var(--todo-bg); stroke: var(--todo); }
+svg .node.done rect { fill: var(--done-bg); stroke: var(--done); }
+svg .node.decide rect { fill: var(--decide-bg); stroke: var(--decide); }
+svg .node.gap rect { fill: var(--gap-bg); stroke: var(--gap); }
+svg .node.hand rect { fill: var(--hand-bg); stroke: var(--hand); stroke-dasharray: 4 3; }
+svg a .node rect { cursor: pointer; }
+svg .edge { fill: none; stroke: var(--muted); stroke-width: 1.5; }
+svg .arrowhead { fill: var(--muted); }
+svg .edge-label { fill: var(--muted); font-size: 11px; text-anchor: middle; }
+svg .lane { fill: none; stroke: var(--border); stroke-dasharray: 4 4; }
+svg .lane-label { fill: var(--muted); font-size: 12px; font-weight: 600; }
+svg .bar { fill: var(--todo); }
+svg .bar.done { fill: var(--done); }
+svg .bar.decide { fill: var(--decide); }
+svg .bar.gap { fill: var(--gap); }
+svg .bar-label { text-anchor: start; }
+svg .axis { stroke: var(--border); }
