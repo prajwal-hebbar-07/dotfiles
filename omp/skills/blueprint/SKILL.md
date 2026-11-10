@@ -162,8 +162,9 @@ and setup steps it uses. Return format, per chunk:
 
 ```text
 ### C<n> <title>
+- Summary: <one sentence, at most 20 words: what a person can do once this chunk ships, in the requirements' words>
 - Covers: "<requirement line, exact>" — <requirements.md section>
-- Issue candidate: <pull-request-sized piece> — <the Covers lines it builds>
+- Issue candidate: <pull-request-sized piece, at most 10 words> — <the Covers lines it builds>
 - Screen: <name>
 - Creates: <path in the project structure>
 - By hand: <manual step this chunk needs>
