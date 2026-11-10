@@ -142,12 +142,14 @@ The design skills are distilled from ui-ux-pro-max and Emil Kowalski's skills,
 neither of which is installed. `ui-craft` holds the shared rules (interface,
 motion, platforms, worst-case data) that `design`, `review-ui`, `work` and
 `implement` read. `design` needs the requirements, stack and (for a new
-app) blueprint, draws grey wireframes and a flow board in Paper for the
-user to approve, then the direction, design system and screens with every
-state, and writes `docs/design.md`. `review-ui` reads the code against
-Paper and the design: which screens and states are built, partial or
-missing, where they drift, and ui-craft findings, written read-only to
-`docs/ui-review.md` for `raise-issues`.
+app) blueprint, draws grey wireframes and a flow board on their own page
+of the Paper file for the user to approve, then the direction, design
+system and screens with every state on a design page of the same file,
+and writes `docs/design.md`. `review-ui` reads the code against
+`docs/design.md` and the Paper page the user names before the review:
+which screens and states are built, partial or missing, where they drift,
+and ui-craft findings, written read-only to `docs/ui-review.md` for
+`raise-issues`.
 
 `archify` and `ponytail` are third-party and not vendored here: install with
 `npx skills add tt-a1i/archify -g` and

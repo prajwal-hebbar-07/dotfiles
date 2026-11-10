@@ -40,8 +40,8 @@ and `skill://design/paper.md` before any Paper call.
 - Ask about color, type or layout taste in chat. Draw the options instead
   and let the user pick on the boards.
 - Start the full design before the user approves the wireframes.
-- Draw on a Paper file or page other than the pinned one, or start Paper
-  Desktop.
+- Draw on a Paper file other than the pinned one, or on a page other than
+  its pinned wireframe and design pages, or start Paper Desktop.
 - Write application code, or change files other than `docs/design.md`.
 - Approve a stage without the user's explicit `approve`.
 
@@ -102,12 +102,12 @@ Skip this step when the screens in scope already have approved wireframes.
 
 1. Write `docs/design.md` with `Status: Wireframes`, the `Flow` section and
    each screen's `Job`, `Primary action`, `Regions` and `Next`.
-2. Draw by `paper.md`'s wireframe rules: one `Flow` board, then one
-   wireframe board per screen in journey order. Grey boxes with plain
-   labels saying what goes there ("Invoices, newest first, 20 per page"),
-   the primary action marked, and arrows or notes saying where each action
-   leads ("Pay → S4 Receipt; card declined → S3 · error"). No colour,
-   tokens, icons or real styling.
+2. Draw on the wireframe page by `paper.md`'s wireframe rules: one `Flow`
+   board, then one wireframe board per screen in journey order. Grey boxes
+   with plain labels saying what goes there ("Invoices, newest first, 20
+   per page"), the primary action marked, and arrows or notes saying where
+   each action leads ("Pay → S4 Receipt; card declined → S3 · error"). No
+   colour, tokens, icons or real styling.
 3. Check each board by screenshot: every screen in the flow has a board,
    every `Next` arrow lands on a screen, nothing is clipped.
 4. Stop. Reply with the screens and the flow in one table and ask the user
@@ -125,10 +125,10 @@ differ on a named axis (density, layout, personality, color attitude, type
 voice), never only in color. Name them by their feel (`Quiet`, `Editorial`,
 `Dense`), not `Option A`. Each gets dials, tokens and a `Refuses` line.
 
-Draw the most important screen once per direction, side by side, on the
-approved wireframe, with real copy and plausible data. Set `Status:
-Directions`, write all directions under `## Directions`, and stop. Reply
-with a table:
+Draw the most important screen once per direction, side by side on the
+design page, from its approved wireframe, with real copy and plausible
+data. Set `Status: Directions`, write all directions under
+`## Directions`, and stop. Reply with a table:
 
 | Direction | Axis | Right when | Costs |
 | --- | --- | --- | --- |
@@ -150,8 +150,8 @@ After `pick`, or when Step 3 was skipped:
    state for screens that show lists or user data.
 4. For each interaction, run the motion gate (`motion.md` §1). Record the
    purpose and the recipe with exact values, or `none` with the reason.
-5. Draw in Paper by `paper.md`: tokens, the `Design system` board, then
-   the screens in journey order with their states beside them.
+5. Draw on the design page by `paper.md`: tokens, the `Design system`
+   board, then the screens in journey order with their states beside them.
 6. Check each board by screenshot against `interface.md` §1–§6: contrast,
    target sizes, one primary action, alignment of repeated rows, nothing
    clipped. Fix the board before the next one.
@@ -177,7 +177,9 @@ After `pick`, or when Step 3 was skipped:
 Status: Wireframes | Directions | Drawn | Approved
 Updated: YYYY-MM-DD
 Wireframes: drawn YYYY-MM-DD | approved YYYY-MM-DD
-Paper: <file name> · <page name> (fileId <id>, pageId <id>)
+Paper: <file name> (fileId <id>)
+Wireframe page: <page name> (pageId <id>)
+Design page: <page name> (pageId <id>)
 Platform: <phone 390×844 | desktop 1440×900 | …>
 Sources: <requirements, blueprint, spec, brief, reference documents used>
 
@@ -233,15 +235,15 @@ Sources: <requirements, blueprint, spec, brief, reference documents used>
 - <only what the user must still decide>
 ```
 
-During `Wireframes`, only the header, `Flow`, `Open decisions` and each
-screen's `Job`, `Primary action`, `Regions`, `Next` and `Wireframe` lines
-exist. During `Directions`, `## Directions` holds one `### <name>` block
-per direction with its dials, key tokens and `Refuses`, in place of
-`## Direction` and `## Tokens`.
+During `Wireframes`, only the header (without `Design page`), `Flow`,
+`Open decisions` and each screen's `Job`, `Primary action`, `Regions`,
+`Next` and `Wireframe` lines exist. During `Directions`, `## Directions`
+holds one `### <name>` block per direction with its dials, key tokens and
+`Refuses`, in place of `## Direction` and `## Tokens`.
 
 ## Reply
 
-Reply with the Paper file and page, the boards drawn, tokens created, the
+Reply with the Paper file and pages, the boards drawn, tokens created, the
 status, open decisions, and the next command (`approve`, `pick`, or, once
 approved, `/skill:raise-issues`; within `feature`, `/skill:feature`). Do
 not repeat the document. Say that no application code was changed.

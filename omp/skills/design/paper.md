@@ -15,24 +15,31 @@ for every drawing; if it and the chat disagree, update the document first.
 3. Call `get_font_family_info` before the first type style, and
    `get_tokens` to reuse tokens that already match.
 
-## Pin the file and page
+## Pin the file and pages
 
-Pass `fileId` on every call and `pageId` on every page-scoped call; the
-focused file can change while you work.
+Wireframes and the design live in one Paper file on separate pages: the
+wireframe page holds the `Flow` board and the `W<n>` boards; the design
+page holds the direction boards, the `Design system` board and the `S<n>`
+boards. Pass `fileId` on every call and the stage's `pageId` on every
+page-scoped call; the focused file and page can change while you work.
 
 - `docs/design.md` has a `Paper:` line: `open_file` that file, then
-  `get_basic_info` to confirm the file and page names match.
-- No `Paper:` line: `get_basic_info` on the focused file, name its file
-  and page to the user, and ask them to confirm before creating anything.
-  Then write the `Paper:` line.
+  `get_basic_info` to confirm the file name matches.
+- No `Paper:` line: `get_basic_info` on the focused file, name it to the
+  user, and ask them to confirm before creating anything. Then write the
+  `Paper:` line.
+- The stage's page line (`Wireframe page:` for Step 2, `Design page:` for
+  directions and the full design) is missing: `create_page` named
+  `Wireframes` or `Design` in the pinned file, unless the user named an
+  existing page, and write the line before drawing.
 
 ## Order
 
 1. **Wireframes** (Step 2). A `Flow` board first: one labelled box per
    screen, arrows between them, each arrow labelled with the action that
    takes it. Then one artboard per screen named `W<n> <name>` at the
-   platform size, in journey order, in a row above where the screens will
-   go. Greys only (white, one light grey for boxes, one dark grey for
+   platform size, left to right in journey order after the `Flow` board.
+   Greys only (white, one light grey for boxes, one dark grey for
    text), the font the file already uses, no tokens or icons. Each region
    is a box labelled with what goes there; the primary action is a dark
    box; notes beside the frame say where each action leads. Annotations
