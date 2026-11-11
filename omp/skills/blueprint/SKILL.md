@@ -1,6 +1,6 @@
 ---
 name: blueprint
-description: After requirements and stack are settled, write docs/blueprint/ — five short linked HTML pages (overview, stack, setup, structure, build) that a senior engineer reads in 15–30 minutes, led by inline SVG diagrams and one shared colour code — linking the official docs of every stack choice, listing the setup steps with their commands, proposing the project structure and cutting the build into chunks that become issues, with the review steps that lead to design and raise-issues. An Opus 5.5 orchestrator fans the doc research and chunk drafting out to parallel Sonnet 5.5 workers, or GPT 6.1 Sol and Terra when either is unavailable or hits a limit. Use when the user wants to see how the settled documents turn into a build before designing.
+description: After requirements and stack are settled, write docs/blueprint/ — five short linked HTML pages (overview, stack, setup, structure, build) that a senior engineer reads in 15–30 minutes, led by inline SVG diagrams and one shared colour code — linking the official docs of every stack choice, listing the setup steps with their commands, proposing the project structure and cutting the build into chunks that become issues, with the review steps that lead to design and raise-issues. MiniMax M3.1 Flash workers research the docs and draft the chunks in parallel; a GPT 6.1 Sol orchestrator does the heavy part (the cut, the checks and the pages). Use when the user wants to see how the settled documents turn into a build before designing.
 disable-model-invocation: true
 ---
 
@@ -48,8 +48,8 @@ already set, and `feature` goes from the spec to design and issues.
 - Install, scaffold, run anything, raise issues, commit, or write any file
   outside `docs/blueprint/`.
 - Let the parent session gather, chunk or compose the pages itself, use an
-  agent outside the pairs below, mix pairs, or continue silently when a
-  pinned agent fails.
+  agent other than the two below, or continue silently when a pinned agent
+  fails.
 - Use scripts, web fonts, image files, a CDN, trackers, `<style>` blocks,
   `style` attributes or any stylesheet other than the shared `style.css`.
   The pages are static HTML that open from disk; diagrams are inline SVG.
@@ -59,30 +59,21 @@ already set, and `feature` goes from the spec to design and issues.
 
 ## Specialists
 
-Use only these OMP task agents.
+Use only these OMP task agents. MiniMax M3.1 Flash does everything except
+the heavy part (the cut, the checks, the diagrams and the pages), which
+GPT 6.1 Sol does.
 
-Primary pair:
-
-- `blueprint-opus-orchestrator` — `anthropic/claude-opus-5-5`, high
+- `blueprint-sol-orchestrator` — `openai-codex/gpt-6.1-sol`, high
   thinking. Runs Steps 2–4, spawns the workers, owns the cut, the checks
   and the pages.
-- `blueprint-sonnet-worker` — `anthropic/claude-sonnet-5-5`, medium
+- `blueprint-flash-worker` — `ollama-cloud/minimax-m3.1-flash`, medium
   thinking. Researches one slice of the stack docs or drafts the chunks it
   is given. Only the orchestrator spawns it.
 
-Authorised fallback pair:
-
-- `blueprint-sol-orchestrator` — `openai-codex/gpt-6.1-sol`, high thinking.
-- `blueprint-terra-worker` — `openai-codex/gpt-6.1-terra`, medium thinking.
-
-The parent spawns the primary orchestrator unless the user asks for the
-fallback pair. If the orchestrator fails (including a rate limit or quota
-error), is unavailable, reports a model other than its pin, or returns
-`PAIR FAILED` because a worker did, name the failure and rerun Steps 2–4
-from the start with the fallback orchestrator; nothing has been written, so
-nothing carries over. Never mix pairs or use output from the superseded
-pair. If the fallback pair fails the same way, stop and name it. No other
-fallback is authorised.
+No fallback is authorised. If the orchestrator fails (including a rate
+limit or quota error), is unavailable, reports a model other than its pin,
+or returns `PAIR FAILED` because a worker did, stop and name the failure;
+nothing has been written, and the user reruns `/skill:blueprint` later.
 
 Spawn each agent by its name and never pass a per-call `model`; each agent
 file pins its model and reports its identity first. The orchestrator
@@ -229,8 +220,7 @@ this skill.
 
 ## Reply
 
-Reply with the path `docs/blueprint/index.html`, the pair that ran (and
-the failure that switched it, when it did), each page with its read time
+Reply with the path `docs/blueprint/index.html`, each page with its read time
 and the total, the number of stack links, setup steps (and how many are
 `done` or `by hand`), chunks, issue candidates and gaps, and the next
 command: the first gap's command, or `/skill:design <direction>` when there

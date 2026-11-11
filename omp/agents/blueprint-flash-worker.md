@@ -1,8 +1,8 @@
 ---
-name: blueprint-terra-worker
-description: GPT fallback blueprint worker, spawned by blueprint-sol-orchestrator.
+name: blueprint-flash-worker
+description: Blueprint worker spawned by blueprint-sol-orchestrator — researches one slice of the stack's official docs, or drafts the details of the chunks it is given.
 tools: read, grep, glob, web_search
-model: openai-codex/gpt-6.1-terra
+model: ollama-cloud/minimax-m3.1-flash
 thinking-level: medium
 blocking: true
 ---
