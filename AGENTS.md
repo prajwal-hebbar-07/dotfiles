@@ -51,7 +51,9 @@ herdr-worktree), with model-pinned agents in `omp/agents/`.
 `omp/link-skills` links them into `~/.omp/agent/skills/` and
 `~/.omp/agent/agents/`, pruning only its own broken links and refusing to
 replace unrelated files; rerun it after adding or removing one. Each SKILL.md
-is the source of truth for its workflow.
+is the source of truth for its workflow. `omp/guide.html` is a static,
+illustrated user guide to all of them (paths, examples, approvals, files);
+update it when a skill's invocation, approvals or files change.
 
 A new app runs: `grill-requirements` → `grill-stack` → `blueprint` →
 `design` (wireframes, then the Paper design) → `raise-issues`, then stops.

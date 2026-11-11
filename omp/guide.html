@@ -1,0 +1,716 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OMP workflow guide</title>
+<style>
+:root {
+  color-scheme: light dark;
+  --bg: #ffffff;
+  --surface: #f6f7f9;
+  --code-bg: #f1f3f6;
+  --fg: #16181d;
+  --muted: #555b66;
+  --border: #e2e5ea;
+  --accent: #2457d6;
+  --new: #2457d6;   --new-bg: #e9effc;
+  --feat: #1d7348;  --feat-bg: #e6f4ec;
+  --small: #8a5300; --small-bg: #fbf0dc;
+  --util: #6b4fbb;  --util-bg: #f0ecfb;
+  --stop: #b42318;  --stop-bg: #fdecea;
+
+  --s1: 4px; --s2: 8px; --s3: 16px; --s4: 24px; --s5: 32px; --s6: 48px;
+  --r: 10px;
+  --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f1115;
+    --surface: #161a20;
+    --code-bg: #1d222b;
+    --fg: #e8eaee;
+    --muted: #a3a9b4;
+    --border: #2a303a;
+    --accent: #7aa2ff;
+    --new: #7aa2ff;   --new-bg: #1a2742;
+    --feat: #5fcf95;  --feat-bg: #13301f;
+    --small: #f0b45a; --small-bg: #36260b;
+    --util: #b9a2ff;  --util-bg: #271d47;
+    --stop: #ff8a80;  --stop-bg: #3d1512;
+  }
+}
+
+* { box-sizing: border-box; }
+html { scroll-padding-top: var(--s4); }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font: 16px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+a { color: var(--accent); text-underline-offset: 2px; }
+a:focus-visible, summary:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+code, kbd { font: 0.9em var(--mono); }
+:not(pre) > code {
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: var(--code-bg);
+  overflow-wrap: anywhere;
+}
+h1, h2, h3 { letter-spacing: -0.02em; text-wrap: balance; }
+h1 { margin: 0 0 var(--s2); font-size: 32px; line-height: 1.15; }
+h2 { margin: var(--s6) 0 var(--s2); font-size: 24px; line-height: 1.2; }
+h3 { margin: var(--s4) 0 var(--s2); font-size: 18px; line-height: 1.25; }
+p, li { max-width: 68ch; }
+.lead { margin: 0 0 var(--s4); color: var(--muted); font-size: 18px; }
+.muted { color: var(--muted); }
+.small { font-size: 14px; }
+
+.skip {
+  position: absolute; left: var(--s2); top: -48px;
+  padding: var(--s2) var(--s3);
+  background: var(--fg); color: var(--bg);
+  border-radius: 6px; z-index: 100;
+}
+.skip:focus { top: var(--s2); }
+
+/* Layout */
+.layout { display: grid; grid-template-columns: minmax(0, 1fr); }
+.side { border-bottom: 1px solid var(--border); padding: var(--s3) var(--s4); }
+.side .brand { font-weight: 700; margin-bottom: var(--s2); }
+.side ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--s1) var(--s2); }
+.side a { display: block; padding: 6px 10px; border-radius: 6px; color: var(--muted); text-decoration: none; font-size: 14px; }
+.side a:hover { color: var(--fg); background: var(--surface); }
+main { padding: var(--s5) var(--s4) var(--s6); max-width: 920px; }
+@media (min-width: 1024px) {
+  .layout { grid-template-columns: 240px minmax(0, 1fr); }
+  .side {
+    position: sticky; top: 0; height: 100dvh; overflow-y: auto;
+    border-bottom: 0; border-right: 1px solid var(--border);
+    padding: var(--s5) var(--s3);
+  }
+  .side ul { display: block; }
+  .side .group { margin: var(--s3) 0 var(--s1) 10px; color: var(--muted); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
+  main { padding: var(--s6) var(--s6) 96px; }
+}
+.side .group { display: none; }
+@media (min-width: 1024px) { .side .group { display: block; } }
+
+/* Path chooser cards */
+.paths { display: grid; gap: var(--s3); grid-template-columns: minmax(0, 1fr); margin: var(--s4) 0; }
+@media (min-width: 768px) { .paths { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.path {
+  display: block; padding: var(--s3) var(--s3) var(--s3);
+  border: 1px solid var(--border); border-top: 4px solid var(--c);
+  border-radius: var(--r); background: var(--bg);
+  color: var(--fg); text-decoration: none;
+}
+.path:hover { background: var(--surface); }
+.path .tag { display: inline-block; margin-bottom: var(--s2); padding: 1px 8px; border-radius: 999px; background: var(--cbg); color: var(--c); font-size: 12px; font-weight: 600; }
+.path strong { display: block; font-size: 18px; letter-spacing: -0.01em; }
+.path span.when { display: block; margin-top: var(--s1); color: var(--muted); font-size: 14px; }
+.new  { --c: var(--new);   --cbg: var(--new-bg); }
+.feat { --c: var(--feat);  --cbg: var(--feat-bg); }
+.sml  { --c: var(--small); --cbg: var(--small-bg); }
+.utl  { --c: var(--util);  --cbg: var(--util-bg); }
+
+/* Section header with colour key */
+.sec-tag { display: inline-block; padding: 1px 10px; border-radius: 999px; background: var(--cbg); color: var(--c); font-size: 12px; font-weight: 600; }
+
+/* Commands */
+.cmd {
+  margin: var(--s2) 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--code-bg);
+  overflow: hidden;
+}
+.cmd .label { display: block; padding: 4px 12px; border-bottom: 1px solid var(--border); color: var(--muted); font-size: 12px; font-weight: 600; }
+.cmd pre { margin: 0; padding: 10px 12px; white-space: pre-wrap; overflow-wrap: anywhere; font: 14px/1.55 var(--mono); }
+
+/* Numbered steps */
+ol.steps { list-style: none; margin: var(--s3) 0; padding: 0; counter-reset: s; }
+ol.steps > li {
+  position: relative; max-width: none;
+  margin: 0 0 var(--s4); padding-left: 48px;
+  counter-increment: s;
+}
+ol.steps > li::before {
+  content: counter(s);
+  position: absolute; left: 0; top: 0;
+  width: 32px; height: 32px; border-radius: 50%;
+  display: grid; place-items: center;
+  background: var(--cbg, var(--new-bg)); color: var(--c, var(--new));
+  font-weight: 700; font-variant-numeric: tabular-nums;
+}
+ol.steps > li > h3 { margin: 4px 0 var(--s1); font-size: 16px; }
+ol.steps > li > p { margin: var(--s1) 0; }
+.gets { color: var(--muted); font-size: 14px; }
+.gets b { color: var(--fg); font-weight: 600; }
+
+/* Callouts */
+.note {
+  margin: var(--s4) 0; padding: var(--s3);
+  border-left: 4px solid var(--c, var(--accent));
+  background: var(--cbg, var(--surface));
+  border-radius: 0 var(--r) var(--r) 0;
+}
+.note h3 { margin: 0 0 var(--s1); font-size: 16px; }
+.note p, .note ul { margin: var(--s1) 0 0; }
+.note ul { padding-left: 20px; }
+.stop { --c: var(--stop); --cbg: var(--stop-bg); }
+
+/* Diagrams */
+figure { margin: var(--s4) 0; }
+.diagram { padding: var(--s3); border: 1px solid var(--border); border-radius: 12px; background: var(--surface); }
+.diagram svg { display: block; width: 100%; height: auto; }
+figcaption { margin-top: var(--s2); color: var(--muted); font-size: 14px; }
+svg text { fill: var(--fg); font: 13px system-ui, -apple-system, "Segoe UI", sans-serif; }
+svg .c { text-anchor: middle; dominant-baseline: middle; }
+svg .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.5px; font-weight: 600; }
+svg .sub { fill: var(--muted); font-size: 11px; }
+svg .lane { fill: var(--muted); font-size: 12px; font-weight: 600; letter-spacing: 0.04em; }
+svg .box { fill: var(--bg); stroke: var(--border); stroke-width: 1.5; }
+svg .b-new { fill: var(--new-bg); stroke: var(--new); }
+svg .b-feat { fill: var(--feat-bg); stroke: var(--feat); }
+svg .b-sml { fill: var(--small-bg); stroke: var(--small); }
+svg .b-opt { stroke-dasharray: 5 4; }
+svg .edge { fill: none; stroke: var(--muted); stroke-width: 1.5; }
+svg .head { fill: var(--muted); }
+svg .elab { fill: var(--muted); font-size: 11px; text-anchor: middle; }
+
+/* State chips */
+.flow { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s2); margin: var(--s2) 0; padding: 0; list-style: none; }
+.flow li { max-width: none; }
+.chip { display: inline-block; padding: 2px 10px; border-radius: 999px; border: 1px solid var(--border); background: var(--bg); font-size: 13px; font-weight: 600; white-space: nowrap; }
+.chip.go { background: var(--feat-bg); color: var(--feat); border-color: transparent; }
+.flow .arrow { color: var(--muted); font-size: 13px; }
+.flow .arrow code { font-size: 12px; }
+
+/* Skill reference */
+.skills { display: grid; gap: var(--s3); grid-template-columns: minmax(0, 1fr); margin: var(--s3) 0; }
+@media (min-width: 768px) { .skills { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.skill { padding: var(--s3); border: 1px solid var(--border); border-left: 4px solid var(--c); border-radius: var(--r); }
+.skill h3 { margin: 0; font: 600 15px var(--mono); letter-spacing: 0; }
+.skill p { margin: var(--s1) 0; font-size: 15px; }
+.skill dl { margin: var(--s2) 0 0; font-size: 14px; display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: var(--s1) var(--s2); }
+.skill dt { color: var(--muted); font-weight: 600; }
+.skill dd { margin: 0; overflow-wrap: anywhere; }
+
+/* Tables */
+.table-wrap { overflow-x: auto; margin: var(--s3) 0; border: 1px solid var(--border); border-radius: var(--r); }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th, td { padding: 10px 12px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--border); }
+tr:last-child td { border-bottom: 0; }
+th { background: var(--surface); color: var(--muted); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+td code { white-space: nowrap; }
+
+/* Example transcripts */
+details { margin: var(--s3) 0; border: 1px solid var(--border); border-radius: var(--r); }
+summary { padding: 12px var(--s3); cursor: pointer; font-weight: 600; }
+details[open] summary { border-bottom: 1px solid var(--border); }
+details > div { padding: var(--s2) var(--s3) var(--s3); }
+.turn { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: var(--s2); margin: var(--s2) 0; font-size: 15px; }
+.turn .who { color: var(--muted); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; padding-top: 3px; }
+.turn.you .who { color: var(--accent); }
+.turn p { margin: 0; }
+.turn code { overflow-wrap: anywhere; }
+
+footer { margin-top: var(--s6); padding-top: var(--s3); border-top: 1px solid var(--border); color: var(--muted); font-size: 14px; }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="layout">
+
+<nav class="side" aria-label="Guide sections">
+  <div class="brand">OMP workflow</div>
+  <ul>
+    <li class="group">Start</li>
+    <li><a href="#choose">Pick your path</a></li>
+    <li><a href="#setup">One-time setup</a></li>
+    <li class="group">Paths</li>
+    <li><a href="#new-app">New app</a></li>
+    <li><a href="#feature">Feature</a></li>
+    <li><a href="#small">Small change</a></li>
+    <li class="group">How it works</li>
+    <li><a href="#grills">Grills and questions</a></li>
+    <li><a href="#approvals">Approvals and gates</a></li>
+    <li><a href="#files">Files it keeps</a></li>
+    <li class="group">Reference</li>
+    <li><a href="#skills">Every skill</a></li>
+    <li><a href="#stuck">When something stops</a></li>
+  </ul>
+</nav>
+
+<main id="main">
+
+<h1>Using your OMP skills</h1>
+<p class="lead">Three paths, seventeen skills, one rule: the models settle what they can, you decide what matters, and nothing is built or raised until you say so.</p>
+
+<section id="choose" aria-labelledby="choose-h">
+  <h2 id="choose-h">Pick your path</h2>
+  <p>Ask one question first: <strong>what are you starting from?</strong></p>
+
+  <div class="paths">
+    <a class="path new" href="#new-app">
+      <span class="tag">New app</span>
+      <strong>Nothing exists yet</strong>
+      <span class="when">Requirements, stack, blueprint, design, then issues. Every big decision is made before any code.</span>
+    </a>
+    <a class="path feat" href="#feature">
+      <span class="tag">Feature</span>
+      <strong>The app runs; this adds something real</strong>
+      <span class="when">New data, a new screen, a new API, auth, a new library, or a change to promised behaviour.</span>
+    </a>
+    <a class="path sml" href="#small">
+      <span class="tag">Small change</span>
+      <strong>Bug fix or tweak, no decisions</strong>
+      <span class="when">Straight to a plan you approve, then the code. No grill, no design step.</span>
+    </a>
+  </div>
+
+  <figure class="diagram">
+    <svg viewBox="0 0 760 236" role="img" aria-labelledby="choose-t">
+      <title id="choose-t">Decision: new app, feature or small change</title>
+      <defs><marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path class="head" d="M0 0 L10 5 L0 10 z"/></marker></defs>
+      <rect class="box" x="10" y="90" width="160" height="56" rx="10"/>
+      <text class="c" x="90" y="110">What are you</text>
+      <text class="c" x="90" y="128">starting from?</text>
+
+      <path class="edge" d="M170 118 H210 V40 H370" marker-end="url(#a1)"/>
+      <path class="edge" d="M170 118 H370" marker-end="url(#a1)"/>
+      <path class="edge" d="M210 118 V196 H370" marker-end="url(#a1)"/>
+      <text class="elab" x="290" y="32">empty repo</text>
+      <text class="elab" x="290" y="110">app runs, real decisions</text>
+      <text class="elab" x="290" y="188">app runs, no decisions</text>
+
+      <rect class="box b-new" x="370" y="12" width="380" height="56" rx="10"/>
+      <text class="c" x="560" y="32" font-weight="600">New app</text>
+      <text class="c sub" x="560" y="50">requirements → stack → blueprint → design → issues</text>
+      <rect class="box b-feat" x="370" y="90" width="380" height="56" rx="10"/>
+      <text class="c" x="560" y="110" font-weight="600">Feature</text>
+      <text class="c sub" x="560" y="128">feature → (stack) → (design) → issues raised</text>
+      <rect class="box b-sml" x="370" y="168" width="380" height="56" rx="10"/>
+      <text class="c" x="560" y="188" font-weight="600">Small change</text>
+      <text class="c sub" x="560" y="206">issue-branch → implement → commit → raise-pr</text>
+    </svg>
+    <figcaption>All three paths end the same way: one branch per issue, a plan you approve, then commit and pull request.</figcaption>
+  </figure>
+
+  <div class="note">
+    <h3>Not sure if it is a feature or a small change?</h3>
+    <p>Use <strong>Feature</strong> if any of these is true:</p>
+    <ul>
+      <li>It adds or changes stored data (a new table, field or migration).</li>
+      <li>It adds or changes a route, API, CLI command or config.</li>
+      <li>It touches sign-in, permissions or privacy.</li>
+      <li>It changes something <code>docs/requirements.md</code> promises, or users rely on.</li>
+      <li>It needs a library or service <code>docs/stack.md</code> does not have.</li>
+      <li>It adds a screen or changes the flow of a designed one.</li>
+    </ul>
+    <p>None of them? It is a small change.</p>
+  </div>
+</section>
+
+<section id="setup" aria-labelledby="setup-h">
+  <h2 id="setup-h">One-time setup</h2>
+  <ol class="steps">
+    <li>
+      <h3>Link the skills and agents</h3>
+      <div class="cmd"><span class="label">Terminal, in the dotfiles repo</span><pre>omp/link-skills</pre></div>
+      <p class="gets">Rerun it after pulling changes that add or remove a skill or agent, then <b>restart OMP</b>.</p>
+    </li>
+    <li>
+      <h3>Install ponytail</h3>
+      <div class="cmd"><span class="label">Terminal</span><pre>npx skills add DietrichGebert/ponytail -g --skill ponytail</pre></div>
+      <p class="gets"><code>implement</code> and <code>work</code> stop without it; it keeps every change to the smallest complete one.</p>
+    </li>
+    <li>
+      <h3>GitHub CLI 2.94 or later, signed in</h3>
+      <div class="cmd"><span class="label">Terminal</span><pre>brew upgrade gh &amp;&amp; gh auth login</pre></div>
+      <p class="gets"><code>raise-issues</code> needs it for blocked-by links; <code>issue-branch</code> and <code>raise-pr</code> need it to read issues and open PRs.</p>
+    </li>
+    <li>
+      <h3>Open Paper Desktop before designing</h3>
+      <p class="gets"><code>design</code> and <code>review-ui</code> draw and read through it. They never start it for you.</p>
+    </li>
+  </ol>
+</section>
+
+<section id="new-app" aria-labelledby="new-h" class="new">
+  <span class="sec-tag">New app</span>
+  <h2 id="new-h">Building a new app</h2>
+  <p>You plan once, then build issue by issue. The top row runs once; the bottom row repeats for every issue.</p>
+
+  <figure class="diagram">
+    <svg viewBox="0 0 888 250" role="img" aria-labelledby="new-t">
+      <title id="new-t">New app pipeline: plan once, then a loop per issue</title>
+      <defs><marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path class="head" d="M0 0 L10 5 L0 10 z"/></marker></defs>
+      <text class="lane" x="10" y="20">PLAN ONCE</text>
+      <rect class="box b-new" x="10" y="32" width="156" height="58" rx="10"/>
+      <text class="c mono" x="88" y="53">grill-requirements</text><text class="c sub" x="88" y="72">requirements.md</text>
+      <rect class="box b-new" x="188" y="32" width="156" height="58" rx="10"/>
+      <text class="c mono" x="266" y="53">grill-stack</text><text class="c sub" x="266" y="72">stack.md</text>
+      <rect class="box b-new" x="366" y="32" width="156" height="58" rx="10"/>
+      <text class="c mono" x="444" y="53">blueprint</text><text class="c sub" x="444" y="72">docs/blueprint/</text>
+      <rect class="box b-new" x="544" y="32" width="156" height="58" rx="10"/>
+      <text class="c mono" x="622" y="53">design</text><text class="c sub" x="622" y="72">Paper + design.md</text>
+      <rect class="box b-new" x="722" y="32" width="156" height="58" rx="10"/>
+      <text class="c mono" x="800" y="53">raise-issues</text><text class="c sub" x="800" y="72">GitHub issues</text>
+      <path class="edge" d="M166 61 H188" marker-end="url(#a2)"/>
+      <path class="edge" d="M344 61 H366" marker-end="url(#a2)"/>
+      <path class="edge" d="M522 61 H544" marker-end="url(#a2)"/>
+      <path class="edge" d="M700 61 H722" marker-end="url(#a2)"/>
+
+      <path class="edge" d="M770 90 V132 H88 V170" marker-end="url(#a2)"/>
+      <text class="elab" x="430" y="124">for each issue, in order</text>
+
+      <text class="lane" x="10" y="160">PER ISSUE</text>
+      <rect class="box b-new" x="10" y="170" width="156" height="58" rx="10"/>
+      <text class="c mono" x="88" y="191">issue-branch</text><text class="c sub" x="88" y="210">branch + summary</text>
+      <rect class="box b-new" x="188" y="170" width="156" height="58" rx="10"/>
+      <text class="c mono" x="266" y="191">implement</text><text class="c sub" x="266" y="210">plan → approve → code</text>
+      <rect class="box b-new" x="366" y="170" width="156" height="58" rx="10"/>
+      <text class="c mono" x="444" y="191">commit</text><text class="c sub" x="444" y="210">focused commits</text>
+      <rect class="box b-new" x="544" y="170" width="156" height="58" rx="10"/>
+      <text class="c mono" x="622" y="191">raise-pr</text><text class="c sub" x="622" y="210">pull request</text>
+      <rect class="box b-new b-opt" x="722" y="170" width="156" height="58" rx="10"/>
+      <text class="c mono" x="800" y="191">review-ui</text><text class="c sub" x="800" y="210">when UI was built</text>
+      <path class="edge" d="M166 199 H188" marker-end="url(#a2)"/>
+      <path class="edge" d="M344 199 H366" marker-end="url(#a2)"/>
+      <path class="edge" d="M522 199 H544" marker-end="url(#a2)"/>
+      <path class="edge" d="M700 199 H722" marker-end="url(#a2)"/>
+      <path class="edge" d="M850 170 V90" marker-end="url(#a2)"/>
+      <text class="elab" x="866" y="140">gaps</text>
+    </svg>
+    <figcaption>Dashed: only when the issue built UI. Its gaps go back through <code>raise-issues</code> as new issues.</figcaption>
+  </figure>
+
+  <ol class="steps">
+    <li>
+      <h3>Write down what you want</h3>
+      <p>Optional, but faster: record what you already know, in your words. Nothing is researched or invented.</p>
+      <div class="cmd"><span class="label">You type</span><pre>/skill:draft-docs requirements A web app for book clubs. Members join by invite link, vote on the next book and RSVP to monthly meetings. Only the club owner can remove members.</pre></div>
+    </li>
+    <li>
+      <h3>Grill the requirements</h3>
+      <p>Two models question and answer each other. You only get the questions that matter, as a form.</p>
+      <div class="cmd"><span class="label">You type</span><pre>/skill:grill-requirements</pre></div>
+      <p class="gets">You get <b>docs/requirements.md</b> with <code>Status: Settled</code>. <a href="#grills">How the grill works →</a></p>
+    </li>
+    <li>
+      <h3>Grill the stack</h3>
+      <div class="cmd"><span class="label">You type</span><pre>/skill:draft-docs stack Next.js, Postgres, hosted on Vercel
+/skill:grill-stack</pre></div>
+      <p class="gets">You get <b>docs/stack.md</b>: one choice (or your deferral) for runtime, framework, datastore, auth, hosting and, for a UI, the component library and styling.</p>
+    </li>
+    <li>
+      <h3>Read the blueprint</h3>
+      <div class="cmd"><span class="label">You type</span><pre>/skill:blueprint</pre></div>
+      <p class="gets">You get <b>docs/blueprint/</b>: five short pages with diagrams, about 30 minutes in total. Open <code>docs/blueprint/index.html</code> in a browser. Ask for changes with <code>/skill:blueprint move invites before voting</code>.</p>
+    </li>
+    <li>
+      <h3>Design it in Paper</h3>
+      <p>Grey wireframes and the flow first; colour only after you approve the flow.</p>
+      <div class="cmd"><span class="label">You type, one at a time as each stage finishes</span><pre>/skill:design calm and dense, like Linear
+/skill:design approve
+/skill:design pick Quiet
+/skill:design approve</pre></div>
+      <ul class="flow" aria-label="Design stages">
+        <li><span class="chip">Wireframes</span></li>
+        <li class="arrow"><code>approve</code> →</li>
+        <li><span class="chip">Directions</span></li>
+        <li class="arrow"><code>pick</code> →</li>
+        <li><span class="chip">Drawn</span></li>
+        <li class="arrow"><code>approve</code> →</li>
+        <li><span class="chip go">Approved</span></li>
+      </ul>
+      <p class="gets">Wireframes and the design live on separate pages of one Paper file. Directions are skipped when you gave one.</p>
+    </li>
+    <li>
+      <h3>Raise the issues</h3>
+      <div class="cmd"><span class="label">You type</span><pre>/skill:raise-issues
+/skill:raise-issues approve</pre></div>
+      <p class="gets">First call drafts <b>docs/issues.md</b> for you to read; nothing reaches GitHub until <code>approve</code>. Issues are vertical slices with blocked-by links, skeleton first.</p>
+    </li>
+    <li>
+      <h3>Build each issue</h3>
+      <div class="cmd"><span class="label">You type</span><pre>/skill:issue-branch https://github.com/you/shelf/issues/3
+/skill:implement https://github.com/you/shelf/issues/3 — voting lives in its own module under src/votes
+approve
+/skill:commit
+/skill:raise-pr main</pre></div>
+      <p class="gets">You give the architecture in one line; <code>implement</code> writes a one-minute plan and waits for <code>approve</code>. Issues with no blocker can run in parallel worktrees.</p>
+    </li>
+  </ol>
+</section>
+
+<section id="feature" aria-labelledby="feat-h" class="feat">
+  <span class="sec-tag">Feature</span>
+  <h2 id="feat-h">Adding a feature</h2>
+  <p>The same pipeline, cut down to one feature: a spec instead of full requirements, no blueprint, and the stack grill or design only when the feature needs them.</p>
+
+  <figure class="diagram">
+    <svg viewBox="0 0 888 112" role="img" aria-labelledby="feat-t">
+      <title id="feat-t">Feature path</title>
+      <defs><marker id="a3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path class="head" d="M0 0 L10 5 L0 10 z"/></marker></defs>
+      <rect class="box b-feat" x="3" y="26" width="132" height="58" rx="10"/>
+      <text class="c mono" x="69" y="47">branch</text><text class="c sub" x="69" y="66">issue-branch / git</text>
+      <rect class="box b-feat" x="153" y="26" width="132" height="58" rx="10"/>
+      <text class="c mono" x="219" y="47">feature</text><text class="c sub" x="219" y="66">spec grill</text>
+      <rect class="box b-feat b-opt" x="303" y="26" width="132" height="58" rx="10"/>
+      <text class="c mono" x="369" y="47">grill-stack</text><text class="c sub" x="369" y="66">if new technology</text>
+      <rect class="box b-feat b-opt" x="453" y="26" width="132" height="58" rx="10"/>
+      <text class="c mono" x="519" y="47">design</text><text class="c sub" x="519" y="66">if the UI changes</text>
+      <rect class="box b-feat" x="603" y="26" width="132" height="58" rx="10"/>
+      <text class="c mono" x="669" y="47">feature approve</text><text class="c sub" x="669" y="66">issues raised</text>
+      <rect class="box b-feat" x="753" y="26" width="132" height="58" rx="10"/>
+      <text class="c mono" x="819" y="47">per issue</text><text class="c sub" x="819" y="66">same loop as above</text>
+      <path class="edge" d="M135 55 H153" marker-end="url(#a3)"/>
+      <path class="edge" d="M285 55 H303" marker-end="url(#a3)"/>
+      <path class="edge" d="M435 55 H453" marker-end="url(#a3)"/>
+      <path class="edge" d="M585 55 H603" marker-end="url(#a3)"/>
+      <path class="edge" d="M735 55 H753" marker-end="url(#a3)"/>
+    </svg>
+    <figcaption>Dashed steps run only when the spec's <code>Impact</code> says so; <code>feature</code> tells you which command to run.</figcaption>
+  </figure>
+
+  <ol class="steps">
+    <li>
+      <h3>Get on a branch</h3>
+      <div class="cmd"><span class="label">You type</span><pre>git switch -c reading-reminders</pre></div>
+      <p class="gets">Or <code>/skill:issue-branch &lt;URL&gt;</code> when there is an issue. <code>feature</code> refuses to run on the default branch.</p>
+    </li>
+    <li>
+      <h3>Start the feature</h3>
+      <div class="cmd"><span class="label">You type</span><pre>/skill:feature Email members a reminder three days before each meeting</pre></div>
+      <p class="gets">It reads the code it touches, then grills a spec into <b>docs/features/reading-reminders/spec.md</b>. Same form-based questions as the requirements grill.</p>
+    </li>
+    <li>
+      <h3>Run the extra step it names, if any</h3>
+      <div class="cmd"><span class="label">Example: email is new technology</span><pre>/skill:grill-stack Resend for docs/features/reading-reminders/spec.md
+/skill:feature</pre></div>
+      <p class="gets">Rerunning <code>/skill:feature</code> carries on from where the folder says.</p>
+    </li>
+    <li>
+      <h3>Approve the issues</h3>
+      <div class="cmd"><span class="label">You type</span><pre>/skill:feature approve</pre></div>
+      <p class="gets">It raises the issues, merges the spec into <b>docs/requirements.md</b> and deletes the feature folder.</p>
+    </li>
+    <li>
+      <h3>Land the docs, then build</h3>
+      <div class="cmd"><span class="label">You type</span><pre>/skill:commit
+/skill:raise-pr main</pre></div>
+      <p class="gets">Then each issue goes through <code>issue-branch</code> → <code>implement</code> → <code>commit</code> → <code>raise-pr</code>.</p>
+    </li>
+  </ol>
+</section>
+
+<section id="small" aria-labelledby="small-h" class="sml">
+  <span class="sec-tag">Small change</span>
+  <h2 id="small-h">Making a small change</h2>
+
+  <figure class="diagram">
+    <svg viewBox="0 0 870 96" role="img" aria-labelledby="small-t">
+      <title id="small-t">Small change path</title>
+      <defs><marker id="a4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path class="head" d="M0 0 L10 5 L0 10 z"/></marker></defs>
+      <rect class="box b-sml" x="10" y="18" width="190" height="58" rx="10"/>
+      <text class="c mono" x="105" y="39">issue-branch</text><text class="c sub" x="105" y="58">or git switch -c</text>
+      <rect class="box b-sml" x="230" y="18" width="190" height="58" rx="10"/>
+      <text class="c mono" x="325" y="39">implement</text><text class="c sub" x="325" y="58">plan → approve → code</text>
+      <rect class="box b-sml" x="450" y="18" width="190" height="58" rx="10"/>
+      <text class="c mono" x="545" y="39">commit</text><text class="c sub" x="545" y="58">focused commits</text>
+      <rect class="box b-sml" x="670" y="18" width="190" height="58" rx="10"/>
+      <text class="c mono" x="765" y="39">raise-pr</text><text class="c sub" x="765" y="58">pull request</text>
+      <path class="edge" d="M200 47 H230" marker-end="url(#a4)"/>
+      <path class="edge" d="M420 47 H450" marker-end="url(#a4)"/>
+      <path class="edge" d="M640 47 H670" marker-end="url(#a4)"/>
+    </svg>
+  </figure>
+
+  <div class="cmd"><span class="label">You type</span><pre>git switch -c meeting-date-format
+/skill:implement Show meeting dates as "Tue, 10 Nov" on the meeting card
+approve
+/skill:commit
+/skill:raise-pr main</pre></div>
+
+  <details>
+    <summary>What the conversation looks like</summary>
+    <div>
+      <div class="turn you"><span class="who">You</span><p><code>/skill:implement Show meeting dates as "Tue, 10 Nov" on the meeting card</code></p></div>
+      <div class="turn"><span class="who">OMP</span><p>Wrote <code>docs/implementation-plan.md</code>: one formatter in <code>src/lib/dates.ts</code>, used by <code>MeetingCard</code>. Three steps, no open decisions. Approve or request changes.</p></div>
+      <div class="turn you"><span class="who">You</span><p>approve</p></div>
+      <div class="turn"><span class="who">OMP</span><p>Implemented. Changed two files; updated the codebase map. Not run or tested; to check it, run <code>npm test -- dates</code>.</p></div>
+    </div>
+  </details>
+
+  <div class="note">
+    <h3>Use <code>work</code> instead of <code>implement</code> when…</h3>
+    <p>…the repository should not carry <code>docs/codebase-map.md</code>, the AI navigation map. Everything else is identical.</p>
+  </div>
+</section>
+
+<section id="grills" aria-labelledby="grills-h">
+  <h2 id="grills-h">Grills and questions</h2>
+  <p><code>grill-requirements</code>, <code>grill-stack</code> and the spec step of <code>feature</code> all work the same way.</p>
+
+  <ol class="steps">
+    <li><h3>One model asks, another answers</h3><p>Haiku 5.5 asks; Sonnet 5.5 answers from the repo, the docs, or its own expertise. If either is unavailable, both switch to GPT 6.1 Terra and Sol.</p></li>
+    <li><h3>They argue once</h3><p>Each challenge gets one rebuttal and one rejoinder. Small choices become recorded <strong>defaults</strong> you can override.</p></li>
+    <li><h3>You get only the big questions</h3><p>A choice reaches you only if it moves scope, changes core behaviour, is costly to undo (stored data, public APIs, auth), costs money, or two of your statements conflict.</p></li>
+    <li><h3>A fresh pair checks it all</h3><p>Sonnet 5.5 asks and Opus 5.5 answers in a final round over the whole document. Then it is <code>Settled</code>.</p></li>
+  </ol>
+
+  <figure class="diagram">
+    <svg viewBox="0 0 640 210" role="img" aria-labelledby="form-t">
+      <title id="form-t">Example interview question</title>
+      <rect class="box" x="10" y="10" width="620" height="190" rx="10"/>
+      <text x="30" y="40" font-weight="600">Can a member belong to more than one club?</text>
+      <text class="sub" x="30" y="62">Why you: changes stored data. Trade-off: one more table now, no migration later.</text>
+      <circle class="box" cx="38" cy="92" r="7"/><text x="54" y="96">Yes (recommended)</text>
+      <circle class="box" cx="38" cy="122" r="7"/><text x="54" y="126">No, one club per member</text>
+      <circle class="box" cx="38" cy="152" r="7"/><text x="54" y="156">Not sure — decide when implementing</text>
+      <circle class="box" cx="38" cy="182" r="7"/><text class="sub" x="54" y="186">Other: type your own answer</text>
+    </svg>
+    <figcaption>Nothing is preselected. A timeout leaves the question unanswered; it is asked again.</figcaption>
+  </figure>
+
+  <div class="note feat">
+    <h3>“Not sure — decide when implementing”</h3>
+    <p>Pick it when you cannot decide yet. The question is saved with your words under <code>Open questions</code> (requirements) or <code>Decisions for you</code> (stack), stops blocking, and comes back as <code>Decide first</code> in the issue that needs it. <code>implement</code> asks it in that issue's plan and records your answer.</p>
+  </div>
+</section>
+
+<section id="approvals" aria-labelledby="appr-h">
+  <h2 id="appr-h">Approvals and gates</h2>
+  <p>Nothing that costs you something happens on silence. These are the only words that move things forward:</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th scope="col">You say</th><th scope="col">What happens</th></tr></thead>
+      <tbody>
+        <tr><td>Answer the grill form</td><td>The answer goes into the document; the next round starts.</td></tr>
+        <tr><td><code>/skill:design approve</code></td><td>Approves the wireframes (then directions start) or the full design.</td></tr>
+        <tr><td><code>/skill:design pick &lt;name&gt;</code></td><td>Chooses a drawn direction for the full design.</td></tr>
+        <tr><td><code>/skill:raise-issues approve</code></td><td>Raises the drafted issues on GitHub.</td></tr>
+        <tr><td><code>/skill:feature approve</code></td><td>Raises the feature's issues and folds the spec into the requirements.</td></tr>
+        <tr><td><code>approve</code> after an implement plan</td><td>Builds exactly that plan.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="note stop">
+    <h3>What blocks what</h3>
+    <ul>
+      <li><code>blueprint</code>, <code>design</code> and <code>raise-issues</code> refuse to start until requirements and stack both say <code>Status: Settled</code>.</li>
+      <li><code>design</code> needs the blueprint for a new app.</li>
+      <li><code>raise-issues</code> needs the design <code>Approved</code> for any screen in scope.</li>
+      <li><code>implement</code> changes nothing but its plan until you approve.</li>
+    </ul>
+  </div>
+</section>
+
+<section id="files" aria-labelledby="files-h">
+  <h2 id="files-h">Files it keeps</h2>
+  <p>Every skill resumes from its file, so you can stop at any point and pick up in a new session.</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th scope="col">File</th><th scope="col">Written by</th><th scope="col">States</th></tr></thead>
+      <tbody>
+        <tr><td><code>docs/requirements.md</code></td><td>grill-requirements</td><td>Grilling → Settled</td></tr>
+        <tr><td><code>docs/stack.md</code></td><td>grill-stack</td><td>Grilling → Settled</td></tr>
+        <tr><td><code>docs/blueprint/</code></td><td>blueprint</td><td>Five pages</td></tr>
+        <tr><td><code>docs/design.md</code> + Paper</td><td>design</td><td>Wireframes → Directions → Drawn → Approved</td></tr>
+        <tr><td><code>docs/issues.md</code></td><td>raise-issues</td><td>Draft → Approved → Raised</td></tr>
+        <tr><td><code>docs/features/&lt;branch&gt;/</code></td><td>feature</td><td>Deleted once its issues are raised</td></tr>
+        <tr><td><code>docs/implementation-plan.md</code></td><td>implement, work</td><td>Awaiting approval → Approved → Implemented</td></tr>
+        <tr><td><code>docs/codebase-map.md</code></td><td>implement</td><td>Updated, never replaced</td></tr>
+        <tr><td><code>docs/ui-review.md</code></td><td>review-ui</td><td>Verdict: Block or Approve</td></tr>
+        <tr><td><code>manual.md</code></td><td>manual (empty)</td><td>Your private notes; agents never read it</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="skills" aria-labelledby="skills-h">
+  <h2 id="skills-h">Every skill</h2>
+  <p class="muted">Colour shows the path a skill belongs to: <span class="sec-tag new">New app</span> <span class="sec-tag feat">Feature</span> <span class="sec-tag sml">Build</span> <span class="sec-tag utl">Utility</span></p>
+
+  <h3>Plan</h3>
+  <div class="skills">
+    <article class="skill new"><h3>draft-docs</h3><p>Writes a starting requirements or stack file from what you said. No research.</p>
+      <dl><dt>Use</dt><dd><code>/skill:draft-docs requirements …</code></dd><dt>Writes</dt><dd><code>docs/requirements.md</code> or <code>docs/stack.md</code></dd></dl></article>
+    <article class="skill new"><h3>grill-requirements</h3><p>Settles what the app must do; you answer only high-impact questions.</p>
+      <dl><dt>Use</dt><dd><code>/skill:grill-requirements</code> · <code>… final</code></dd><dt>Writes</dt><dd><code>docs/requirements.md</code></dd></dl></article>
+    <article class="skill new"><h3>grill-stack</h3><p>Researches and stress-tests every technology choice against the requirements.</p>
+      <dl><dt>Use</dt><dd><code>/skill:grill-stack</code> · <code>… final</code></dd><dt>Writes</dt><dd><code>docs/stack.md</code></dd></dl></article>
+    <article class="skill new"><h3>blueprint</h3><p>Five short visual pages: stack docs, setup commands, structure, build order.</p>
+      <dl><dt>Use</dt><dd><code>/skill:blueprint</code> · <code>/skill:blueprint &lt;change&gt;</code></dd><dt>Writes</dt><dd><code>docs/blueprint/</code></dd></dl></article>
+    <article class="skill feat"><h3>feature</h3><p>Spec, optional stack and design, then issues, for one feature on a running app.</p>
+      <dl><dt>Use</dt><dd><code>/skill:feature &lt;request | URL&gt;</code> · <code>… approve</code></dd><dt>Writes</dt><dd><code>docs/features/&lt;branch&gt;/</code></dd></dl></article>
+  </div>
+
+  <h3>Design</h3>
+  <div class="skills">
+    <article class="skill new"><h3>design</h3><p>Wireframes and flow, then the full design with every state, in Paper.</p>
+      <dl><dt>Use</dt><dd><code>/skill:design &lt;direction&gt;</code> · <code>approve</code> · <code>pick</code></dd><dt>Writes</dt><dd><code>docs/design.md</code>, Paper pages</dd></dl></article>
+    <article class="skill new"><h3>review-ui</h3><p>Reads the built code against the Paper page you name. Read-only.</p>
+      <dl><dt>Use</dt><dd><code>/skill:review-ui page Design S1</code></dd><dt>Writes</dt><dd><code>docs/ui-review.md</code></dd></dl></article>
+    <article class="skill utl"><h3>ui-craft</h3><p>Shared UI, motion and worst-case-data rules. You never call it; design, review-ui and implement read it.</p>
+      <dl><dt>Use</dt><dd>Automatic</dd><dt>Writes</dt><dd>Nothing</dd></dl></article>
+  </div>
+
+  <h3>Build and ship</h3>
+  <div class="skills">
+    <article class="skill new"><h3>raise-issues</h3><p>Drafts vertical-slice issues with blocked-by links; raises on approve.</p>
+      <dl><dt>Use</dt><dd><code>/skill:raise-issues</code> · <code>… approve</code> · <code>… docs/ui-review.md</code></dd><dt>Writes</dt><dd><code>docs/issues.md</code>, GitHub issues</dd></dl></article>
+    <article class="skill sml"><h3>issue-branch</h3><p>Creates the branch for an issue and sums it up in a few lines.</p>
+      <dl><dt>Use</dt><dd><code>/skill:issue-branch &lt;URL&gt;</code></dd><dt>Writes</dt><dd>A local branch</dd></dl></article>
+    <article class="skill sml"><h3>implement</h3><p>One-minute plan, your approval, then the smallest complete change.</p>
+      <dl><dt>Use</dt><dd><code>/skill:implement &lt;URL | request&gt;</code></dd><dt>Writes</dt><dd>Code, plan, codebase map</dd></dl></article>
+    <article class="skill sml"><h3>work</h3><p>Same as implement, without the codebase map.</p>
+      <dl><dt>Use</dt><dd><code>/skill:work &lt;URL | request&gt;</code></dd><dt>Writes</dt><dd>Code, plan</dd></dl></article>
+    <article class="skill sml"><h3>commit</h3><p>Fewest focused commits, each revertable alone. Never adds co-authors.</p>
+      <dl><dt>Use</dt><dd><code>/skill:commit</code> · <code>… plan</code></dd><dt>Writes</dt><dd>Commits</dd></dl></article>
+    <article class="skill sml"><h3>raise-pr</h3><p>Pushes the branch and opens a pull request with a short summary.</p>
+      <dl><dt>Use</dt><dd><code>/skill:raise-pr main</code> · <code>… draft</code></dd><dt>Writes</dt><dd>A pull request</dd></dl></article>
+  </div>
+
+  <h3>Utilities</h3>
+  <div class="skills">
+    <article class="skill utl"><h3>herdr-worktree</h3><p>One worktree per task under <code>.worktrees/</code>, each opened as a Herdr tab.</p>
+      <dl><dt>Use</dt><dd><code>/skill:herdr-worktree invites, voting</code></dd><dt>Writes</dt><dd>Worktrees and tabs</dd></dl></article>
+    <article class="skill utl"><h3>manual</h3><p>Creates an empty, git-ignored <code>manual.md</code> for your private notes.</p>
+      <dl><dt>Use</dt><dd><code>/skill:manual</code></dd><dt>Writes</dt><dd><code>manual.md</code>, <code>.gitignore</code></dd></dl></article>
+    <article class="skill utl"><h3>detox</h3><p>Audits your OMP setup and serves a checklist; changes nothing until you confirm.</p>
+      <dl><dt>Use</dt><dd><code>/skill:detox</code> · <code>… review</code></dd><dt>Writes</dt><dd>Only what you tick</dd></dl></article>
+  </div>
+</section>
+
+<section id="stuck" aria-labelledby="stuck-h">
+  <h2 id="stuck-h">When something stops</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th scope="col">You see</th><th scope="col">Do this</th></tr></thead>
+      <tbody>
+        <tr><td><code>not ready: … not Settled</code></td><td>Rerun the grill it names; it resumes from the file and shows what is under <code>Unresolved</code>.</td></tr>
+        <tr><td>The final round stopped (model unavailable)</td><td><code>/skill:grill-requirements final</code>, <code>/skill:grill-stack final</code> or <code>/skill:feature final</code>.</td></tr>
+        <tr><td>An agent or skill is missing</td><td>Run <code>omp/link-skills</code> in the dotfiles repo, then restart OMP.</td></tr>
+        <tr><td>Paper is not running</td><td>Open Paper Desktop; <code>design</code> keeps writing <code>docs/design.md</code> meanwhile.</td></tr>
+        <tr><td>Changed your mind after approving</td><td>Say the change: <code>/skill:design &lt;change&gt;</code>, <code>/skill:blueprint &lt;change&gt;</code> or <code>/skill:feature &lt;change&gt;</code>. Each redoes only what the change touches.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<footer>Source of truth: each <code>omp/skills/&lt;name&gt;/SKILL.md</code>. This page summarises them; when they disagree, the skill wins.</footer>
+</main>
+</div>
+</body>
+</html>
