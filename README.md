@@ -9,14 +9,13 @@ Personal configuration for my daily development setup.
 
 ## What I use
 
-Six tools make up my environment:
+Five tools make up my environment:
 
 | Tool | Role |
 | --- | --- |
 | [Brave](https://brave.com) | Browser |
 | [Ghostty](https://ghostty.org) | Terminal emulator |
 | [Cursor](https://cursor.com) | Code editor |
-| [Oh My Pi](https://omp.sh) | Terminal-first coding agent |
 | [zsh](https://www.zsh.org) | Shell (macOS default) |
 | [tmux](https://github.com/tmux/tmux) | Terminal multiplexer |
 
